@@ -24,8 +24,8 @@ public class MainFrame extends JFrame {
 		setDefaultCloseOperation( EXIT_ON_CLOSE );
 		
 		pack();
-		setVisible( true );
 		setLocation( 100, 100 );
+		setVisible( true );
 	}
 	
 	/**
