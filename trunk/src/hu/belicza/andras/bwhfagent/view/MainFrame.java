@@ -39,7 +39,7 @@ public class MainFrame extends JFrame {
 		for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ ) {
 			final Tab tab = tabs[ tabIndex ];
 			final char mnemonicChar = Integer.toString( tabIndex + 1 ).charAt( 0 );
-			tabbedPane.add( mnemonicChar + " " + tab.getTitle(), tab );
+			tabbedPane.add( mnemonicChar + " " + tab.getTitle(), tab.getScrollPane() );
 			tabbedPane.setMnemonicAt( tabIndex, mnemonicChar );
 		}
 		

@@ -1,18 +1,11 @@
 package hu.belicza.andras.bwhfagent.view;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.JTextArea;
-
 /**
  * Autoscan tab.
  * 
  * @author Andras Belicza
  */
-public class AutoscanTab extends Tab {
-	
-	/** Log text area. */
-	private final JTextArea logTextArea = new JTextArea();
+public class AutoscanTab extends LoggedTab {
 	
 	/**
 	 * Creates a new AutoscanTab.
@@ -26,14 +19,8 @@ public class AutoscanTab extends Tab {
 	/**
 	 * Builds the GUI of the tab.
 	 */
-	private void buildGUI() {
-		final Box box = Box.createVerticalBox();
-		
-		logTextArea.setEditable( false );
-		logTextArea.setBorder( BorderFactory.createTitledBorder( "Log" ) );
-		box.add( logTextArea );
-		
-		setContent( box );
+	protected void buildGUI() {
+		super.buildGUI();
 	}
 	
 }

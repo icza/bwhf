@@ -1,13 +1,12 @@
 package hu.belicza.andras.bwhfagent.view;
 
-import javax.swing.Box;
 
 /**
  * Manual scan tab.
  * 
  * @author Andras Belicza
  */
-public class ManualScanTab extends Tab {
+public class ManualScanTab extends LoggedTab {
 	
 	/**
 	 * Creates a new AutoscanTab.
@@ -21,9 +20,8 @@ public class ManualScanTab extends Tab {
 	/**
 	 * Builds the GUI of the tab.
 	 */
-	private void buildGUI() {
-		final Box box = Box.createVerticalBox();
-		setContent( box );
+	protected void buildGUI() {
+		super.buildGUI();
 	}
 	
 }
