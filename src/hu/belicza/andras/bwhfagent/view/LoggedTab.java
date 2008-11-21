@@ -16,6 +16,7 @@ import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 
 /**
+ * A tab with log and log control capabilities.
  * 
  * @author Belicza Andras
  */
@@ -25,7 +26,7 @@ public class LoggedTab extends Tab {
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
 	
 	/** Log text area.        */
-	private final JTextArea logTextArea        = new JTextArea( 5, 40 );
+	private final JTextArea logTextArea        = new JTextArea( 10, 20 );
 	/** Scroll Lock checkbox. */
 	private final JCheckBox scrollLockCheckBox = new JCheckBox( "Scroll Lock" );
 	
@@ -64,6 +65,10 @@ public class LoggedTab extends Tab {
 		contentBox.add( logPanel );
 	}
 	
+	/**
+	 * Logs a message.
+	 * @param message message to be logged
+	 */
 	protected void logMessage( final String message ) {
 		logTextArea.append( DATE_FORMAT.format( new Date() ) + " - " + message + "\n" );
 		if ( !scrollLockCheckBox.isSelected() )
