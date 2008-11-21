@@ -13,7 +13,7 @@ import javax.swing.JTabbedPane;
 public class MainFrame extends JFrame {
 	
 	public static final String APPLICATION_NAME    = "BWHF Agent";
-	public static final String APPLICATION_VERSION = "0.1 2008-11-20";
+	public static final String APPLICATION_VERSION = "0.12 2008-11-21";
 	public static final String APPLICATION_AUTHOR  = "András Belicza";
 	
 	public MainFrame() {
