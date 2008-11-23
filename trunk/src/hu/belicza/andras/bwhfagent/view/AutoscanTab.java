@@ -4,6 +4,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -11,10 +12,7 @@ import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSpinner;
 import javax.swing.JTextField;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingConstants;
 
 /**
  * Autoscan tab.
@@ -23,24 +21,29 @@ import javax.swing.SwingConstants;
  */
 public class AutoscanTab extends LoggedTab {
 	
-	/** Checkbox to enable/disable the autoscan.                 */
+	/** Time between checking for new replay in ms.                    */
+	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS = 3000l;
+	/** Name of the last replay file relative to the starcraft folder. */
+	private static final String LAST_REPLAY_FILE_NAME                 = "maps/replays/LastReplay.rep";
+	
+	/** Checkbox to enable/disable the autoscan.                                */
 	private final JCheckBox  enabledCheckBox                = new JCheckBox( "Autoscan enabled", true );
-	/** Starcraft directory.                                     */
+	/** Starcraft directory.                                                    */
 	private final JTextField starcraftFolderTextField       = new JTextField( "C:/Program Files/Starcraft", 30 );
-	/** Checkbox to enable/disable autosaving hacker reps.       */
+	/** Checkbox to enable/disable autosaving hacker reps.                      */
 	private final JCheckBox  saveHackerRepsCheckBox         = new JCheckBox( "Save hacker replays to folder:", true );
-	/** Save hacker replays to this folder.                      */
+	/** Save hacker replays to this folder.                                     */
 	private final JTextField hackerRepsDestinationTextField = new JTextField( "C:/Program Files/Starcraft/maps/replays/hacker", 30 );
-	/** Checkbox to enable/disable autosaving all reps.          */
+	/** Checkbox to enable/disable autosaving all reps.                         */
 	private final JCheckBox  saveAllRepsCheckBox            = new JCheckBox( "Save all replays to folder:", true );
-	/** Save hacker replays to this folder.                      */
+	/** Save hacker replays to this folder.                                     */
 	private final JTextField allRepsDestinationTextField    = new JTextField( "C:/Program Files/Starcraft/maps/replays/allreps", 30 );
-	/** Spinner to set the time interval between checks.         */
-	private final JSpinner   checkIntervalSpinner           = new JSpinner( new SpinnerNumberModel( 3, 1, 30, 1 ) );
-	/** Checkbox to enable/disable playing sound if found hacks. */
+	/** Checkbox to enable/disable playing sound if found hacks.                */
 	private final JCheckBox  playSoundCheckBox              = new JCheckBox( "Play wav file if found hacks:", true );
-	/** Wav file to play when found hacks.                       */
+	/** Wav file to play when found hacks.                                      */
 	private final JTextField foundHacksWavFileTextField     = new JTextField( "foundHacks.wav", 15 );
+	/** Checkbox to enable/disable bringing main frame to front if found hacks. */
+	private final JCheckBox  bringToFrontCheckBox           = new JCheckBox( "Bring agent to front if found hacks", false );
 	
 	/**
 	 * Creates a new AutoscanTab.
@@ -49,6 +52,7 @@ public class AutoscanTab extends LoggedTab {
 		super( "Autoscan" );
 		
 		buildGUI();
+		startScanner();
 	}
 	
 	/**
@@ -101,17 +105,6 @@ public class AutoscanTab extends LoggedTab {
 		settingsPanel.add( button );
 		
 		constraints.gridwidth = 1;
-		label = new JLabel( "Time between checks for new replay:" );
-		gridBagLayout.setConstraints( label, constraints );
-		settingsPanel.add( label );
-		gridBagLayout.setConstraints( checkIntervalSpinner, constraints );
-		settingsPanel.add( checkIntervalSpinner );
-		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		label = new JLabel( " seconds" );
-		gridBagLayout.setConstraints( label, constraints );
-		settingsPanel.add( label );
-		
-		constraints.gridwidth = 1;
 		gridBagLayout.setConstraints( playSoundCheckBox, constraints );
 		settingsPanel.add( playSoundCheckBox );
 		gridBagLayout.setConstraints( foundHacksWavFileTextField, constraints );
@@ -120,6 +113,10 @@ public class AutoscanTab extends LoggedTab {
 		button = createFileChooserButton( foundHacksWavFileTextField, JFileChooser.FILES_ONLY );
 		gridBagLayout.setConstraints( button, constraints );
 		settingsPanel.add( button );
+		
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( bringToFrontCheckBox, constraints );
+		settingsPanel.add( bringToFrontCheckBox );
 		
 		wrapperPanel = Utils.wrapInPanel( settingsPanel );
 		wrapperPanel.setBorder( BorderFactory.createTitledBorder( "Settings" ) );
@@ -130,7 +127,7 @@ public class AutoscanTab extends LoggedTab {
 	
 	/**
 	 * Creates and returns a button with a registered action listener which opens a file chooser
-	 * with the specified file seletcion mode, and on approved returned option stores the selected file
+	 * with the specified file selection mode, and on approved returned option stores the selected file
 	 * into the target text field. 
 	 * @param targetTextField   text field to be updated if file/folder is selected
 	 * @param fileSelectionMode the type of files to be displayed
@@ -154,6 +151,38 @@ public class AutoscanTab extends LoggedTab {
 		} );
 		
 		return chooseButton;
+	}
+	
+	/**
+	 * Starts the autoscanner.
+	 */
+	private void startScanner() {
+		new Thread() {
+			/** Last modified time of the LastReplay.rep that was checked lastly. */
+			private long lastReplayLastModified = new File( starcraftFolderTextField.getText(), LAST_REPLAY_FILE_NAME ).lastModified();
+			
+			@Override
+			public void run() {
+				while ( true ) {
+					try {
+						if ( enabledCheckBox.isSelected() ) {
+							final File lastReplayFile            = new File( starcraftFolderTextField.getText(), LAST_REPLAY_FILE_NAME );
+							final long newLastReplayLastModified = lastReplayFile.lastModified();
+							
+							if ( newLastReplayLastModified != lastReplayLastModified ) {
+								logMessage( "LastReplay.rep was modified - proceeding to scan." );
+								lastReplayLastModified = newLastReplayLastModified;
+								// Perform check of file LastReplay.rep
+							}
+						}
+						
+						sleep( TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS );
+					} catch ( final InterruptedException ie ) {
+					}
+				}
+			}
+			
+		}.start();
 	}
 	
 }
