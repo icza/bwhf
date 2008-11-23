@@ -2,17 +2,15 @@ package hu.belicza.andras.bwhfagent.view;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * Autoscan tab.
@@ -25,19 +23,21 @@ public class AutoscanTab extends LoggedTab {
 	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS = 3000l;
 	/** Name of the last replay file relative to the starcraft folder. */
 	private static final String LAST_REPLAY_FILE_NAME                 = "maps/replays/LastReplay.rep";
+	/** Default hacker replays destination directory. */
+	private static final String DEFAULT_HACKER_REPS_DESTINATION       = MainFrame.DEFAULT_STARCRAFT_DIRECTORY + "/maps/replays/hackerreps"; 
+	/** Default all replays destination directory.    */
+	private static final String DEFAULT_ALL_REPS_DESTINATION          = MainFrame.DEFAULT_STARCRAFT_DIRECTORY + "/maps/replays/allreps"; 
 	
 	/** Checkbox to enable/disable the autoscan.                                */
 	private final JCheckBox  enabledCheckBox                = new JCheckBox( "Autoscan enabled", true );
-	/** Starcraft directory.                                                    */
-	private final JTextField starcraftFolderTextField       = new JTextField( "C:/Program Files/Starcraft", 30 );
 	/** Checkbox to enable/disable autosaving hacker reps.                      */
 	private final JCheckBox  saveHackerRepsCheckBox         = new JCheckBox( "Save hacker replays to folder:", true );
 	/** Save hacker replays to this folder.                                     */
-	private final JTextField hackerRepsDestinationTextField = new JTextField( "C:/Program Files/Starcraft/maps/replays/hacker", 30 );
+	private final JTextField hackerRepsDestinationTextField = new JTextField( DEFAULT_HACKER_REPS_DESTINATION, 30 );
 	/** Checkbox to enable/disable autosaving all reps.                         */
 	private final JCheckBox  saveAllRepsCheckBox            = new JCheckBox( "Save all replays to folder:", true );
 	/** Save hacker replays to this folder.                                     */
-	private final JTextField allRepsDestinationTextField    = new JTextField( "C:/Program Files/Starcraft/maps/replays/allreps", 30 );
+	private final JTextField allRepsDestinationTextField    = new JTextField( DEFAULT_ALL_REPS_DESTINATION, 30 );
 	/** Checkbox to enable/disable playing sound if found hacks.                */
 	private final JCheckBox  playSoundCheckBox              = new JCheckBox( "Play wav file if found hacks:", true );
 	/** Wav file to play when found hacks.                                      */
@@ -63,7 +63,6 @@ public class AutoscanTab extends LoggedTab {
 		final GridBagConstraints constraints   = new GridBagConstraints();
 		final JPanel             settingsPanel = new JPanel( gridBagLayout );
 		
-		JLabel  label;
 		JButton button;
 		
 		constraints.fill = GridBagConstraints.BOTH;
@@ -74,23 +73,12 @@ public class AutoscanTab extends LoggedTab {
 		settingsPanel.add( wrapperPanel );
 		
 		constraints.gridwidth = 1;
-		label = new JLabel( "Starcraft directory:" );
-		gridBagLayout.setConstraints( label, constraints );
-		settingsPanel.add( label );
-		gridBagLayout.setConstraints( starcraftFolderTextField, constraints );
-		settingsPanel.add( starcraftFolderTextField );
-		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		button = createFileChooserButton( starcraftFolderTextField, JFileChooser.DIRECTORIES_ONLY );
-		gridBagLayout.setConstraints( button, constraints );
-		settingsPanel.add( button );
-		
-		constraints.gridwidth = 1;
 		gridBagLayout.setConstraints( saveHackerRepsCheckBox, constraints );
 		settingsPanel.add( saveHackerRepsCheckBox );
 		gridBagLayout.setConstraints( hackerRepsDestinationTextField, constraints );
 		settingsPanel.add( hackerRepsDestinationTextField );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		button = createFileChooserButton( hackerRepsDestinationTextField, JFileChooser.DIRECTORIES_ONLY );
+		button = createFileChooserButton( hackerRepsDestinationTextField, JFileChooser.DIRECTORIES_ONLY, null );
 		gridBagLayout.setConstraints( button, constraints );
 		settingsPanel.add( button );
 		
@@ -100,7 +88,7 @@ public class AutoscanTab extends LoggedTab {
 		gridBagLayout.setConstraints( allRepsDestinationTextField, constraints );
 		settingsPanel.add( allRepsDestinationTextField );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		button = createFileChooserButton( allRepsDestinationTextField, JFileChooser.DIRECTORIES_ONLY );
+		button = createFileChooserButton( allRepsDestinationTextField, JFileChooser.DIRECTORIES_ONLY, null );
 		gridBagLayout.setConstraints( button, constraints );
 		settingsPanel.add( button );
 		
@@ -110,7 +98,14 @@ public class AutoscanTab extends LoggedTab {
 		gridBagLayout.setConstraints( foundHacksWavFileTextField, constraints );
 		settingsPanel.add( foundHacksWavFileTextField );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		button = createFileChooserButton( foundHacksWavFileTextField, JFileChooser.FILES_ONLY );
+		button = createFileChooserButton( foundHacksWavFileTextField, JFileChooser.FILES_ONLY, new FileFilter() {
+			public boolean accept( final File file ) {
+				return file.getName().toLowerCase().endsWith( ".wav" );
+			}
+			public String getDescription() {
+				return "Wave audio files (*.wav)";
+			} 
+		} );
 		gridBagLayout.setConstraints( button, constraints );
 		settingsPanel.add( button );
 		
@@ -126,37 +121,17 @@ public class AutoscanTab extends LoggedTab {
 	}
 	
 	/**
-	 * Creates and returns a button with a registered action listener which opens a file chooser
-	 * with the specified file selection mode, and on approved returned option stores the selected file
-	 * into the target text field. 
-	 * @param targetTextField   text field to be updated if file/folder is selected
-	 * @param fileSelectionMode the type of files to be displayed
-	 * 							<ul>
-	 * 								<li>JFileChooser.FILES_ONLY
-	 * 								<li>JFileChooser.DIRECTORIES_ONLY
-	 * 								<li>JFileChooser.FILES_AND_DIRECTORIES
-	 * 							</ul>
-	 * @return a button handling the file chooser
+	 * Calls {@link Utils#createFileChooserButton(java.awt.Component, JTextField, int, FileFilter)} with the scroll pane of the tab.
 	 */
-	private JButton createFileChooserButton( final JTextField targetTextField, final int fileSelectionMode ) {
-		final JButton chooseButton = new JButton( "Choose..." );
-		
-		chooseButton.addActionListener( new ActionListener() {
-			public void actionPerformed( final ActionEvent event ) {
-				final JFileChooser fileChooser = new JFileChooser();
-				fileChooser.setFileSelectionMode( fileSelectionMode );
-				if ( fileChooser.showOpenDialog( getScrollPane() ) == JFileChooser.APPROVE_OPTION )
-					targetTextField.setText( fileChooser.getSelectedFile().getAbsolutePath() );
-			}
-		} );
-		
-		return chooseButton;
+	private JButton createFileChooserButton( final JTextField targetTextField, final int fileSelectionMode, final FileFilter choosableFileFilter ) {
+		return Utils.createFileChooserButton( getScrollPane(), targetTextField, fileSelectionMode, choosableFileFilter );
 	}
 	
 	/**
 	 * Starts the autoscanner.
 	 */
 	private void startScanner() {
+		final JTextField starcraftFolderTextField = Utils.getMainFrame().getStarcraftFolderTextField();
 		new Thread() {
 			/** Last modified time of the LastReplay.rep that was checked lastly. */
 			private long lastReplayLastModified = new File( starcraftFolderTextField.getText(), LAST_REPLAY_FILE_NAME ).lastModified();
