@@ -1,6 +1,9 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import java.awt.BorderLayout;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 import javax.swing.JFrame;
 import javax.swing.JTabbedPane;
@@ -12,12 +15,21 @@ import javax.swing.JTabbedPane;
  */
 public class MainFrame extends JFrame {
 	
-	public static final String APPLICATION_NAME    = "BWHF Agent";
-	public static final String APPLICATION_VERSION = "0.12 2008-11-21";
-	public static final String APPLICATION_AUTHOR  = "András Belicza";
+	public static final String APPLICATION_NAME      = "BWHF Agent";
+	public static final String VERSION_RESOURCE_NAME = "../current_version.txt";
+	public static final String APPLICATION_AUTHOR    = "András Belicza";
 	
 	public MainFrame() {
-		super( APPLICATION_NAME + " " + APPLICATION_VERSION + " by " + APPLICATION_AUTHOR );
+		String applicationVersion = "";
+		try {
+			final BufferedReader bufferedReader = new BufferedReader( new InputStreamReader( getClass().getResourceAsStream( VERSION_RESOURCE_NAME ) ) );
+			applicationVersion = bufferedReader.readLine();
+			bufferedReader.close();
+		} catch ( final IOException ie ) {
+			ie.printStackTrace();
+		}
+		
+		setTitle( APPLICATION_NAME + " " + applicationVersion + " by " + APPLICATION_AUTHOR );
 		
 		buildGUI();
 		
