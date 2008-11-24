@@ -1,6 +1,7 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -38,6 +39,9 @@ public class MainFrame extends JFrame {
 	/** Name of the Starcraft executable file. */
 	public static final String STARCRAFT_EXECUTABLE_FILE_NAME = "StarCraft.exe";
 	
+	/** Current version of the application. */
+	private final String applicationVersion;
+	
 	/** Starcraft directory.                                                    */
 	private final JTextField starcraftFolderTextField = new JTextField( DEFAULT_STARCRAFT_DIRECTORY, 25 );
 	
@@ -47,18 +51,19 @@ public class MainFrame extends JFrame {
 	public MainFrame() {
 		Utils.setMainFrame( this );
 		
-		String applicationVersion = "";
+		String applicationVersion_ = "";
 		try {
 			// TODO: newest version check url:
 			// http://bwhf.googlecode.com/svn/trunk/src/hu/belicza/andras/bwhfagent/current_version.txt
 			final BufferedReader bufferedReader = new BufferedReader( new InputStreamReader( getClass().getResourceAsStream( VERSION_RESOURCE_NAME ) ) );
-			applicationVersion = bufferedReader.readLine();
+			applicationVersion_ = bufferedReader.readLine();
 			bufferedReader.close();
 		} catch ( final IOException ie ) {
 			ie.printStackTrace();
 		}
+		applicationVersion = applicationVersion_;
 		
-		setTitle( APPLICATION_NAME + " " + applicationVersion + " by " + APPLICATION_AUTHOR );
+		setTitle( APPLICATION_NAME );
 		
 		buildGUI();
 		
@@ -121,9 +126,20 @@ public class MainFrame extends JFrame {
 	private Tab buildAboutTab() {
 		final Tab aboutTab = new Tab( "About" );
 		
-		final String aboutHtml = "<html><body><h1>HI!</h1><b>yo</b><br><a href='http://code.google.com/p/bwhf'>bwhf</a></body></html>";
+		final String applicationNameHtml = APPLICATION_NAME + "&trade;";
+		
+		final String aboutHtml = "<html><body>"
+				+ "<center><h2>" + applicationNameHtml + " ver " + applicationVersion + "</h2>"
+				+ "<table border=1><tr><td>Author:<td><b>" + APPLICATION_AUTHOR + "</b>"
+				+ "<tr><td>Battle.net account:<td><b>Dakota_Fanning@USEast</b></table></center>"
+				+ "<p>" + applicationNameHtml + " is an open source project hosted on Google code, available under the <a href='http://www.gnu.org/licenses/gpl.html'>GNU General Public License v3</a>.</p>"
+				+ "<p><a href='http://code.google.com/p/bwhf'>" + applicationNameHtml + " home page</a><br>"
+				+ "Check out the home page for license information, detailed description, downloads, updates, discussion, bug reports and more.</p>"
+				+ "<p align=right><i>&copy; András Belicza, 2008</i></p>"
+				+ "</body></html>";
 		final JEditorPane editorPane = new JEditorPane( "text/html", aboutHtml );
 		editorPane.setEditable( false );
+		editorPane.setPreferredSize( new Dimension( 100, 100 ) );
 		editorPane.addHyperlinkListener( new HyperlinkListener() {
 			public void hyperlinkUpdate( final HyperlinkEvent event ) {
 				if ( event.getEventType() == HyperlinkEvent.EventType.ACTIVATED )
