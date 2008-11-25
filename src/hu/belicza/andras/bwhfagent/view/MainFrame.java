@@ -107,7 +107,7 @@ public class MainFrame extends JFrame {
 		
 		final JTabbedPane tabbedPane = new JTabbedPane();
 		
-		final Tab[] tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), buildAboutTab() };
+		final Tab[] tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), new GeneralSettings(), buildAboutTab() };
 		
 		for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ ) {
 			final Tab tab = tabs[ tabIndex ];
@@ -129,17 +129,20 @@ public class MainFrame extends JFrame {
 		final String applicationNameHtml = APPLICATION_NAME + "&trade;";
 		
 		final String aboutHtml = "<html><body>"
-				+ "<center><h2>" + applicationNameHtml + " ver " + applicationVersion + "</h2>"
-				+ "<table border=1><tr><td>Author:<td><b>" + APPLICATION_AUTHOR + "</b>"
-				+ "<tr><td>Battle.net account:<td><b>Dakota_Fanning@USEast</b></table></center>"
-				+ "<p>" + applicationNameHtml + " is an open source project hosted on Google code, available under the <a href='http://www.gnu.org/licenses/gpl.html'>GNU General Public License v3</a>.</p>"
+				+ "<center><h2>" + applicationNameHtml + "</h2>"
+				+ "<table border=1>"
+				+ "<tr><td>Version:<td><b>" + applicationVersion + "</b>"
+				+ "<tr><td>Author:<td><b>" + APPLICATION_AUTHOR + "</b>"
+				+ "<tr><td>Battle.net account:<td><b>Dakota_Fanning@USEast</b>"
+				+ "</table></center>"
+				+ "<p>" + applicationNameHtml + " is an open source project available under the <a href='http://www.gnu.org/licenses/gpl.html'>GNU General Public License v3</a>.</p>"
 				+ "<p><a href='http://code.google.com/p/bwhf'>" + applicationNameHtml + " home page</a><br>"
 				+ "Check out the home page for license information, detailed description, downloads, updates, discussion, bug reports and more.</p>"
 				+ "<p align=right><i>&copy; András Belicza, 2008</i></p>"
 				+ "</body></html>";
 		final JEditorPane editorPane = new JEditorPane( "text/html", aboutHtml );
 		editorPane.setEditable( false );
-		editorPane.setPreferredSize( new Dimension( 100, 100 ) );
+		editorPane.setPreferredSize( new Dimension( 200, 200 ) );
 		editorPane.addHyperlinkListener( new HyperlinkListener() {
 			public void hyperlinkUpdate( final HyperlinkEvent event ) {
 				if ( event.getEventType() == HyperlinkEvent.EventType.ACTIVATED )
