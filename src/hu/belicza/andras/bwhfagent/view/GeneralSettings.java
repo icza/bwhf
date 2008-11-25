@@ -55,10 +55,12 @@ public class GeneralSettings extends Tab {
 		new Thread() {
 			@Override
 			public void run() {
-				try { sleep(5000l); } catch ( final Exception e ) {}
-				
-				checkUpdatesButton.setText( CHECK_UPDATES_BUTTON_TEXT );
-				checkUpdatesButton.setEnabled( true );
+				try {
+				}
+				finally {
+					checkUpdatesButton.setText( CHECK_UPDATES_BUTTON_TEXT );
+					checkUpdatesButton.setEnabled( true );
+				}
 			}
 		}.start();
 	}

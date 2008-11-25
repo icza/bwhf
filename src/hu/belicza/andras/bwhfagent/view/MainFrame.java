@@ -1,7 +1,6 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import java.awt.BorderLayout;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -12,7 +11,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 
 import javax.swing.JButton;
-import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -20,8 +18,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
 
 /**
  * The main frame of BWHFAgent.
@@ -40,7 +36,7 @@ public class MainFrame extends JFrame {
 	public static final String STARCRAFT_EXECUTABLE_FILE_NAME = "StarCraft.exe";
 	
 	/** Current version of the application. */
-	private final String applicationVersion;
+	public final String applicationVersion;
 	
 	/** Starcraft directory.                                                    */
 	private final JTextField starcraftFolderTextField = new JTextField( DEFAULT_STARCRAFT_DIRECTORY, 25 );
@@ -107,7 +103,7 @@ public class MainFrame extends JFrame {
 		
 		final JTabbedPane tabbedPane = new JTabbedPane();
 		
-		final Tab[] tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), new GeneralSettings(), buildAboutTab() };
+		final Tab[] tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), new GeneralSettings(), new AboutTab() };
 		
 		for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ ) {
 			final Tab tab = tabs[ tabIndex ];
@@ -120,40 +116,8 @@ public class MainFrame extends JFrame {
 	}
 	
 	/**
-	 * Builds and returns the about tab.
-	 * @return the about tab
+	 * Exits.
 	 */
-	private Tab buildAboutTab() {
-		final Tab aboutTab = new Tab( "About" );
-		
-		final String applicationNameHtml = APPLICATION_NAME + "&trade;";
-		
-		final String aboutHtml = "<html><body>"
-				+ "<center><h2>" + applicationNameHtml + "</h2>"
-				+ "<table border=1>"
-				+ "<tr><td>Version:<td><b>" + applicationVersion + "</b>"
-				+ "<tr><td>Author:<td><b>" + APPLICATION_AUTHOR + "</b>"
-				+ "<tr><td>Battle.net account:<td><b>Dakota_Fanning@USEast</b>"
-				+ "</table></center>"
-				+ "<p>" + applicationNameHtml + " is an open source project available under the <a href='http://www.gnu.org/licenses/gpl.html'>GNU General Public License v3</a>.</p>"
-				+ "<p><a href='http://code.google.com/p/bwhf'>" + applicationNameHtml + " home page</a><br>"
-				+ "Check out the home page for license information, detailed description, downloads, updates, discussion, bug reports and more.</p>"
-				+ "<p align=right><i>&copy; András Belicza, 2008</i></p>"
-				+ "</body></html>";
-		final JEditorPane editorPane = new JEditorPane( "text/html", aboutHtml );
-		editorPane.setEditable( false );
-		editorPane.setPreferredSize( new Dimension( 200, 200 ) );
-		editorPane.addHyperlinkListener( new HyperlinkListener() {
-			public void hyperlinkUpdate( final HyperlinkEvent event ) {
-				if ( event.getEventType() == HyperlinkEvent.EventType.ACTIVATED )
-					Utils.showURLInBrowser( event.getURL().toString() );
-			}
-		} );
-		aboutTab.contentBox.add( editorPane );
-		
-		return aboutTab;
-	}
-	
 	public void exit() {
 		System.exit( 0 );
 	}
