@@ -20,7 +20,7 @@ public class Consts {
 	public static final String LATEST_STABLE_VERSION_TEXT_URL = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version.txt";
 	
 	/** Name of the resource containing the about html template.       */
-	public static final String ABOUT_TEMLATE_RESOURCE_NAME = "about_template.html";
+	public static final String ABOUT_TEMLATE_RESOURCE_NAME    = "about_template.html";
 	
 	/** Default Starcraft directory.                                   */
 	public static final String DEFAULT_STARCRAFT_DIRECTORY    = "C:/Program Files/Starcraft";

@@ -118,7 +118,7 @@ public class Utils {
 		try {
 			bufferedReader = new BufferedReader( new InputStreamReader( inputStream ) );
 			return bufferedReader.readLine();
-		} catch ( final IOException ie ) {
+		} catch ( final Exception e ) {
 			return null;
 		}
 		finally {
