@@ -41,6 +41,9 @@ public class GeneralSettings extends Tab {
 			checkUpdates();
 	}
 	
+	/**
+	 * Builds the GUI of the tab.
+	 */
 	private void buildGUI() {
 		final JPanel panel = new JPanel();
 		panel.add( autoCheckUpdatesCheckBox );
