@@ -20,7 +20,7 @@ import javax.swing.ScrollPaneConstants;
  * 
  * @author Belicza Andras
  */
-public class LoggedTab extends Tab {
+public abstract class LoggedTab extends Tab {
 	
 	/** Date format to create timestamps for logging. */
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );

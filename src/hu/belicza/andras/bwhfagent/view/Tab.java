@@ -9,7 +9,7 @@ import javax.swing.JScrollPane;
  * 
  * @author Belicza Andras
  */
-public class Tab {
+public abstract class Tab {
 	
 	/** A box to hold the content of the tab. */
 	protected final Box contentBox = Box.createVerticalBox();
@@ -43,5 +43,10 @@ public class Tab {
 	public JComponent getScrollPane() {
 		return scrollPane;
 	}
+	
+	/**
+	 * Sets the new values of properties used by this tab.
+	 */
+	public abstract void assignUsedProperties();
 	
 }

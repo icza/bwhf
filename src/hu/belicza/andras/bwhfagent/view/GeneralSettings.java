@@ -23,11 +23,11 @@ public class GeneralSettings extends Tab {
 	private static final String CHECK_UPDATES_BUTTON_TEXT = "Check now";
 	
 	/** Checkbox to tell whether check for updates automatically on startup. */
-	private final JCheckBox autoCheckUpdatesCheckBox           = new JCheckBox( "Check for updates on startup", true );
+	private final JCheckBox checkUpdatesOnStartupCheckBox      = new JCheckBox( "Check for updates on startup", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHECK_UPDATES_ON_STARTUP ) ) );
 	/** Check for updates button.                                            */
 	private final JButton checkUpdatesButton                   = new JButton( CHECK_UPDATES_BUTTON_TEXT );
 	/** Checkbox to tell whether check for updates automatically on startup. */
-	private final JCheckBox skipLatterActionsOfHackersCheckBox = new JCheckBox( "During a replay scan if a player is found hacking, skip scanning his latter actions", true );
+	private final JCheckBox skipLatterActionsOfHackersCheckBox = new JCheckBox( "During a replay scan if a player is found hacking, skip scanning his latter actions", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS ) ) );
 	
 	/**
 	 * Creates a new GeneralSettings.
@@ -37,7 +37,7 @@ public class GeneralSettings extends Tab {
 		
 		buildGUI();
 		
-		if ( autoCheckUpdatesCheckBox.isSelected() )
+		if ( checkUpdatesOnStartupCheckBox.isSelected() )
 			checkUpdates();
 	}
 	
@@ -46,7 +46,7 @@ public class GeneralSettings extends Tab {
 	 */
 	private void buildGUI() {
 		final JPanel panel = new JPanel();
-		panel.add( autoCheckUpdatesCheckBox );
+		panel.add( checkUpdatesOnStartupCheckBox );
 		checkUpdatesButton.setMnemonic( ( checkUpdatesButton.getText().charAt( 0 ) ) );
 		checkUpdatesButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
@@ -92,6 +92,12 @@ public class GeneralSettings extends Tab {
 				}
 			}
 		}.start();
+	}
+	
+	@Override
+	public void assignUsedProperties() {
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_CHECK_UPDATES_ON_STARTUP      , Boolean.toString( checkUpdatesOnStartupCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, Boolean.toString( skipLatterActionsOfHackersCheckBox.isSelected() ) );
 	}
 	
 }

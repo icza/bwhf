@@ -24,4 +24,8 @@ public class ManualScanTab extends LoggedTab {
 		super.buildGUI();
 	}
 	
+	@Override
+	public void assignUsedProperties() {
+	}
+	
 }

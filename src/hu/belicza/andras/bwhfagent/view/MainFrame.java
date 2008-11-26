@@ -30,7 +30,10 @@ public class MainFrame extends JFrame {
 	public final String applicationVersion;
 	
 	/** Starcraft directory. */
-	private final JTextField starcraftFolderTextField = new JTextField( Consts.DEFAULT_STARCRAFT_DIRECTORY, 25 );
+	private final JTextField starcraftFolderTextField = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ), 25 );
+	
+	/** Tabs in the main frame. */
+	private final Tab[] tabs;
 	
 	/**
 	 * Creates a new MainFrame.
@@ -42,13 +45,19 @@ public class MainFrame extends JFrame {
 		
 		setTitle( Consts.APPLICATION_NAME );
 		
+		tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), new GeneralSettings(), new AboutTab() };
 		buildGUI();
 		
 		setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
 		addWindowListener( new WindowAdapter() {
 			@Override
 			public void windowClosing( final WindowEvent we ) {
-				exit();
+				Utils.settingsProperties.setProperty( Consts.PROPERTY_STARCRAFT_FOLDER, starcraftFolderTextField.getText() );
+				for ( final Tab tab : tabs )
+					tab.assignUsedProperties();
+				
+				Utils.saveSettingsProperties();
+				System.exit( 0 );
 			}
 		} );
 		
@@ -84,8 +93,6 @@ public class MainFrame extends JFrame {
 		
 		final JTabbedPane tabbedPane = new JTabbedPane();
 		
-		final Tab[] tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), new GeneralSettings(), new AboutTab() };
-		
 		for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ ) {
 			final Tab tab = tabs[ tabIndex ];
 			final char mnemonicChar = Integer.toString( tabIndex + 1 ).charAt( 0 );
@@ -94,13 +101,6 @@ public class MainFrame extends JFrame {
 		}
 		
 		getContentPane().add( tabbedPane, BorderLayout.CENTER );
-	}
-	
-	/**
-	 * Exits.
-	 */
-	public void exit() {
-		System.exit( 0 );
 	}
 	
 	/**

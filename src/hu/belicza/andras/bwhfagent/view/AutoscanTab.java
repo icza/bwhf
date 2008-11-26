@@ -22,30 +22,24 @@ import javax.swing.filechooser.FileFilter;
 public class AutoscanTab extends LoggedTab {
 	
 	/** Time between checking for new replay in ms.   */
-	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS = 3000l;
-	/** Default hacker replays destination directory. */
-	private static final String DEFAULT_HACKER_REPS_DESTINATION       = Consts.DEFAULT_STARCRAFT_DIRECTORY + "/maps/replays/hackerreps"; 
-	/** Default all replays destination directory.    */
-	private static final String DEFAULT_ALL_REPS_DESTINATION          = Consts.DEFAULT_STARCRAFT_DIRECTORY + "/maps/replays/allreps";
-	/** Default wav file to be played if found hacks. */
-	private static final String DEFAULT_FOUND_HACKS_WAV_FILE          = "foundHacks.wav";
+	private static final long TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS = 2000l;
 	
 	/** Checkbox to enable/disable the autoscan.                                */
-	private final JCheckBox  enabledCheckBox                = new JCheckBox( "Autoscan enabled", true );
+	private final JCheckBox  enabledCheckBox                = new JCheckBox( "Autoscan enabled", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTOSCAN_ENABLED ) ) );
 	/** Checkbox to enable/disable autosaving hacker reps.                      */
-	private final JCheckBox  saveHackerRepsCheckBox         = new JCheckBox( "Save hacker replays to folder:", true );
+	private final JCheckBox  saveHackerRepsCheckBox         = new JCheckBox( "Save hacker replays to folder:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAVE_HACKER_REPS ) ) );
 	/** Save hacker replays to this folder.                                     */
-	private final JTextField hackerRepsDestinationTextField = new JTextField( DEFAULT_HACKER_REPS_DESTINATION, 30 );
+	private final JTextField hackerRepsDestinationTextField = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_HACKER_REPS_DESTINATION ), 30 );
 	/** Checkbox to enable/disable autosaving all reps.                         */
-	private final JCheckBox  saveAllRepsCheckBox            = new JCheckBox( "Save all replays to folder:", true );
+	private final JCheckBox  saveAllRepsCheckBox            = new JCheckBox( "Save all replays to folder:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAVE_ALL_REPS ) ) );
 	/** Save hacker replays to this folder.                                     */
-	private final JTextField allRepsDestinationTextField    = new JTextField( DEFAULT_ALL_REPS_DESTINATION, 30 );
+	private final JTextField allRepsDestinationTextField    = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_REPS_DESTINATION ), 30 );
 	/** Checkbox to enable/disable playing sound if found hacks.                */
-	private final JCheckBox  playSoundCheckBox              = new JCheckBox( "Play wav file if found hacks:", true );
+	private final JCheckBox  playSoundCheckBox              = new JCheckBox( "Play wav file if found hacks:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_PLAY_SOUND ) ) );
 	/** Wav file to play when found hacks.                                      */
-	private final JTextField foundHacksWavFileTextField     = new JTextField( DEFAULT_FOUND_HACKS_WAV_FILE, 15 );
+	private final JTextField foundHacksWavFileTextField     = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_FOUND_HACKS_WAV_FILE ), 15 );
 	/** Checkbox to enable/disable bringing main frame to front if found hacks. */
-	private final JCheckBox  bringToFrontCheckBox           = new JCheckBox( "Bring agent to front if found hacks", false );
+	private final JCheckBox  bringToFrontCheckBox           = new JCheckBox( "Bring agent to front if found hacks", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_BRING_TO_FRONT ) ) );
 	
 	/**
 	 * Creates a new AutoscanTab.
@@ -160,6 +154,18 @@ public class AutoscanTab extends LoggedTab {
 			}
 			
 		}.start();
+	}
+	
+	@Override
+	public void assignUsedProperties() {
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTOSCAN_ENABLED       , Boolean.toString( enabledCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SAVE_HACKER_REPS       , Boolean.toString( saveHackerRepsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_HACKER_REPS_DESTINATION, hackerRepsDestinationTextField.getText() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SAVE_ALL_REPS          , Boolean.toString( saveAllRepsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_ALL_REPS_DESTINATION   , allRepsDestinationTextField.getText() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_PLAY_SOUND             , Boolean.toString( playSoundCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_FOUND_HACKS_WAV_FILE   , foundHacksWavFileTextField.getText() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_BRING_TO_FRONT         , Boolean.toString( bringToFrontCheckBox.isSelected() ) );
 	}
 	
 }
