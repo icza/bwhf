@@ -4,7 +4,10 @@ import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -100,6 +103,27 @@ public class Utils {
 			
 			Runtime.getRuntime().exec( cmdArray );
 		} catch ( final IOException ie ) {
+		}
+	}
+	
+	/**
+	 * Reads the application version string from an input stream.<br>
+	 * The version string is the first line of the stream.
+	 * 
+	 * @param inputStream input stream to read from
+	 * @return the application version; or null if read failed 
+	 */
+	public static String readVersionStringFromStream( final InputStream inputStream ) {
+		BufferedReader bufferedReader = null;
+		try {
+			bufferedReader = new BufferedReader( new InputStreamReader( inputStream ) );
+			return bufferedReader.readLine();
+		} catch ( final IOException ie ) {
+			return null;
+		}
+		finally {
+			if ( bufferedReader != null )
+				try { bufferedReader.close(); } catch ( final IOException ie ) {}
 		}
 	}
 	

@@ -1,14 +1,14 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhfagent.Consts;
+
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -26,40 +26,21 @@ import javax.swing.JTextField;
  */
 public class MainFrame extends JFrame {
 	
-	public static final String APPLICATION_NAME      = "BWHF Agent";
-	public static final String VERSION_RESOURCE_NAME = "../current_version.txt";
-	public static final String APPLICATION_AUTHOR    = "András Belicza";
-	
-	/** Default Starcraft directory.           */
-	public static final String DEFAULT_STARCRAFT_DIRECTORY    = "C:/Program Files/Starcraft";
-	/** Name of the Starcraft executable file. */
-	public static final String STARCRAFT_EXECUTABLE_FILE_NAME = "StarCraft.exe";
-	
 	/** Current version of the application. */
 	public final String applicationVersion;
 	
-	/** Starcraft directory.                                                    */
-	private final JTextField starcraftFolderTextField = new JTextField( DEFAULT_STARCRAFT_DIRECTORY, 25 );
+	/** Starcraft directory. */
+	private final JTextField starcraftFolderTextField = new JTextField( Consts.DEFAULT_STARCRAFT_DIRECTORY, 25 );
 	
 	/**
 	 * Creates a new MainFrame.
 	 */
-	public MainFrame() {
+	public MainFrame( final String applicationVersion ) {
 		Utils.setMainFrame( this );
 		
-		String applicationVersion_ = "";
-		try {
-			// TODO: newest version check url:
-			// http://bwhf.googlecode.com/svn/trunk/src/hu/belicza/andras/bwhfagent/current_version.txt
-			final BufferedReader bufferedReader = new BufferedReader( new InputStreamReader( getClass().getResourceAsStream( VERSION_RESOURCE_NAME ) ) );
-			applicationVersion_ = bufferedReader.readLine();
-			bufferedReader.close();
-		} catch ( final IOException ie ) {
-			ie.printStackTrace();
-		}
-		applicationVersion = applicationVersion_;
+		this.applicationVersion = applicationVersion;
 		
-		setTitle( APPLICATION_NAME );
+		setTitle( Consts.APPLICATION_NAME );
 		
 		buildGUI();
 		
@@ -88,9 +69,9 @@ public class MainFrame extends JFrame {
 		startScButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				try {
-					Runtime.getRuntime().exec( new File( starcraftFolderTextField.getText(), STARCRAFT_EXECUTABLE_FILE_NAME ).getCanonicalPath() );
+					Runtime.getRuntime().exec( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).getCanonicalPath() );
 				} catch ( final IOException ie ) {
-					JOptionPane.showMessageDialog( MainFrame.this, "Cannot start " + STARCRAFT_EXECUTABLE_FILE_NAME + "!\nIs Starcraft directory properly set?", "Error", JOptionPane.ERROR_MESSAGE );
+					JOptionPane.showMessageDialog( MainFrame.this, "Cannot start " + Consts.STARCRAFT_EXECUTABLE_FILE_NAME + "!\nIs Starcraft directory properly set?", "Error", JOptionPane.ERROR_MESSAGE );
 				}
 			}
 		} );

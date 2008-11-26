@@ -1,5 +1,7 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhfagent.Consts;
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.File;
@@ -19,14 +21,14 @@ import javax.swing.filechooser.FileFilter;
  */
 public class AutoscanTab extends LoggedTab {
 	
-	/** Time between checking for new replay in ms.                    */
+	/** Time between checking for new replay in ms.   */
 	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS = 3000l;
-	/** Name of the last replay file relative to the starcraft folder. */
-	private static final String LAST_REPLAY_FILE_NAME                 = "maps/replays/LastReplay.rep";
 	/** Default hacker replays destination directory. */
-	private static final String DEFAULT_HACKER_REPS_DESTINATION       = MainFrame.DEFAULT_STARCRAFT_DIRECTORY + "/maps/replays/hackerreps"; 
+	private static final String DEFAULT_HACKER_REPS_DESTINATION       = Consts.DEFAULT_STARCRAFT_DIRECTORY + "/maps/replays/hackerreps"; 
 	/** Default all replays destination directory.    */
-	private static final String DEFAULT_ALL_REPS_DESTINATION          = MainFrame.DEFAULT_STARCRAFT_DIRECTORY + "/maps/replays/allreps"; 
+	private static final String DEFAULT_ALL_REPS_DESTINATION          = Consts.DEFAULT_STARCRAFT_DIRECTORY + "/maps/replays/allreps";
+	/** Default wav file to be played if found hacks. */
+	private static final String DEFAULT_FOUND_HACKS_WAV_FILE          = "foundHacks.wav";
 	
 	/** Checkbox to enable/disable the autoscan.                                */
 	private final JCheckBox  enabledCheckBox                = new JCheckBox( "Autoscan enabled", true );
@@ -41,7 +43,7 @@ public class AutoscanTab extends LoggedTab {
 	/** Checkbox to enable/disable playing sound if found hacks.                */
 	private final JCheckBox  playSoundCheckBox              = new JCheckBox( "Play wav file if found hacks:", true );
 	/** Wav file to play when found hacks.                                      */
-	private final JTextField foundHacksWavFileTextField     = new JTextField( "foundHacks.wav", 15 );
+	private final JTextField foundHacksWavFileTextField     = new JTextField( DEFAULT_FOUND_HACKS_WAV_FILE, 15 );
 	/** Checkbox to enable/disable bringing main frame to front if found hacks. */
 	private final JCheckBox  bringToFrontCheckBox           = new JCheckBox( "Bring agent to front if found hacks", false );
 	
@@ -134,14 +136,14 @@ public class AutoscanTab extends LoggedTab {
 		final JTextField starcraftFolderTextField = Utils.getMainFrame().getStarcraftFolderTextField();
 		new Thread() {
 			/** Last modified time of the LastReplay.rep that was checked lastly. */
-			private long lastReplayLastModified = new File( starcraftFolderTextField.getText(), LAST_REPLAY_FILE_NAME ).lastModified();
+			private long lastReplayLastModified = new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ).lastModified();
 			
 			@Override
 			public void run() {
 				while ( true ) {
 					try {
 						if ( enabledCheckBox.isSelected() ) {
-							final File lastReplayFile            = new File( starcraftFolderTextField.getText(), LAST_REPLAY_FILE_NAME );
+							final File lastReplayFile            = new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME );
 							final long newLastReplayLastModified = lastReplayFile.lastModified();
 							
 							if ( newLastReplayLastModified != lastReplayLastModified ) {
