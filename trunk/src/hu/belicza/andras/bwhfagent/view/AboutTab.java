@@ -75,4 +75,8 @@ public class AboutTab extends Tab {
 		contentBox.add( wrapperScrollPane );
 	}
 	
+	@Override
+	public void assignUsedProperties() {
+	}
+	
 }

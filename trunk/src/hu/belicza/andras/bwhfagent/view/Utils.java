@@ -1,13 +1,18 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhfagent.Consts;
+
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Properties;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -22,6 +27,25 @@ import javax.swing.filechooser.FileFilter;
  * @author Belicza Andras
  */
 public class Utils {
+	
+	/** Public reference to the settings properties. */
+	public static final Properties settingsProperties = new Properties( Consts.DEFAULT_SETTINGS_PROPERTIES );
+	static {
+		try {
+			settingsProperties.load( new FileInputStream( Consts.SETTINGS_PROPERTIES_FILE ) );
+		} catch ( final Exception e ) {
+		}
+	}
+	
+	/**
+	 * Saves the settings properties.
+	 */
+	public static void saveSettingsProperties() {
+		try {
+			settingsProperties.store( new FileOutputStream( Consts.SETTINGS_PROPERTIES_FILE ), null );
+		} catch ( final Exception e) {
+		}
+	}
 	
 	/** Stores the reference of the main frame. */
 	private static MainFrame mainFrame;
