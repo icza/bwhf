@@ -26,6 +26,8 @@ public class Consts {
 	
 	/** Default Starcraft directory.                                   */
 	public static final String DEFAULT_STARCRAFT_DIRECTORY    = "C:/Program Files/Starcraft";
+	/** Starcraft replay folder relative to the Starcraft folder.      */
+	public static final String STARCRAFT_REPLAY_FOLDER        = "maps/replays";
 	/** Name of the last replay file relative to the starcraft folder. */
 	public static final String LAST_REPLAY_FILE_NAME          = "maps/replays/LastReplay.rep";
 	/** Name of the Starcraft executable file.                         */

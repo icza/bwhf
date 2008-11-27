@@ -27,7 +27,7 @@ public class AutoscanTab extends LoggedTab {
 	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS = 2000l;
 	
 	/** Checkbox to enable/disable the autoscan.                                */
-	private final JCheckBox  enabledCheckBox                = new JCheckBox( "Autoscan enabled", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTOSCAN_ENABLED ) ) );
+	private final JCheckBox  autoscanEnabledCheckBox        = new JCheckBox( "Autoscan enabled", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTOSCAN_ENABLED ) ) );
 	/** Checkbox to enable/disable autosaving hacker reps.                      */
 	private final JCheckBox  saveHackerRepsCheckBox         = new JCheckBox( "Save hacker replays to folder:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAVE_HACKER_REPS ) ) );
 	/** Save hacker replays to this folder.                                     */
@@ -66,7 +66,7 @@ public class AutoscanTab extends LoggedTab {
 		constraints.fill = GridBagConstraints.BOTH;
 		
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		JPanel wrapperPanel = Utils.wrapInPanel( enabledCheckBox );
+		JPanel wrapperPanel = Utils.wrapInPanel( autoscanEnabledCheckBox );
 		gridBagLayout.setConstraints( wrapperPanel, constraints );
 		settingsPanel.add( wrapperPanel );
 		
@@ -97,9 +97,11 @@ public class AutoscanTab extends LoggedTab {
 		settingsPanel.add( foundHacksWavFileTextField );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		button = createFileChooserButton( foundHacksWavFileTextField, JFileChooser.FILES_ONLY, new FileFilter() {
+			@Override
 			public boolean accept( final File file ) {
-				return file.getName().toLowerCase().endsWith( ".wav" );
+				return file.isDirectory() || file.getName().toLowerCase().endsWith( ".wav" );
 			}
+			@Override
 			public String getDescription() {
 				return "Wave audio files (*.wav)";
 			} 
@@ -138,7 +140,7 @@ public class AutoscanTab extends LoggedTab {
 			public void run() {
 				while ( true ) {
 					try {
-						if ( enabledCheckBox.isSelected() ) {
+						if ( autoscanEnabledCheckBox.isSelected() ) {
 							final File lastReplayFile            = new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME );
 							final long newLastReplayLastModified = lastReplayFile.lastModified();
 							
@@ -160,7 +162,7 @@ public class AutoscanTab extends LoggedTab {
 	
 	@Override
 	public void assignUsedProperties() {
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTOSCAN_ENABLED       , Boolean.toString( enabledCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTOSCAN_ENABLED       , Boolean.toString( autoscanEnabledCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SAVE_HACKER_REPS       , Boolean.toString( saveHackerRepsCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_HACKER_REPS_DESTINATION, hackerRepsDestinationTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SAVE_ALL_REPS          , Boolean.toString( saveAllRepsCheckBox.isSelected() ) );
