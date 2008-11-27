@@ -151,4 +151,31 @@ public class Utils {
 		}
 	}
 	
+	
+	/**
+	 * Formats a nano time amount to human readable.
+	 * @param nanoTimeAmount amount of time in nanos
+	 * @return the human readable formatted text of the specified amount of time
+	 */
+	public static String formatNanoTimeAmount( final long nanoTimeAmount ) {
+		final long ms = nanoTimeAmount / 1000000l; 
+		String formattedText = ( ms % 1000l ) + " ms";
+		final long sec = ms / 1000l;
+		
+		if ( sec > 0 ) {
+			formattedText = ( sec % 60l ) + " sec " + formattedText;
+		
+			final long min = sec / 60l;
+			if ( min > 0 ) {
+				formattedText = ( min % 60l ) + " min " + formattedText;
+				
+				final long hours = min / 60l;
+				if ( hours > 0 )
+					formattedText = hours + " hour(s) " + formattedText;
+			}
+		}
+		
+		return formattedText;
+	}
+	
 }
