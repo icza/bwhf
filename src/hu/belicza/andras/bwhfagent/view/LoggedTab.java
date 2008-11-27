@@ -28,7 +28,7 @@ public abstract class LoggedTab extends Tab {
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
 	
 	/** Log text area.        */
-	private final JTextArea logTextArea        = new JTextArea( 10, 20 );
+	private final JTextArea logTextArea        = new JTextArea( 5, 10 );
 	/** Scroll Lock checkbox. */
 	private final JCheckBox scrollLockCheckBox = new JCheckBox( "Scroll Lock" );
 	

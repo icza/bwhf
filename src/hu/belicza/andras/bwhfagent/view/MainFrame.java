@@ -61,8 +61,7 @@ public class MainFrame extends JFrame {
 			}
 		} );
 		
-		pack();
-		setLocation( 100, 100 );
+		setBounds( 100, 100, 700, 600 );
 		setVisible( true );
 	}
 	
