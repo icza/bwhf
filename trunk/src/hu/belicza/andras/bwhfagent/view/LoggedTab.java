@@ -3,6 +3,8 @@ package hu.belicza.andras.bwhfagent.view;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,12 +32,23 @@ public abstract class LoggedTab extends Tab {
 	/** Scroll Lock checkbox. */
 	private final JCheckBox scrollLockCheckBox = new JCheckBox( "Scroll Lock" );
 	
+	private final String logFileName;
+	/** Log file writer. */
+	private FileWriter   logFileWriter = null;
+	
 	/**
 	 * Creates a new LoggedTab.
 	 * @param title title of the tab
+	 * @param logFileName name of the log file
 	 */
-	public LoggedTab( final String title ) {
+	public LoggedTab( final String title, final String logFileName ) {
 		super( title );
+		this.logFileName = logFileName;
+		
+		try {
+			logFileWriter = new FileWriter( logFileName, true );
+		} catch ( final IOException ie ) {
+		}
 	}
 	
 	/**
@@ -61,7 +74,7 @@ public abstract class LoggedTab extends Tab {
 		controlPanel.add( clearLogButton );
 		logPanel.add( controlPanel, BorderLayout.SOUTH );
 		
-		logPanel.setBorder( BorderFactory.createTitledBorder( "Log" ) );
+		logPanel.setBorder( BorderFactory.createTitledBorder( "Log: " + logFileName + "" ) );
 		contentBox.add( logPanel );
 	}
 	
@@ -70,9 +83,18 @@ public abstract class LoggedTab extends Tab {
 	 * @param message message to be logged
 	 */
 	protected void logMessage( final String message ) {
-		logTextArea.append( DATE_FORMAT.format( new Date() ) + " - " + message + "\n" );
+		final String formattedMessage = DATE_FORMAT.format( new Date() ) + " - " + message + "\n";
+		logTextArea.append( formattedMessage );
+		
 		if ( !scrollLockCheckBox.isSelected() )
 			logTextArea.setCaretPosition( logTextArea.getDocument().getLength() );
+		
+		if ( logFileWriter != null )
+			try {
+				logFileWriter.write( formattedMessage );
+				logFileWriter.flush();
+			} catch ( IOException ie ) {
+			}
 	}
 	
 }
