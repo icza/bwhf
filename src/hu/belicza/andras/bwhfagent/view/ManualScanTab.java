@@ -5,6 +5,8 @@ import hu.belicza.andras.bwhfagent.Consts;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -21,10 +23,22 @@ public class ManualScanTab extends LoggedTab {
 	/** Log file name for autoscan. */
 	private static final String LOG_FILE_NAME = "manual_scan.log";
 	
+	/** Replay file filter. */
+	private static final FileFilter SWING_REPLAY_FILE_FILTER = new FileFilter() {
+		@Override
+		public boolean accept( final File file ) {
+			return file.isDirectory() || file.getName().toLowerCase().endsWith( ".rep" );
+		}
+		@Override
+		public String getDescription() {
+			return "Replay files (*.rep)";
+		}
+	};
+	
 	/** Button to scan the last replay.             */
 	final JButton scanLastReplayButton        = new JButton( "Scan 'LastReplay.rep'" );
 	/** Butotn to select files and folders to scan. */
-	final JButton selectFilesAndFoldersButton = new JButton( "Select files and folders to scan" );
+	final JButton selectFilesAndFoldersButton = new JButton( "Select files and folders to scan recursively" );
 	
 	/**
 	 * Creates a new AutoscanTab.
@@ -40,6 +54,11 @@ public class ManualScanTab extends LoggedTab {
 	 */
 	protected void buildGUI() {
 		scanLastReplayButton.setMnemonic( 'L' );
+		scanLastReplayButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				scanFilesAndFolders( new File[] { new File( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ), Consts.LAST_REPLAY_FILE_NAME ) } );
+			}
+		} );
 		contentBox.add( Utils.wrapInPanel( scanLastReplayButton ) );
 		
 		selectFilesAndFoldersButton.setMnemonic( 'f' );
@@ -47,27 +66,72 @@ public class ManualScanTab extends LoggedTab {
 			public void actionPerformed( final ActionEvent event ) {
 				final JFileChooser fileChooser = new JFileChooser( new File( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ), Consts.STARCRAFT_REPLAY_FOLDER ) );
 				
-				fileChooser.addChoosableFileFilter( new FileFilter() {
-					@Override
-					public boolean accept( final File file ) {
-						return file.isDirectory() || file.getName().toLowerCase().endsWith( ".rep" );
-					}
-					@Override
-					public String getDescription() {
-						return "Replay files (*.rep)";
-					}
-				} ); 
+				fileChooser.addChoosableFileFilter( SWING_REPLAY_FILE_FILTER ); 
 				
 				fileChooser.setFileSelectionMode( JFileChooser.FILES_AND_DIRECTORIES );
 				fileChooser.setMultiSelectionEnabled( true );
-				if ( fileChooser.showOpenDialog( getScrollPane() ) == JFileChooser.APPROVE_OPTION ) {
-					fileChooser.getSelectedFiles();
-				}
+				if ( fileChooser.showOpenDialog( getScrollPane() ) == JFileChooser.APPROVE_OPTION )
+					scanFilesAndFolders( fileChooser.getSelectedFiles() );
 			}
 		} );
 		contentBox.add( Utils.wrapInPanel( selectFilesAndFoldersButton ) );
 		
 		super.buildGUI();
+	}
+	
+	/**
+	 * Scans the specified files and folders.
+	 * @param files files and folders to be scanned
+	 */
+	private void scanFilesAndFolders( final File[] files ) {
+		scanLastReplayButton       .setEnabled( false );
+		selectFilesAndFoldersButton.setEnabled( false );
+		
+		new Thread() {
+			/** List of replay files to be scanned. */
+			final List< File > replayFileList = new ArrayList< File >();
+			
+			@Override
+			public void run() {
+				logMessage( "Counting replays..." );
+				
+				chooseReplayFiles( files );
+				final long startTimeNanons = System.nanoTime();
+				
+				final String scanningMessage = "Scanning " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" );
+				logMessage( scanningMessage + "..." );
+				
+				for ( final File replayFile : replayFileList ) {
+					// TODO: perform check of replayFile
+					replayFile.getName();
+				}
+				
+				final long endTimeNanons = System.nanoTime();
+				logMessage( scanningMessage + " done in " + Utils.formatNanoTimeAmount( endTimeNanons - startTimeNanons ) );
+				scanLastReplayButton       .setEnabled( true );
+				selectFilesAndFoldersButton.setEnabled( true );
+			}
+			
+			private final java.io.FileFilter IO_REPLAY_FILE_FILTER = new java.io.FileFilter() {
+				public boolean accept( final File pathname ) {
+					return SWING_REPLAY_FILE_FILTER.accept( pathname );
+				}
+			};
+			
+			/**
+			 * Chooses the replay files in the specified files and folders.
+			 * @param files files and folders to be chosen from
+			 */
+			private void chooseReplayFiles( final File[] files ) {
+				for ( final File file : files )
+					if ( file.isDirectory() )
+						chooseReplayFiles( file.listFiles( IO_REPLAY_FILE_FILTER ) );
+					else
+						if ( IO_REPLAY_FILE_FILTER.accept( file ) )
+							replayFileList.add( file );
+			}
+			
+		}.start();
 	}
 	
 	@Override

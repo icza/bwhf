@@ -50,7 +50,7 @@ public class AutoscanTab extends LoggedTab {
 		super( "Autoscan", LOG_FILE_NAME );
 		
 		buildGUI();
-		startScanner();
+		startAutoscanner();
 	}
 	
 	/**
@@ -130,7 +130,7 @@ public class AutoscanTab extends LoggedTab {
 	/**
 	 * Starts the autoscanner.
 	 */
-	private void startScanner() {
+	private void startAutoscanner() {
 		final JTextField starcraftFolderTextField = Utils.getMainFrame().getStarcraftFolderTextField();
 		new Thread() {
 			/** Last modified time of the LastReplay.rep that was checked lastly. */
@@ -147,7 +147,7 @@ public class AutoscanTab extends LoggedTab {
 							if ( newLastReplayLastModified != lastReplayLastModified ) {
 								logMessage( "LastReplay.rep was modified - proceeding to scan." );
 								lastReplayLastModified = newLastReplayLastModified;
-								// Perform check of file LastReplay.rep
+								// TODO: Perform check of file 'LastReplay.rep'
 							}
 						}
 						
