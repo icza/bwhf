@@ -21,8 +21,10 @@ import javax.swing.filechooser.FileFilter;
  */
 public class AutoscanTab extends LoggedTab {
 	
+	/** Log file name for autoscan.                   */
+	private static final String LOG_FILE_NAME                         = "autoscan.log";
 	/** Time between checking for new replay in ms.   */
-	private static final long TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS = 2000l;
+	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS = 2000l;
 	
 	/** Checkbox to enable/disable the autoscan.                                */
 	private final JCheckBox  enabledCheckBox                = new JCheckBox( "Autoscan enabled", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTOSCAN_ENABLED ) ) );
@@ -45,7 +47,7 @@ public class AutoscanTab extends LoggedTab {
 	 * Creates a new AutoscanTab.
 	 */
 	public AutoscanTab() {
-		super( "Autoscan" );
+		super( "Autoscan", LOG_FILE_NAME );
 		
 		buildGUI();
 		startScanner();

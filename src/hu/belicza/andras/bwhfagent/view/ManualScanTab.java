@@ -8,11 +8,14 @@ package hu.belicza.andras.bwhfagent.view;
  */
 public class ManualScanTab extends LoggedTab {
 	
+	/** Log file name for autoscan. */
+	private static final String LOG_FILE_NAME = "manual_scan.log";
+	
 	/**
 	 * Creates a new AutoscanTab.
 	 */
 	public ManualScanTab() {
-		super( "Manual scan" );
+		super( "Manual scan", LOG_FILE_NAME );
 		
 		buildGUI();
 	}
