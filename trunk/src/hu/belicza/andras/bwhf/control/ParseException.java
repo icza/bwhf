@@ -7,16 +7,12 @@ package hu.belicza.andras.bwhf.control;
  */
 public class ParseException extends Exception {
 	
-	/** Line where the parse failed. */
-	private final Integer line;
-	
 	/**
 	 * Creates a new ParseException.<br>
 	 * This constructor should be used if the parser failes to read the source.
-	 * @param line line where the parse failed
 	 */
 	public ParseException() {
-		line = null;
+		super( "Error reading the source." );
 	}
 	
 	/**
@@ -25,12 +21,7 @@ public class ParseException extends Exception {
 	 * @param line line where the parse failed
 	 */
 	public ParseException( final int line ) {
-		this.line = line;
-	}
-	
-	@Override
-	public String getMessage() {
-		return line == null ? "Error reading the source." : "Parse error in line " + line + ".";
+		super( "Parse error in line " + line + "." );
 	}
 	
 }
