@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Replay scanner which analyses a {@link Replay} in order to find hacks in it.
  * 
  * @author Andras Belicza
  */
@@ -17,7 +18,7 @@ public class ReplayScanner {
 	 * Scans the replay for hacks.
 	 * 
 	 * @param replay replay to be scanned
-	 * @param skipLatterActionsOfHackers
+	 * @param skipLatterActionsOfHackers tells whether we have to proceed to the next player if one is found hacking
 	 * @return a list of string messages descibing the hacks found in the rep;
 	 */
 	public static List< String > scanReplayForHacks( final Replay replay, final boolean skipLatterActionsOfHackers ) {
@@ -34,7 +35,7 @@ public class ReplayScanner {
 	 * 
 	 * @param player player to be scanned
 	 * @param hackDescriptionList reference to a hack description list where to put new hack descriptions
-	 * @param skipLatterActionsOfHackers
+	 * @param skipLatterActionsOfHackers tells whether we have to proceed to the next player if one is found hacking
 	 */
 	private static void scanPlayerForHacks( final Player player, final List< String > hackDescriptionList, final boolean skipLatterActionsOfHackers ) {
 		final Action[] playerActions = player.actions;

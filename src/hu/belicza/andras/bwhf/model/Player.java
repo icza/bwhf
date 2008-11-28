@@ -1,6 +1,7 @@
 package hu.belicza.andras.bwhf.model;
 
 /**
+ * Class modelling a player.
  * 
  * @author Andras Belicza
  */

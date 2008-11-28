@@ -1,6 +1,7 @@
 package hu.belicza.andras.bwhf.model;
 
 /**
+ * Class modelling an action.
  * 
  * @author Andras Belicza
  */
@@ -16,6 +17,7 @@ public class Action {
 	public static final int ACTION_NAME_INDEX_SELECT       =  6;
 	
 	
+	/** Possible action names. */
 	private static final String[] ACTION_NAMES = {
 		"HACK",
 		"Cancel Train",
@@ -31,6 +33,7 @@ public class Action {
 	public static final int UNIT_NAME_INDEX_PROBE   =  0;
 	public static final int UNIT_NAME_INDEX_DRONE   =  1;
 	
+	/** Unit names we're interested in. */
 	public static final String[] UNIT_NAMES = {
 		"Probe",
 		"Drone"
@@ -43,6 +46,7 @@ public class Action {
 	public static final int BUILDING_NAME_INDEX_FIRST_ZERG_BUILDING = 18;
 	public static final int BUILDING_NAME_INDEX_LAST_ZERG_BUILDING  = 33;
 	
+	/** Possible building names. */
 	public static final String[] BUILDING_NAMES = {
 		"Command Center",
 		"ComSat",
@@ -102,16 +106,30 @@ public class Action {
 	public static final String HOTKEY_ACTION_PARAM_NAME_ADD    = "Add";
 	public static final String HOTKEY_ACTION_PARAM_NAME_ASSIGN = "Assign";
 	
+	/** Iteration when this action was given. */
 	public final int     iteration;
+	/** Name of the action.                   */
 	public final String  name;
+	/** Parameter string of the action.       */
 	public final String  parameters;
+	/** Unit ids string of the ation.         */
 	public final String  unitIds;
 	
+	/** Constant for identifying the action name.       */
 	public final int     actionNameIndex;
+	/** Constant for identifying the action's unit.     */
 	public final int     parameterUnitNameIndex;
+	/** Constant for identifying the action's building. */
 	public final int     parameterBuildingNameIndex;
 	
 	
+	/**
+	 * Creates a new Action.
+	 * @param iteration  iteration of the action
+	 * @param name       name of the atcion
+	 * @param parameters parameter string of the atcion
+	 * @param unitIds    unit ids string of the action
+	 */
 	public Action( final int iteration, final String name, final String parameters, final String unitIds ) {
 		this.iteration  = iteration;
 		this.name       = name;
