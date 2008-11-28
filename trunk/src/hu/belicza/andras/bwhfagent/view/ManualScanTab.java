@@ -41,7 +41,7 @@ public class ManualScanTab extends LoggedTab {
 	final JButton selectFilesAndFoldersButton = new JButton( "Select files and folders to scan recursively" );
 	
 	/**
-	 * Creates a new AutoscanTab.
+	 * Creates a new ManualScanTab.
 	 */
 	public ManualScanTab() {
 		super( "Manual scan", LOG_FILE_NAME );
