@@ -10,6 +10,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -25,6 +26,9 @@ import javax.swing.JTextField;
  * @author Andras Belicza
  */
 public class MainFrame extends JFrame {
+	
+	/** Name of the image resource file to be used as icon image. */
+	private static final String ICON_IMAGE_RESOURCE_NAME = "redpill.gif";
 	
 	/** Current version of the application. */
 	public final String applicationVersion;
@@ -44,6 +48,7 @@ public class MainFrame extends JFrame {
 		this.applicationVersion = applicationVersion;
 		
 		setTitle( Consts.APPLICATION_NAME );
+		setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
 		
 		tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), new GeneralSettings(), new AboutTab() };
 		buildGUI();
