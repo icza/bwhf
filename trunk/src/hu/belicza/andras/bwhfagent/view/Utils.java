@@ -7,6 +7,7 @@ import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -14,6 +15,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Properties;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.SourceDataLine;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -27,6 +33,9 @@ import javax.swing.filechooser.FileFilter;
  * @author Belicza Andras
  */
 public class Utils {
+	
+	/** Size of buffer to play wav files. */
+	private static final int WAV_BUFFER_SIZE = 128*1024;
 	
 	/** Public reference to the settings properties. */
 	public static final Properties settingsProperties = new Properties( Consts.DEFAULT_SETTINGS_PROPERTIES );
@@ -45,25 +54,6 @@ public class Utils {
 			settingsProperties.store( new FileOutputStream( Consts.SETTINGS_PROPERTIES_FILE ), null );
 		} catch ( final Exception e) {
 		}
-	}
-	
-	/** Stores the reference of the main frame. */
-	private static MainFrame mainFrame;
-	
-	/**
-	 * Sets the <code>MainFrame</code> reference.
-	 * @param mainFrame reference to the main frame to be set 
-	 */
-	public static void setMainFrame( final MainFrame mainFrame ) {
-		Utils.mainFrame = mainFrame;
-	}
-	
-	/**
-	 * Returns the reference of the main frame.
-	 * @return the reference of the main frame
-	 */
-	public static MainFrame getMainFrame() {
-		return mainFrame;
 	}
 	
 	/**
@@ -176,6 +166,50 @@ public class Utils {
 		}
 		
 		return formattedText;
+	}
+	
+	/**
+	 * Plays a wav file.<br>
+	 * Will return immediately, the wav playing will run on a new thread.
+	 * 
+	 * @param wavFileName name of the wav file to play
+	 * @return true if the file was started playing; false if error occurred
+	 */
+	public static boolean playWavFile( final String wavFileName ) {
+		try {
+			final AudioInputStream audioInputStream = AudioSystem.getAudioInputStream( new File( wavFileName ) );
+			final AudioFormat      audioFormat      = audioInputStream.getFormat();
+			final SourceDataLine   audioLine        = (SourceDataLine) AudioSystem.getLine( new DataLine.Info( SourceDataLine.class, audioFormat ) );
+			
+			audioLine.open( audioFormat );
+			
+			new Thread() {
+				@Override
+				public void run() {
+					try {
+						audioLine.start();
+						
+						final byte[] buffer = new byte[ WAV_BUFFER_SIZE ];
+						int          bytesRead;
+						
+						while ( ( bytesRead = audioInputStream.read( buffer ) ) > 0 )
+							audioLine.write( buffer, 0, bytesRead );
+						
+					}
+					catch ( final Exception e  ){
+					}
+					finally {
+						audioLine.drain();
+						audioLine.close();
+					}
+				}
+			}.start();
+			
+			return true;
+		}
+		catch ( final Exception e ) {
+			return false;
+		}
 	}
 	
 }

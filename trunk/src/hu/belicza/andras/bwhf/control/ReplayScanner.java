@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Replay scanner which analyses a {@link Replay} in order to find hacks in it.
+ * Replay scanner which analyzes a {@link Replay} in order to find hacks in it.
  * 
  * @author Andras Belicza
  */
@@ -19,7 +19,7 @@ public class ReplayScanner {
 	 * 
 	 * @param replay replay to be scanned
 	 * @param skipLatterActionsOfHackers tells whether we have to proceed to the next player if one is found hacking
-	 * @return a list of string messages descibing the hacks found in the rep;
+	 * @return a list of string messages describing the hacks found in the rep;
 	 */
 	public static List< String > scanReplayForHacks( final Replay replay, final boolean skipLatterActionsOfHackers ) {
 		final List< String > hackDescriptionList = new ArrayList< String >();
@@ -66,9 +66,7 @@ public class ReplayScanner {
 		//    -if unit(s)/building included in the selection was/were taken out => we get a superior/greater set
 		final Action[] lastSelectActionSetAsHotkeys         = new Action[ 11 ]; // We might have 11 hotkeys (0..11)
 		
-		for ( int actionIndex = 0; actionIndex < actionsCount; actionIndex++ ) {
-			final Action action = playerActions[ actionIndex ];
-			
+		for ( final Action action : playerActions ) {
 			
 			// Building selection hack: selecting more than one non-zerg building object with one select command
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action.actionNameIndex == Action.ACTION_NAME_INDEX_BWCHART_HACK )
@@ -125,12 +123,18 @@ public class ReplayScanner {
 				lastSelectAction = action;
 			
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY ) {
-				final int hotkey = Integer.parseInt( action.parameters.substring( action.parameters.indexOf( ',' ) + 1 ) );
-				if ( action.parameters.startsWith( Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN ) || action.parameters.startsWith( Action.HOTKEY_ACTION_PARAM_NAME_ADD ) )
-					lastSelectActionSetAsHotkeys[ hotkey ] = lastSelectAction;
-				else
-					if ( action.parameters.startsWith( Action.HOTKEY_ACTION_PARAM_NAME_SELECT ) )
-						lastSelectAction = lastSelectActionSetAsHotkeys[ hotkey ];
+				try {
+					final int hotkey = Integer.parseInt( action.parameters.substring( action.parameters.indexOf( ',' ) + 1 ) );
+					if ( action.parameters.startsWith( Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN ) || action.parameters.startsWith( Action.HOTKEY_ACTION_PARAM_NAME_ADD ) )
+						lastSelectActionSetAsHotkeys[ hotkey ] = lastSelectAction;
+					else
+						if ( action.parameters.startsWith( Action.HOTKEY_ACTION_PARAM_NAME_SELECT ) )
+							lastSelectAction = lastSelectActionSetAsHotkeys[ hotkey ];
+				}
+				catch ( ArrayIndexOutOfBoundsException aioobe ) {
+					// TODO: consider, resulting in here can be proof of hack?
+					// Real life example:  "2530	TwilightNinja69	Hotkey	Select,15		"
+				}
 			}
 			
 			lastAction = action;
