@@ -65,9 +65,9 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_STARCRAFT_FOLDER              , "C:/Program Files/Starcraft" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTOSCAN_ENABLED              , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SAVE_HACKER_REPS              , "true" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HACKER_REPS_DESTINATION       , DEFAULT_SETTINGS_PROPERTIES.getProperty( PROPERTY_STARCRAFT_FOLDER ) + "/maps/replays/hackerreps" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HACKER_REPS_DESTINATION       , "c:/replays/hackerreps" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SAVE_ALL_REPS                 , "true" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_REPS_DESTINATION          , DEFAULT_SETTINGS_PROPERTIES.getProperty( PROPERTY_STARCRAFT_FOLDER ) + "/maps/replays/allreps" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_REPS_DESTINATION          , "c:/replays/allreps" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAY_SOUND                    , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FOUND_HACKS_WAV_FILE          , "sounds/falling.wav" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_BRING_TO_FRONT                , "false" );
