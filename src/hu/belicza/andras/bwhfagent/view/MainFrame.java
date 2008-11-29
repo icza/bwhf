@@ -30,11 +30,25 @@ public class MainFrame extends JFrame {
 	/** Name of the image resource file to be used as icon image. */
 	private static final String ICON_IMAGE_RESOURCE_NAME = "redpill.gif";
 	
+	/** Stores the reference of the main frame. */
+	private static MainFrame mainFrame;
+	
+	/**
+	 * Returns the reference of the main frame.
+	 * @return the reference of the main frame
+	 */
+	public static MainFrame getInstance() {
+		return mainFrame;
+	}
+	
 	/** Current version of the application. */
 	public final String applicationVersion;
 	
 	/** Starcraft directory. */
-	private final JTextField starcraftFolderTextField = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ), 25 );
+	public final JTextField starcraftFolderTextField = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ), 25 );
+	
+	/** Reference to the general settings tab. */
+	public final GeneralSettingsTab generalSettingsTab;
 	
 	/** Tabs in the main frame. */
 	private final Tab[] tabs;
@@ -43,14 +57,18 @@ public class MainFrame extends JFrame {
 	 * Creates a new MainFrame.
 	 */
 	public MainFrame( final String applicationVersion ) {
-		Utils.setMainFrame( this );
+		if ( MainFrame.mainFrame != null )
+			throw new RuntimeException( "Only one main frame is allowed per Java Virtual Machine!" );
+		
+		MainFrame.mainFrame = this;
 		
 		this.applicationVersion = applicationVersion;
 		
 		setTitle( Consts.APPLICATION_NAME );
 		setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
 		
-		tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), new GeneralSettings(), new AboutTab() };
+		generalSettingsTab = new GeneralSettingsTab();
+		tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), generalSettingsTab, new AboutTab() };
 		buildGUI();
 		
 		setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
@@ -74,7 +92,6 @@ public class MainFrame extends JFrame {
 	 * Builds the graphical user interface.
 	 */
 	private void buildGUI() {
-		
 		final JPanel northPanel = new JPanel( new BorderLayout() );
 		final JPanel controlPanel = new JPanel();
 		final JButton startScButton = new JButton( "Start/Switch to Starcraft" );

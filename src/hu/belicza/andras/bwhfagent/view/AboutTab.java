@@ -32,7 +32,7 @@ public class AboutTab extends Tab {
 		
 		templateParameterValueMap.put( "%APPLICATION_NAME%"   , Consts.APPLICATION_NAME + "&trade;" );
 		templateParameterValueMap.put( "%APPLICATION_AUTHOR%" , Consts.APPLICATION_AUTHOR );
-		templateParameterValueMap.put( "%APPLICATION_VERSION%", Utils.getMainFrame().applicationVersion );
+		templateParameterValueMap.put( "%APPLICATION_VERSION%", MainFrame.getInstance().applicationVersion );
 		templateParameterValueMap.put( "%HOME_PAGE_URL%"      , Consts.HOME_PAGE_URL );
 		
 		buildGUI();

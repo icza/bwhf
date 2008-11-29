@@ -17,7 +17,7 @@ import javax.swing.JPanel;
  * 
  * @author Andras Belicza
  */
-public class GeneralSettings extends Tab {
+public class GeneralSettingsTab extends Tab {
 	
 	/** Text of the check updates button. */
 	private static final String CHECK_UPDATES_BUTTON_TEXT = "Check now";
@@ -25,14 +25,14 @@ public class GeneralSettings extends Tab {
 	/** Checkbox to tell whether check for updates automatically on startup. */
 	private final JCheckBox checkUpdatesOnStartupCheckBox      = new JCheckBox( "Check for updates on startup", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHECK_UPDATES_ON_STARTUP ) ) );
 	/** Check for updates button.                                            */
-	private final JButton checkUpdatesButton                   = new JButton( CHECK_UPDATES_BUTTON_TEXT );
+	private final JButton   checkUpdatesButton                 = new JButton( CHECK_UPDATES_BUTTON_TEXT );
 	/** Checkbox to tell whether check for updates automatically on startup. */
-	private final JCheckBox skipLatterActionsOfHackersCheckBox = new JCheckBox( "During a replay scan if a player is found hacking, skip scanning his latter actions", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS ) ) );
+	public  final JCheckBox skipLatterActionsOfHackersCheckBox = new JCheckBox( "During a replay scan if a player is found hacking, skip scanning his latter actions", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS ) ) );
 	
 	/**
 	 * Creates a new GeneralSettings.
 	 */
-	public GeneralSettings() {
+	public GeneralSettingsTab() {
 		super( "General settings" );
 		
 		buildGUI();
@@ -77,10 +77,10 @@ public class GeneralSettings extends Tab {
 					if ( versionString == null )
 						throw new Exception();
 					
-					if ( versionString.equals( Utils.getMainFrame().applicationVersion ) )
+					if ( versionString.equals( MainFrame.getInstance().applicationVersion ) )
 						checkUpdatesButton.setText( CHECK_UPDATES_BUTTON_TEXT + " (no new version)" );
 					else {
-						if ( JOptionPane.showConfirmDialog( Utils.getMainFrame(), "A newer version of " + Consts.APPLICATION_NAME + " is available.\nWould you like to visit the home page to download it?", "New version available!", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE ) == JOptionPane.YES_OPTION )
+						if ( JOptionPane.showConfirmDialog( MainFrame.getInstance(), "A newer version of " + Consts.APPLICATION_NAME + " is available.\nWould you like to visit the home page to download it?", "New version available!", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE ) == JOptionPane.YES_OPTION )
 							Utils.showURLInBrowser( Consts.HOME_PAGE_URL );
 						checkUpdatesButton.setText( CHECK_UPDATES_BUTTON_TEXT + " (new version available!)" );
 					}

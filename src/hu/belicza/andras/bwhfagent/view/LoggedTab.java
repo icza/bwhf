@@ -61,6 +61,7 @@ public abstract class LoggedTab extends Tab {
 		logTextArea.setEditable( false );
 		logTextArea.setLineWrap( true );
 		logTextArea.setWrapStyleWord( true );
+		logTextArea.setTabSize( 4 );
 		logPanel.add( new JScrollPane( logTextArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS ), BorderLayout.CENTER );
 		
 		final JPanel controlPanel = new JPanel();
@@ -83,7 +84,17 @@ public abstract class LoggedTab extends Tab {
 	 * @param message message to be logged
 	 */
 	protected void logMessage( final String message ) {
-		final String formattedMessage = DATE_FORMAT.format( new Date() ) + " - " + message + "\n";
+		logMessage( message, true );
+	}
+	
+	/**
+	 * Logs a message.
+	 * @param message message to be logged
+	 * @param appendTimeStamp tells whether timestamp should be appended to the message
+	 */
+	protected void logMessage( final String message, final boolean appendTimeStamp ) {
+		final String formattedMessage = ( appendTimeStamp ? DATE_FORMAT.format( new Date() ) + " - " : "" ) + message + "\n";
+		
 		logTextArea.append( formattedMessage );
 		
 		if ( !scrollLockCheckBox.isSelected() )

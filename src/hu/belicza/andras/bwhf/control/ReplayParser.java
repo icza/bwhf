@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringTokenizer;
 
 /**
  * Replay parser to produce a {@link Replay} java object from a string or a text file
@@ -91,8 +90,6 @@ public class ReplayParser {
 			
 			reader = new LineNumberReader( new FileReader( replayExportFile ) );
 			
-			String line;
-			
 			// Buffer of a new action
 			int    iteration;
 			String playerName;
@@ -100,14 +97,27 @@ public class ReplayParser {
 			String parameters;
 			String unitIds;
 			
+			String line;
+			int    toIndex;
 			while ( ( line = reader.readLine() ) != null ) {
-				final StringTokenizer lineTokenizer = new StringTokenizer( line, "\t" );
+				int fromIndex = 0;
+				iteration = Integer.parseInt( line.substring( fromIndex, toIndex = line.indexOf( '\t', fromIndex ) ) );
 				
-				iteration  = Integer.parseInt( lineTokenizer.nextToken() );
-				playerName = lineTokenizer.nextToken();
-				name       = lineTokenizer.nextToken();
-				parameters = lineTokenizer.nextToken();
-				unitIds    = lineTokenizer.nextToken();
+				fromIndex = toIndex + 1;
+				playerName = line.substring( fromIndex, toIndex = line.indexOf( '\t', fromIndex ) );
+				
+				fromIndex = toIndex + 1;
+				name = line.substring( fromIndex, toIndex = line.indexOf( '\t', fromIndex ) );
+				
+				fromIndex = toIndex + 1;
+				parameters = line.substring( fromIndex, toIndex = line.indexOf( '\t', fromIndex ) ).trim();
+				
+				// Here comes just a separator space and another tab.
+				fromIndex = toIndex + 1;
+				toIndex = line.indexOf( '\t', fromIndex );
+				
+				fromIndex = toIndex + 1;
+				unitIds = line.substring( fromIndex );
 				
 				addActionToPlayerMap( playerName, new Action( iteration, name, parameters, unitIds ), playerNameActionListMap );
 			}

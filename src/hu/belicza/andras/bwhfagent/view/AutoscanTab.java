@@ -1,10 +1,17 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhf.control.ParseException;
+import hu.belicza.andras.bwhf.control.ReplayParser;
+import hu.belicza.andras.bwhf.control.ReplayScanner;
 import hu.belicza.andras.bwhfagent.Consts;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Date;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -106,6 +113,11 @@ public class AutoscanTab extends LoggedTab {
 				return "Wave audio files (*.wav)";
 			} 
 		} );
+		button.addActionListener( new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				System.out.println( Utils.playWavFile( foundHacksWavFileTextField.getText() ) );
+			}
+		} );
 		gridBagLayout.setConstraints( button, constraints );
 		settingsPanel.add( button );
 		
@@ -131,25 +143,46 @@ public class AutoscanTab extends LoggedTab {
 	 * Starts the autoscanner.
 	 */
 	private void startAutoscanner() {
-		final JTextField starcraftFolderTextField = Utils.getMainFrame().getStarcraftFolderTextField();
 		new Thread() {
-			/** Last modified time of the LastReplay.rep that was checked lastly. */
-			private long lastReplayLastModified = new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ).lastModified();
-			
 			@Override
 			public void run() {
+				final JTextField starcraftFolderTextField           = MainFrame.getInstance().starcraftFolderTextField;
+				final JCheckBox  skipLatterActionsOfHackersCheckBox = MainFrame.getInstance().generalSettingsTab.skipLatterActionsOfHackersCheckBox;
+				
+				Date autoscanEnabledTime       = null;
+				long lastModifiedOfLastChecked = 0l; // Last modified time of the LastReplay.rep that was checked lastly.
 				while ( true ) {
 					try {
 						if ( autoscanEnabledCheckBox.isSelected() ) {
+							if ( autoscanEnabledTime == null ) {
+								autoscanEnabledTime       = new Date();
+								lastModifiedOfLastChecked = 0l;
+							}
+							
 							final File lastReplayFile            = new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME );
 							final long newLastReplayLastModified = lastReplayFile.lastModified();
 							
-							if ( newLastReplayLastModified != lastReplayLastModified ) {
+							if ( newLastReplayLastModified >= autoscanEnabledTime.getTime() && newLastReplayLastModified != lastModifiedOfLastChecked ) {
 								logMessage( "LastReplay.rep was modified - proceeding to scan." );
-								lastReplayLastModified = newLastReplayLastModified;
+								lastModifiedOfLastChecked = newLastReplayLastModified;
+								
 								// TODO: Perform check of file 'LastReplay.rep'
+								try {
+									final List< String > hackDescriptionList = ReplayScanner.scanReplayForHacks( ReplayParser.parseBWChartExportFile( new File( "w:/bwchart.txt" ) ), skipLatterActionsOfHackersCheckBox.isSelected() );
+									if ( !hackDescriptionList.isEmpty() ) {
+										logMessage( "Found " + hackDescriptionList.size() + " hack" + (hackDescriptionList.size() == 1 ? "" : "s" ) + " in LastReplay.rep:" );
+										for ( final String hackDescription : hackDescriptionList )
+											logMessage( "\t" + hackDescription, false );
+									}
+								} catch ( final ParseException pe ) {
+									logMessage( "Could not scan LastReplay.rep!" );
+									pe.printStackTrace();
+								}
+								skipLatterActionsOfHackersCheckBox.isSelected();
 							}
 						}
+						else
+							autoscanEnabledTime = null;
 						
 						sleep( TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS );
 					} catch ( final InterruptedException ie ) {
