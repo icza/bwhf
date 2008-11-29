@@ -144,6 +144,7 @@ public class AutoscanTab extends LoggedTab {
 	 */
 	private void startAutoscanner() {
 		new Thread() {
+			
 			@Override
 			public void run() {
 				final JTextField starcraftFolderTextField           = MainFrame.getInstance().starcraftFolderTextField;
@@ -163,17 +164,24 @@ public class AutoscanTab extends LoggedTab {
 							final long newLastReplayLastModified = lastReplayFile.lastModified();
 							
 							if ( newLastReplayLastModified >= autoscanEnabledTime.getTime() && newLastReplayLastModified != lastModifiedOfLastChecked ) {
-								logMessage( "LastReplay.rep was modified - proceeding to scan." );
+								logMessage( "LastReplay.rep was modified - proceeding to scan..." );
 								lastModifiedOfLastChecked = newLastReplayLastModified;
 								
 								// TODO: Perform check of file 'LastReplay.rep'
 								try {
 									final List< String > hackDescriptionList = ReplayScanner.scanReplayForHacks( ReplayParser.parseBWChartExportFile( new File( "w:/bwchart.txt" ) ), skipLatterActionsOfHackersCheckBox.isSelected() );
 									if ( !hackDescriptionList.isEmpty() ) {
+										if ( bringToFrontCheckBox.isSelected() )
+											MainFrame.getInstance().toFront();
+										if ( playSoundCheckBox.isSelected() )
+											Utils.playWavFile( foundHacksWavFileTextField.getText() );
+										
 										logMessage( "Found " + hackDescriptionList.size() + " hack" + (hackDescriptionList.size() == 1 ? "" : "s" ) + " in LastReplay.rep:" );
 										for ( final String hackDescription : hackDescriptionList )
 											logMessage( "\t" + hackDescription, false );
 									}
+									else
+										logMessage( "Found no hacks in LastReplay.rep." );
 								} catch ( final ParseException pe ) {
 									logMessage( "Could not scan LastReplay.rep!" );
 									pe.printStackTrace();
