@@ -93,7 +93,7 @@ public class ReplayScanner {
 					if ( lastAction != null && lastAction.actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN
 							&& ( lastAction.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_COMSAT || lastAction.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_CONTROL_TOWER ) ) {
 						foundTerranComsatCancelHack = true;
-						hackDescriptionList.add( player.name + " used terran moneyhakc at " + action.iteration + " (this hack is reported only once)" );
+						hackDescriptionList.add( player.name + " used terran moneyhack at " + action.iteration + " (this hack is reported only once)" );
 					}
 			
 			// Old protoss moneyhack

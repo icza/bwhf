@@ -15,7 +15,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.util.Date;
 import java.util.List;
 import java.util.Properties;
@@ -40,8 +39,10 @@ import javax.swing.filechooser.FileFilter;
  */
 public class Utils {
 	
-	/** Size of buffer to play wav files. */
-	private static final int WAV_BUFFER_SIZE = 128*1024;
+	/** Size of buffer to use to play wav files.  */
+	private static final int WAV_BUFFER_SIZE       = 128*1024;
+	/** Size of buffer to use to copy files.      */
+	private static final int FILE_COPY_BUFFER_SIZE = 4*1024;
 	
 	/** Public reference to the settings properties. */
 	public static final Properties settingsProperties = new Properties( Consts.DEFAULT_SETTINGS_PROPERTIES );
@@ -229,17 +230,63 @@ public class Utils {
 		final File exportFile = new File( "rep-" + (long) ( Math.random() * 1000000l ) + "-" + new Date().getTime() + ".out" );
 		try {
 			final Process process = Runtime.getRuntime().exec( new String[] { Consts.REPLAY_CONVERTER_EXECUTABLE_FILE, replayFile.getAbsolutePath(), exportFile.getAbsolutePath() } );
-			final PrintWriter printWriter = new PrintWriter( process.getOutputStream() );
-			printWriter.println( "asd" );
-			printWriter.flush();
-			printWriter.close();
-			process.waitFor();
+			Thread.sleep( 300l );
+			process.destroy();
+			//process.waitFor();
 			
 			return ReplayScanner.scanReplayForHacks( ReplayParser.parseBWChartExportFile( exportFile ), skipLatterActionsOfHackersCheckBox.isSelected() );
 		} catch ( final Exception e ) {
-			if ( !exportFile.delete() )
-				exportFile.deleteOnExit();
 			return null;
+		}
+		finally {
+			if ( !exportFile.delete() )
+				if ( exportFile.exists() )
+					exportFile.deleteOnExit();
+		}
+	}
+	
+	/**
+	 * Copies the source file to the destination folder using the specified destination file name.<br>
+	 * If destination folder does not exist, tries to create it (recursively).
+	 * 
+	 * @param sourceFile          source file to be copied
+	 * @param destinationFolder   destination folder to copy to
+	 * @param destinationFileName destination file name to be used for the copied file
+	 */
+	public static void copyFile( final File sourceFile, final File destinationFolder, final String destinationFileName ) {
+		if ( !destinationFolder.exists() )
+			destinationFolder.mkdirs();
+		if ( destinationFolder.exists() && destinationFolder.isDirectory() ) {
+			Utils.copyFile( sourceFile, new File( destinationFolder, destinationFileName ) );
+		}
+	}
+	
+	/**
+	 * Copies the source file to the destination file.
+	 * @param sourceFile      source file to be copied
+	 * @param destinationFile destination file to copy to
+	 */
+	public static void copyFile( final File sourceFile, final File destinationFile ) {
+		FileInputStream  inputStream  = null;
+		FileOutputStream outputStream = null;
+		try {
+			inputStream  = new FileInputStream ( sourceFile      );
+			outputStream = new FileOutputStream( destinationFile );
+			
+			final byte[] buffer =  new byte[ FILE_COPY_BUFFER_SIZE ];
+			
+			int bytesRead;
+			while ( ( bytesRead = inputStream.read( buffer ) ) > 0 )
+				outputStream.write( buffer, 0, bytesRead );
+			
+		} catch ( final Exception e ) {
+			e.printStackTrace();
+		}
+		finally {
+			if ( outputStream != null )
+				try { outputStream.close(); } catch ( final Exception e ) {}
+			if ( inputStream != null )
+				try { inputStream.close(); } catch ( final Exception e ) {}
 		}
 	}
 	
