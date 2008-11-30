@@ -1,5 +1,7 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhf.control.ReplayParser;
+import hu.belicza.andras.bwhf.control.ReplayScanner;
 import hu.belicza.andras.bwhfagent.Consts;
 
 import java.awt.Component;
@@ -13,6 +15,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.util.Date;
+import java.util.List;
 import java.util.Properties;
 
 import javax.sound.sampled.AudioFormat;
@@ -21,6 +26,7 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
@@ -209,6 +215,31 @@ public class Utils {
 		}
 		catch ( final Exception e ) {
 			return false;
+		}
+	}
+	
+	/**
+	 * Scans a replay file and returns the hack descriptions found in it.
+	 * @param replayFile file to be scanned
+	 * @return the hack descriptions found in the replay
+	 */
+	public static List< String > scanReplayFile( final File replayFile ) {
+		final JCheckBox skipLatterActionsOfHackersCheckBox = MainFrame.getInstance().generalSettingsTab.skipLatterActionsOfHackersCheckBox;
+		
+		final File exportFile = new File( "rep-" + (long) ( Math.random() * 1000000l ) + "-" + new Date().getTime() + ".out" );
+		try {
+			final Process process = Runtime.getRuntime().exec( new String[] { Consts.REPLAY_CONVERTER_EXECUTABLE_FILE, replayFile.getAbsolutePath(), exportFile.getAbsolutePath() } );
+			final PrintWriter printWriter = new PrintWriter( process.getOutputStream() );
+			printWriter.println( "asd" );
+			printWriter.flush();
+			printWriter.close();
+			process.waitFor();
+			
+			return ReplayScanner.scanReplayForHacks( ReplayParser.parseBWChartExportFile( exportFile ), skipLatterActionsOfHackersCheckBox.isSelected() );
+		} catch ( final Exception e ) {
+			if ( !exportFile.delete() )
+				exportFile.deleteOnExit();
+			return null;
 		}
 	}
 	

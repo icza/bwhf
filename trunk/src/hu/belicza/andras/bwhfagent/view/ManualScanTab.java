@@ -101,13 +101,26 @@ public class ManualScanTab extends LoggedTab {
 				final String scanningMessage = "Scanning " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" );
 				logMessage( scanningMessage + "..." );
 				
+				int hackerRepsCount = 0;
 				for ( final File replayFile : replayFileList ) {
-					// TODO: perform check of replayFile
-					replayFile.getName();
+					final List< String > hackDescriptionList = Utils.scanReplayFile( replayFile );
+					if ( hackDescriptionList == null )
+						logMessage( "Could not scan " + replayFile.getAbsolutePath() + "!" );
+					else
+						if ( !hackDescriptionList.isEmpty() ) {
+							hackerRepsCount++;
+							logMessage( "Found " + hackDescriptionList.size() + " hack" + (hackDescriptionList.size() == 1 ? "" : "s" ) + " in " + replayFile.getAbsolutePath() + ":" );
+							for ( final String hackDescription : hackDescriptionList )
+								logMessage( "\t" + hackDescription, false );
+						}
+						else
+							logMessage( "Found no hacks in " + replayFile.getAbsolutePath() + "." );
 				}
 				
 				final long endTimeNanons = System.nanoTime();
 				logMessage( scanningMessage + " done in " + Utils.formatNanoTimeAmount( endTimeNanons - startTimeNanons ) );
+				logMessage( "\tFound " + hackerRepsCount + " hacker replay" + ( hackerRepsCount == 1 ? "" : "s" ) + " overall.", false );
+				
 				scanLastReplayButton       .setEnabled( true );
 				selectFilesAndFoldersButton.setEnabled( true );
 			}
