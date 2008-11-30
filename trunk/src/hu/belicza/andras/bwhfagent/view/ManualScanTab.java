@@ -101,11 +101,14 @@ public class ManualScanTab extends LoggedTab {
 				final String scanningMessage = "Scanning " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" );
 				logMessage( scanningMessage + "..." );
 				
-				int hackerRepsCount = 0;
+				int hackerRepsCount  = 0;
+				int skippedRepsCount = 0;
 				for ( final File replayFile : replayFileList ) {
 					final List< String > hackDescriptionList = Utils.scanReplayFile( replayFile );
-					if ( hackDescriptionList == null )
+					if ( hackDescriptionList == null ) {
+						skippedRepsCount++;
 						logMessage( "Could not scan " + replayFile.getAbsolutePath() + "!" );
+					}
 					else
 						if ( !hackDescriptionList.isEmpty() ) {
 							hackerRepsCount++;
@@ -119,7 +122,8 @@ public class ManualScanTab extends LoggedTab {
 				
 				final long endTimeNanons = System.nanoTime();
 				logMessage( scanningMessage + " done in " + Utils.formatNanoTimeAmount( endTimeNanons - startTimeNanons ) );
-				logMessage( "\tFound " + hackerRepsCount + " hacker replay" + ( hackerRepsCount == 1 ? "" : "s" ) + " overall.", false );
+				logMessage( "\tFound " + hackerRepsCount + " hacker replay" + ( hackerRepsCount == 1 ? "" : "s" ) + ".", false );
+				logMessage( "\tSkipped " + skippedRepsCount + " replay" + ( hackerRepsCount == 1 ? "" : "s" ) + ".", false );
 				
 				scanLastReplayButton       .setEnabled( true );
 				selectFilesAndFoldersButton.setEnabled( true );

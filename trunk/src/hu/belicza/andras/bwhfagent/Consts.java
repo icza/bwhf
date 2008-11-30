@@ -44,6 +44,7 @@ public class Consts {
 			REPLAY_CONVERTER_EXECUTABLE_FILE = null;
 	}
 	
+	
 	/** Name of the settings properties file. */
 	public static final String SETTINGS_PROPERTIES_FILE = "settings.properites";
 	

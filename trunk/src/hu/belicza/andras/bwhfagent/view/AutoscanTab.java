@@ -7,6 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
@@ -25,10 +27,12 @@ import javax.swing.filechooser.FileFilter;
  */
 public class AutoscanTab extends LoggedTab {
 	
-	/** Log file name for autoscan.                   */
+	/** Log file name for autoscan.                             */
 	private static final String LOG_FILE_NAME                         = "autoscan.log";
-	/** Time between checking for new replay in ms.   */
+	/** Time between checking for new replay in ms.             */
 	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS = 2000l;
+	/** Date format to create timestamps for copied file names. */
+	private static final DateFormat DATE_FORMAT                       = new SimpleDateFormat( "yyyy-MM-dd HH-mm-ss" );
 	
 	/** Checkbox to enable/disable the autoscan.                                */
 	private final JCheckBox  autoscanEnabledCheckBox        = new JCheckBox( "Autoscan enabled", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTOSCAN_ENABLED ) ) );
@@ -160,6 +164,9 @@ public class AutoscanTab extends LoggedTab {
 							final long newLastReplayLastModified = lastReplayFile.lastModified();
 							
 							if ( newLastReplayLastModified >= autoscanEnabledTime.getTime() && newLastReplayLastModified != lastModifiedOfLastChecked ) {
+								if ( saveAllRepsCheckBox.isSelected() )
+									Utils.copyFile( lastReplayFile, new File( allRepsDestinationTextField.getText() ), DATE_FORMAT.format( new Date() ) + " LastReplay.rep" );
+								
 								logMessage( "LastReplay.rep was modified - proceeding to scan..." );
 								lastModifiedOfLastChecked = newLastReplayLastModified;
 								
@@ -176,6 +183,9 @@ public class AutoscanTab extends LoggedTab {
 										logMessage( "Found " + hackDescriptionList.size() + " hack" + (hackDescriptionList.size() == 1 ? "" : "s" ) + " in LastReplay.rep:" );
 										for ( final String hackDescription : hackDescriptionList )
 											logMessage( "\t" + hackDescription, false );
+										
+										if ( saveHackerRepsCheckBox.isSelected() )
+											Utils.copyFile( lastReplayFile, new File( hackerRepsDestinationTextField.getText() ), DATE_FORMAT.format( new Date() ) + " LastReplay.rep" );
 									}
 									else
 										logMessage( "Found no hacks in LastReplay.rep." );
