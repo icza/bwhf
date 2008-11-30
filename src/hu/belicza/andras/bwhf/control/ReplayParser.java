@@ -123,6 +123,7 @@ public class ReplayParser {
 			}
 			
 		} catch ( final FileNotFoundException fnfe ) {
+			fnfe.printStackTrace();
 			throw new ParseException();
 		} catch ( final IOException ie ) {
 			throw new ParseException();

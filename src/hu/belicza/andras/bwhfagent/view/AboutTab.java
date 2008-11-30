@@ -43,12 +43,16 @@ public class AboutTab extends Tab {
 	 */
 	private void buildGUI() {
 		final StringBuilder aboutHtmlBuilder = new StringBuilder();
-		final BufferedReader input = new BufferedReader( new InputStreamReader( getClass().getResourceAsStream( Consts.ABOUT_TEMLATE_RESOURCE_NAME ) ) );
+		BufferedReader input = null;
 		try {
+			input = new BufferedReader( new InputStreamReader( getClass().getResourceAsStream( Consts.ABOUT_TEMLATE_RESOURCE_NAME ) ) );
 			while ( input.ready() )
 				aboutHtmlBuilder.append( input.readLine() );
 		} catch ( final IOException ie ) {
-			ie.printStackTrace();
+		}
+		finally {
+			if ( input != null )
+				try { input.close(); } catch ( final IOException ie ) {}
 		}
 		
 		String aboutHtml = aboutHtmlBuilder.toString();

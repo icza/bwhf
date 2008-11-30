@@ -33,6 +33,17 @@ public class Consts {
 	/** Name of the Starcraft executable file.                         */
 	public static final String STARCRAFT_EXECUTABLE_FILE_NAME = "StarCraft.exe";
 	
+	/** Replay converter utility to extract actions from a replay.     */
+	public static final String REPLAY_CONVERTER_EXECUTABLE_FILE;
+	static {
+		final String osName = System.getProperty( "os.name" );
+		
+		if ( osName != null && osName.startsWith( "Windows" ) )
+			REPLAY_CONVERTER_EXECUTABLE_FILE = "utils/repconverter.exe";
+		else
+			REPLAY_CONVERTER_EXECUTABLE_FILE = null;
+	}
+	
 	/** Name of the settings properties file. */
 	public static final String SETTINGS_PROPERTIES_FILE = "settings.properites";
 	

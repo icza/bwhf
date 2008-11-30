@@ -1,8 +1,5 @@
 package hu.belicza.andras.bwhfagent.view;
 
-import hu.belicza.andras.bwhf.control.ParseException;
-import hu.belicza.andras.bwhf.control.ReplayParser;
-import hu.belicza.andras.bwhf.control.ReplayScanner;
 import hu.belicza.andras.bwhfagent.Consts;
 
 import java.awt.GridBagConstraints;
@@ -148,7 +145,6 @@ public class AutoscanTab extends LoggedTab {
 			@Override
 			public void run() {
 				final JTextField starcraftFolderTextField           = MainFrame.getInstance().starcraftFolderTextField;
-				final JCheckBox  skipLatterActionsOfHackersCheckBox = MainFrame.getInstance().generalSettingsTab.skipLatterActionsOfHackersCheckBox;
 				
 				Date autoscanEnabledTime       = null;
 				long lastModifiedOfLastChecked = 0l; // Last modified time of the LastReplay.rep that was checked lastly.
@@ -167,9 +163,10 @@ public class AutoscanTab extends LoggedTab {
 								logMessage( "LastReplay.rep was modified - proceeding to scan..." );
 								lastModifiedOfLastChecked = newLastReplayLastModified;
 								
-								// TODO: Perform check of file 'LastReplay.rep'
-								try {
-									final List< String > hackDescriptionList = ReplayScanner.scanReplayForHacks( ReplayParser.parseBWChartExportFile( new File( "w:/bwchart.txt" ) ), skipLatterActionsOfHackersCheckBox.isSelected() );
+								final List< String > hackDescriptionList = Utils.scanReplayFile( lastReplayFile );
+								if ( hackDescriptionList == null )
+									logMessage( "Could not scan LastReplay.rep!" );
+								else
 									if ( !hackDescriptionList.isEmpty() ) {
 										if ( bringToFrontCheckBox.isSelected() )
 											MainFrame.getInstance().toFront();
@@ -182,11 +179,6 @@ public class AutoscanTab extends LoggedTab {
 									}
 									else
 										logMessage( "Found no hacks in LastReplay.rep." );
-								} catch ( final ParseException pe ) {
-									logMessage( "Could not scan LastReplay.rep!" );
-									pe.printStackTrace();
-								}
-								skipLatterActionsOfHackersCheckBox.isSelected();
 							}
 						}
 						else
