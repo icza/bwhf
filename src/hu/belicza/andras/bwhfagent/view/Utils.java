@@ -230,9 +230,7 @@ public class Utils {
 		final File exportFile = new File( "rep-" + (long) ( Math.random() * 1000000l ) + "-" + new Date().getTime() + ".out" );
 		try {
 			final Process process = Runtime.getRuntime().exec( new String[] { Consts.REPLAY_CONVERTER_EXECUTABLE_FILE, replayFile.getAbsolutePath(), exportFile.getAbsolutePath() } );
-			Thread.sleep( 300l );
-			process.destroy();
-			//process.waitFor();
+			process.waitFor();
 			
 			return ReplayScanner.scanReplayForHacks( ReplayParser.parseBWChartExportFile( exportFile ), skipLatterActionsOfHackersCheckBox.isSelected() );
 		} catch ( final Exception e ) {
