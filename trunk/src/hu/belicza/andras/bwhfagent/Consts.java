@@ -39,7 +39,7 @@ public class Consts {
 		final String osName = System.getProperty( "os.name" );
 		
 		if ( osName != null && osName.startsWith( "Windows" ) )
-			REPLAY_CONVERTER_EXECUTABLE_FILE = "utils/repconverter.exe";
+			REPLAY_CONVERTER_EXECUTABLE_FILE = "utils/repextractor.exe";
 		else
 			REPLAY_CONVERTER_EXECUTABLE_FILE = null;
 	}
