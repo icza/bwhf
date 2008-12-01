@@ -148,7 +148,7 @@ public class AutoscanTab extends LoggedTab {
 			
 			@Override
 			public void run() {
-				final JTextField starcraftFolderTextField           = MainFrame.getInstance().starcraftFolderTextField;
+				final JTextField starcraftFolderTextField = MainFrame.getInstance().starcraftFolderTextField;
 				
 				Date autoscanEnabledTime       = null;
 				long lastModifiedOfLastChecked = 0l; // Last modified time of the LastReplay.rep that was checked lastly.

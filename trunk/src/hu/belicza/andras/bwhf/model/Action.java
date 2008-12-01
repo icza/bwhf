@@ -15,6 +15,8 @@ public class Action {
 	public static final int ACTION_NAME_INDEX_TRAIN        =  4;
 	public static final int ACTION_NAME_INDEX_HOTKEY       =  5;
 	public static final int ACTION_NAME_INDEX_SELECT       =  6;
+	public static final int ACTION_NAME_INDEX_MOVE         =  7;
+	public static final int ACTION_NAME_INDEX_ATTACK_MOVE  =  8;
 	
 	
 	/** Possible action names. */
@@ -25,7 +27,9 @@ public class Action {
 		"Hatch",
 		"Train",
 		"Hotkey",
-		"Select"
+		"Select",
+		"Move",
+		"Attack Move"
 	};
 	
 	
@@ -112,7 +116,7 @@ public class Action {
 	public final String  name;
 	/** Parameter string of the action.       */
 	public final String  parameters;
-	/** Unit ids string of the ation.         */
+	/** Unit ids string of the action.        */
 	public final String  unitIds;
 	
 	/** Constant for identifying the action name.       */

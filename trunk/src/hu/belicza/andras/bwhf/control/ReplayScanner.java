@@ -66,7 +66,11 @@ public class ReplayScanner {
 		//    -if unit(s)/building included in the selection was/were taken out => we get a superior/greater set
 		final Action[] lastSelectActionSetAsHotkeys         = new Action[ 11 ]; // We might have 11 hotkeys (0..11)
 		
-		for ( final Action action : playerActions ) {
+		// Actions ahead local variables for multicommand unit control detection
+		Action actionAhead1, actionAhead2, actionAhead3;
+		
+		for ( int actionIndex = 0; actionIndex < actionsCount; actionIndex++ ) {
+			final Action action = playerActions[ actionIndex ];
 			
 			// Building selection hack: selecting more than one non-zerg building object with one select command
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action.actionNameIndex == Action.ACTION_NAME_INDEX_BWCHART_HACK )
@@ -95,6 +99,24 @@ public class ReplayScanner {
 						foundTerranComsatCancelHack = true;
 						hackDescriptionList.add( player.name + " used terran moneyhack at " + action.iteration + " (this hack is reported only once)" );
 					}
+			
+			// Multicommand unit control hack and multicommand rally set hack
+			if ( actionIndex + 3 < actionsCount ) {
+				actionAhead1 = playerActions[ actionIndex + 1 ];
+				actionAhead2 = playerActions[ actionIndex + 2 ];
+				actionAhead3 = playerActions[ actionIndex + 3 ];
+				if ( action.parameters != null && actionAhead1.parameters != null && actionAhead2.parameters != null && actionAhead2.parameters != null )
+					if ( action.iteration == actionAhead1.iteration && action.iteration == actionAhead2.iteration && action.iteration == actionAhead3.iteration
+					  && action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT && actionAhead2.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT
+					  && ( actionAhead1.actionNameIndex == Action.ACTION_NAME_INDEX_MOVE || actionAhead1.actionNameIndex == Action.ACTION_NAME_INDEX_ATTACK_MOVE )
+					  && actionAhead1.actionNameIndex == actionAhead3.actionNameIndex
+					  && actionAhead1.parameters.equals( actionAhead3.parameters ) ) {
+						if ( action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_NON_BUILDING )
+							hackDescriptionList.add( player.name + " used multicommand unit control hack at " + action.iteration );
+						else
+							hackDescriptionList.add( player.name + " used multicommand rally set hack at " + action.iteration );
+					}
+			}
 			
 			// Old protoss moneyhack
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BWCHART_HACK && action.parameters.startsWith( "00 15" ) )
