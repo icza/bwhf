@@ -236,6 +236,7 @@ public class Utils {
 			
 			return ReplayScanner.scanReplayForHacks( ReplayParser.parseBWChartExportFile( exportFile ), skipLatterActionsOfHackersCheckBox.isSelected() );
 		} catch ( final Exception e ) {
+			new Object();
 			return null;
 		}
 		finally {

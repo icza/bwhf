@@ -37,7 +37,7 @@ public class ManualScanTab extends LoggedTab {
 	
 	/** Button to scan the last replay.             */
 	final JButton scanLastReplayButton        = new JButton( "Scan 'LastReplay.rep'" );
-	/** Butotn to select files and folders to scan. */
+	/** Button to select files and folders to scan. */
 	final JButton selectFilesAndFoldersButton = new JButton( "Select files and folders to scan recursively" );
 	
 	/**

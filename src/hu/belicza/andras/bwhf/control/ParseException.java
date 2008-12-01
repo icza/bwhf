@@ -9,7 +9,7 @@ public class ParseException extends Exception {
 	
 	/**
 	 * Creates a new ParseException.<br>
-	 * This constructor should be used if the parser failes to read the source.
+	 * This constructor should be used if the parser fails to read the source.
 	 */
 	public ParseException() {
 		super( "Error reading the source." );

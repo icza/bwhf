@@ -58,7 +58,7 @@ public class ReplayParser {
 				fromIndex = toIndex + 1;
 				parameters = replayActions.substring( fromIndex, toIndex = replayActions.indexOf( '\t', fromIndex ) ).trim();
 				
-				// Here comes just a separator space and another tab.
+				// Here comes just a separator character (space or a tab) and another tab.
 				fromIndex = toIndex + 1;
 				toIndex = replayActions.indexOf( '\t', fromIndex );
 				
@@ -112,7 +112,7 @@ public class ReplayParser {
 				fromIndex = toIndex + 1;
 				parameters = line.substring( fromIndex, toIndex = line.indexOf( '\t', fromIndex ) ).trim();
 				
-				// Here comes just a separator space and another tab.
+				// Here comes just a separator character (space or a tab) and another tab.
 				fromIndex = toIndex + 1;
 				toIndex = line.indexOf( '\t', fromIndex );
 				
