@@ -66,6 +66,8 @@ public class Consts {
 	public static final String PROPERTY_FOUND_HACKS_WAV_FILE           = "foundHacksWavFile";
 	/** Bring to front property.                 */
 	public static final String PROPERTY_BRING_TO_FRONT                 = "bringToFront";
+	/** Flag hacker reps property.               */
+	public static final String PROPERTY_FLAG_HACKER_REPS               = "flagHackerReps";
 	/** Check updates on startup property.       */
 	public static final String PROPERTY_CHECK_UPDATES_ON_STARTUP       = "checkUpdatesOnStartup";
 	/** Skip latter actions of hackers property. */
@@ -83,6 +85,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAY_SOUND                    , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FOUND_HACKS_WAV_FILE          , "sounds/falling.wav" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_BRING_TO_FRONT                , "false" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FLAG_HACKER_REPS              , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHECK_UPDATES_ON_STARTUP      , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, "true" );
 		
