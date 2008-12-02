@@ -19,10 +19,10 @@ public class ReplayScanner {
 	 * 
 	 * @param replay replay to be scanned
 	 * @param skipLatterActionsOfHackers tells whether we have to proceed to the next player if one is found hacking
-	 * @return a list of string messages describing the hacks found in the rep;
+	 * @return a list of {@link HackDescription}s describing the hacks found in the rep
 	 */
-	public static List< String > scanReplayForHacks( final Replay replay, final boolean skipLatterActionsOfHackers ) {
-		final List< String > hackDescriptionList = new ArrayList< String >();
+	public static List< HackDescription > scanReplayForHacks( final Replay replay, final boolean skipLatterActionsOfHackers ) {
+		final List< HackDescription > hackDescriptionList = new ArrayList< HackDescription >();
 		
 		for ( int playerIndex = 0; playerIndex < replay.players.length; playerIndex++ )
 			scanPlayerForHacks( replay.players[ playerIndex ], hackDescriptionList, skipLatterActionsOfHackers );
@@ -37,7 +37,7 @@ public class ReplayScanner {
 	 * @param hackDescriptionList reference to a hack description list where to put new hack descriptions
 	 * @param skipLatterActionsOfHackers tells whether we have to proceed to the next player if one is found hacking
 	 */
-	private static void scanPlayerForHacks( final Player player, final List< String > hackDescriptionList, final boolean skipLatterActionsOfHackers ) {
+	private static void scanPlayerForHacks( final Player player, final List< HackDescription > hackDescriptionList, final boolean skipLatterActionsOfHackers ) {
 		final Action[] playerActions = player.actions;
 		final int actionsCount = playerActions.length;
 		
@@ -51,7 +51,7 @@ public class ReplayScanner {
 			else
 				break;
 		if ( actionsAtIteration5Count > 1 )
-			hackDescriptionList.add( player.name + " used autogather/autotrain hack at 5" );
+			hackDescriptionList.add( new HackDescription( player.name, player.name + " used autogather/autotrain hack at 5" ) );
 		
 		
 		int            lastIteration                        = 0;
@@ -78,18 +78,18 @@ public class ReplayScanner {
 					if ( action.parameterBuildingNameIndex < Action.BUILDING_NAME_INDEX_FIRST_ZERG_BUILDING || action.parameterBuildingNameIndex > Action.BUILDING_NAME_INDEX_LAST_ZERG_BUILDING ) // Not a zerg building selected multiple times (that can be done wihtout hack by selecting drones about to morph)
 						if ( action.parameters.length() != Action.BUILDING_NAMES[ action.parameterBuildingNameIndex ].length() )
 							if ( action.parameters.startsWith( Action.BUILDING_NAMES[ action.parameterBuildingNameIndex ] + "(x" ) )
-								hackDescriptionList.add( player.name + " used building selection hack at " + action.iteration );
+								hackDescriptionList.add( new HackDescription( player.name, player.name + " used building selection hack at " + action.iteration ) );
 			
 			// Old zerg and protoss moneyhacks
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_0X33 )
 				if ( lastSelectAction.parameterUnitNameIndex == Action.UNIT_NAME_INDEX_PROBE )
-					hackDescriptionList.add( player.name + " used protoss moneyhack at " + action.iteration );
+					hackDescriptionList.add( new HackDescription( player.name, player.name + " used protoss moneyhack at " + action.iteration ) );
 				else
 					if ( lastSelectAction.parameterUnitNameIndex == Action.UNIT_NAME_INDEX_DRONE )
-						hackDescriptionList.add( player.name + " used zerg moneyhack at " + action.iteration );
+						hackDescriptionList.add( new HackDescription( player.name, player.name + " used zerg moneyhack at " + action.iteration ) );
 					else
 						if ( lastSelectAction.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_NON_BUILDING ) // giving !0x33 means cancel upgrade; sometimes it's just a number (not recognized by BWChart), if not a building => moneyhack
-							hackDescriptionList.add( player.name + " used moneyhack at " + action.iteration );
+							hackDescriptionList.add( new HackDescription( player.name, player.name + " used moneyhack at " + action.iteration ) );
 			
 			// Old terran moneyhack (comsat cancel)
 			if ( !foundTerranComsatCancelHack )
@@ -97,7 +97,7 @@ public class ReplayScanner {
 					if ( lastAction != null && lastAction.actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN
 							&& ( lastAction.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_COMSAT || lastAction.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_CONTROL_TOWER ) ) {
 						foundTerranComsatCancelHack = true;
-						hackDescriptionList.add( player.name + " used terran moneyhack at " + action.iteration + " (this hack is reported only once)" );
+						hackDescriptionList.add( new HackDescription( player.name, player.name + " used terran moneyhack at " + action.iteration + " (this hack is reported only once)" ) );
 					}
 			
 			// Multicommand unit control hack and multicommand rally set hack
@@ -112,20 +112,20 @@ public class ReplayScanner {
 					  && actionAhead1.actionNameIndex == actionAhead3.actionNameIndex
 					  && actionAhead1.parameters.equals( actionAhead3.parameters ) ) {
 						if ( action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_NON_BUILDING )
-							hackDescriptionList.add( player.name + " used multicommand unit control hack at " + action.iteration );
+							hackDescriptionList.add( new HackDescription( player.name, player.name + " used multicommand unit control hack at " + action.iteration ) );
 						else
-							hackDescriptionList.add( player.name + " used multicommand rally set hack at " + action.iteration );
+							hackDescriptionList.add( new HackDescription( player.name, player.name + " used multicommand rally set hack at " + action.iteration ) );
 					}
 			}
 			
 			// Old protoss moneyhack
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BWCHART_HACK && action.parameters.startsWith( "00 15" ) )
-				hackDescriptionList.add( player.name + " used protoss moneyhack at " + action.iteration );
+				hackDescriptionList.add( new HackDescription( player.name, player.name + " used protoss moneyhack at " + action.iteration ) );
 			
 			// Zerg moneyhack with cancelling eggs (from Starcraft version 1.15.1)
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_CANCEL_TRAIN && ( action.parameters.equals( "FE 00" ) || action.parameters.equals( "00 00" ) ) )
 				if ( lastAction != null && lastAction.actionNameIndex == Action.ACTION_NAME_INDEX_HATCH )
-					hackDescriptionList.add( player.name + " used zerg moneyhack at " + action.iteration );
+					hackDescriptionList.add( new HackDescription( player.name, player.name + " used zerg moneyhack at " + action.iteration ) );
 			
 			// Multicommand hack: giving "several" actions in the same iteration
 			if ( lastIteration == action.iteration ) {
@@ -134,7 +134,7 @@ public class ReplayScanner {
 			}
 			else {
 				if ( nonHotkeyActionsCountInSameIteration > 14 )
-					hackDescriptionList.add( player.name + " used multicommand hack at " + lastAction.iteration );
+					hackDescriptionList.add( new HackDescription( player.name, player.name + " used multicommand hack at " + lastAction.iteration ) );
 				lastIteration = action.iteration;
 				nonHotkeyActionsCountInSameIteration = 0;
 			}
@@ -154,7 +154,7 @@ public class ReplayScanner {
 							lastSelectAction = lastSelectActionSetAsHotkeys[ hotkey ];
 				}
 				catch ( ArrayIndexOutOfBoundsException aioobe ) {
-					// TODO: consider, resulting in here can be proof of hack?
+					// TODO: investigate, resulting in here can be proof of hack?
 					// Real life example:  "2530	TwilightNinja69	Hotkey	Select,15		"
 				}
 			}

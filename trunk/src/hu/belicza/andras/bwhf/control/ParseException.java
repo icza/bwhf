@@ -3,7 +3,7 @@ package hu.belicza.andras.bwhf.control;
 /**
  * Refers to an error parsing a replay text.
  * 
- * @author Belicza Andras
+ * @author Andras Belicza
  */
 public class ParseException extends Exception {
 	
