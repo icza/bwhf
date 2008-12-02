@@ -1,5 +1,6 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhf.control.HackDescription;
 import hu.belicza.andras.bwhfagent.Consts;
 
 import java.awt.GridBagConstraints;
@@ -170,7 +171,7 @@ public class AutoscanTab extends LoggedTab {
 								logMessage( "LastReplay.rep was modified - proceeding to scan..." );
 								lastModifiedOfLastChecked = newLastReplayLastModified;
 								
-								final List< String > hackDescriptionList = Utils.scanReplayFile( lastReplayFile );
+								final List< HackDescription > hackDescriptionList = Utils.scanReplayFile( lastReplayFile );
 								if ( hackDescriptionList == null )
 									logMessage( "Could not scan LastReplay.rep!" );
 								else
@@ -181,8 +182,8 @@ public class AutoscanTab extends LoggedTab {
 											Utils.playWavFile( foundHacksWavFileTextField.getText() );
 										
 										logMessage( "Found " + hackDescriptionList.size() + " hack" + (hackDescriptionList.size() == 1 ? "" : "s" ) + " in LastReplay.rep:" );
-										for ( final String hackDescription : hackDescriptionList )
-											logMessage( "\t" + hackDescription, false );
+										for ( final HackDescription hackDescription : hackDescriptionList )
+											logMessage( "\t" + hackDescription.description, false );
 										
 										if ( saveHackerRepsCheckBox.isSelected() )
 											Utils.copyFile( lastReplayFile, new File( hackerRepsDestinationTextField.getText() ), DATE_FORMAT.format( new Date() ) + " LastReplay.rep" );

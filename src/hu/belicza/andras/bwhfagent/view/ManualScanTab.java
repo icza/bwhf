@@ -1,12 +1,16 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhf.control.HackDescription;
 import hu.belicza.andras.bwhfagent.Consts;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -80,6 +84,14 @@ public class ManualScanTab extends LoggedTab {
 	}
 	
 	/**
+	 * Helper class to wrap a modifiable integer into an object.
+	 * @author Andras Belicza
+	 */
+	private static class IntWrapper {
+		public int value;
+	}
+	
+	/**
 	 * Scans the specified files and folders.
 	 * @param files files and folders to be scanned
 	 */
@@ -103,8 +115,11 @@ public class ManualScanTab extends LoggedTab {
 				
 				int hackerRepsCount  = 0;
 				int skippedRepsCount = 0;
+				
+				final Map< String, IntWrapper > playerHackerRepsCountMap = new HashMap< String, IntWrapper >(); // We count the number of replays every hacker was caguht in
+				
 				for ( final File replayFile : replayFileList ) {
-					final List< String > hackDescriptionList = Utils.scanReplayFile( replayFile );
+					final List< HackDescription > hackDescriptionList = Utils.scanReplayFile( replayFile );
 					if ( hackDescriptionList == null ) {
 						skippedRepsCount++;
 						logMessage( "Could not scan " + replayFile.getAbsolutePath() + "!" );
@@ -113,8 +128,14 @@ public class ManualScanTab extends LoggedTab {
 						if ( !hackDescriptionList.isEmpty() ) {
 							hackerRepsCount++;
 							logMessage( "Found " + hackDescriptionList.size() + " hack" + (hackDescriptionList.size() == 1 ? "" : "s" ) + " in " + replayFile.getAbsolutePath() + ":" );
-							for ( final String hackDescription : hackDescriptionList )
-								logMessage( "\t" + hackDescription, false );
+							for ( final HackDescription hackDescription : hackDescriptionList ) {
+								logMessage( "\t" + hackDescription.description, false );
+								
+								IntWrapper playerHackerRepsCount = playerHackerRepsCountMap.get( hackDescription.playerName );
+								if ( playerHackerRepsCount == null )
+									playerHackerRepsCountMap.put( hackDescription.playerName, playerHackerRepsCount = new IntWrapper() );
+								playerHackerRepsCount.value++;
+							}
 						}
 						else
 							logMessage( "Found no hacks in " + replayFile.getAbsolutePath() + "." );
@@ -124,6 +145,18 @@ public class ManualScanTab extends LoggedTab {
 				logMessage( scanningMessage + " done in " + Utils.formatNanoTimeAmount( endTimeNanons - startTimeNanons ) );
 				logMessage( "\tFound " + hackerRepsCount + " hacker replay" + ( hackerRepsCount == 1 ? "" : "s" ) + ".", false );
 				logMessage( "\tSkipped " + skippedRepsCount + " replay" + ( hackerRepsCount == 1 ? "" : "s" ) + ".", false );
+				if ( !playerHackerRepsCountMap.isEmpty() ) {
+					logMessage( "\tThe following players were found hacking:", false );
+					final StringBuilder hackersBuilder = new StringBuilder( "\t" );
+					for ( final Entry< String, IntWrapper > playerHackerRepsCount : playerHackerRepsCountMap.entrySet() ) {
+						if ( hackersBuilder.length() > 1 )
+							hackersBuilder.append( ", " );
+						hackersBuilder.append( playerHackerRepsCount.getKey() );
+						if ( playerHackerRepsCount.getValue().value > 1 )
+							hackersBuilder.append( " (x" ).append( playerHackerRepsCount.getValue().value ).append( ')' );
+					}
+					logMessage( hackersBuilder.toString(), false );
+				}
 				
 				scanLastReplayButton       .setEnabled( true );
 				selectFilesAndFoldersButton.setEnabled( true );

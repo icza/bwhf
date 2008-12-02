@@ -1,5 +1,6 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhf.control.HackDescription;
 import hu.belicza.andras.bwhf.control.ReplayParser;
 import hu.belicza.andras.bwhf.control.ReplayScanner;
 import hu.belicza.andras.bwhfagent.Consts;
@@ -222,9 +223,9 @@ public class Utils {
 	/**
 	 * Scans a replay file and returns the hack descriptions found in it.
 	 * @param replayFile file to be scanned
-	 * @return the hack descriptions found in the replay
+	 * @return the list of {@link HackDescription}s found in the replay
 	 */
-	public static List< String > scanReplayFile( final File replayFile ) {
+	public static List< HackDescription > scanReplayFile( final File replayFile ) {
 		final JCheckBox skipLatterActionsOfHackersCheckBox = MainFrame.getInstance().generalSettingsTab.skipLatterActionsOfHackersCheckBox;
 		
 		final File exportFile = new File( "rep-" + (long) ( Math.random() * 1000000l ) + "-" + new Date().getTime() + ".out" );
