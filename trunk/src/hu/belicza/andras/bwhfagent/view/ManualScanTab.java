@@ -50,8 +50,13 @@ public class ManualScanTab extends LoggedTab {
 	private final JButton   scanLastReplayButton        = new JButton( "Scan 'LastReplay.rep'" );
 	/** Button to select files and folders to scan. */
 	private final JButton   selectFilesAndFoldersButton = new JButton( "Select files and folders to scan recursively" );
+	/** Button to stop the current scan.            */
+	private final JButton   stopScanButton              = new JButton( "Stop current scan" );
 	/** Flag hacker reps checkbox.                  */
-	private final JCheckBox flagHackerRepsCheckBox      = new JCheckBox( "Flag hacker replays by appending '" + HACKER_REPS_POSTFIX + "' to their name", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS ) ) );
+	private final JCheckBox flagHackerRepsCheckBox      = new JCheckBox( "Flag hacker replays by appending '" + HACKER_REPS_POSTFIX + "' to the end of their names", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS ) ) );
+	
+	/** Variable to store stop requests of scan.    */
+	private volatile boolean requestedToStop;
 	
 	/**
 	 * Creates a new ManualScanTab.
@@ -89,6 +94,16 @@ public class ManualScanTab extends LoggedTab {
 		} );
 		contentBox.add( Utils.wrapInPanel( selectFilesAndFoldersButton ) );
 		
+		stopScanButton.setEnabled( false );
+		stopScanButton.setMnemonic( 't' );
+		stopScanButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				requestedToStop = true; // Access to a volatile variable is automatically synchronized from Java 5.0
+				stopScanButton.setEnabled( false );
+			}
+		} );
+		contentBox.add( Utils.wrapInPanel( stopScanButton ) );
+		
 		contentBox.add( Utils.wrapInPanel( flagHackerRepsCheckBox ) );
 		
 		super.buildGUI();
@@ -107,8 +122,10 @@ public class ManualScanTab extends LoggedTab {
 	 * @param files files and folders to be scanned
 	 */
 	private void scanFilesAndFolders( final File[] files ) {
+		requestedToStop = false;
 		scanLastReplayButton       .setEnabled( false );
 		selectFilesAndFoldersButton.setEnabled( false );
+		stopScanButton             .setEnabled( true  );
 		
 		new Thread() {
 			/** List of replay files to be scanned. */
@@ -116,73 +133,87 @@ public class ManualScanTab extends LoggedTab {
 			
 			@Override
 			public void run() {
-				logMessage( "Counting replays..." );
-				
-				chooseReplayFiles( files );
-				final long startTimeNanons = System.nanoTime();
-				
-				final String scanningMessage = "Scanning " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" );
-				logMessage( scanningMessage + "..." );
-				
-				int hackerRepsCount  = 0;
-				int skippedRepsCount = 0;
-				
-				final Map< String, IntWrapper > playerHackerRepsCountMap = new HashMap< String, IntWrapper >(); // We count the number of replays every hacker was caguht in
-				
-				for ( final File replayFile : replayFileList ) {
-					final List< HackDescription > hackDescriptionList = Utils.scanReplayFile( replayFile );
-					if ( hackDescriptionList == null ) {
-						skippedRepsCount++;
-						logMessage( "Could not scan " + replayFile.getAbsolutePath() + "!" );
-					}
-					else
-						if ( !hackDescriptionList.isEmpty() ) {
-							hackerRepsCount++;
-							logMessage( "Found " + hackDescriptionList.size() + " hack" + (hackDescriptionList.size() == 1 ? "" : "s" ) + " in " + replayFile.getAbsolutePath() + ":" );
-							final Set< String > hackersOfReplaySet = new HashSet< String >();
-							for ( final HackDescription hackDescription : hackDescriptionList ) {
-								logMessage( "\t" + hackDescription.description, false );
-								
-								if ( !hackersOfReplaySet.contains( hackDescription.playerName ) ) {
-									// Only count once a player per replay in the overall statistics
-									hackersOfReplaySet.add( hackDescription.playerName );
-									IntWrapper playerHackerRepsCount = playerHackerRepsCountMap.get( hackDescription.playerName );
-									if ( playerHackerRepsCount == null )
-										playerHackerRepsCountMap.put( hackDescription.playerName, playerHackerRepsCount = new IntWrapper() );
-									playerHackerRepsCount.value++;
-								}
-							}
-							if ( flagHackerRepsCheckBox.isSelected() ) {
-								final String replayName = replayFile.getName().substring( 0, replayFile.getName().length() - REPLAY_FILE_EXTENSION.length() );
-								if ( !replayName.endsWith( HACKER_REPS_POSTFIX ) )
-									replayFile.renameTo( new File( replayFile.getParent(), replayName + HACKER_REPS_POSTFIX + REPLAY_FILE_EXTENSION ) );
-							}
+				try {
+					logMessage( "", false ); // Prints an empty line
+					logMessage( "Counting replays..." );
+					
+					chooseReplayFiles( files );
+					
+					if ( requestedToStop )
+						return;
+					
+					final long startTimeNanons = System.nanoTime();
+					
+					final String scanningMessage = "Scanning " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" );
+					logMessage( scanningMessage + "..." );
+					
+					int hackerRepsCount  = 0;
+					int skippedRepsCount = 0;
+					
+					final Map< String, IntWrapper > playerHackerRepsCountMap = new HashMap< String, IntWrapper >(); // We count the number of replays every hacker was caguht in
+					
+					for ( final File replayFile : replayFileList ) {
+						if ( requestedToStop )
+							return;
+						
+						final List< HackDescription > hackDescriptionList = Utils.scanReplayFile( replayFile );
+						if ( hackDescriptionList == null ) {
+							skippedRepsCount++;
+							logMessage( "Could not scan " + replayFile.getAbsolutePath() + "!" );
 						}
 						else
-							logMessage( "Found no hacks in " + replayFile.getAbsolutePath() + "." );
-				}
-				
-				final long endTimeNanons = System.nanoTime();
-				logMessage( scanningMessage + " done in " + Utils.formatNanoTimeAmount( endTimeNanons - startTimeNanons ) );
-				logMessage( "\tFound " + hackerRepsCount + " hacker replay" + ( hackerRepsCount == 1 ? "" : "s" ) + ".", false );
-				logMessage( "\tSkipped " + skippedRepsCount + " replay" + ( hackerRepsCount == 1 ? "" : "s" ) + ".", false );
-				if ( !playerHackerRepsCountMap.isEmpty() ) {
-					final StringBuilder hackersBuilder = new StringBuilder( "\tThe following player" + ( playerHackerRepsCountMap.size() == 1 ? " was" : "s were" ) + " found hacking: " );
-					boolean firstHacker = true;
-					for ( final Entry< String, IntWrapper > playerHackerRepsCount : playerHackerRepsCountMap.entrySet() ) {
-						if ( firstHacker )
-							firstHacker = false;
-						else
-							hackersBuilder.append( ", " );
-						hackersBuilder.append( playerHackerRepsCount.getKey() );
-						if ( playerHackerRepsCount.getValue().value > 1 )
-							hackersBuilder.append( " (x" ).append( playerHackerRepsCount.getValue().value ).append( ')' );
+							if ( !hackDescriptionList.isEmpty() ) {
+								hackerRepsCount++;
+								logMessage( "Found " + hackDescriptionList.size() + " hack" + (hackDescriptionList.size() == 1 ? "" : "s" ) + " in " + replayFile.getAbsolutePath() + ":" );
+								final Set< String > hackersOfReplaySet = new HashSet< String >();
+								for ( final HackDescription hackDescription : hackDescriptionList ) {
+									logMessage( "\t" + hackDescription.description, false );
+									
+									if ( !hackersOfReplaySet.contains( hackDescription.playerName ) ) {
+										// Only count a player once per replay in the overall statistics
+										hackersOfReplaySet.add( hackDescription.playerName );
+										IntWrapper playerHackerRepsCount = playerHackerRepsCountMap.get( hackDescription.playerName );
+										if ( playerHackerRepsCount == null )
+											playerHackerRepsCountMap.put( hackDescription.playerName, playerHackerRepsCount = new IntWrapper() );
+										playerHackerRepsCount.value++;
+									}
+								}
+								if ( flagHackerRepsCheckBox.isSelected() ) {
+									final String replayName = replayFile.getName().substring( 0, replayFile.getName().length() - REPLAY_FILE_EXTENSION.length() );
+									if ( !replayName.endsWith( HACKER_REPS_POSTFIX ) )
+										replayFile.renameTo( new File( replayFile.getParent(), replayName + HACKER_REPS_POSTFIX + REPLAY_FILE_EXTENSION ) );
+								}
+							}
+							else
+								logMessage( "Found no hacks in " + replayFile.getAbsolutePath() + "." );
 					}
-					logMessage( hackersBuilder.toString(), false );
+					
+					final long endTimeNanons = System.nanoTime();
+					logMessage( scanningMessage + " done in " + Utils.formatNanoTimeAmount( endTimeNanons - startTimeNanons ) );
+					logMessage( "\tFound " + hackerRepsCount + " hacker replay" + ( hackerRepsCount == 1 ? "" : "s" ) + ".", false );
+					logMessage( "\tSkipped " + skippedRepsCount + " replay" + ( hackerRepsCount == 1 ? "" : "s" ) + ".", false );
+					if ( !playerHackerRepsCountMap.isEmpty() ) {
+						final StringBuilder hackersBuilder = new StringBuilder( "\tThe following player" + ( playerHackerRepsCountMap.size() == 1 ? " was" : "s were" ) + " found hacking: " );
+						boolean firstHacker = true;
+						for ( final Entry< String, IntWrapper > playerHackerRepsCount : playerHackerRepsCountMap.entrySet() ) {
+							if ( firstHacker )
+								firstHacker = false;
+							else
+								hackersBuilder.append( ", " );
+							hackersBuilder.append( playerHackerRepsCount.getKey() );
+							if ( playerHackerRepsCount.getValue().value > 1 )
+								hackersBuilder.append( " (x" ).append( playerHackerRepsCount.getValue().value ).append( ')' );
+						}
+						logMessage( hackersBuilder.toString(), false );
+					}
 				}
-				
-				scanLastReplayButton       .setEnabled( true );
-				selectFilesAndFoldersButton.setEnabled( true );
+				finally {
+					if ( requestedToStop )
+						logMessage( "Scan was manually aborted!" );
+					stopScanButton             .setEnabled( false );
+					selectFilesAndFoldersButton.setEnabled( true  );
+					scanLastReplayButton       .setEnabled( true  );
+				}
 			}
 			
 			private final java.io.FileFilter IO_REPLAY_FILE_FILTER = new java.io.FileFilter() {
@@ -196,12 +227,15 @@ public class ManualScanTab extends LoggedTab {
 			 * @param files files and folders to be chosen from
 			 */
 			private void chooseReplayFiles( final File[] files ) {
-				for ( final File file : files )
+				for ( final File file : files ) {
+					if ( requestedToStop )
+						return;
 					if ( file.isDirectory() )
 						chooseReplayFiles( file.listFiles( IO_REPLAY_FILE_FILTER ) );
 					else
 						if ( IO_REPLAY_FILE_FILTER.accept( file ) )
 							replayFileList.add( file );
+				}
 			}
 			
 		}.start();
