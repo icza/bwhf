@@ -3,6 +3,7 @@ package hu.belicza.andras.bwhfagent.view;
 import hu.belicza.andras.bwhf.control.HackDescription;
 import hu.belicza.andras.bwhfagent.Consts;
 
+import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
@@ -105,6 +106,7 @@ public class AutoscanTab extends LoggedTab {
 		gridBagLayout.setConstraints( foundHacksWavFileTextField, constraints );
 		settingsPanel.add( foundHacksWavFileTextField );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		final JPanel panel = new JPanel( new BorderLayout() );
 		button = createFileChooserButton( foundHacksWavFileTextField, JFileChooser.FILES_ONLY, new FileFilter() {
 			@Override
 			public boolean accept( final File file ) {
@@ -115,13 +117,17 @@ public class AutoscanTab extends LoggedTab {
 				return "Wave audio files (*.wav)";
 			} 
 		} );
-		button.addActionListener( new ActionListener() {
-			public void actionPerformed(ActionEvent arg0) {
-				System.out.println( Utils.playWavFile( foundHacksWavFileTextField.getText() ) );
+		panel.add( button, BorderLayout.CENTER );
+		final JButton testButton = new JButton( "Play" );
+		testButton.setToolTipText( "Play the selected sound file" );
+		testButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				Utils.playWavFile( foundHacksWavFileTextField.getText() );
 			}
 		} );
-		gridBagLayout.setConstraints( button, constraints );
-		settingsPanel.add( button );
+		panel.add( testButton, BorderLayout.EAST );
+		gridBagLayout.setConstraints( panel, constraints );
+		settingsPanel.add( panel );
 		
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		gridBagLayout.setConstraints( bringToFrontCheckBox, constraints );
