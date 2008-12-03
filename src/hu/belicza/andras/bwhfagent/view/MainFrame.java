@@ -109,7 +109,7 @@ public class MainFrame extends JFrame {
 		northPanel.add( controlPanel, BorderLayout.NORTH );
 		northPanel.add( new JLabel( "Starcraft directory:" ), BorderLayout.WEST );
 		northPanel.add( starcraftFolderTextField, BorderLayout.CENTER );
-		northPanel.add( Utils.createFileChooserButton( this, starcraftFolderTextField, JFileChooser.DIRECTORIES_ONLY, null ), BorderLayout.EAST );
+		northPanel.add( Utils.createFileChooserButton( this, starcraftFolderTextField, JFileChooser.DIRECTORIES_ONLY, null, null ), BorderLayout.EAST );
 		getContentPane().add( Utils.wrapInPanel( northPanel ), BorderLayout.NORTH );
 		
 		final JTabbedPane tabbedPane = new JTabbedPane();

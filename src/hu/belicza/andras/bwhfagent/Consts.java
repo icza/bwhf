@@ -32,6 +32,10 @@ public class Consts {
 	public static final String LAST_REPLAY_FILE_NAME          = "maps/replays/LastReplay.rep";
 	/** Name of the Starcraft executable file.                         */
 	public static final String STARCRAFT_EXECUTABLE_FILE_NAME = "StarCraft.exe";
+	/** Name of directory containing sound samples.                    */
+	public static final String SOUNDS_DIRECTORY_NAME          = "sounds";
+	/** Name of directory containing utility programs.                 */
+	public static final String UTILS_DIRECTORY_NAME           = "utils";
 	
 	/** Replay converter utility to extract actions from a replay.     */
 	public static final String REPLAY_CONVERTER_EXECUTABLE_FILE;
@@ -39,7 +43,7 @@ public class Consts {
 		final String osName = System.getProperty( "os.name" );
 		
 		if ( osName != null && osName.startsWith( "Windows" ) )
-			REPLAY_CONVERTER_EXECUTABLE_FILE = "utils/repextractor.exe";
+			REPLAY_CONVERTER_EXECUTABLE_FILE = UTILS_DIRECTORY_NAME + "/repextractor.exe";
 		else
 			REPLAY_CONVERTER_EXECUTABLE_FILE = null;
 	}
@@ -83,7 +87,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SAVE_ALL_REPS                 , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_REPS_DESTINATION          , "c:/replays/allreps" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAY_SOUND                    , "true" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FOUND_HACKS_WAV_FILE          , "sounds/falling.wav" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FOUND_HACKS_WAV_FILE          , SOUNDS_DIRECTORY_NAME + "/falling.wav" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_BRING_TO_FRONT                , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FLAG_HACKER_REPS              , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHECK_UPDATES_ON_STARTUP      , "true" );

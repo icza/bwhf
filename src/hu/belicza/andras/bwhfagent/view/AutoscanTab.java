@@ -86,7 +86,7 @@ public class AutoscanTab extends LoggedTab {
 		gridBagLayout.setConstraints( hackerRepsDestinationTextField, constraints );
 		settingsPanel.add( hackerRepsDestinationTextField );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		button = createFileChooserButton( hackerRepsDestinationTextField, JFileChooser.DIRECTORIES_ONLY, null );
+		button = createFileChooserButton( hackerRepsDestinationTextField, JFileChooser.DIRECTORIES_ONLY, null, null );
 		gridBagLayout.setConstraints( button, constraints );
 		settingsPanel.add( button );
 		
@@ -96,7 +96,7 @@ public class AutoscanTab extends LoggedTab {
 		gridBagLayout.setConstraints( allRepsDestinationTextField, constraints );
 		settingsPanel.add( allRepsDestinationTextField );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		button = createFileChooserButton( allRepsDestinationTextField, JFileChooser.DIRECTORIES_ONLY, null );
+		button = createFileChooserButton( allRepsDestinationTextField, JFileChooser.DIRECTORIES_ONLY, null, null );
 		gridBagLayout.setConstraints( button, constraints );
 		settingsPanel.add( button );
 		
@@ -116,6 +116,13 @@ public class AutoscanTab extends LoggedTab {
 			public String getDescription() {
 				return "Wave audio files (*.wav)";
 			} 
+		}, new Runnable() {
+			public void run() {
+				// If one of our sound file was selected, we replace its path to be relative so it will work if the product is copied to another directory
+				final File selectedFile = new File( foundHacksWavFileTextField.getText() );
+				if ( selectedFile.getAbsolutePath().equals( new File( Consts.SOUNDS_DIRECTORY_NAME + "/" + selectedFile.getName() ).getAbsolutePath() ) )
+					foundHacksWavFileTextField.setText( Consts.SOUNDS_DIRECTORY_NAME + "/" + selectedFile.getName() );
+			}
 		} );
 		panel.add( button, BorderLayout.CENTER );
 		final JButton testButton = new JButton( "Play" );
@@ -141,10 +148,10 @@ public class AutoscanTab extends LoggedTab {
 	}
 	
 	/**
-	 * Calls {@link Utils#createFileChooserButton(java.awt.Component, JTextField, int, FileFilter)} with the scroll pane of the tab.
+	 * Calls {@link Utils#createFileChooserButton(java.awt.Component, JTextField, int, FileFilter, Runnable)} with the scroll pane of the tab.
 	 */
-	private JButton createFileChooserButton( final JTextField targetTextField, final int fileSelectionMode, final FileFilter choosableFileFilter ) {
-		return Utils.createFileChooserButton( getScrollPane(), targetTextField, fileSelectionMode, choosableFileFilter );
+	private JButton createFileChooserButton( final JTextField targetTextField, final int fileSelectionMode, final FileFilter choosableFileFilter, final Runnable taskOnApprove ) {
+		return Utils.createFileChooserButton( getScrollPane(), targetTextField, fileSelectionMode, choosableFileFilter, taskOnApprove );
 	}
 	
 	/**
