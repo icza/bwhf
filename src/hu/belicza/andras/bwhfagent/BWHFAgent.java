@@ -5,7 +5,6 @@ import hu.belicza.andras.bwhfagent.view.Utils;
 
 import javax.swing.JFrame;
 import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
 /**
  * The main class of BWHFAgent.
