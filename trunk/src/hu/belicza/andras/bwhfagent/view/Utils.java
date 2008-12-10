@@ -294,4 +294,14 @@ public class Utils {
 		}
 	}
 	
+	/**
+	 * Checks an authorization key.
+	 * @param key key to be checked
+	 * @return true if the key is valid; false if key is invalid; or null if check failed
+	 */
+	public static Boolean checkAuthorizationKey( final String key ) {
+		// TODO: implement it
+		return false;
+	}
+	
 }
