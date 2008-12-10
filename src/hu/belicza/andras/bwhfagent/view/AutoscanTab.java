@@ -57,14 +57,16 @@ public class AutoscanTab extends LoggedTab {
 	/** Checkbox to enable/disable bringing main frame to front if found hacks. */
 	private final JCheckBox  bringToFrontCheckBox           = new JCheckBox( "Bring agent to front if found hacks", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_BRING_TO_FRONT ) ) );
 	/** Checkbox to enable/disable reporting hackers.                           */
-	private final JCheckBox  reportHackersCheckBox          = new JCheckBox( "report hackers to a central hacker database with Battle.net gateway:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPORT_HACKERS ) ) );
+	private final JCheckBox  reportHackersCheckBox          = new JCheckBox( "Report hackers to a central hacker database with Battle.net gateway:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPORT_HACKERS ) ) );
 	/** Combobox to select the gateway of the user.                             */
 	private final JComboBox gatewayComboBox                 = new JComboBox( Consts.GATEWAYS );
 	
-	/** Authorization key to report hackers. */
-	private String  authorizationKey = Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTHORIZATION_KEY );
-	/** Result of the last key check.        */
-	private Boolean lastKeyCheckResult;
+	/** Authorization key to report hackers.      */
+	private String           authorizationKey = Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTHORIZATION_KEY );
+	/** Result of the last key check.             */
+	private volatile Boolean lastKeyCheckResult;
+	/** Tells whether a key check is in progress. */
+	private volatile boolean keyCheckInProgress;
 	
 	/**
 	 * Creates a new AutoscanTab.
@@ -161,11 +163,25 @@ public class AutoscanTab extends LoggedTab {
 		reportHackersCheckBox.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				if ( reportHackersCheckBox.isSelected() ) {
-					checkKeyButton.doClick();
-					if ( lastKeyCheckResult == null || !lastKeyCheckResult ) {
-						reportHackersCheckBox.setSelected( false );
-						JOptionPane.showMessageDialog( getScrollPane(), "You need a valid authorization key to report hackers,\n" + ( lastKeyCheckResult == null ? "failed to check the authorization key!" : "the supplied key is invalid!"), "Error", JOptionPane.ERROR_MESSAGE );
-					}
+					reportHackersCheckBox.setEnabled( false );
+					reportHackersCheckBox.setSelected( false );
+					new Thread() {
+						public void run() {
+							checkKeyButton.doClick();
+							
+							while ( keyCheckInProgress )
+								try { Thread.sleep( 10l ); } catch ( final InterruptedException ie ) {}
+							
+							if ( lastKeyCheckResult == null || !lastKeyCheckResult ) {
+								reportHackersCheckBox.setSelected( false );
+								JOptionPane.showMessageDialog( getScrollPane(), "You need a valid authorization key to report hackers!\n" + ( lastKeyCheckResult == null ? "Failed to check the authorization key." : "The supplied authorization key is invalid."), "Error", JOptionPane.ERROR_MESSAGE );
+							}
+							else
+								reportHackersCheckBox.setSelected( true );
+							
+							reportHackersCheckBox.setEnabled( true );
+						}
+					}.start();
 				}
 			}
 		} );
@@ -188,11 +204,23 @@ public class AutoscanTab extends LoggedTab {
 		panel.add( button, BorderLayout.CENTER );
 		checkKeyButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				lastKeyCheckResult = Utils.checkAuthorizationKey( authorizationKey );
-				( (JButton) event.getSource() ).setText( CHECK_KEY_BUTTON_TEXT + ( lastKeyCheckResult == null ? " (check failed!)" : ( lastKeyCheckResult ? " (valid)" : " (invalid)" ) ) );
+				if ( keyCheckInProgress ) // If a key check is already in progress, we have nothing to do.
+					return;
+				
+				keyCheckInProgress = true;
+				checkKeyButton.setEnabled( false );
+				checkKeyButton.setText( "Checking..." );
+				new Thread() {
+					public void run() {
+						lastKeyCheckResult = Utils.checkAuthorizationKey( authorizationKey );
+						( (JButton) event.getSource() ).setText( CHECK_KEY_BUTTON_TEXT + ( lastKeyCheckResult == null ? " (check failed!)" : ( lastKeyCheckResult ? " (valid)" : " (invalid)" ) ) );
+						checkKeyButton.setEnabled( true );
+						keyCheckInProgress = false;
+					}
+				}.start();
 			}
 		} );
-		checkKeyButton.doClick();
+		//checkKeyButton.doClick();
 		panel.add( checkKeyButton, BorderLayout.EAST );
 		gridBagLayout.setConstraints( panel, constraints );
 		settingsPanel.add( panel );
