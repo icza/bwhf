@@ -17,7 +17,9 @@ import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
@@ -35,6 +37,8 @@ public class AutoscanTab extends LoggedTab {
 	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS = 2000l;
 	/** Date format to create timestamps for copied file names. */
 	private static final DateFormat DATE_FORMAT                       = new SimpleDateFormat( "yyyy-MM-dd HH-mm-ss" );
+	/** Text of the check key button.                           */
+	private static final String CHECK_KEY_BUTTON_TEXT                 = "Check key";
 	
 	/** Checkbox to enable/disable the autoscan.                                */
 	private final JCheckBox  autoscanEnabledCheckBox        = new JCheckBox( "Autoscan enabled", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTOSCAN_ENABLED ) ) );
@@ -52,12 +56,23 @@ public class AutoscanTab extends LoggedTab {
 	private final JTextField foundHacksWavFileTextField     = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_FOUND_HACKS_WAV_FILE ), 30 );
 	/** Checkbox to enable/disable bringing main frame to front if found hacks. */
 	private final JCheckBox  bringToFrontCheckBox           = new JCheckBox( "Bring agent to front if found hacks", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_BRING_TO_FRONT ) ) );
+	/** Checkbox to enable/disable reporting hackers.                           */
+	private final JCheckBox  reportHackersCheckBox          = new JCheckBox( "report hackers to BWHF database with Battle.net gateway:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPORT_HACKERS ) ) );
+	/** Combobox to select the gateway of the user.                             */
+	private final JComboBox gatewayComboBox                 = new JComboBox( Consts.GATEWAYS );
+	
+	/** Authorization key to report hackers. */
+	private String  authorizationKey = Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTHORIZATION_KEY );
+	/** Result of the last key check.        */
+	private Boolean lastKeyCheckResult;
 	
 	/**
 	 * Creates a new AutoscanTab.
 	 */
 	public AutoscanTab() {
 		super( "Autoscan", LOG_FILE_NAME );
+		
+		gatewayComboBox.setSelectedItem( Utils.settingsProperties.getProperty( Consts.PROPERTY_GATEWAY ) );
 		
 		buildGUI();
 		startAutoscanner();
@@ -106,7 +121,7 @@ public class AutoscanTab extends LoggedTab {
 		gridBagLayout.setConstraints( foundHacksWavFileTextField, constraints );
 		settingsPanel.add( foundHacksWavFileTextField );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		final JPanel panel = new JPanel( new BorderLayout() );
+		JPanel panel = new JPanel( new BorderLayout() );
 		button = createFileChooserButton( foundHacksWavFileTextField, JFileChooser.FILES_ONLY, new FileFilter() {
 			@Override
 			public boolean accept( final File file ) {
@@ -140,8 +155,50 @@ public class AutoscanTab extends LoggedTab {
 		gridBagLayout.setConstraints( bringToFrontCheckBox, constraints );
 		settingsPanel.add( bringToFrontCheckBox );
 		
+		constraints.gridwidth = 2;
+		final JButton checkKeyButton = new JButton( CHECK_KEY_BUTTON_TEXT );
+		panel = new JPanel( new BorderLayout() );
+		reportHackersCheckBox.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				if ( reportHackersCheckBox.isSelected() ) {
+					checkKeyButton.doClick();
+					if ( lastKeyCheckResult == null || !lastKeyCheckResult ) {
+						reportHackersCheckBox.setSelected( false );
+						JOptionPane.showMessageDialog( getScrollPane(), "You need a valid authorization key to report hackers,\n" + ( lastKeyCheckResult == null ? "failed to check the authorization key!" : "the supplied key is invalid!"), "Error", JOptionPane.ERROR_MESSAGE );
+					}
+				}
+			}
+		} );
+		panel.add( reportHackersCheckBox, BorderLayout.WEST );
+		panel.add( gatewayComboBox, BorderLayout.CENTER );
+		gridBagLayout.setConstraints( panel, constraints );
+		settingsPanel.add( panel );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		panel = new JPanel( new BorderLayout() );
+		button = new JButton( "Change key" );
+		button.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				final Object newAuthorizationKeyObject = JOptionPane.showInputDialog( getScrollPane(), "Enter your authorization key:", "Changing key", JOptionPane.QUESTION_MESSAGE, null, null, authorizationKey );
+				if ( newAuthorizationKeyObject != null ) {
+					authorizationKey = (String) newAuthorizationKeyObject;
+					checkKeyButton.doClick();
+				}
+			}
+		} );
+		panel.add( button, BorderLayout.CENTER );
+		checkKeyButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				lastKeyCheckResult = Utils.checkAuthorizationKey( authorizationKey );
+				( (JButton) event.getSource() ).setText( CHECK_KEY_BUTTON_TEXT + ( lastKeyCheckResult == null ? " (check failed!)" : ( lastKeyCheckResult ? " (valid)" : " (invalid)" ) ) );
+			}
+		} );
+		checkKeyButton.doClick();
+		panel.add( checkKeyButton, BorderLayout.EAST );
+		gridBagLayout.setConstraints( panel, constraints );
+		settingsPanel.add( panel );
+		
 		wrapperPanel = Utils.wrapInPanel( settingsPanel );
-		wrapperPanel.setBorder( BorderFactory.createTitledBorder( "Settings" ) );
+		settingsPanel.setBorder( BorderFactory.createTitledBorder( "Settings" ) );
 		contentBox.add( wrapperPanel );
 		
 		super.buildGUI();
@@ -227,6 +284,9 @@ public class AutoscanTab extends LoggedTab {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_PLAY_SOUND             , Boolean.toString( playSoundCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_FOUND_HACKS_WAV_FILE   , foundHacksWavFileTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_BRING_TO_FRONT         , Boolean.toString( bringToFrontCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_REPORT_HACKERS         , Boolean.toString( reportHackersCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_GATEWAY                , (String) gatewayComboBox.getSelectedItem() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTHORIZATION_KEY      , authorizationKey );
 	}
 	
 }
