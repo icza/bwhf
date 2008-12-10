@@ -57,7 +57,7 @@ public class AutoscanTab extends LoggedTab {
 	/** Checkbox to enable/disable bringing main frame to front if found hacks. */
 	private final JCheckBox  bringToFrontCheckBox           = new JCheckBox( "Bring agent to front if found hacks", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_BRING_TO_FRONT ) ) );
 	/** Checkbox to enable/disable reporting hackers.                           */
-	private final JCheckBox  reportHackersCheckBox          = new JCheckBox( "report hackers to BWHF database with Battle.net gateway:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPORT_HACKERS ) ) );
+	private final JCheckBox  reportHackersCheckBox          = new JCheckBox( "report hackers to a central hacker database with Battle.net gateway:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPORT_HACKERS ) ) );
 	/** Combobox to select the gateway of the user.                             */
 	private final JComboBox gatewayComboBox                 = new JComboBox( Consts.GATEWAYS );
 	
