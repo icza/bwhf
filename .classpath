@@ -4,5 +4,6 @@
 	<classpathentry kind="src" output="hackerdb/webapp-root/WEB-INF/classes" path="hackerdb/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="var" path="TOMCAT_HOME/lib/servlet-api.jar"/>
+	<classpathentry kind="lib" path="hackerdb/webapp-root/WEB-INF/lib/commons-dbcp-1.2.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

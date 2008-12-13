@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tomcatProjectProperties>
-    <rootDir>/server/webapp-root</rootDir>
+    <rootDir>/hackerdb/webapp-root</rootDir>
     <exportSource>false</exportSource>
     <reloadable>true</reloadable>
     <redirectLogger>false</redirectLogger>
     <updateXml>true</updateXml>
     <warLocation></warLocation>
     <extraInfo></extraInfo>
-    <webPath>bwhf</webPath>
+    <webPath>hackers</webPath>
 </tomcatProjectProperties>
