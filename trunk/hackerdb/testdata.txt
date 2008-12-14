@@ -1,0 +1,10 @@
+
+Database test data:
+INSERT INTO person (name) VALUES ('whoami');
+INSERT INTO key (value,person) VALUES ('testkey',0);
+
+Key check URL:
+http://localhost:8080/hackers/?op=chk&key=testkey
+
+Test report URL:
+http://localhost:8080/hackers/?op=rep&key=testkey&gat=0&pln0=utfunny&pln1=plasmer

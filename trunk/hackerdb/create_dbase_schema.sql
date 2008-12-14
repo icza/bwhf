@@ -20,6 +20,7 @@ CREATE CACHED TABLE key (
     person INT NOT NULL,
     comment VARCHAR,
     version TIMESTAMP DEFAULT NOW,
+	UNIQUE (value),
     FOREIGN KEY (person) REFERENCES person(id) ON DELETE CASCADE
 );
 

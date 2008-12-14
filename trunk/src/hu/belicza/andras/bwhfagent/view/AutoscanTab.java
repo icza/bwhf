@@ -2,6 +2,7 @@ package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhf.control.HackDescription;
 import hu.belicza.andras.bwhfagent.Consts;
+import hu.belicza.andras.hackerdb.ApiConsts;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
@@ -59,7 +60,7 @@ public class AutoscanTab extends LoggedTab {
 	/** Checkbox to enable/disable reporting hackers.                           */
 	private final JCheckBox  reportHackersCheckBox          = new JCheckBox( "Report hackers to a central hacker database with Battle.net gateway:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPORT_HACKERS ) ) );
 	/** Combobox to select the gateway of the user.                             */
-	private final JComboBox gatewayComboBox                 = new JComboBox( Consts.GATEWAYS );
+	private final JComboBox gatewayComboBox                 = new JComboBox( ApiConsts.GATEWAYS );
 	
 	/** Authorization key to report hackers.      */
 	private String           authorizationKey = Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTHORIZATION_KEY );
@@ -74,7 +75,7 @@ public class AutoscanTab extends LoggedTab {
 	public AutoscanTab() {
 		super( "Autoscan", LOG_FILE_NAME );
 		
-		gatewayComboBox.setSelectedItem( Utils.settingsProperties.getProperty( Consts.PROPERTY_GATEWAY ) );
+		gatewayComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_GATEWAY ) ) );
 		
 		buildGUI();
 		startAutoscanner();
@@ -313,7 +314,7 @@ public class AutoscanTab extends LoggedTab {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_FOUND_HACKS_WAV_FILE   , foundHacksWavFileTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_BRING_TO_FRONT         , Boolean.toString( bringToFrontCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_REPORT_HACKERS         , Boolean.toString( reportHackersCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_GATEWAY                , (String) gatewayComboBox.getSelectedItem() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_GATEWAY                , Integer.toString( gatewayComboBox.getSelectedIndex() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTHORIZATION_KEY      , authorizationKey );
 	}
 	
