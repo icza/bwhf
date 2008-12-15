@@ -8,3 +8,4 @@ http://localhost:8080/hackers/?op=chk&key=testkey
 
 Test report URL:
 http://localhost:8080/hackers/?op=rep&key=testkey&gat=0&pln0=utfunny&pln1=plasmer
+http://localhost:8080/hackers/?op=rep&key=testkey&gat=1&pln0=somehacker
