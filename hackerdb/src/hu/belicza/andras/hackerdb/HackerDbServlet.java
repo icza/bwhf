@@ -179,7 +179,7 @@ public class HackerDbServlet extends HttpServlet {
 			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
 				outputWriter.println( ".gateway" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
 			outputWriter.println( ".gatewayUn {" + UNKNOWN_GATEWAY_STYLE + "}" );
-			outputWriter.println( "</style></head><body><center>" );
+			outputWriter.println( "</style></head><body style='background:#f7f7f7'><center>" );
 			
 			// Header section
 			outputWriter.println( "<h2>BWHF Hacker data base</h2>" );
