@@ -233,13 +233,13 @@ public class HackerDbServlet extends HttpServlet {
 			// Filters
 			outputWriter.println( "<b>Filters</b> <button type=button onclick=\"javascript:document.getElementsByName('" + FILTER_NAME_NAME + "')[0].value='';document.getElementsByName('" + FILTER_NAME_MIN_REPORT_COUNT + "')[0].value='" + FILTER_DEFAULT_MIN_REPORT_COUNT + "';for(var i=0;i<" + GATEWAYS.length + ";i++) document.getElementsByName('" + FILTER_NAME_GATEWAY + "'+i)[0].checked=true;\">Reset filters</button><table border=1>" );
 			outputWriter.println( "<tr><th>Name<th>Gateway<th>Min. report count" );
-			outputWriter.println( "<tr><td><input name='" + FILTER_NAME_NAME + "' type=text value='" + filtersWrapper.name + "'><td>" );
+			outputWriter.println( "<tr><td><input name='" + FILTER_NAME_NAME + "' type=text value='" + filtersWrapper.name + "' size=13><td>" );
 			
 			// Render gateways here
 			outputWriter.println( "<input name='" + FILTER_NAME_NO_ALL_GATEWAYS + "' type=hidden value='no'>" ); // First we select all gateways, on subsequent calls we only want to select selected gateways
 			for ( int i = 0; i < GATEWAYS.length; i++ )
 				outputWriter.println( "<input name='" + FILTER_NAME_GATEWAY + i + "' type=checkbox " + ( filtersWrapper.gateways[ i ] ? "checked" : "" ) + ">" + GATEWAYS[ i ] );
-			outputWriter.println( "<td><input name='" + FILTER_NAME_MIN_REPORT_COUNT +"' type=text value='" + filtersWrapper.minReportCount + "'>" );
+			outputWriter.println( "<td><input name='" + FILTER_NAME_MIN_REPORT_COUNT +"' type=text value='" + filtersWrapper.minReportCount + "' size=14>" );
 			outputWriter.println( "</table>" );
 			outputWriter.println( "<p><input type=submit value='Go / Refresh'></p>" );
 			outputWriter.println( "<p><b>Hackers matching the filters: " + matchingRecordsCount + "</b></p>" );
@@ -308,9 +308,9 @@ public class HackerDbServlet extends HttpServlet {
 		final StringBuilder scriptBuilder = new StringBuilder( "javascript:" );
 		
 		if ( !filtersWrapper.sortByValue.equals( headerName ) )
-			scriptBuilder.append( "document.getElementsByName('" ).append( FILTER_NAME_SORT_BY ).append( "')[ 0 ].value='" ).append( headerName ).append( "';" );
+			scriptBuilder.append( "document.getElementsByName('" ).append( FILTER_NAME_SORT_BY ).append( "')[0].value='" ).append( headerName ).append( "';" );
 		
-		scriptBuilder.append( "document.getElementsByName('" ).append( FILTER_NAME_ASCENDANT_SORTING ).append( "')[ 0 ].value=" )
+		scriptBuilder.append( "document.getElementsByName('" ).append( FILTER_NAME_ASCENDANT_SORTING ).append( "')[0].value=" )
 			.append( filtersWrapper.sortByValue.equals( headerName ) ? !filtersWrapper.ascendantSorting : FILTER_DEFAULT_ASCENDANT_SORTING_MAP.get( headerName ) ).append( ';' );
 		
 		scriptBuilder.append( "document.getElementById('" + FORM_ID + "').submit();" );
