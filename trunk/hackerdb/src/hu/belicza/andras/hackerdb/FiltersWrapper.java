@@ -11,8 +11,9 @@ public class FiltersWrapper {
 	public boolean[] gateways;
 	public int       minReportCount;
 	public String    sortByValue;
-	public boolean   descendantSorting;
+	public boolean   ascendantSorting;
 	public int       page;
 	public int       pageSize;
+	public String    stepDirection;
 	
 }
