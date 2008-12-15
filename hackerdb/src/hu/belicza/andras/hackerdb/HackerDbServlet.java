@@ -1,24 +1,6 @@
 package hu.belicza.andras.hackerdb;
 
-import static hu.belicza.andras.hackerdb.ApiConsts.FILTER_NAME_DESCENDANT_SORTING;
-import static hu.belicza.andras.hackerdb.ApiConsts.FILTER_NAME_GATEWAY;
-import static hu.belicza.andras.hackerdb.ApiConsts.FILTER_NAME_MIN_REPORT_COUNT;
-import static hu.belicza.andras.hackerdb.ApiConsts.FILTER_NAME_NAME;
-import static hu.belicza.andras.hackerdb.ApiConsts.FILTER_NAME_NO_ALL_GATEWAYS;
-import static hu.belicza.andras.hackerdb.ApiConsts.FILTER_NAME_PAGE;
-import static hu.belicza.andras.hackerdb.ApiConsts.FILTER_NAME_PAGE_SIZE;
-import static hu.belicza.andras.hackerdb.ApiConsts.FILTER_NAME_SORT_BY;
-import static hu.belicza.andras.hackerdb.ApiConsts.GATEWAYS;
-import static hu.belicza.andras.hackerdb.ApiConsts.OPERATION_CHECK;
-import static hu.belicza.andras.hackerdb.ApiConsts.OPERATION_LIST;
-import static hu.belicza.andras.hackerdb.ApiConsts.OPERATION_REPORT;
-import static hu.belicza.andras.hackerdb.ApiConsts.REQUEST_PARAMETER_NAME_GATEWAY;
-import static hu.belicza.andras.hackerdb.ApiConsts.REQUEST_PARAMETER_NAME_KEY;
-import static hu.belicza.andras.hackerdb.ApiConsts.REQUEST_PARAMETER_NAME_OPERATION;
-import static hu.belicza.andras.hackerdb.ApiConsts.REQUEST_PARAMETER_NAME_PLAYER;
-import static hu.belicza.andras.hackerdb.ApiConsts.SORT_BY_VALUE_GATEWAY;
-import static hu.belicza.andras.hackerdb.ApiConsts.SORT_BY_VALUE_NAME;
-import static hu.belicza.andras.hackerdb.ApiConsts.SORT_BY_VALUE_REPORT_COUNT;
+import static hu.belicza.andras.hackerdb.ApiConsts.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -27,6 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -50,10 +34,31 @@ public class HackerDbServlet extends HttpServlet {
 	/** URL of the hacker data base. */
 	private static final String DATABASE_URL = "jdbc:hsqldb:hsql://localhost/hackers";
 	
+	/** Max players in a report. */
+	private static final int MAX_PLAYERS_IN_REPORT = 8;
+	
 	/** Styles used for different gateways in the hacker list table. */
-	private final String[] GATEWAY_STYLES        = new String[] { "background:#ff2020;color:#000000;", "background:#00ffff;color:#000000;", "background:#00ff00;color:#000000;", "background:#ffff00;color:#000000;", "background:#000000;color:#ffffff;", "background:#ffffff;color:#000000;" };
-	/** Style for unknown gatway.                                    */
-	private final String   UNKNOWN_GATEWAY_STYLE = "background:#f080f0;color:#000000;";
+	private static final String[] GATEWAY_STYLES        = new String[] { "background:#ff2020;color:#000000;", "background:#00ffff;color:#000000;", "background:#00ff00;color:#000000;", "background:#ffff00;color:#000000;", "background:#000000;color:#ffffff;", "background:#ffffff;color:#000000;" };
+	/** Style for unknown gateway.                                   */
+	private static final String   UNKNOWN_GATEWAY_STYLE = "background:#f080f0;color:#000000;";
+	
+	/** Id to be used in the form. */
+	private static final String FORM_ID = "fid";
+	
+	/** Default value of the min report count filter. */
+	private static final int FILTER_DEFAULT_MIN_REPORT_COUNT = 1;
+	/** Default value of the page filter.             */
+	private static final int FILTER_DEFAULT_PAGE             = 1;
+	/** Default value of the page size filter.        */
+	private static final int FILTER_DEFAULT_PAGE_SIZE        = 20;
+	
+	/** Default value of ascendant sorting for the different sorting by values. */
+	private static final Map< String, Boolean > FILTER_DEFAULT_ASCENDANT_SORTING_MAP = new HashMap< String, Boolean >();
+	static {
+		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_NAME        , true  );
+		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_GATEWAY     , true  );
+		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_REPORT_COUNT, false );
+	}
 	
 	/** Data source to provide pooled connections to the hacker database. */
 	private static final BasicDataSource dataSource = new BasicDataSource();
@@ -84,16 +89,17 @@ public class HackerDbServlet extends HttpServlet {
 				final FiltersWrapper filtersWrapper = new FiltersWrapper();
 				// Parse parameters
 				filtersWrapper.name              = getStringParamValue( request, FILTER_NAME_NAME );
-				filtersWrapper.gateways           = new boolean[ GATEWAYS.length ];
+				filtersWrapper.gateways          = new boolean[ GATEWAYS.length ];
 				for ( int i = 0; i < filtersWrapper.gateways.length; i++ )
-					filtersWrapper.gateways[ i ]  = request.getParameter( FILTER_NAME_NO_ALL_GATEWAYS ) == null || request.getParameter( FILTER_NAME_GATEWAY + i ) != null;
-				filtersWrapper.minReportCount    = getIntParamValue( request, FILTER_NAME_MIN_REPORT_COUNT, 1 );
+					filtersWrapper.gateways[ i ] = request.getParameter( FILTER_NAME_NO_ALL_GATEWAYS ) == null || request.getParameter( FILTER_NAME_GATEWAY + i ) != null;
+				filtersWrapper.minReportCount    = getIntParamValue( request, FILTER_NAME_MIN_REPORT_COUNT, FILTER_DEFAULT_MIN_REPORT_COUNT );
 				filtersWrapper.sortByValue       = getStringParamValue( request, FILTER_NAME_SORT_BY );
 				if ( filtersWrapper.sortByValue.length() == 0 )
 					filtersWrapper.sortByValue   = SORT_BY_VALUE_NAME;
-				filtersWrapper.descendantSorting = request.getParameter( FILTER_NAME_DESCENDANT_SORTING ) != null ;
-				filtersWrapper.page              = getIntParamValue( request, FILTER_NAME_PAGE, 1 );
-				filtersWrapper.pageSize          = getIntParamValue( request, FILTER_NAME_PAGE_SIZE, 20 );
+				filtersWrapper.ascendantSorting  = request.getParameter( FILTER_NAME_ASCENDANT_SORTING ) == null ? FILTER_DEFAULT_ASCENDANT_SORTING_MAP.get( SORT_BY_VALUE_NAME ) : request.getParameter( FILTER_NAME_ASCENDANT_SORTING ).equalsIgnoreCase( "true" );
+				filtersWrapper.page              = getIntParamValue( request, FILTER_NAME_PAGE, FILTER_DEFAULT_PAGE );
+				filtersWrapper.pageSize          = getIntParamValue( request, FILTER_NAME_PAGE_SIZE, FILTER_DEFAULT_PAGE_SIZE );
+				filtersWrapper.stepDirection     = request.getParameter( FILTER_NAME_STEP_DIRECTION );
 				
 				serveHackerList( filtersWrapper, response );
 				
@@ -122,7 +128,7 @@ public class HackerDbServlet extends HttpServlet {
 				if ( gatewayIndex < 0 || gatewayIndex >= GATEWAYS.length )
 					throw new BadRequestException();
 				
-				final String[] playerNames = new String[ 8 ];
+				final String[] playerNames = new String[ MAX_PLAYERS_IN_REPORT ];
 				for ( int i = 0; i <= playerNames.length && ( playerNames[ i ] = request.getParameter( REQUEST_PARAMETER_NAME_PLAYER + i ) ) != null; i++ )
 					;
 				if ( playerNames[ 0 ] == null )
@@ -133,130 +139,6 @@ public class HackerDbServlet extends HttpServlet {
 		}
 		catch ( final BadRequestException bre ) {
 			sendBackErrorMessage( response );
-		}
-	}
-	
-	/**
-	 * Serves a part of the hacker list.
-	 * @param filtersWrapper filters wrapper holding the filter parameters
-	 * @param response       the http response
-	 */
-	private void serveHackerList( final FiltersWrapper filtersWrapper, final HttpServletResponse response ) {
-		setNoCache( response );
-		response.setContentType( "text/html" );
-		
-		Connection        connection = null;
-		PreparedStatement statement  = null;
-		ResultSet         resultSet  = null;
-		
-		PrintWriter outputWriter = null;
-		try {
-			
-			connection = dataSource.getConnection();
-			
-			if ( filtersWrapper.page < 1 )
-				filtersWrapper.page = 1;
-			if ( filtersWrapper.pageSize < 1 )
-				filtersWrapper.pageSize = 1;
-			
-			statement = buildHackersQueryStatement( filtersWrapper, true, connection );
-			resultSet = statement.executeQuery();
-			int matchingRecordsCount = 0;
-			if ( resultSet.next() )
-				matchingRecordsCount = resultSet.getInt( 1 );
-			else
-				throw new SQLException( "Could not count matching hackers." );
-			resultSet.close();
-			statement.close();
-			
-			final int pagesCount = ( (matchingRecordsCount-1) / filtersWrapper.pageSize ) + 1;
-			if ( filtersWrapper.page > pagesCount )
-				filtersWrapper.page = pagesCount;
-			
-			outputWriter = response.getWriter();
-			
-			outputWriter.println( "<html><head><title>BWHF Hacker data base</title><style>" );
-			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
-				outputWriter.println( ".gateway" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
-			outputWriter.println( ".gatewayUn {" + UNKNOWN_GATEWAY_STYLE + "}" );
-			outputWriter.println( "</style></head><body style='background:#f7f7f7'><center>" );
-			
-			// Header section
-			outputWriter.println( "<h2>BWHF Hacker data base</h2>" );
-			outputWriter.println( "<p align=right>Go to <a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></p>" );
-			
-			// Controls section
-			outputWriter.println( "<form action='/hackers' method='GET'>" );
-			
-			// Filters
-			outputWriter.println( "<b>Filters:</b><table border=1>" );
-			outputWriter.println( "<tr><th>Name<th>Gateway<th>Min. report count" );
-			outputWriter.println( "<tr><td><input name='" + FILTER_NAME_NAME + "' type=text value='" + filtersWrapper.name + "'><td>" );
-			
-			// Render gateways here
-			outputWriter.println( "<input type=hidden name='" + FILTER_NAME_NO_ALL_GATEWAYS + "' value='no'>" ); // First we select all gatways, on subsequent calls we only want to select selected gateways
-			for ( int i = 0; i < GATEWAYS.length; i++ )
-				outputWriter.println( "<input name='" + FILTER_NAME_GATEWAY + i + "' type=checkbox " + ( filtersWrapper.gateways[ i ] ? "checked" : "" ) + ">" + GATEWAYS[ i ] );
-			outputWriter.println( "<td><input name='" + FILTER_NAME_MIN_REPORT_COUNT +"' type=text value='" + filtersWrapper.minReportCount + "'>" );
-			outputWriter.println( "</table>" );
-			outputWriter.println( "<p><input type=submit value='Go / Refresh'></p>" );
-			outputWriter.println( "<p><b>Hackers matching the filters: " + matchingRecordsCount + "</b></p>" );
-			
-			// Sorting
-			outputWriter.println( "<p>Sort hackers by: <select name='" + FILTER_NAME_SORT_BY + "'>" );
-			outputWriter.println( "<option value='" + SORT_BY_VALUE_NAME + "' " + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME ) ? "selected" : "" ) + ">Name</value>" );
-			outputWriter.println( "<option value='" + SORT_BY_VALUE_GATEWAY + "' " + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_GATEWAY ) ? "selected" : "" ) + ">Gateway</value>" );
-			outputWriter.println( "<option value='" + SORT_BY_VALUE_REPORT_COUNT + "' " + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_REPORT_COUNT ) ? "selected" : "" ) + ">Report count</value>" );
-			outputWriter.println( "</select>" );
-			outputWriter.println( "<input name='" + FILTER_NAME_DESCENDANT_SORTING + "' type=checkbox " + ( filtersWrapper.descendantSorting ? "checked" : "" ) + ">Descendant sorting</p>" );
-			
-			// Pagination
-			outputWriter.println( "<input type=submit value='First' " + ( filtersWrapper.page <= 1 ? "disabled" : "" ) + ">" );
-			outputWriter.println( "<input type=submit value='Previous' " + ( filtersWrapper.page <= 1 ? "disabled" : "" ) + ">" );
-			outputWriter.println( "Page <input name='" + FILTER_NAME_PAGE + "' type=text value='" + filtersWrapper.page + "' size=1> out of <b>" + pagesCount + "</b>, page size:" );
-			outputWriter.println( "<input name='" + FILTER_NAME_PAGE_SIZE + "' type=text value='" + filtersWrapper.pageSize + "' size=1>" );
-			outputWriter.println( "<input type=submit value='Next' " + ( filtersWrapper.page >= pagesCount ? "disabled" : "" ) + ">" );
-			outputWriter.println( "<input type=submit value='Last' " + ( filtersWrapper.page >= pagesCount ? "disabled" : "" ) + ">" );
-			outputWriter.println( "</form>" );
-			
-			// Hackers table section
-			outputWriter.println( "<table border=1>" );
-			outputWriter.println( "<tr><th>#<th>Name" + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME ) ? ( filtersWrapper.descendantSorting ? " &darr;" : " &uarr;" ) : "" )
-					+ "<th>Gateway" + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_GATEWAY ) ? ( filtersWrapper.descendantSorting ? " &darr;" : " &uarr;" ) : "" )
-					+ "<th>Report count" + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_REPORT_COUNT ) ? ( filtersWrapper.descendantSorting ? " &darr;" : " &uarr;" ) : "" ) + "" );
-			if ( matchingRecordsCount > 0 ) {
-				int recordNumber = ( filtersWrapper.page - 1 )* filtersWrapper.pageSize;
-				statement = buildHackersQueryStatement( filtersWrapper, false, connection );
-				resultSet = statement.executeQuery();
-				while ( resultSet.next() ) {
-					final int gateway = resultSet.getInt( 2 );
-					outputWriter.println( "<tr class='gateway" + ( gateway < GATEWAY_STYLES.length ? gateway : "Un" ) + "'><td>" + (++recordNumber) + "<td>" + resultSet.getString( 1 ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td>" + resultSet.getInt( 3 ) );
-				}
-			}
-			outputWriter.println( "</table>" );
-			
-			// Footer section
-			outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008</i></p>" );
-			outputWriter.println( "</center></body></html>" );
-			
-			outputWriter.flush();
-		} catch ( final IOException ie ) {
-			ie.printStackTrace();
-		} catch ( final SQLException se ) {
-			se.printStackTrace();
-			if ( outputWriter != null )
-				outputWriter.println( "<p>Sorry, the server has encountered an error, we cannot fulfill your request!</p>" );
-		}
-		finally {
-			if ( resultSet != null )
-				try { resultSet.close(); } catch ( final SQLException se ) {}
-			if ( statement != null )
-				try { statement.close(); } catch ( final SQLException se ) {}
-			if ( connection != null )
-				try { connection.close(); } catch ( final SQLException se ) {}
-			
-			if ( outputWriter != null )
-				outputWriter.close();
 		}
 	}
 	
@@ -287,6 +169,153 @@ public class HackerDbServlet extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Serves a part of the hacker list.
+	 * @param filtersWrapper filters wrapper holding the filter parameters
+	 * @param response       the http response
+	 */
+	private void serveHackerList( final FiltersWrapper filtersWrapper, final HttpServletResponse response ) {
+		setNoCache( response );
+		response.setContentType( "text/html" );
+		
+		Connection        connection = null;
+		PreparedStatement statement  = null;
+		ResultSet         resultSet  = null;
+		
+		PrintWriter outputWriter = null;
+		try {
+			
+			connection = dataSource.getConnection();
+			
+			statement = buildHackersQueryStatement( filtersWrapper, true, connection );
+			resultSet = statement.executeQuery();
+			int matchingRecordsCount = 0;
+			if ( resultSet.next() )
+				matchingRecordsCount = resultSet.getInt( 1 );
+			else
+				throw new SQLException( "Could not count matching hackers." );
+			resultSet.close();
+			statement.close();
+			
+			if ( filtersWrapper.pageSize < 1 )
+				filtersWrapper.pageSize = 1;
+			final int pagesCount = ( (matchingRecordsCount-1) / filtersWrapper.pageSize ) + 1;
+			if ( filtersWrapper.stepDirection != null ) {
+				if ( filtersWrapper.stepDirection.equals( STEP_DIRECTION_FIRST ) )
+					filtersWrapper.page = 1;
+				else if ( filtersWrapper.stepDirection.equals( STEP_DIRECTION_PREVIOUS ) )
+					filtersWrapper.page--;
+				else if ( filtersWrapper.stepDirection.equals( STEP_DIRECTION_NEXT ) )
+					filtersWrapper.page++;
+				else if ( filtersWrapper.stepDirection.equals( STEP_DIRECTION_LAST ) )
+					filtersWrapper.page = pagesCount;
+			}
+			if ( filtersWrapper.page < 1 )
+				filtersWrapper.page = 1;
+			if ( filtersWrapper.page > pagesCount )
+				filtersWrapper.page = pagesCount;
+			
+			outputWriter = response.getWriter();
+			
+			outputWriter.println( "<html><head><title>BWHF Hacker data base</title><style>" );
+			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
+				outputWriter.println( ".gat" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
+			outputWriter.println( ".gatUn {" + UNKNOWN_GATEWAY_STYLE + "}" );
+			outputWriter.println( ".sortCol {cursor:pointer;}</style></head><body style='background:#f7f7f7'><center>" );
+			
+			// Header section
+			outputWriter.println( "<h2>BWHF Hacker data base</h2>" );
+			outputWriter.println( "<p align=right>Go to <a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></p>" );
+			
+			// Controls section
+			outputWriter.println( "<form id='" + FORM_ID + "' action='/hackers' method='GET'>" );
+			
+			// Filters
+			outputWriter.println( "<b>Filters</b> <button type=button onclick=\"javascript:document.getElementsByName('" + FILTER_NAME_NAME + "')[0].value='';document.getElementsByName('" + FILTER_NAME_MIN_REPORT_COUNT + "')[0].value='" + FILTER_DEFAULT_MIN_REPORT_COUNT + "';for(var i=0;i<" + GATEWAYS.length + ";i++) document.getElementsByName('" + FILTER_NAME_GATEWAY + "'+i)[0].checked=true;\">Reset filters</button><table border=1>" );
+			outputWriter.println( "<tr><th>Name<th>Gateway<th>Min. report count" );
+			outputWriter.println( "<tr><td><input name='" + FILTER_NAME_NAME + "' type=text value='" + filtersWrapper.name + "'><td>" );
+			
+			// Render gateways here
+			outputWriter.println( "<input name='" + FILTER_NAME_NO_ALL_GATEWAYS + "' type=hidden value='no'>" ); // First we select all gateways, on subsequent calls we only want to select selected gateways
+			for ( int i = 0; i < GATEWAYS.length; i++ )
+				outputWriter.println( "<input name='" + FILTER_NAME_GATEWAY + i + "' type=checkbox " + ( filtersWrapper.gateways[ i ] ? "checked" : "" ) + ">" + GATEWAYS[ i ] );
+			outputWriter.println( "<td><input name='" + FILTER_NAME_MIN_REPORT_COUNT +"' type=text value='" + filtersWrapper.minReportCount + "'>" );
+			outputWriter.println( "</table>" );
+			outputWriter.println( "<p><input type=submit value='Go / Refresh'></p>" );
+			outputWriter.println( "<p><b>Hackers matching the filters: " + matchingRecordsCount + "</b></p>" );
+			
+			// Sorting
+			outputWriter.println( "<input name='" + FILTER_NAME_SORT_BY + "' type=hidden value='" + filtersWrapper.sortByValue + "'>" );
+			outputWriter.println( "<input name='" + FILTER_NAME_ASCENDANT_SORTING + "' type=hidden value='" + filtersWrapper.ascendantSorting + "'>" );
+			
+			// Pagination
+			outputWriter.println( "<input type=submit name='" + FILTER_NAME_STEP_DIRECTION +"' value='" + STEP_DIRECTION_FIRST + "' " + ( filtersWrapper.page <= 1 ? "disabled" : "" ) + ">" );
+			outputWriter.println( "<input type=submit name='" + FILTER_NAME_STEP_DIRECTION +"' value='" + STEP_DIRECTION_PREVIOUS + "' " + ( filtersWrapper.page <= 1 ? "disabled" : "" ) + ">" );
+			outputWriter.println( "Page <input name='" + FILTER_NAME_PAGE + "' type=text value='" + filtersWrapper.page + "' size=1> out of <b>" + pagesCount + "</b>, page size:" );
+			outputWriter.println( "<input name='" + FILTER_NAME_PAGE_SIZE + "' type=text value='" + filtersWrapper.pageSize + "' size=1>" );
+			outputWriter.println( "<input type=submit name='" + FILTER_NAME_STEP_DIRECTION +"' value='" + STEP_DIRECTION_NEXT + "' " + ( filtersWrapper.page >= pagesCount ? "disabled" : "" ) + ">" );
+			outputWriter.println( "<input type=submit name='" + FILTER_NAME_STEP_DIRECTION +"' value='" + STEP_DIRECTION_LAST + "' " + ( filtersWrapper.page >= pagesCount ? "disabled" : "" ) + ">" );
+			outputWriter.println( "</form>" );
+			
+			// Hackers table section
+			outputWriter.println( "<table border=1>" );
+			outputWriter.println( "<tr><th>#<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_NAME        , filtersWrapper ) + "\">Name"         + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME         ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
+										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_GATEWAY     , filtersWrapper ) + "\">Gateway"      + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_GATEWAY      ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
+										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_REPORT_COUNT, filtersWrapper ) + "\">Report count" + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_REPORT_COUNT ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" ) );
+			if ( matchingRecordsCount > 0 ) {
+				int recordNumber = ( filtersWrapper.page - 1 )* filtersWrapper.pageSize;
+				statement = buildHackersQueryStatement( filtersWrapper, false, connection );
+				resultSet = statement.executeQuery();
+				while ( resultSet.next() ) {
+					final int gateway = resultSet.getInt( 2 );
+					outputWriter.println( "<tr class='gat" + ( gateway < GATEWAY_STYLES.length ? gateway : "Un" ) + "'><td>" + (++recordNumber) + "<td>" + resultSet.getString( 1 ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td>" + resultSet.getInt( 3 ) );
+				}
+			}
+			outputWriter.println( "</table>" );
+			
+			// Footer section
+			outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008</i></p>" );
+			outputWriter.println( "</center></body></html>" );
+			
+			outputWriter.flush();
+		} catch ( final IOException ie ) {
+			ie.printStackTrace();
+		} catch ( final SQLException se ) {
+			se.printStackTrace();
+			if ( outputWriter != null )
+				outputWriter.println( "<p>Sorry, the server has encountered an error, we cannot fulfill your request!</p>" );
+		}
+		finally {
+			if ( resultSet != null )
+				try { resultSet.close(); } catch ( final SQLException se ) {}
+			if ( statement != null )
+				try { statement.close(); } catch ( final SQLException se ) {}
+			if ( connection != null )
+				try { connection.close(); } catch ( final SQLException se ) {}
+			
+			if ( outputWriter != null )
+				outputWriter.close();
+		}
+	}
+	
+	/**
+	 * Builds a javascript code to be used for sorting column header onclick event.
+	 * @param headerName     name of the header to generate javascript for
+	 * @param filtersWrapper filters wrapper holding the filter parameters
+	 * @return
+	 */
+	private String getJavaScriptForSortingColumn( final String headerName, final FiltersWrapper filtersWrapper ) {
+		final StringBuilder scriptBuilder = new StringBuilder( "javascript:" );
+		
+		if ( !filtersWrapper.sortByValue.equals( headerName ) )
+			scriptBuilder.append( "document.getElementsByName('" ).append( FILTER_NAME_SORT_BY ).append( "')[ 0 ].value='" ).append( headerName ).append( "';" );
+		
+		scriptBuilder.append( "document.getElementsByName('" ).append( FILTER_NAME_ASCENDANT_SORTING ).append( "')[ 0 ].value=" )
+			.append( filtersWrapper.sortByValue.equals( headerName ) ? !filtersWrapper.ascendantSorting : FILTER_DEFAULT_ASCENDANT_SORTING_MAP.get( headerName ) ).append( ';' );
+		
+		scriptBuilder.append( "document.getElementById('" + FORM_ID + "').submit();" );
+		return scriptBuilder.toString();
+	}
 	
 	/**
 	 * Builds a query listing the hackers matching the filter parameters.
@@ -334,7 +363,7 @@ public class HackerDbServlet extends HttpServlet {
 			else
 				queryBuilder.append( "h.name" );
 			
-			queryBuilder.append( filtersWrapper.descendantSorting ? " DESC" : " ASC" );
+			queryBuilder.append( filtersWrapper.ascendantSorting ? " ASC" : " DESC" );
 			
 			queryBuilder.append( " LIMIT " ).append( filtersWrapper.pageSize ).append( " OFFSET " ).append( ( filtersWrapper.page - 1 ) * filtersWrapper.pageSize );
 		}

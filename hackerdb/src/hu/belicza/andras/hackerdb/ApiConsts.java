@@ -26,28 +26,39 @@ public class ApiConsts {
 	/** String representations of gateways. Only the index should be sent over. */
 	public static final String[] GATEWAYS = new String[] { "USEast", "USWest", "Europe", "Asia", "iCCup", "Other" };
 	
-	/** Filter name for name.             */
+	/** Filter name for name.              */
 	public static final String FILTER_NAME_NAME               = "nam";
-	/** Filter name for no all gateways.  */
+	/** Filter name for no all gateways.   */
 	public static final String FILTER_NAME_NO_ALL_GATEWAYS    = "nag";
-	/** Filter name for gateway.          */
+	/** Filter name for gateway.           */
 	public static final String FILTER_NAME_GATEWAY            = "gat";
-	/** Filter name for min report count. */
+	/** Filter name for min report count.  */
 	public static final String FILTER_NAME_MIN_REPORT_COUNT   = "mrc";
-	/** Filter name for page.             */
+	/** Filter name for page.              */
 	public static final String FILTER_NAME_PAGE               = "pag";
-	/** Filter name for page size.        */
+	/** Filter name for page size.         */
 	public static final String FILTER_NAME_PAGE_SIZE          = "pgs";
-	/** Filter name for sort by.          */
+	/** Filter name for sort by.           */
 	public static final String FILTER_NAME_SORT_BY            = "sby";
-	/** Filter name for sort by.          */
-	public static final String FILTER_NAME_DESCENDANT_SORTING = "dst";
+	/** Filter name for ascendant sorting. */
+	public static final String FILTER_NAME_ASCENDANT_SORTING = "ast";
+	/** Filter name for step direction.    */
+	public static final String FILTER_NAME_STEP_DIRECTION     = "std";
 	
-	/** Sort by value for name.           */
+	/** Sort by value for name.            */
 	public static final String SORT_BY_VALUE_NAME             = "snm";
-	/** Sort by value for gateway.           */
+	/** Sort by value for gateway.         */
 	public static final String SORT_BY_VALUE_GATEWAY          = "sgt";
-	/** Sort by value for report count.   */
+	/** Sort by value for report count.    */
 	public static final String SORT_BY_VALUE_REPORT_COUNT     = "src";
+	
+	/** Step direction value for first.    */
+	public static final String STEP_DIRECTION_FIRST           = "First";
+	/** Step direction value for first.    */
+	public static final String STEP_DIRECTION_PREVIOUS        = "Prev";
+	/** Step direction value for first.    */
+	public static final String STEP_DIRECTION_NEXT            = "Next";
+	/** Step direction value for first.    */
+	public static final String STEP_DIRECTION_LAST            = "Last";
 	
 }

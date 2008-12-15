@@ -13,6 +13,5 @@ http://localhost:8080/hackers/?op=rep&key=testkey&gat=1&pln0=somehacker
 http://localhost:8080/hackers/?op=rep&key=testkey&gat=3&pln0=somehacker
 http://localhost:8080/hackers/?op=rep&key=testkey&gat=4&pln0=ihackn00bs
 http://localhost:8080/hackers/?op=rep&key=testkey&gat=5&pln0=y0uhackn0obs
-http://localhost:8080/hackers/?op=rep&key=testkey&gat=6&pln0=uhackn00bs
 http://localhost:8080/hackers/?op=rep&key=testkey&gat=2&pln0=jUropeHax0r
 http://localhost:8080/hackers/?op=rep&key=testkey&gat=0&pln0=angryjew
