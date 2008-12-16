@@ -10,6 +10,7 @@ public class FiltersWrapper {
 	public String    name;
 	public boolean[] gateways;
 	public int       minReportCount;
+	public String    reportedWithKey;
 	public String    sortByValue;
 	public boolean   ascendantSorting;
 	public int       page;

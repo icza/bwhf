@@ -1,17 +1,23 @@
 
 Database test data:
 INSERT INTO person (name) VALUES ('whoami');
-INSERT INTO key (value,person) VALUES ('testkey',0);
+INSERT INTO key (value,person) VALUES ('testkey',IDENTITY());
+INSERT INTO person (name) VALUES ('IamwhoIam');
+INSERT INTO key (value,person) VALUES ('testkey2',IDENTITY());
 
 Key check URL:
 http://localhost:8080/hackers/?op=chk&key=testkey
 
-Test report URL:
-http://localhost:8080/hackers/?op=rep&key=testkey&gat=0&pln0=utfunny&pln1=plasmer
-http://localhost:8080/hackers/?op=rep&key=testkey&gat=1&pln0=somehacker
-http://localhost:8080/hackers/?op=rep&key=testkey&gat=1&pln0=somehacker
-http://localhost:8080/hackers/?op=rep&key=testkey&gat=3&pln0=somehacker
-http://localhost:8080/hackers/?op=rep&key=testkey&gat=4&pln0=ihackn00bs
-http://localhost:8080/hackers/?op=rep&key=testkey&gat=5&pln0=y0uhackn0obs
-http://localhost:8080/hackers/?op=rep&key=testkey&gat=2&pln0=jUropeHax0r
-http://localhost:8080/hackers/?op=rep&key=testkey&gat=0&pln0=angryjew
+Test report URLs:
+http://localhost:8080/hackerdb/hackers?op=rep&key=testkey&gat=0&pln0=utfunny&pln1=plasmer
+http://localhost:8080/hackerdb/hackers?op=rep&key=testkey&gat=1&pln0=somehacker
+http://localhost:8080/hackerdb/hackers?op=rep&key=testkey&gat=1&pln0=somehacker
+http://localhost:8080/hackerdb/hackers?op=rep&key=testkey&gat=3&pln0=somehacker
+http://localhost:8080/hackerdb/hackers?op=rep&key=testkey&gat=4&pln0=ihackn00bs
+http://localhost:8080/hackerdb/hackers?op=rep&key=testkey&gat=5&pln0=y0uhackn0obs
+http://localhost:8080/hackerdb/hackers?op=rep&key=testkey&gat=2&pln0=juropehax0r
+http://localhost:8080/hackerdb/hackers?op=rep&key=testkey&gat=0&pln0=angryjew
+http://localhost:8080/hackerdb/hackers?op=rep&key=testkey&gat=1&pln0=wtfi2500
+http://localhost:8080/hackerdb/hackers?op=rep&key=testkey&gat=3&pln0=ionk0rs
+http://localhost:8080/hackerdb/hackers?op=rep&key=testkey&gat=0&pln0=STUNNER_X
+http://localhost:8080/hackerdb/hackers?op=rep&key=testkey2&gat=0&pln0=STUNNER_X
