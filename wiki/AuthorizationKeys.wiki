@@ -6,4 +6,7 @@ The key authenticates its owner toward the BWHF hacker data base. Only those who
 ==How can I get a key?==
 Keys cannot be purchased. I give keys for free for those who can be trusted. This includes my friends and people I play with on battle.net. Of course this is a very limited group of people.
 
-Moreover I provide keys upon requests to admins of Starcraft websites and communities. The number of keys given to admins is practically not limited. Then the admins are responsible who to give the keys. 
+Moreover I provide keys upon requests to admins of Starcraft websites and communities. First of course they have to prove they are really admins. The number of keys given to admins is practically not limited. Then the admins are responsible to distribute the keys.
+
+==Key revocation==
+If I find that a key is used inappropriate, the key can be revocated without any warning. Revocating a key means all reports that was done using that key will be excluded from all queries like they were never happened.
