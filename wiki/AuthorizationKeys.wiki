@@ -1,7 +1,4 @@
-#summary One-sentence summary of this page.
-
 =BWHF Authorization keys=
 
 ==What is this key?==
 Only those who possess a valid authorization key can report hackers to the central hacker data base.
-
