@@ -1,13 +1,13 @@
 <web-app>
 	
 	<servlet>
-		<servlet-name>HackerDb</servlet-name>
+		<servlet-name>Hackers</servlet-name>
 		<servlet-class>hu.belicza.andras.hackerdb.HackerDbServlet</servlet-class>
 	</servlet>
 	
 	<servlet-mapping>
-		<servlet-name>HackerDb</servlet-name>
-		<url-pattern>/</url-pattern>
+		<servlet-name>Hackers</servlet-name>
+		<url-pattern>/hackers</url-pattern>
 	</servlet-mapping>
 	
 </web-app>

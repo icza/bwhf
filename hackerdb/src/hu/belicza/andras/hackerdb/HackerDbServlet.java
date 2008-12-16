@@ -32,7 +32,8 @@ import org.apache.commons.dbcp.BasicDataSource;
 public class HackerDbServlet extends HttpServlet {
 	
 	/** URL of the hacker data base. */
-	private static final String DATABASE_URL = "jdbc:hsqldb:hsql://localhost/hackers";
+	//private static final String DATABASE_URL = "jdbc:hsqldb:hsql://localhost/hackers";
+	private static final String DATABASE_URL = "jdbc:hsqldb:hsql://iczavds.selfip.com/testhackers";
 	
 	/** Max players in a report. */
 	private static final int MAX_PLAYERS_IN_REPORT = 8;
@@ -93,6 +94,7 @@ public class HackerDbServlet extends HttpServlet {
 				for ( int i = 0; i < filtersWrapper.gateways.length; i++ )
 					filtersWrapper.gateways[ i ] = request.getParameter( FILTER_NAME_NO_ALL_GATEWAYS ) == null || request.getParameter( FILTER_NAME_GATEWAY + i ) != null;
 				filtersWrapper.minReportCount    = getIntParamValue( request, FILTER_NAME_MIN_REPORT_COUNT, FILTER_DEFAULT_MIN_REPORT_COUNT );
+				filtersWrapper.reportedWithKey   = getStringParamValue( request, FILTER_NAME_REPORTED_WITH_KEY );
 				filtersWrapper.sortByValue       = getStringParamValue( request, FILTER_NAME_SORT_BY );
 				if ( filtersWrapper.sortByValue.length() == 0 )
 					filtersWrapper.sortByValue   = SORT_BY_VALUE_NAME;
@@ -228,20 +230,21 @@ public class HackerDbServlet extends HttpServlet {
 			outputWriter.println( "<p align=right>Go to <a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></p>" );
 			
 			// Controls section
-			outputWriter.println( "<form id='" + FORM_ID + "' action='/hackers' method='GET'>" );
+			outputWriter.println( "<form id='" + FORM_ID + "' action='hackers' method='POST'>" );
 			
 			// Filters
-			outputWriter.println( "<b>Filters</b> <button type=button onclick=\"javascript:document.getElementsByName('" + FILTER_NAME_NAME + "')[0].value='';document.getElementsByName('" + FILTER_NAME_MIN_REPORT_COUNT + "')[0].value='" + FILTER_DEFAULT_MIN_REPORT_COUNT + "';for(var i=0;i<" + GATEWAYS.length + ";i++) document.getElementsByName('" + FILTER_NAME_GATEWAY + "'+i)[0].checked=true;\">Reset filters</button><table border=1>" );
-			outputWriter.println( "<tr><th>Name<th>Gateway<th>Min. report count" );
-			outputWriter.println( "<tr><td><input name='" + FILTER_NAME_NAME + "' type=text value='" + filtersWrapper.name + "' size=13><td>" );
-			
+			outputWriter.println( "<b>Filters</b> <button type=button onclick=\"javascript:document.getElementsByName('" + FILTER_NAME_NAME + "')[0].value='';for(var i=0;i<" + GATEWAYS.length + ";i++) document.getElementsByName('" + FILTER_NAME_GATEWAY + "'+i)[0].checked=true;document.getElementsByName('" + FILTER_NAME_MIN_REPORT_COUNT + "')[0].value='" + FILTER_DEFAULT_MIN_REPORT_COUNT + "';document.getElementsByName('" + FILTER_NAME_REPORTED_WITH_KEY + "')[0].value='';\">Reset filters</button><table border=1>" );
+			outputWriter.println( "<tr><th>Name:<td><input name='" + FILTER_NAME_NAME + "' type=text value='" + filtersWrapper.name + "' style='width:100%'>" );
+			outputWriter.print  ( "<tr><th>Gateways:<td>" );
 			// Render gateways here
 			outputWriter.println( "<input name='" + FILTER_NAME_NO_ALL_GATEWAYS + "' type=hidden value='no'>" ); // First we select all gateways, on subsequent calls we only want to select selected gateways
 			for ( int i = 0; i < GATEWAYS.length; i++ )
 				outputWriter.println( "<input name='" + FILTER_NAME_GATEWAY + i + "' type=checkbox " + ( filtersWrapper.gateways[ i ] ? "checked" : "" ) + ">" + GATEWAYS[ i ] );
-			outputWriter.println( "<td><input name='" + FILTER_NAME_MIN_REPORT_COUNT +"' type=text value='" + filtersWrapper.minReportCount + "' size=14>" );
+			outputWriter.println( "<tr><th>Min report count:<td><input name='" + FILTER_NAME_MIN_REPORT_COUNT +"' type=text value='" + filtersWrapper.minReportCount + "' style='width:100%'>" );
+			outputWriter.println( "<tr><th>Reported with key:<td><input name='" + FILTER_NAME_REPORTED_WITH_KEY +"' type=text value='" + filtersWrapper.reportedWithKey + "' style='width:100%'>" );
 			outputWriter.println( "</table>" );
 			outputWriter.println( "<p><input type=submit value='Go / Refresh'></p>" );
+			
 			outputWriter.println( "<p><b>Hackers matching the filters: " + matchingRecordsCount + "</b></p>" );
 			
 			// Sorting
@@ -257,6 +260,8 @@ public class HackerDbServlet extends HttpServlet {
 			outputWriter.println( "<input type=submit name='" + FILTER_NAME_STEP_DIRECTION +"' value='" + STEP_DIRECTION_LAST + "' " + ( filtersWrapper.page >= pagesCount ? "disabled" : "" ) + ">" );
 			outputWriter.println( "</form>" );
 			
+			outputWriter.flush();
+			
 			// Hackers table section
 			outputWriter.println( "<table border=1>" );
 			outputWriter.println( "<tr><th>#<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_NAME        , filtersWrapper ) + "\">Name"         + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME         ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
@@ -268,7 +273,7 @@ public class HackerDbServlet extends HttpServlet {
 				resultSet = statement.executeQuery();
 				while ( resultSet.next() ) {
 					final int gateway = resultSet.getInt( 2 );
-					outputWriter.println( "<tr class='gat" + ( gateway < GATEWAY_STYLES.length ? gateway : "Un" ) + "'><td>" + (++recordNumber) + "<td>" + resultSet.getString( 1 ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td>" + resultSet.getInt( 3 ) );
+					outputWriter.println( "<tr class='gat" + ( gateway < GATEWAY_STYLES.length ? gateway : "Un" ) + "'><td align=right>" + (++recordNumber) + "<td>" + resultSet.getString( 1 ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td align=center>" + resultSet.getInt( 3 ) );
 				}
 			}
 			outputWriter.println( "</table>" );
@@ -282,8 +287,11 @@ public class HackerDbServlet extends HttpServlet {
 			ie.printStackTrace();
 		} catch ( final SQLException se ) {
 			se.printStackTrace();
+			final String errorMessage = "<p>Sorry, the server has encountered an error, we cannot fulfill your request! We apologize.</p>";
 			if ( outputWriter != null )
-				outputWriter.println( "<p>Sorry, the server has encountered an error, we cannot fulfill your request!</p>" );
+				outputWriter.println( errorMessage );
+			else
+				sendBackErrorMessage( response, errorMessage );
 		}
 		finally {
 			if ( resultSet != null )
@@ -333,8 +341,18 @@ public class HackerDbServlet extends HttpServlet {
 		
 		queryBuilder.append( " FROM hacker h, report r, key k WHERE r.hacker=h.id AND r.key=k.id AND k.revocated=FALSE" );
 		
-		if ( filtersWrapper.name.length() > 0 )
+		int sqlParamsCounter = 0;
+		int nameParamIndex   = 0;
+		int keyParamIndex    = 0;
+		if ( filtersWrapper.name.length() > 0 ) {
 			queryBuilder.append( " AND h.name LIKE ?" );
+			nameParamIndex = ++sqlParamsCounter;
+		}
+		
+		if ( filtersWrapper.reportedWithKey.length() > 0 ) {
+			queryBuilder.append( " AND k.value=?" );
+			keyParamIndex = ++sqlParamsCounter;
+		}
 		
 		boolean dontNeedAllGateways = false; // Only want to append gateway filter if not all is required
 		for ( final boolean gateway : filtersWrapper.gateways )
@@ -369,8 +387,10 @@ public class HackerDbServlet extends HttpServlet {
 		}
 		
 		final PreparedStatement statement = connection.prepareStatement( queryBuilder.toString() );
-		if ( filtersWrapper.name.length() > 0 )
-			statement.setString( 1, "%" + filtersWrapper.name + "%" );
+		if ( nameParamIndex > 0 )
+			statement.setString( nameParamIndex, "%" + filtersWrapper.name + "%" );
+		if ( keyParamIndex > 0 )
+			statement.setString( keyParamIndex, filtersWrapper.reportedWithKey );
 		
 		return statement;
 	}
@@ -461,8 +481,8 @@ public class HackerDbServlet extends HttpServlet {
 				else {
 					// New hacker, add it first
 					statement2 = connection.prepareStatement( "INSERT INTO hacker (name,gateway) VALUES (?,?)" );
-					statement2.setString( 1, playerNames[ i ] );
-					statement2.setInt   ( 2, gateway          );
+					statement2.setString( 1, playerNames[ i ].toLowerCase() );
+					statement2.setInt   ( 2, gateway                        );
 					if ( statement2.executeUpdate() > 0 ) {
 						statement3 = connection.createStatement();
 						resultSet3 = statement3.executeQuery( "CALL IDENTITY()" );
@@ -532,14 +552,23 @@ public class HackerDbServlet extends HttpServlet {
 	}
 	
 	/**
-	 * Sends back an error message indicating a bad request.
+	 * Sends back an error message to the client indicating a bad request.
 	 * @param response response to be used
 	 */
 	private void sendBackErrorMessage( final HttpServletResponse response ) {
+		sendBackErrorMessage( response, "Bad request!" );
+	}
+	
+	/**
+	 * Sends back an error message to the client.
+	 * @param response response to be used
+	 * @param message  message to be sent back
+	 */
+	private void sendBackErrorMessage( final HttpServletResponse response, final String message ) {
 		response.setContentType( "text/html" );
 		try {
 			final PrintWriter outputWriter = response.getWriter();
-			outputWriter.println( "Bad request!" );
+			outputWriter.println( message );
 			outputWriter.flush();
 			outputWriter.close();
 		} catch ( final IOException ie ) {
