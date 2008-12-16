@@ -9,4 +9,4 @@ Keys cannot be purchased. I give keys for free for those who can be trusted. Thi
 Moreover I provide keys upon requests to admins of Starcraft websites and communities. First of course they have to prove they are really admins. The number of keys given to admins is practically not limited. Then the admins are responsible to distribute the keys.
 
 ==Key revocation==
-If I find that a key is used inappropriate, the key can be revocated without any warning. Revocating a key means all reports that was done using that key will be excluded from all queries like they were never happened.
+If I find that a key is used inappropriate, the key can be revocated without any warning. Revocation of a key means all reports that were done using that key will be excluded from all queries like they were never happened. Optionally those reports can be deleted forever.
