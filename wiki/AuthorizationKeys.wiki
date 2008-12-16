@@ -11,4 +11,4 @@ Moreover I provide keys upon requests to admins of known Starcraft websites and 
 If I don't know you, don't come to me begging for a key. Instead ask an admin of a known Starcraft community who knows you and trusts you to get you a key.
 
 ==Key revocation==
-If I find that a key is used inappropriate, the key can be revocated without any warning. Revocation of a key means all reports that were done using that key will be excluded from all queries like they were never happened. Optionally those reports can be deleted forever.
+If I find that a key is used inappropriately, the key can be revocated without any warning. Revocation of a key means all reports that were done using that key will be excluded from all queries like they were never happened. Optionally those reports can be deleted forever.
