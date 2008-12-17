@@ -8,9 +8,9 @@ Only those who possess a valid authorization key can report hackers to the centr
 ==How can I get a key?==
 Keys cannot be purchased. I give keys for free to those who can be trusted. This includes my friends and people I play with on battle.net. Of course this is a very limited group of people.
 
-Moreover I provide keys upon requests to admins of known Starcraft websites and communities. Once I verified that the requestor is truly the admin he/she claimed to be, I provide as many keys as needed. Then the admins are responsible to distribute the keys to people they know and whom they trust.
+Moreover I provide keys upon requests to admins of known Starcraft websites and communities. Once I verified that the requestor is truly the admin he/she claims to be, I provide as many keys as needed. Then the admins are responsible to distribute the keys to people they know and whom they trust.
 
 If I don't know you, don't come to me begging for a key. Instead ask an admin of a known Starcraft community who knows you and trusts you to get you a key.
 
 ==Key revocation==
-If I find that a key is used inappropriately, the key can be revocated without any warning. Revocation of a key means all reports that were done using that key will be excluded from all queries like they were never happened. Optionally those reports can be deleted forever.
+If I find that a key is used inappropriately, the key can be revocated at anytime without any warning. Revocation of a key means all reports that were done using that key will be excluded from all queries like they were never happened. Optionally those reports will be deleted forever.
