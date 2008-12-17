@@ -9,7 +9,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpServlet;
@@ -130,13 +132,14 @@ public class HackerDbServlet extends HttpServlet {
 				if ( gatewayIndex < 0 || gatewayIndex >= GATEWAYS.length )
 					throw new BadRequestException();
 				
-				final String[] playerNames = new String[ MAX_PLAYERS_IN_REPORT ];
-				for ( int i = 0; i <= playerNames.length && ( playerNames[ i ] = request.getParameter( REQUEST_PARAMETER_NAME_PLAYER + i ) ) != null; i++ )
-					;
-				if ( playerNames[ 0 ] == null )
+				final List< String > playerNameList = new ArrayList< String >( MAX_PLAYERS_IN_REPORT );
+				String playerName;
+				for ( int i = 0; i <= MAX_PLAYERS_IN_REPORT && ( playerName = request.getParameter( REQUEST_PARAMETER_NAME_PLAYER + i ) ) != null; i++ )
+					playerNameList.add( playerName.toLowerCase() ); // We handle player names all lowercased!
+				if ( playerNameList.isEmpty() )
 					throw new BadRequestException();
 				
-				sendBackPlainMessage( handleReport( key, gatewayIndex, playerNames, request.getRemoteAddr() ), response );
+				sendBackPlainMessage( handleReport( key, gatewayIndex, playerNameList.toArray( new String[ playerNameList.size() ] ), request.getRemoteAddr() ), response );
 			}
 		}
 		catch ( final BadRequestException bre ) {
