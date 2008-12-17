@@ -166,12 +166,12 @@ public class AutoscanTab extends LoggedTab {
 				if ( reportHackersCheckBox.isSelected() ) {
 					reportHackersCheckBox.setEnabled( false );
 					reportHackersCheckBox.setSelected( false );
-					new Thread() {
+					new NormalThread() {
 						public void run() {
 							checkKeyButton.doClick();
 							
 							while ( keyCheckInProgress )
-								try { Thread.sleep( 10l ); } catch ( final InterruptedException ie ) {}
+								try { sleep( 10l ); } catch ( final InterruptedException ie ) {}
 							
 							if ( lastKeyCheckResult == null || !lastKeyCheckResult ) {
 								reportHackersCheckBox.setSelected( false );
@@ -211,7 +211,7 @@ public class AutoscanTab extends LoggedTab {
 				keyCheckInProgress = true;
 				checkKeyButton.setEnabled( false );
 				checkKeyButton.setText( "Checking..." );
-				new Thread() {
+				new NormalThread() {
 					public void run() {
 						lastKeyCheckResult = Utils.checkAuthorizationKey( authorizationKey );
 						( (JButton) event.getSource() ).setText( CHECK_KEY_BUTTON_TEXT + ( lastKeyCheckResult == null ? " (check failed!)" : ( lastKeyCheckResult ? " (valid)" : " (invalid)" ) ) );
@@ -244,7 +244,7 @@ public class AutoscanTab extends LoggedTab {
 	 * Starts the autoscanner.
 	 */
 	private void startAutoscanner() {
-		new Thread() {
+		new NormalThread() {
 			
 			@Override
 			public void run() {
