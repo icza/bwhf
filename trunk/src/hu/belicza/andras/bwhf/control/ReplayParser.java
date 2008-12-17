@@ -122,10 +122,12 @@ public class ReplayParser {
 				addActionToPlayerMap( playerName, new Action( iteration, name, parameters, unitIds ), playerNameActionListMap );
 			}
 			
-		} catch ( final FileNotFoundException fnfe ) {
+		}
+		catch ( final FileNotFoundException fnfe ) {
 			fnfe.printStackTrace();
 			throw new ParseException();
-		} catch ( final IOException ie ) {
+		}
+		catch ( final IOException ie ) {
 			throw new ParseException();
 		}
 		catch ( final Exception e ) {

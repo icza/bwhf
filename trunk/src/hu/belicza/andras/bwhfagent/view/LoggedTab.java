@@ -1,6 +1,7 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import java.awt.BorderLayout;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileWriter;
@@ -62,6 +63,7 @@ public abstract class LoggedTab extends Tab {
 		logTextArea.setLineWrap( true );
 		logTextArea.setWrapStyleWord( true );
 		logTextArea.setTabSize( 4 );
+		logTextArea.setFont( new Font( null, Font.PLAIN, 12 ) );
 		logPanel.add( new JScrollPane( logTextArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS ), BorderLayout.CENTER );
 		
 		final JPanel controlPanel = new JPanel();

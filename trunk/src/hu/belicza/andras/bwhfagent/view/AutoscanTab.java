@@ -13,7 +13,9 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -221,7 +223,6 @@ public class AutoscanTab extends LoggedTab {
 				}.start();
 			}
 		} );
-		//checkKeyButton.doClick();
 		panel.add( checkKeyButton, BorderLayout.EAST );
 		gridBagLayout.setConstraints( panel, constraints );
 		settingsPanel.add( panel );
@@ -286,6 +287,19 @@ public class AutoscanTab extends LoggedTab {
 										
 										if ( saveHackerRepsCheckBox.isSelected() )
 											Utils.copyFile( lastReplayFile, new File( hackerRepsDestinationTextField.getText() ), DATE_FORMAT.format( new Date() ) + " LastReplay.rep" );
+										
+										if ( reportHackersCheckBox.isSelected() ) {
+											logMessage( "Sending hacker report..." );
+											final Set< String > playerNameSet = new HashSet< String >( 8 );
+											for ( final HackDescription hackDescription : hackDescriptionList )
+												playerNameSet.add( hackDescription.playerName );
+											
+											final String message = Utils.sendHackerReport( authorizationKey, gatewayComboBox.getSelectedIndex(), playerNameSet );
+											if ( message == null )
+												logMessage( "Sending hacker report succeeded." );
+											else
+												logMessage( "Sending hacker report failed: " + message );
+										}
 									}
 									else
 										logMessage( "Found no hacks in LastReplay.rep." );

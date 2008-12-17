@@ -10,32 +10,35 @@ import java.util.Properties;
 public class Consts {
 	
 	/** Name of the application.                                       */
-	public static final String APPLICATION_NAME               = "BWHF Agent";
+	public static final String APPLICATION_NAME                 = "BWHF Agent";
 	/** Author of the application.                                     */
-	public static final String APPLICATION_AUTHOR             = "András Belicza";
+	public static final String APPLICATION_AUTHOR               = "András Belicza";
 	
 	/** Home page url string.                                          */
-	public static final String HOME_PAGE_URL                  = "http://code.google.com/p/bwhf";
+	public static final String HOME_PAGE_URL                    = "http://code.google.com/p/bwhf";
 	/** Name of the current version resource file.                     */
-	public static final String VERSION_RESOURCE_NAME          = "current_version.txt";
+	public static final String VERSION_RESOURCE_NAME            = "current_version.txt";
 	/** URL pointing to the latest stable version text.                */
-	public static final String LATEST_STABLE_VERSION_TEXT_URL = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version.txt";
+	public static final String LATEST_STABLE_VERSION_TEXT_URL   = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version.txt";
+	
+	/** URL of the BWHF hacker data base server.                       */
+	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL = "http://hackerdb.selfip.com/";
 	
 	/** Name of the resource containing the about html template.       */
-	public static final String ABOUT_TEMLATE_RESOURCE_NAME    = "about_template.html";
+	public static final String ABOUT_TEMLATE_RESOURCE_NAME      = "about_template.html";
 	
 	/** Default Starcraft directory.                                   */
-	public static final String DEFAULT_STARCRAFT_DIRECTORY    = "C:/Program Files/Starcraft";
+	public static final String DEFAULT_STARCRAFT_DIRECTORY      = "C:/Program Files/Starcraft";
 	/** Starcraft replay folder relative to the Starcraft folder.      */
-	public static final String STARCRAFT_REPLAY_FOLDER        = "maps/replays";
+	public static final String STARCRAFT_REPLAY_FOLDER          = "maps/replays";
 	/** Name of the last replay file relative to the starcraft folder. */
-	public static final String LAST_REPLAY_FILE_NAME          = "maps/replays/LastReplay.rep";
+	public static final String LAST_REPLAY_FILE_NAME            = "maps/replays/LastReplay.rep";
 	/** Name of the Starcraft executable file.                         */
-	public static final String STARCRAFT_EXECUTABLE_FILE_NAME = "StarCraft.exe";
+	public static final String STARCRAFT_EXECUTABLE_FILE_NAME   = "StarCraft.exe";
 	/** Name of directory containing sound samples.                    */
-	public static final String SOUNDS_DIRECTORY_NAME          = "sounds";
+	public static final String SOUNDS_DIRECTORY_NAME            = "sounds";
 	/** Name of directory containing utility programs.                 */
-	public static final String UTILS_DIRECTORY_NAME           = "utils";
+	public static final String UTILS_DIRECTORY_NAME             = "utils";
 	
 	/** Replay converter utility to extract actions from a replay.     */
 	public static final String REPLAY_CONVERTER_EXECUTABLE_FILE;
