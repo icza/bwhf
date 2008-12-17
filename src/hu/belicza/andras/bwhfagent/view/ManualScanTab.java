@@ -74,7 +74,7 @@ public class ManualScanTab extends LoggedTab {
 		scanLastReplayButton.setMnemonic( 'L' );
 		scanLastReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				scanFilesAndFolders( new File[] { new File( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ), Consts.LAST_REPLAY_FILE_NAME ) } );
+				scanFilesAndFolders( new File[] { new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) } );
 			}
 		} );
 		contentBox.add( Utils.wrapInPanel( scanLastReplayButton ) );
@@ -127,7 +127,7 @@ public class ManualScanTab extends LoggedTab {
 		selectFilesAndFoldersButton.setEnabled( false );
 		stopScanButton             .setEnabled( true  );
 		
-		new Thread() {
+		new NormalThread() {
 			/** List of replay files to be scanned. */
 			final List< File > replayFileList = new ArrayList< File >();
 			
