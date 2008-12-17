@@ -15,7 +15,7 @@ public class Consts {
 	public static final String APPLICATION_AUTHOR               = "András Belicza";
 	
 	/** Home page url string.                                          */
-	public static final String HOME_PAGE_URL                    = "http://code.google.com/p/bwhf";
+	public static final String HOME_PAGE_URL                    = "http://code.google.com/p/bwhf/";
 	/** Name of the current version resource file.                     */
 	public static final String VERSION_RESOURCE_NAME            = "current_version.txt";
 	/** URL pointing to the latest stable version text.                */
