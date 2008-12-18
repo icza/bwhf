@@ -133,8 +133,18 @@ public class ReplayScanner {
 					nonHotkeyActionsCountInSameIteration++;
 			}
 			else {
-				if ( nonHotkeyActionsCountInSameIteration > 14 )
-					hackDescriptionList.add( new HackDescription( player.name, player.name + " used multicommand hack at " + lastAction.iteration ) );
+				if ( nonHotkeyActionsCountInSameIteration > 14 ) {
+					// If all of the counted actions are the same (like "Move", it can be due to lag and/or "action spam").
+					boolean multicommandHack = false;
+					final int referenceActionNameIndex = playerActions[ actionIndex - 1 ].actionNameIndex;
+					for ( int i = nonHotkeyActionsCountInSameIteration; i > 1; i-- )
+						if ( playerActions[ actionIndex - i ].actionNameIndex != referenceActionNameIndex ) {
+							multicommandHack = true;
+							break;
+						}
+					if ( multicommandHack )
+						hackDescriptionList.add( new HackDescription( player.name, player.name + " used multicommand hack at " + lastAction.iteration ) );
+				}
 				lastIteration = action.iteration;
 				nonHotkeyActionsCountInSameIteration = 0;
 			}
@@ -153,7 +163,7 @@ public class ReplayScanner {
 						if ( action.parameters.startsWith( Action.HOTKEY_ACTION_PARAM_NAME_SELECT ) )
 							lastSelectAction = lastSelectActionSetAsHotkeys[ hotkey ];
 				}
-				catch ( ArrayIndexOutOfBoundsException aioobe ) {
+				catch ( final ArrayIndexOutOfBoundsException aioobe ) {
 					// TODO: investigate, resulting in here can be proof of hack?
 					// Real life example:  "2530	TwilightNinja69	Hotkey	Select,15		"
 				}
