@@ -2,15 +2,15 @@ package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhfagent.Consts;
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.net.URL;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import swingwt.awt.BorderLayout;
+import swingwt.awt.event.ActionEvent;
+import swingwt.awt.event.ActionListener;
+import swingwtx.swing.JButton;
+import swingwtx.swing.JCheckBox;
+import swingwtx.swing.JOptionPane;
+import swingwtx.swing.JPanel;
 
 /**
  * General settings tab.
@@ -38,7 +38,7 @@ public class GeneralSettingsTab extends Tab {
 		buildGUI();
 		
 		if ( checkUpdatesOnStartupCheckBox.isSelected() )
-			checkUpdates();
+			checkUpdatesButton.doClick();//checkUpdates();
 	}
 	
 	/**
@@ -47,7 +47,8 @@ public class GeneralSettingsTab extends Tab {
 	private void buildGUI() {
 		final JPanel panel = new JPanel();
 		panel.add( checkUpdatesOnStartupCheckBox );
-		checkUpdatesButton.setMnemonic( ( checkUpdatesButton.getText().charAt( 0 ) ) );
+		// In SwingWT Button text cannot be changed if a mnemonic has been assigned
+		//checkUpdatesButton.setMnemonic( ( checkUpdatesButton.getText().charAt( 0 ) ) );
 		checkUpdatesButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				checkUpdates();
@@ -89,6 +90,7 @@ public class GeneralSettingsTab extends Tab {
 				}
 				finally {
 					checkUpdatesButton.setEnabled( true );
+					Utils.repackMainFrameDueToButtonChange( checkUpdatesButton );
 				}
 			}
 		}.start();

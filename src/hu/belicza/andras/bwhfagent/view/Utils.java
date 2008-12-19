@@ -6,10 +6,11 @@ import hu.belicza.andras.bwhf.control.ReplayScanner;
 import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.hackerdb.ApiConsts;
 
-import java.awt.Component;
-import java.awt.FlowLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import swingwt.awt.Component;
+import swingwt.awt.Dimension;
+import swingwt.awt.FlowLayout;
+import swingwt.awt.event.ActionEvent;
+import swingwt.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -29,13 +30,14 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.filechooser.FileFilter;
+import swingwtx.swing.JButton;
+import swingwtx.swing.JCheckBox;
+import swingwtx.swing.JComponent;
+import swingwtx.swing.JFileChooser;
+import swingwtx.swing.JPanel;
+import swingwtx.swing.JTextField;
+import swingwtx.swing.SwingUtilities;
+import swingwtx.swing.filechooser.FileFilter;
 
 /**
  * Utility methods related to view and GUI.
@@ -343,6 +345,25 @@ public class Utils {
 			
 			return "Error connecting to the BWHF data base server!";
 		}
+	}
+	
+	/**
+	 * Repacks the main frame due to a button change.<br>
+	 * This is here due to some lack of delegation in the SwingWT.
+	 * @param button button that was changed and creating the need of repacking
+	 */
+	public static void repackMainFrameDueToButtonChange( final JButton button ) {
+		SwingUtilities.invokeAndWait( new Runnable() {
+			public void run() {
+				button.setSize( button.getPreferredSize() );
+				button.revalidate();
+				
+				final Dimension currentDimension = new Dimension( MainFrame.getInstance().getSize() );
+				MainFrame.getInstance().setSize( currentDimension.width+1, currentDimension.height );
+				MainFrame.getInstance().setSize( currentDimension );
+				MainFrame.getInstance().pack();
+			}
+		} );
 	}
 	
 }

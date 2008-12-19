@@ -2,17 +2,17 @@ package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhfagent.Consts;
 
-import java.awt.Dimension;
+import swingwt.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.swing.JEditorPane;
-import javax.swing.JScrollPane;
-import javax.swing.event.HyperlinkEvent;
-import javax.swing.event.HyperlinkListener;
+import swingwtx.swing.JEditorPane;
+import swingwtx.swing.JScrollPane;
+import swingwtx.swing.event.HyperlinkEvent;
+import swingwtx.swing.event.HyperlinkListener;
 
 /**
  * About tab.
@@ -23,6 +23,9 @@ public class AboutTab extends Tab {
 	
 	/** A map containing the possible parameters in the template file and their values to be replaced with. */
 	private final Map< String, String > templateParameterValueMap = new HashMap< String, String >();
+	
+	/** Reference to the content editor pane, so it can be put in focus when the tab is selected. */
+	private JEditorPane editorPane;
 	
 	/**
 	 * Creates a new AboutTab.
@@ -60,12 +63,13 @@ public class AboutTab extends Tab {
 		for ( final Map.Entry< String, String > entry : templateParameterValueMap.entrySet() )
 			aboutHtml = aboutHtml.replace( entry.getKey(), entry.getValue() );
 		
-		final JEditorPane editorPane = new JEditorPane( "text/html", aboutHtml );
+		editorPane = new JEditorPane( "text/html", aboutHtml );
 		editorPane.setEditable( false );
 		editorPane.addHyperlinkListener( new HyperlinkListener() {
 			public void hyperlinkUpdate( final HyperlinkEvent event ) {
 				if ( event.getEventType() == HyperlinkEvent.EventType.ACTIVATED )
-					Utils.showURLInBrowser( event.getURL().toString() );
+					if ( event.getURL() != null )
+						Utils.showURLInBrowser( event.getURL().toString() );
 			}
 		} );
 		
@@ -82,6 +86,11 @@ public class AboutTab extends Tab {
 	
 	@Override
 	public void assignUsedProperties() {
+	}
+	
+	@Override
+	public void onSelected() {
+		editorPane.requestFocusInWindow();
 	}
 	
 }
