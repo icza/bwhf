@@ -2,23 +2,25 @@ package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhfagent.Consts;
 
-import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
+import swingwt.awt.BorderLayout;
+import swingwt.awt.event.ActionEvent;
+import swingwt.awt.event.ActionListener;
+import swingwt.awt.event.WindowAdapter;
+import swingwt.awt.event.WindowEvent;
+import swingwtx.swing.ImageIcon;
+import swingwtx.swing.JButton;
+import swingwtx.swing.JFileChooser;
+import swingwtx.swing.JFrame;
+import swingwtx.swing.JLabel;
+import swingwtx.swing.JOptionPane;
+import swingwtx.swing.JPanel;
+import swingwtx.swing.JTabbedPane;
+import swingwtx.swing.JTextField;
+import swingwtx.swing.event.ChangeEvent;
+import swingwtx.swing.event.ChangeListener;
 
 /**
  * The main frame of BWHFAgent.
@@ -45,7 +47,7 @@ public class MainFrame extends JFrame {
 	public final String applicationVersion;
 	
 	/** Starcraft directory. */
-	public final JTextField starcraftFolderTextField = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ), 25 );
+	public final JTextField starcraftFolderTextField = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ) );
 	
 	/** Reference to the general settings tab. */
 	public final GeneralSettingsTab generalSettingsTab;
@@ -93,7 +95,6 @@ public class MainFrame extends JFrame {
 	 */
 	private void buildGUI() {
 		final JPanel northPanel = new JPanel( new BorderLayout() );
-		final JPanel controlPanel = new JPanel();
 		final JButton startScButton = new JButton( "Start/Switch to Starcraft" );
 		startScButton.setMnemonic( startScButton.getText().charAt( 0 ) );
 		startScButton.addActionListener( new ActionListener() {
@@ -105,8 +106,7 @@ public class MainFrame extends JFrame {
 				}
 			}
 		} );
-		controlPanel.add( startScButton );
-		northPanel.add( controlPanel, BorderLayout.NORTH );
+		northPanel.add( Utils.wrapInPanel( startScButton ), BorderLayout.NORTH );
 		northPanel.add( new JLabel( "Starcraft directory:" ), BorderLayout.WEST );
 		northPanel.add( starcraftFolderTextField, BorderLayout.CENTER );
 		northPanel.add( Utils.createFileChooserButton( this, starcraftFolderTextField, JFileChooser.DIRECTORIES_ONLY, null, null ), BorderLayout.EAST );
@@ -117,11 +117,20 @@ public class MainFrame extends JFrame {
 		for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ ) {
 			final Tab tab = tabs[ tabIndex ];
 			final char mnemonicChar = Integer.toString( tabIndex + 1 ).charAt( 0 );
-			tabbedPane.add( mnemonicChar + " " + tab.getTitle(), tab.getScrollPane() );
-			tabbedPane.setMnemonicAt( tabIndex, mnemonicChar );
+			tabbedPane.add( mnemonicChar + " " + tab.getTitle(), tab.getContent() );
+			// SwingWT doesn't support mnemonics for tabs
+			//tabbedPane.setMnemonicAt( tabIndex, mnemonicChar );
 		}
 		
+		tabbedPane.addChangeListener( new ChangeListener() {
+			public void stateChanged( final ChangeEvent event ) {
+				tabs[ tabbedPane.getSelectedIndex() ].onSelected();
+			}
+		} );
+		
 		getContentPane().add( tabbedPane, BorderLayout.CENTER );
+		
+		tabbedPane.setSelectedIndex( 0 );
 	}
 	
 	/**

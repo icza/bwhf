@@ -1,22 +1,21 @@
 package hu.belicza.andras.bwhfagent.view;
 
-import java.awt.BorderLayout;
-import java.awt.Font;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.ScrollPaneConstants;
+import swingwt.awt.BorderLayout;
+import swingwt.awt.Font;
+import swingwt.awt.event.ActionEvent;
+import swingwt.awt.event.ActionListener;
+import swingwtx.swing.BorderFactory;
+import swingwtx.swing.JButton;
+import swingwtx.swing.JCheckBox;
+import swingwtx.swing.JPanel;
+import swingwtx.swing.JScrollPane;
+import swingwtx.swing.JTextArea;
 
 /**
  * A tab with log and log control capabilities.
@@ -63,8 +62,8 @@ public abstract class LoggedTab extends Tab {
 		logTextArea.setLineWrap( true );
 		logTextArea.setWrapStyleWord( true );
 		logTextArea.setTabSize( 4 );
-		logTextArea.setFont( new Font( null, Font.PLAIN, 12 ) );
-		logPanel.add( new JScrollPane( logTextArea, ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS, ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS ), BorderLayout.CENTER );
+		logTextArea.setFont( new Font( "default", Font.PLAIN, 10 ) );
+		logPanel.add( new JScrollPane( logTextArea ), BorderLayout.CENTER );
 		
 		final JPanel controlPanel = new JPanel();
 		controlPanel.add( scrollLockCheckBox );
@@ -97,10 +96,12 @@ public abstract class LoggedTab extends Tab {
 	protected void logMessage( final String message, final boolean appendTimeStamp ) {
 		final String formattedMessage = ( appendTimeStamp ? DATE_FORMAT.format( new Date() ) + " - " : "" ) + message + "\n";
 		
+		final int caretPosition = logTextArea.getCaretPosition();
 		logTextArea.append( formattedMessage );
 		
-		if ( !scrollLockCheckBox.isSelected() )
-			logTextArea.setCaretPosition( logTextArea.getDocument().getLength() );
+		// SwingWT scrolls automatically
+		if ( scrollLockCheckBox.isSelected() )
+			logTextArea.setCaretPosition( caretPosition );
 		
 		if ( logFileWriter != null )
 			try {

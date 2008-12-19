@@ -3,8 +3,8 @@ package hu.belicza.andras.bwhfagent.view;
 import hu.belicza.andras.bwhf.control.HackDescription;
 import hu.belicza.andras.bwhfagent.Consts;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import swingwt.awt.event.ActionEvent;
+import swingwt.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -14,10 +14,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
 
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.filechooser.FileFilter;
+import swingwtx.swing.JButton;
+import swingwtx.swing.JCheckBox;
+import swingwtx.swing.JFileChooser;
+import swingwtx.swing.filechooser.FileFilter;
 
 
 /**
@@ -88,7 +88,7 @@ public class ManualScanTab extends LoggedTab {
 				
 				fileChooser.setFileSelectionMode( JFileChooser.FILES_AND_DIRECTORIES );
 				fileChooser.setMultiSelectionEnabled( true );
-				if ( fileChooser.showOpenDialog( getScrollPane() ) == JFileChooser.APPROVE_OPTION )
+				if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION )
 					scanFilesAndFolders( fileChooser.getSelectedFiles() );
 			}
 		} );

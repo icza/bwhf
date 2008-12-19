@@ -4,11 +4,6 @@ import hu.belicza.andras.bwhf.control.HackDescription;
 import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.hackerdb.ApiConsts;
 
-import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -17,15 +12,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.filechooser.FileFilter;
+import swingwt.awt.BorderLayout;
+import swingwt.awt.GridBagConstraints;
+import swingwt.awt.GridBagLayout;
+import swingwt.awt.event.ActionEvent;
+import swingwt.awt.event.ActionListener;
+import swingwtx.swing.BorderFactory;
+import swingwtx.swing.JButton;
+import swingwtx.swing.JCheckBox;
+import swingwtx.swing.JComboBox;
+import swingwtx.swing.JFileChooser;
+import swingwtx.swing.JOptionPane;
+import swingwtx.swing.JPanel;
+import swingwtx.swing.JTextField;
+import swingwtx.swing.filechooser.FileFilter;
 
 /**
  * Autoscan tab.
@@ -48,15 +48,15 @@ public class AutoscanTab extends LoggedTab {
 	/** Checkbox to enable/disable autosaving hacker reps.                      */
 	private final JCheckBox  saveHackerRepsCheckBox         = new JCheckBox( "Save hacker replays to folder:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAVE_HACKER_REPS ) ) );
 	/** Save hacker replays to this folder.                                     */
-	private final JTextField hackerRepsDestinationTextField = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_HACKER_REPS_DESTINATION ), 30 );
+	private final JTextField hackerRepsDestinationTextField = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_HACKER_REPS_DESTINATION ) );
 	/** Checkbox to enable/disable autosaving all reps.                         */
 	private final JCheckBox  saveAllRepsCheckBox            = new JCheckBox( "Save all replays to folder:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAVE_ALL_REPS ) ) );
 	/** Save hacker replays to this folder.                                     */
-	private final JTextField allRepsDestinationTextField    = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_REPS_DESTINATION ), 30 );
+	private final JTextField allRepsDestinationTextField    = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_REPS_DESTINATION ) );
 	/** Checkbox to enable/disable playing sound if found hacks.                */
 	private final JCheckBox  playSoundCheckBox              = new JCheckBox( "Play wav file if found hacks:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_PLAY_SOUND ) ) );
 	/** Wav file to play when found hacks.                                      */
-	private final JTextField foundHacksWavFileTextField     = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_FOUND_HACKS_WAV_FILE ), 30 );
+	private final JTextField foundHacksWavFileTextField     = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_FOUND_HACKS_WAV_FILE ) );
 	/** Checkbox to enable/disable bringing main frame to front if found hacks. */
 	private final JCheckBox  bringToFrontCheckBox           = new JCheckBox( "Bring agent to front if found hacks", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_BRING_TO_FRONT ) ) );
 	/** Checkbox to enable/disable reporting hackers.                           */
@@ -177,7 +177,7 @@ public class AutoscanTab extends LoggedTab {
 							
 							if ( lastKeyCheckResult == null || !lastKeyCheckResult ) {
 								reportHackersCheckBox.setSelected( false );
-								JOptionPane.showMessageDialog( getScrollPane(), "You need a valid authorization key to report hackers!\n" + ( lastKeyCheckResult == null ? "Failed to check the authorization key." : "The supplied authorization key is invalid."), "Error", JOptionPane.ERROR_MESSAGE );
+								JOptionPane.showMessageDialog( getContent(), "You need a valid authorization key to report hackers!\n" + ( lastKeyCheckResult == null ? "Failed to check the authorization key." : "The supplied authorization key is invalid."), "Error", JOptionPane.ERROR_MESSAGE );
 							}
 							else
 								reportHackersCheckBox.setSelected( true );
@@ -197,7 +197,7 @@ public class AutoscanTab extends LoggedTab {
 		button = new JButton( "Change key" );
 		button.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				final Object newAuthorizationKeyObject = JOptionPane.showInputDialog( getScrollPane(), "Enter your authorization key:", "Changing key", JOptionPane.QUESTION_MESSAGE, null, null, authorizationKey );
+				final Object newAuthorizationKeyObject = JOptionPane.showInputDialog( getContent(), "Enter your authorization key:", "Changing key", JOptionPane.QUESTION_MESSAGE, null, null, authorizationKey );
 				if ( newAuthorizationKeyObject != null ) {
 					authorizationKey = (String) newAuthorizationKeyObject;
 					checkKeyButton.doClick();
@@ -216,8 +216,9 @@ public class AutoscanTab extends LoggedTab {
 				new NormalThread() {
 					public void run() {
 						lastKeyCheckResult = Utils.checkAuthorizationKey( authorizationKey );
-						( (JButton) event.getSource() ).setText( CHECK_KEY_BUTTON_TEXT + ( lastKeyCheckResult == null ? " (check failed!)" : ( lastKeyCheckResult ? " (valid)" : " (invalid)" ) ) );
+						checkKeyButton.setText( CHECK_KEY_BUTTON_TEXT + ( lastKeyCheckResult == null ? " (check failed!)" : ( lastKeyCheckResult ? " (valid)" : " (invalid)" ) ) );
 						checkKeyButton.setEnabled( true );
+						Utils.repackMainFrameDueToButtonChange( checkKeyButton );
 						keyCheckInProgress = false;
 					}
 				}.start();
@@ -238,7 +239,7 @@ public class AutoscanTab extends LoggedTab {
 	 * Calls {@link Utils#createFileChooserButton(java.awt.Component, JTextField, int, FileFilter, Runnable)} with the scroll pane of the tab.
 	 */
 	private JButton createFileChooserButton( final JTextField targetTextField, final int fileSelectionMode, final FileFilter choosableFileFilter, final Runnable taskOnApprove ) {
-		return Utils.createFileChooserButton( getScrollPane(), targetTextField, fileSelectionMode, choosableFileFilter, taskOnApprove );
+		return Utils.createFileChooserButton( getContent(), targetTextField, fileSelectionMode, choosableFileFilter, taskOnApprove );
 	}
 	
 	/**
