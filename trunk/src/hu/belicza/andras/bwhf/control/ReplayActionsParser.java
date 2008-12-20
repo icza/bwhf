@@ -1,7 +1,7 @@
 package hu.belicza.andras.bwhf.control;
 
 import hu.belicza.andras.bwhf.model.Action;
-import hu.belicza.andras.bwhf.model.Replay;
+import hu.belicza.andras.bwhf.model.ReplayActions;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -14,21 +14,21 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Replay parser to produce a {@link Replay} java object from a string or a text file
- * from the actions of the replay.
+ * Replay actions parser to produce a {@link ReplayActions} java object from a string or a text file
+ * containing the actions of the replay.
  * 
  * @author Andras Belicza
  */
-public class ReplayParser {
+public class ReplayActionsParser {
 	
 	/**
-	 * Parses the BWChart-exported text actions of a replay and returns the parsed replay.
+	 * Parses the BWChart-exported text actions of a replay and returns the parsed replay actions object.
 	 * 
-	 * @param replayActions
-	 * @return the parsed replay
+	 * @param replayActions string containing the actions of a replay in the BWChart export format
+	 * @return the parsed replay actions
 	 * @throws ParseException thrown if parsing fails
 	 */
-	public static Replay parseBWChartExportString( final String replayActions ) throws ParseException {
+	public static ReplayActions parseBWChartExportString( final String replayActions ) throws ParseException {
 		final Map< String, List< Action > > playerNameActionListMap = new HashMap< String, List< Action > >();
 		
 		int lineCounter =  0;
@@ -72,17 +72,17 @@ public class ReplayParser {
 			throw new ParseException( lineCounter );
 		}
 		
-		return new Replay( playerNameActionListMap );
+		return new ReplayActions( playerNameActionListMap );
 	}
 	
 	/**
 	 * Parses the BWChart-exported text actions of a replay and returns the parsed replay.
 	 * 
-	 * @param replayActions
-	 * @return the parsed replay
+	 * @param replayExportFile a text file containing the actions of a replay in the BWChart export format
+	 * @return the parsed replay actions
 	 * @throws ParseException thrown if parsing fails
 	 */
-	public static Replay parseBWChartExportFile( final File replayExportFile ) throws ParseException {
+	public static ReplayActions parseBWChartExportFile( final File replayExportFile ) throws ParseException {
 		final Map< String, List< Action > > playerNameActionListMap = new HashMap< String, List< Action > >();
 		
 		LineNumberReader reader = null;
@@ -141,7 +141,7 @@ public class ReplayParser {
 				try { reader.close(); } catch ( final Exception e ) {}
 		}
 		
-		return new Replay( playerNameActionListMap );
+		return new ReplayActions( playerNameActionListMap );
 	}
 	
 	/**

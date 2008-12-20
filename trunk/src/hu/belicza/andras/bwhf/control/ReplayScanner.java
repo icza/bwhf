@@ -1,31 +1,31 @@
 package hu.belicza.andras.bwhf.control;
 
 import hu.belicza.andras.bwhf.model.Action;
-import hu.belicza.andras.bwhf.model.Player;
-import hu.belicza.andras.bwhf.model.Replay;
+import hu.belicza.andras.bwhf.model.PlayerActions;
+import hu.belicza.andras.bwhf.model.ReplayActions;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Replay scanner which analyzes a {@link Replay} in order to find hacks in it.
+ * Replay scanner which analyzes a {@link ReplayActions} in order to find hacks in it.
  * 
  * @author Andras Belicza
  */
 public class ReplayScanner {
 	
 	/**
-	 * Scans the replay for hacks.
+	 * Scans the replay actions for hacks.
 	 * 
-	 * @param replay replay to be scanned
+	 * @param replayActions replay actions to be scanned
 	 * @param skipLatterActionsOfHackers tells whether we have to proceed to the next player if one is found hacking
 	 * @return a list of {@link HackDescription}s describing the hacks found in the rep
 	 */
-	public static List< HackDescription > scanReplayForHacks( final Replay replay, final boolean skipLatterActionsOfHackers ) {
+	public static List< HackDescription > scanReplayForHacks( final ReplayActions replayActions, final boolean skipLatterActionsOfHackers ) {
 		final List< HackDescription > hackDescriptionList = new ArrayList< HackDescription >();
 		
-		for ( int playerIndex = 0; playerIndex < replay.players.length; playerIndex++ )
-			scanPlayerForHacks( replay.players[ playerIndex ], hackDescriptionList, skipLatterActionsOfHackers );
+		for ( int playerIndex = 0; playerIndex < replayActions.players.length; playerIndex++ )
+			scanPlayerForHacks( replayActions.players[ playerIndex ], hackDescriptionList, skipLatterActionsOfHackers );
 		
 		return hackDescriptionList;
 	}
@@ -37,7 +37,7 @@ public class ReplayScanner {
 	 * @param hackDescriptionList reference to a hack description list where to put new hack descriptions
 	 * @param skipLatterActionsOfHackers tells whether we have to proceed to the next player if one is found hacking
 	 */
-	private static void scanPlayerForHacks( final Player player, final List< HackDescription > hackDescriptionList, final boolean skipLatterActionsOfHackers ) {
+	private static void scanPlayerForHacks( final PlayerActions player, final List< HackDescription > hackDescriptionList, final boolean skipLatterActionsOfHackers ) {
 		final Action[] playerActions = player.actions;
 		final int actionsCount = playerActions.length;
 		
