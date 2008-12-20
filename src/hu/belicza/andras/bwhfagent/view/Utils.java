@@ -1,7 +1,7 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhf.control.HackDescription;
-import hu.belicza.andras.bwhf.control.ReplayParser;
+import hu.belicza.andras.bwhf.control.ReplayActionsParser;
 import hu.belicza.andras.bwhf.control.ReplayScanner;
 import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.hackerdb.ApiConsts;
@@ -243,7 +243,7 @@ public class Utils {
 			final Process process = Runtime.getRuntime().exec( new String[] { Consts.REPLAY_CONVERTER_EXECUTABLE_FILE, replayFile.getAbsolutePath(), exportFile.getAbsolutePath() } );
 			process.waitFor();
 			
-			return ReplayScanner.scanReplayForHacks( ReplayParser.parseBWChartExportFile( exportFile ), skipLatterActionsOfHackersCheckBox.isSelected() );
+			return ReplayScanner.scanReplayForHacks( ReplayActionsParser.parseBWChartExportFile( exportFile ), skipLatterActionsOfHackersCheckBox.isSelected() );
 		} catch ( final Exception e ) {
 			return null;
 		}
