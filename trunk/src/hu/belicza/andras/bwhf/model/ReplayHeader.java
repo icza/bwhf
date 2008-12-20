@@ -3,8 +3,6 @@ package hu.belicza.andras.bwhf.model;
 /**
  * Class modelling the header of a replay.
  * 
- * See also: http://www.cs.utsa.edu/~wagner/laws/Abytes.html
- * 
  * @author Andras Belicza
  */
 public class ReplayHeader {

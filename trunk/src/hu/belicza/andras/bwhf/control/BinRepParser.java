@@ -25,7 +25,7 @@ public class BinRepParser {
 		parseReplay( new File( "w:/sample/00135_wrx-sti_mc - hack.rep" ) );
 	}
 	
-	private static final byte[] REPLAY_ID = new byte[] { (byte) 0xa7, (byte) 0x7e, (byte) 0x7e, (byte) 0x2b };
+	private static final byte[] REPLAY_ID = new byte[] { (byte) 0x72, (byte) 0x65, (byte) 0x52, (byte) 0x53 };
 	
 	/**
 	 * Parses a binary replay file and returns a {@link Replay} object describing it.
@@ -42,9 +42,8 @@ public class BinRepParser {
 			
 			final byte[] replayId = unpacker.unpackSection( REPLAY_ID.length );
 			for ( int i = REPLAY_ID.length - 1; i >= 0; i-- ) {
-				System.out.println( Integer.toHexString( replayId[ i ] & 0xff ) );
-/*				if ( replayId[ i ] != REPLAY_ID[ i ] )
-					return null;  // Not a replay file*/
+				if ( replayId[ i ] != REPLAY_ID[ i ] )
+					return null;  // Not a replay file
 			}
 			
 			final byte[] headerData = unpacker.unpackSection( ReplayHeader.HEADER_SIZE );
@@ -71,6 +70,7 @@ public class BinRepParser {
 			return new Replay( replayHeader, null );
 		}
 		catch ( final Exception e ) {
+			e.printStackTrace();
 			return null;
 		}
 		finally {
