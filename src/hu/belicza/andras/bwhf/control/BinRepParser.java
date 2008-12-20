@@ -5,6 +5,9 @@ import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 /**
  * Replay parser to produce a {@link Replay} java object from a binary replay file.
@@ -18,14 +21,21 @@ public class BinRepParser {
 	 * @param arguments
 	 */
 	public static void main( final String[] arguments ) {
-		parseReplay( new File( "w:/sample/nonhack rain/0288 CrT HoP coT StT sOP MP.rep" ) );
+		Replay replay = parseReplay( new File( "w:/sample/nonhack rain/0288 CrT HoP coT StT sOP MP.rep" ) );
+		displayReplayInformation( replay );
 		System.out.println();
-		parseReplay( new File( "w:/sample/Dakota hacks.rep" ) );
+		
+		replay = parseReplay( new File( "w:/sample/Dakota hacks.rep" ) );
+		displayReplayInformation( replay );
 		System.out.println();
-		parseReplay( new File( "w:/sample/00135_wrx-sti_mc - hack.rep" ) );
+		
+		replay = parseReplay( new File( "w:/sample/00135_wrx-sti_mc - hack.rep" ) );
+		displayReplayInformation( replay );
+		System.out.println();
 	}
 	
-	private static final byte[] REPLAY_ID = new byte[] { (byte) 0x72, (byte) 0x65, (byte) 0x52, (byte) 0x53 };
+	/** Size of the header section */
+	public static final int HEADER_SIZE = 0x279;
 	
 	/**
 	 * Parses a binary replay file and returns a {@link Replay} object describing it.
@@ -37,35 +47,33 @@ public class BinRepParser {
 		try {
 			unpacker = new BinReplayUnpacker( replayFile );
 			
-			final byte[] dWordBuffer = new byte[ 4 ];
-			int offset;
+			final byte[] replayId = unpacker.unpackSection( 4 );
+			if ( Integer.reverseBytes( ByteBuffer.wrap( replayId ).getInt() ) != 0x53526572 )
+				return null;  // Not a replay file
 			
-			final byte[] replayId = unpacker.unpackSection( REPLAY_ID.length );
-			for ( int i = REPLAY_ID.length - 1; i >= 0; i-- ) {
-				if ( replayId[ i ] != REPLAY_ID[ i ] )
-					return null;  // Not a replay file
-			}
+			final byte[] headerData = unpacker.unpackSection( HEADER_SIZE );
+			final ByteBuffer headerBuffer = ByteBuffer.wrap( headerData );
 			
-			final byte[] headerData = unpacker.unpackSection( ReplayHeader.HEADER_SIZE );
-			offset = 0;
 			final ReplayHeader replayHeader = new ReplayHeader();
-			replayHeader.gameEngine = headerData[ offset++ ];
+			replayHeader.gameEngine  = headerData[ 0x00 ];
 			
-			System.arraycopy( headerData, offset, dWordBuffer, 0, dWordBuffer.length ); offset += dWordBuffer.length;
+			replayHeader.gameFrames  = Integer.reverseBytes( headerBuffer.getInt( 0x01 ) );
+			replayHeader.saveTime    = new Date( Integer.reverseBytes( headerBuffer.getInt( 0x08 ) ) * 1000l );
 			
-			System.out.println( dWordBuffer[ 0 ] + " " +dWordBuffer[ 1 ] + " " + dWordBuffer[ 2 ] + " " + dWordBuffer[ 3 ] + " "  );
-			replayHeader.gameFrames = ByteBuffer.wrap( dWordBuffer ).getInt();
-			System.out.println( replayHeader.gameFrames );
+			replayHeader.gameName    = getZeroPaddedString( headerData, 0x18, 28 );
 			
-			offset += replayHeader.padding0.length;
+			replayHeader.mapWidth    = Short.reverseBytes( headerBuffer.getShort( 0x34 ) );
+			replayHeader.mapHeight   = Short.reverseBytes( headerBuffer.getShort( 0x36 ) );
 			
-			System.arraycopy( headerData, offset, dWordBuffer, 0, dWordBuffer.length ); offset += dWordBuffer.length;
-			replayHeader.saveTime = ByteBuffer.wrap( dWordBuffer ).getInt();
+			replayHeader.creatorName = getZeroPaddedString( headerData, 0x48, 24 );
 			
-			offset += replayHeader.padding1.length;
+			replayHeader.mapName     = getZeroPaddedString( headerData, 0x61, 26 );
 			
-			System.arraycopy( headerData, offset, replayHeader.gameName, 0, replayId.length ); offset += replayHeader.gameName.length;
-			System.out.println( new String( replayHeader.gameName ) );
+			for ( int i = 0; i < 12; i++ ) {
+				final String playerName = getZeroPaddedString( headerData, 0xa1 + i * 36 + 11, 26 );
+				if ( playerName.length() > 0 )
+					replayHeader.playerNames[ i ] = playerName;
+			}
 			
 			return new Replay( replayHeader, null );
 		}
@@ -77,6 +85,33 @@ public class BinRepParser {
 			if ( unpacker != null )
 				unpacker.close();
 		}
+	}
+	
+	private static String getZeroPaddedString( final byte[] data, final int offset, final int length ) {
+		String string = new String( data, offset, length );
+		
+		int firstNullCharPos = string.indexOf( 0x00 );
+		if ( firstNullCharPos >= 0 )
+			string = string.substring( 0, firstNullCharPos );
+		
+		return string;
+	}
+	
+	/**
+	 * Displays the replay header informations.
+	 * @param replay replay to be displayed informations about
+	 */
+	public static void displayReplayInformation( final Replay replay ) {
+		final ReplayHeader replayHeader = replay.replayHeader;
+		
+		System.out.println( "Game engine: " + replayHeader.getGameEngineString() );
+		System.out.println( "Duration: " + replayHeader.getDurationString()  );
+		System.out.println( "Save time: " + replayHeader.saveTime );
+		System.out.println( "Game name: " + replayHeader.gameName );
+		System.out.println( "Map size: " + replayHeader.getMapSize() );
+		System.out.println( "Creator name: " + replayHeader.creatorName );
+		System.out.println( "Map name: " + replayHeader.mapName );
+		System.out.println( "Players: " + replayHeader.getPlayerNamesString() );
 	}
 	
 }

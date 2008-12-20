@@ -1,7 +1,5 @@
 package hu.belicza.andras.bwhf.control;
 
-import hu.belicza.andras.bwhf.model.ReplayHeader;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -70,7 +68,7 @@ public class BinReplayUnpacker {
 	 * @throws Exception if the specified file is a directory, or is a file but does not exist or if it is not a replay file (based on its size)
 	 */
 	public BinReplayUnpacker( final File replayFile ) throws Exception {
-		if ( !replayFile.exists() || replayFile.isDirectory() || replayFile.length() < ReplayHeader.HEADER_SIZE + 8 ) // Not enough data for id, header and commands length
+		if ( !replayFile.exists() || replayFile.isDirectory() || replayFile.length() < BinRepParser.HEADER_SIZE + 8 ) // Not enough data for id, header and commands length
 			throw new Exception( "Not a replay file!" );
 		
 		input = new FileInputStream( replayFile );
@@ -150,13 +148,13 @@ public class BinReplayUnpacker {
 		
 		final ReplayEnc rep = new ReplayEnc();
 		
-		int length, n, len = 0, m1C, m20=0;
+		int length, n, len = 0, m1C, m20 = 0;
 		final byte[] result = new byte[ size ];
 		int resultOffset = 0;
 		
 		esi.init();
 		
-		for ( n = 0, m1C=0; n < count; n++, m1C += buffer.length, m20 += len ) {
+		for ( n = 0, m1C = 0; n < count; n++, m1C += buffer.length, m20 += len ) {
 			length = readIntFromStream();
 			if ( length > size - m20 )
 				throw new Exception();
