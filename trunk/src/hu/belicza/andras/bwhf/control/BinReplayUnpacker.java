@@ -52,7 +52,7 @@ public class BinReplayUnpacker {
 	};
 	
 	
-	/** Input stream of the replay fie. */
+	/** Input stream of the replay file. */
 	private final FileInputStream input;
 	
 	/** Buffer to be used to read int numbers.          */
@@ -135,7 +135,7 @@ public class BinReplayUnpacker {
 	}
 	
 	/**
-	 * Unpacks a seciton and returns a byte array of the unpacked data.
+	 * Unpacks a section and returns a byte array of the unpacked data.
 	 * @return a byte array of the unpacked data
 	 * @throws Exception thrown if size is zero, if I/O error occurs or there's not enough data
 	 */
@@ -180,6 +180,7 @@ public class BinReplayUnpacker {
 				throw new Exception();
 			
 			System.arraycopy( buffer, 0, result, resultOffset, len );
+			resultOffset += len;
 		}
 		
 		return result;
@@ -241,7 +242,7 @@ public class BinReplayUnpacker {
 						esi.m30[ esi.m08 ] = esi.m30[ esi.m08 - tmp ];
 					}
 					catch ( final ArrayIndexOutOfBoundsException aioobe ) {
-						// In C there is no index checking, so the next buffer in the sturct is overwritten (maybe this is intended). 
+						// In C there is no index checking, so the next buffer in the struct is overwritten (maybe this is intended). 
 						esi.m1030[ esi.m08 - esi.m30.length ] = esi.m08 - tmp < esi.m30.length ? esi.m30[ esi.m08 - tmp ] : esi.m1030[ esi.m08 - tmp - esi.m30.length ];
 					}
 			}
@@ -250,7 +251,7 @@ public class BinReplayUnpacker {
 					esi.m30[ esi.m08 ] = (byte) len;
 				}
 				catch ( final ArrayIndexOutOfBoundsException aioobe ) {
-					// In C there is no index checking, so the next buffer in the sturct is overwritten (maybe this is intended). 
+					// In C there is no index checking, so the next buffer in the struct is overwritten (maybe this is intended). 
 					esi.m1030[ esi.m08 - esi.m30.length ] = (byte) len;
 				}
 				esi.m08++;
@@ -269,7 +270,7 @@ public class BinReplayUnpacker {
 	private int function1( final Esi esi ) {
 		int x, result;
 		
-		// myesi.m14 is odd
+		// esi.m14 is odd
 		if ( ( 1 & esi.m14 ) != 0 ) {
 			if ( common( esi, 1 ) )
 				return 0x306;
@@ -282,21 +283,21 @@ public class BinReplayUnpacker {
 					return 0x306;
 				// TODO: examine this from closer, low-high byte orders...
 				//result =  Short.reverseBytes( ByteBuffer.wrap( esi.m3114, 2*result, 2 ).getShort() );
-				result =  ( ( esi.m3114[ 2 * result + 1 ] & 0xff ) << 8 ) | ( esi.m3114[ 2 * result ] & 0xff ); // memcpy(&result, &myesi->m3114[2*result], 2);
+				result = ( ( esi.m3114[ 2 * result + 1 ] & 0xff ) << 8 ) | ( esi.m3114[ 2 * result ] & 0xff ); // memcpy(&result, &myesi->m3114[2*result], 2);
 				result += x;
 			}
 			return result + 0x100;
 		}
-		// myesi->m14 is even
+		// esi.m14 is even
 		if ( common( esi, 1 ) )
 			return 0x306;
 		if ( esi.m04 == 0 ) {
 			result = esi.m14 & 0xff;
 			if ( common( esi, 8 ) )
 				return 0x306;
-		return result;
+			return result;
 		}
-		if ( esi.m14 == 0 ) {
+		if ( ( esi.m14 & 0xff )== (byte) 0 ) {
 			if ( common( esi, 8 ) )
 		    	return 0x306;
 		    result = esi.m2EB4[ esi.m14 & 0xff ] & 0xff;
@@ -316,7 +317,7 @@ public class BinReplayUnpacker {
 				}
 			}
 		}
-		if ( common( esi, esi.m2FB4 [result ] & 0xff ) )
+		if ( common( esi, esi.m2FB4[ result ] & 0xff ) )
 			return 0x306;
 		return result;
 	}
@@ -338,7 +339,7 @@ public class BinReplayUnpacker {
 			tmp |= esi.m14 & 3;
 			if ( common( esi, 2 ) )
 				return 0;
-		}   /* A38 */
+		}   // A38
 		
 		return tmp + 1;
 	}
@@ -360,9 +361,9 @@ public class BinReplayUnpacker {
 			esi.m1C++;
 			tmp |= esi.m14;
 			esi.m14 = tmp;
-			tmp >>>= ( count - ( esi.m18  & 0xff ) );
+			tmp >>>= count - ( esi.m18 & 0xff );
 			esi.m14 = tmp;
-			esi.m18 += ( 8 - count );
+			esi.m18 += 8 - count;
 		}
 		else {
 			esi.m18 -= count;
