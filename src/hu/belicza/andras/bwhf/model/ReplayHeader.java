@@ -3,7 +3,7 @@ package hu.belicza.andras.bwhf.model;
 import java.util.Date;
 
 /**
- * Class modelling the header of a replay.
+ * Class modeling the header of a replay.
  * 
  * @author Andras Belicza
  */
@@ -88,11 +88,11 @@ public class ReplayHeader {
 	public String getPlayerNamesString() {
 		final StringBuilder playerNamesBuilder = new StringBuilder();
 		
-		for ( int i = 0; i < playerNames.length; i++ )
-			if ( playerNames[ i ] != null ) {
-				if ( i > 0 )
+		for ( final String playerName : playerNames )
+			if ( playerName != null ) {
+				if ( playerNamesBuilder.length() > 0 )
 					playerNamesBuilder.append( ", " );
-				playerNamesBuilder.append( playerNames[ i ] );
+				playerNamesBuilder.append( playerName );
 			}
 		
 		return playerNamesBuilder.toString();
