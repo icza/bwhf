@@ -5,7 +5,11 @@ import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.File;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Replay parser to produce a {@link Replay} java object from a binary replay file.
@@ -52,17 +56,18 @@ public class BinRepParser {
 			// Replay header section
 			final byte[] headerData = unpacker.unpackSection( HEADER_SIZE );
 			final ByteBuffer headerBuffer = ByteBuffer.wrap( headerData );
+			headerBuffer.order( ByteOrder.LITTLE_ENDIAN );
 			
 			final ReplayHeader replayHeader = new ReplayHeader();
 			replayHeader.gameEngine  = headerData[ 0x00 ];
 			
-			replayHeader.gameFrames  = Integer.reverseBytes( headerBuffer.getInt( 0x01 ) );
-			replayHeader.saveTime    = new Date( Integer.reverseBytes( headerBuffer.getInt( 0x08 ) ) * 1000l );
+			replayHeader.gameFrames  = headerBuffer.getInt( 0x01 );
+			replayHeader.saveTime    = new Date( headerBuffer.getInt( 0x08 ) * 1000l );
 			
 			replayHeader.gameName    = getZeroPaddedString( headerData, 0x18, 28 );
 			
-			replayHeader.mapWidth    = Short.reverseBytes( headerBuffer.getShort( 0x34 ) );
-			replayHeader.mapHeight   = Short.reverseBytes( headerBuffer.getShort( 0x36 ) );
+			replayHeader.mapWidth    = headerBuffer.getShort( 0x34 );
+			replayHeader.mapHeight   = headerBuffer.getShort( 0x36 );
 			
 			replayHeader.creatorName = getZeroPaddedString( headerData, 0x48, 24 );
 			
@@ -74,12 +79,34 @@ public class BinRepParser {
 					replayHeader.playerNames[ i ] = playerName;
 			}
 			
+			for ( int i = 0; i < replayHeader.playerColors.length; i++ )
+				replayHeader.playerColors[ i ] = headerBuffer.getInt( 0x251 + i * 4 );
+			replayHeader.playerSpotIndices = Arrays.copyOfRange( headerData, 0x271, 0x271 + 8 );
+			
 			// Player commands length section
 			final int playerCommandsLength = Integer.reverseBytes( ByteBuffer.wrap( unpacker.unpackSection( 4 ) ).getInt() );
 			System.out.println( playerCommandsLength );
 			
 			// Player commands section
-			final byte[] playerCommandsData = unpacker.unpackSection( playerCommandsLength );
+			final ByteBuffer playerCommandsBuffer = ByteBuffer.wrap( unpacker.unpackSection( playerCommandsLength ) );
+			playerCommandsBuffer.order( ByteOrder.LITTLE_ENDIAN );
+			final List< String > pl = new ArrayList< String >();
+			for ( final String n : replayHeader.playerNames )
+				if ( n!= null )
+					pl.add( n );
+			do {
+				//frame += playerCommandsBuffer.getInt(); // frames past
+				final int frame = playerCommandsBuffer.getInt();
+				final int commandBlocksLength = playerCommandsBuffer.get() & 0xff;
+				final int playerId            = playerCommandsBuffer.get() & 0xff;
+				final int blockId             = playerCommandsBuffer.get() & 0xff;
+				
+				//System.out.println( "Command blocks length: " + commandBlocksLength );
+				System.out.println( frame + " Player ID: " + pl.get( playerId ) );
+				//System.out.println( "Block ID: " + blockId );
+				
+				playerCommandsBuffer.position( playerCommandsBuffer.position() + commandBlocksLength - 2 );
+			} while ( Math.random() < 2 );
 			
 			return new Replay( replayHeader, null );
 		}

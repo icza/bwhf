@@ -11,8 +11,6 @@ import java.util.Arrays;
  * The algorithm comes from JCA's bwreplib.<br>
  * Java port and optimization for Java environment by Andras Belicza.
  * 
- * See also: http://www.cs.utsa.edu/~wagner/laws/Abytes.html
- * 
  * @author Andras Belicza
  */
 public class BinReplayUnpacker {
@@ -99,38 +97,12 @@ public class BinReplayUnpacker {
 		ReplayEnc m24;
 		int       m28;
 		int       m2C;
-		byte[]    m30   = new byte[ 0x1000 ];
-		byte[]    m1030 = new byte[ 0x1000 ];
-		byte[]    m2030 = new byte[ 0x0204 ];
-		byte[]    m2234 = new byte[ 0x0800 ];
-		byte[]    m2A34 = new byte[ 0x0100 ];
-		byte[]    m2B34 = new byte[ 0x0100 ];
-		byte[]    m2C34 = new byte[ 0x0100 ];
-		byte[]    m2D34 = new byte[ 0x0180 ];
-		byte[]    m2EB4 = new byte[ 0x0100 ];
-		byte[]    m2FB4 = new byte[ 0x0100 ];
-		byte[]    m30B4 = new byte[ 0x0040 ];
-		byte[]    m30F4 = new byte[ 0x0010 ];
-		byte[]    m3104 = new byte[ 0x0010 ];
-		byte[]    m3114 = new byte[ 0x0020 ];
+		byte[]    data = new byte[ 0x3114 + 0x20 ]; // allocates 0x30 extra bytes in the beginning, but we ignore those
 		
 		public void init() {
-			 m2C = m28 = m20 = m1C = m18 = m14 = m10 = m0C = m08 = m04 = m00 = 0;
-			 m24 = null;
-			 Arrays.fill( m30  , (byte) 0x00 );
-			 Arrays.fill( m1030, (byte) 0x00 );
-			 Arrays.fill( m2030, (byte) 0x00 );
-			 Arrays.fill( m2234, (byte) 0x00 );
-			 Arrays.fill( m2A34, (byte) 0x00 );
-			 Arrays.fill( m2B34, (byte) 0x00 );
-			 Arrays.fill( m2C34, (byte) 0x00 );
-			 Arrays.fill( m2D34, (byte) 0x00 );
-			 Arrays.fill( m2EB4, (byte) 0x00 );
-			 Arrays.fill( m2FB4, (byte) 0x00 );
-			 Arrays.fill( m30B4, (byte) 0x00 );
-			 Arrays.fill( m30F4, (byte) 0x00 );
-			 Arrays.fill( m3104, (byte) 0x00 );
-			 Arrays.fill( m3114, (byte) 0x00 );
+			m2C = m28 = m20 = m1C = m18 = m14 = m10 = m0C = m08 = m04 = m00 = 0;
+			m24 = null;
+			Arrays.fill( data, (byte) 0x00 );
 		}
 	}
 	
@@ -189,7 +161,7 @@ public class BinReplayUnpacker {
 	private int unpackRepSection( final Esi esi, final ReplayEnc rep ) {
 		esi.m24 = rep;
 		esi.m1C = 0x800;
-		esi.m20 = esi28( esi.m2234, esi.m1C, esi.m24 );
+		esi.m20 = esi28( 0x2234, esi.m1C, esi.m24 );
 		if ( esi.m20 <= 4 )
 			return 3;
 		esi.m04 = rep.src[ 0 ] & 0xff;
@@ -204,22 +176,22 @@ public class BinReplayUnpacker {
 		if ( esi.m04 != 0 )
 			return 2;
 		
-		System.arraycopy( OFF_5071D0, 0, esi.m30F4, 0, OFF_5071D0.length );
-		com1( OFF_5071E0.length, esi.m30F4, OFF_5071E0, esi.m2B34 );
-		System.arraycopy( OFF_5071A0, 0, esi.m3104, 0, OFF_5071A0.length );
-		System.arraycopy( OFF_5071B0, 0, esi.m3114, 0, OFF_5071B0.length );
-		System.arraycopy( OFF_507120, 0, esi.m30B4, 0, OFF_507120.length );
-		com1( OFF_507160.length, esi.m30B4, OFF_507160, esi.m2A34 );
+		System.arraycopy( OFF_5071D0, 0, esi.data, 0x30F4, OFF_5071D0.length );
+		com1( OFF_5071E0.length, 0x30F4, OFF_5071E0, 0x2B34 );
+		System.arraycopy( OFF_5071A0, 0, esi.data, 0x3104, OFF_5071A0.length );
+		System.arraycopy( OFF_5071B0, 0, esi.data, 0x3114, OFF_5071B0.length );
+		System.arraycopy( OFF_507120, 0, esi.data, 0x30B4, OFF_507120.length );
+		com1( OFF_507160.length, 0x30B4, OFF_507160, 0x2A34 );
 		unpackRepChunk( esi );
 		
 		return 0;
 	}
 	
-	private void com1( final int strlen, final byte[] src, final byte[] str, final byte[] dst ) {
+	private void com1( final int strlen, final int srcPos, final byte[] str, final int dstPos ) {
 		int x,y;
 		for ( int n = strlen - 1 ; n >= 0; n-- )
-			for ( x = str[ n ] & 0xff, y = 1 << ( src[ n ] & 0xff ); x < 0x100; x += y )
-				dst[ x ] = (byte) n;
+			for ( x = str[ n ] & 0xff, y = 1 << ( esi.data[ srcPos + n ] & 0xff ); x < 0x100; x += y )
+				esi.data[ dstPos + x ] = (byte) n;
 	}
 	
 	private int unpackRepChunk( final Esi esi ) {
@@ -238,31 +210,19 @@ public class BinReplayUnpacker {
 					break;
 				}
 				for ( ; len > 0; esi.m08++, len-- )
-					try {
-						esi.m30[ esi.m08 ] = esi.m30[ esi.m08 - tmp ];
-					}
-					catch ( final ArrayIndexOutOfBoundsException aioobe ) {
-						// In C there is no index checking, so the next buffer in the struct is overwritten (maybe this is intended). 
-						esi.m1030[ esi.m08 - esi.m30.length ] = esi.m08 - tmp < esi.m30.length ? esi.m30[ esi.m08 - tmp ] : esi.m1030[ esi.m08 - tmp - esi.m30.length ];
-					}
+					esi.data[ 0x30 + esi.m08 ] = esi.data[ 0x30 + esi.m08 - tmp ];
 			}
 			else { // just copy the character
-				try {
-					esi.m30[ esi.m08 ] = (byte) len;
-				}
-				catch ( final ArrayIndexOutOfBoundsException aioobe ) {
-					// In C there is no index checking, so the next buffer in the struct is overwritten (maybe this is intended). 
-					esi.m1030[ esi.m08 - esi.m30.length ] = (byte) len;
-				}
+				esi.data[ 0x30 + esi.m08 ] = (byte) len;
 				esi.m08++;
 			}
 			if ( esi.m08 < 0x2000 )
 				continue;
-			esi2C( esi.m1030, 0x1000, esi.m24 );
-			System.arraycopy( esi.m1030, 0, esi.m30, 0, esi.m08 - 0x1000 );
+			esi2C( 0x1030, 0x1000, esi.m24 );
+			System.arraycopy( esi.data, 0x1030, esi.data, 0x30, esi.m08 - 0x1000 );
 			esi.m08 -= 0x1000;
 		} while ( true );
-		esi2C( esi.m1030, esi.m08 - 0x1000, esi.m24 );
+		esi2C( 0x1030, esi.m08 - 0x1000, esi.m24 );
 		
 		return len;
 	}
@@ -274,16 +234,15 @@ public class BinReplayUnpacker {
 		if ( ( 1 & esi.m14 ) != 0 ) {
 			if ( common( esi, 1 ) )
 				return 0x306;
-			result = esi.m2B34[ esi.m14 & 0xff ] & 0xff;
-			if ( common( esi, esi.m30F4[ result ] & 0xff ) )
+			result = esi.data[ 0x2B34 + ( esi.m14 & 0xff ) ] & 0xff;
+			if ( common( esi, esi.data[ 0x30F4 + result ] & 0xff ) )
 				return 0x306;
-			if ( esi.m3104[ result ] != (byte) 0 ) {
-				x = ( ( 1 << ( esi.m3104[ result ] & 0xff ) ) - 1 ) & esi.m14;
-				if ( common( esi, esi.m3104[ result ] & 0xff ) && ( result + x ) != 0x10E )
+			if ( esi.data[ 0x3104 + result ] != (byte) 0 ) {
+				x = ( ( 1 << ( esi.data[ 0x3104 + result ] & 0xff ) ) - 1 ) & esi.m14;
+				if ( common( esi, esi.data[ 0x3104 + result ] & 0xff ) && ( result + x ) != 0x10E )
 					return 0x306;
-				// TODO: examine this from closer, low-high byte orders...
 				//result =  Short.reverseBytes( ByteBuffer.wrap( esi.m3114, 2*result, 2 ).getShort() );
-				result = ( ( esi.m3114[ 2 * result + 1 ] & 0xff ) << 8 ) | ( esi.m3114[ 2 * result ] & 0xff ); // memcpy(&result, &myesi->m3114[2*result], 2);
+				result = ( ( esi.data[ 0x3114 + 2 * result + 1 ] & 0xff ) << 8 ) | ( esi.data[ 0x3114 + 2 * result ] & 0xff ); // memcpy(&result, &myesi->m3114[2*result], 2);
 				result += x;
 			}
 			return result + 0x100;
@@ -300,24 +259,24 @@ public class BinReplayUnpacker {
 		if ( ( esi.m14 & 0xff )== (byte) 0 ) {
 			if ( common( esi, 8 ) )
 		    	return 0x306;
-		    result = esi.m2EB4[ esi.m14 & 0xff ] & 0xff;
+		    result = esi.data[ 0x2EB4 + ( esi.m14 & 0xff ) ] & 0xff;
 		}
 		else {
-			result = esi.m2C34[ esi.m14 & 0xff ] & 0xff;
+			result = esi.data[ 0x2C34 + ( esi.m14 & 0xff ) ] & 0xff;
 			if ( result == 0xFF ) {
 				if ( ( esi.m14 & 0x3F ) == 0 ) {
 					if ( common( esi, 6 ) )
 						return 0x306;
-					result = esi.m2C34[ esi.m14 & 0x7F ] & 0xff;
+					result = esi.data[ 0x2C34 + ( esi.m14 & 0x7F ) ] & 0xff;
 				}
 				else {
 					if ( common( esi, 4 ) )
 						return 0x306;
-					result = esi.m2D34[ esi.m14 & 0xFF ] & 0xff;
+					result = esi.data[ 0x2D34 + ( esi.m14 & 0xFF ) ] & 0xff;
 				}
 			}
 		}
-		if ( common( esi, esi.m2FB4[ result ] & 0xff ) )
+		if ( common( esi, esi.data[ 0x2FB4 + result ] & 0xff ) )
 			return 0x306;
 		return result;
 	}
@@ -325,8 +284,8 @@ public class BinReplayUnpacker {
 	private int function2( final Esi esi, final int len ) {
 		int tmp;
 		
-		tmp = esi.m2A34[ esi.m14 & 0xff ] & 0xff;
-		if ( common( esi, esi.m30B4[ tmp ] & 0xff ) )
+		tmp = esi.data[ 0x2A34 + ( esi.m14 & 0xff ) ] & 0xff;
+		if ( common( esi, esi.data[ 0x30B4 + tmp ] & 0xff ) )
 			return 0;
 		if ( len != 2 ) {
 			tmp <<= esi.m0C & 0xff;
@@ -350,13 +309,13 @@ public class BinReplayUnpacker {
 		if ( esi.m18 < count ) {
 			esi.m14 >>>= esi.m18 & 0xff;
 			if ( esi.m1C == esi.m20 ) {
-				esi.m20 = esi28( esi.m2234, 0x800, esi.m24 );
+				esi.m20 = esi28( 0x2234, 0x800, esi.m24 );
 				if ( esi.m20 == 0 )
 					return true;
 				else
 					esi.m1C = 0;
 			}
-			tmp = esi.m2234[ esi.m1C ] & 0xff;
+			tmp = esi.data[ 0x2234 + esi.m1C ] & 0xff;
 			tmp <<= 8;
 			esi.m1C++;
 			tmp |= esi.m14;
@@ -373,16 +332,16 @@ public class BinReplayUnpacker {
 		return false;
 	}
 	
-	private int esi28( final byte[] dst, int len, final ReplayEnc rep ) {
+	private int esi28( final int dstPos, int len, final ReplayEnc rep ) {
 		len = Math.min( rep.m10 - rep.m04, len );
-		System.arraycopy( rep.src, rep.m04, dst, 0, len );
+		System.arraycopy( rep.src, rep.m04, esi.data, dstPos, len );
 		rep.m04 += len;
 		return len;
 	}
 	
-	private void esi2C( final byte[] src, final int len, final ReplayEnc rep ) {
+	private void esi2C( final int srcPos, final int len, final ReplayEnc rep ) {
 		if ( rep.m0C + len <= rep.m14 )
-			System.arraycopy( src, 0, rep.m08, rep.m0C, len );
+			System.arraycopy( esi.data, srcPos, rep.m08, rep.m0C, len );
 		rep.m0C += len;
 	}
 	

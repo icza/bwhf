@@ -26,7 +26,7 @@ public class ReplayHeader {
 	public String   mapName;
 	public String[] playerNames = new String[ 12 ];
 	public byte[]   playerRecords = new byte[ 432 ]; // 12 player records, 12*36 bytes
-	public byte[]   playerColors  = new byte[ 8 * 4 ]; // Player spot color (ABGR)
+	public int[]    playerColors  = new int[ 8 ]; // Player spot color (ABGR)
 	public byte[]   playerSpotIndices = new byte[ 8 ]; 
 	
 	/**
