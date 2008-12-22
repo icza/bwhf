@@ -1,16 +1,11 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhf.control.BinRepParser;
 import hu.belicza.andras.bwhf.control.HackDescription;
-import hu.belicza.andras.bwhf.control.ReplayActionsParser;
 import hu.belicza.andras.bwhf.control.ReplayScanner;
 import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.hackerdb.ApiConsts;
 
-import swingwt.awt.Component;
-import swingwt.awt.Dimension;
-import swingwt.awt.FlowLayout;
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -20,7 +15,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Date;
 import java.util.List;
 import java.util.Properties;
 import java.util.Set;
@@ -30,6 +24,12 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
+
+import swingwt.awt.Component;
+import swingwt.awt.Dimension;
+import swingwt.awt.FlowLayout;
+import swingwt.awt.event.ActionEvent;
+import swingwt.awt.event.ActionListener;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComponent;
@@ -233,24 +233,15 @@ public class Utils {
 	/**
 	 * Scans a replay file and returns the hack descriptions found in it.
 	 * @param replayFile file to be scanned
-	 * @return the list of {@link HackDescription}s found in the replay or null if scanning the replay failed
+	 * @return the list of {@link HackDescription}s found in the replay or <code>null</code> if scanning the replay failed
 	 */
 	public static List< HackDescription > scanReplayFile( final File replayFile ) {
 		final JCheckBox skipLatterActionsOfHackersCheckBox = MainFrame.getInstance().generalSettingsTab.skipLatterActionsOfHackersCheckBox;
 		
-		final File exportFile = new File( "rep-" + (long) ( Math.random() * 1000000l ) + "-" + new Date().getTime() + ".out" );
 		try {
-			final Process process = Runtime.getRuntime().exec( new String[] { Consts.REPLAY_CONVERTER_EXECUTABLE_FILE, replayFile.getAbsolutePath(), exportFile.getAbsolutePath() } );
-			process.waitFor();
-			
-			return ReplayScanner.scanReplayForHacks( ReplayActionsParser.parseBWChartExportFile( exportFile ), skipLatterActionsOfHackersCheckBox.isSelected() );
+			return ReplayScanner.scanReplayForHacks( BinRepParser.parseReplay( replayFile ).replayActions, skipLatterActionsOfHackersCheckBox.isSelected() );
 		} catch ( final Exception e ) {
 			return null;
-		}
-		finally {
-			if ( !exportFile.delete() )
-				if ( exportFile.exists() )
-					exportFile.deleteOnExit();
 		}
 	}
 	

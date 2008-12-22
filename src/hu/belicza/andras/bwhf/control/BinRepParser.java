@@ -29,9 +29,11 @@ public class BinRepParser {
 	public static void main( final String[] arguments ) {
 		//final String[] replayNames = new String[] { "w:/sample/nonhack rain/0288 CrT HoP coT StT sOP MP.rep" };
 		//final String[] replayNames = new String[] { "w:/sample/Dakota hacks.rep" };
-		final String[] replayNames = new String[] { "w:/sample/00135_wrx-sti_mc - hack.rep" };
-		//final String[] replayNames = new String[] { "w:/sample/nonhack rain/0288 CrT HoP coT StT sOP MP.rep", "w:/sample/Dakota hacks.rep", "w:/sample/00135_wrx-sti_mc - hack.rep" };
+		//final String[] replayNames = new String[] { "w:/sample/00135_wrx-sti_mc - hack.rep" };
+		//final String[] replayNames = new String[] { "w:/sample/nonhack rain/0288 CrT HoP coT StT sOP MP.rep" };//, "w:/sample/Dakota hacks.rep", "w:/sample/00135_wrx-sti_mc - hack.rep" };
 		//final String[] replayNames = new String[] { "w:/Dakota hacks.rep", "w:/9369 NiT thT LT DP gP DT sZ.rep", "w:/9745 SuT TCT wNT NeP DoZ DZ.rep" };
+		final String[] replayNames = new String[] { "X:\\maps\\replays\\nd]hunter mc hack.rep" };
+		
 		
 		for ( final String replayName : replayNames ) {
 			final Replay replay = parseReplay( new File( replayName ) );
@@ -102,9 +104,11 @@ public class BinRepParser {
 			final List< String > playerNameList = new ArrayList< String >();
 			for ( int i = 0; i < replayHeader.playerNames.length; i++ )
 				if ( replayHeader.playerNames[ i ] != null ) {
-					// playerid: playerRecords[ playerIndex * 36 + 4 ]
-					playerIdPlayerIndexMap.put( replayHeader.playerRecords[ i * 36 + 4 ] & 0xff, playerNameList.size() );
-					playerNameList.add( replayHeader.playerNames[ i ] );
+					final int playerId = replayHeader.playerRecords[ i * 36 + 4 ] & 0xff;
+					if ( playerId != 0xff ) { // Computers are listed with playerId values of 0xff, but no actions are recorded from them.
+						playerIdPlayerIndexMap.put( playerId, playerNameList.size() );
+						playerNameList.add( replayHeader.playerNames[ i ] );
+					}
 				}
 			
 			final List< Action >[] playerActionLists = new ArrayList[ playerNameList.size() ]; // Indexed by playerId!
@@ -124,8 +128,9 @@ public class BinRepParser {
 			
 			// Now create the ReplayActions object, and we can return the replay
 			final Map< String, List< Action > > playerNameActionListMap = new HashMap< String, List< Action > >( playerNameList.size() );
-			for ( int playerId = 0; playerId < playerActionLists.length; playerId++ )
+			for ( int playerId = 0; playerId < playerActionLists.length; playerId++ ) {
 				playerNameActionListMap.put( playerNameList.get( playerIdPlayerIndexMap.get( playerId ) ), playerActionLists[ playerId ] );
+			}
 			
 			return new Replay( replayHeader, new ReplayActions( playerNameActionListMap ) );
 		}
@@ -272,9 +277,9 @@ public class BinRepParser {
 		int    skipBytes = 0;
 		
 		switch ( blockId ) {
-			case 0x09 :   // Select units
-			case 0x0a :   // Shift select units
-			case 0x0b : { // Shift deselect units
+			case (byte) 0x09 :   // Select units
+			case (byte) 0x0a :   // Shift select units
+			case (byte) 0x0b : { // Shift deselect units
 				int unitsCount = commandsBuffer.get() & 0xff;
 				final StringBuilder parametersBuilder = new StringBuilder();
 				for ( ; unitsCount > 0; unitsCount-- ) {
@@ -283,28 +288,28 @@ public class BinRepParser {
 						parametersBuilder.append( ',' );
 				}
 				// TODO: determine unit name indices
-				action = new Action( frame, parametersBuilder.toString(), blockId == 0x09 ? Action.ACTION_NAME_INDEX_SELECT : Action.ACTION_NAME_INDEX_UNKNOWN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, parametersBuilder.toString(), blockId == (byte) 0x09 ? Action.ACTION_NAME_INDEX_SELECT : Action.ACTION_NAME_INDEX_UNKNOWN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
-			case 0x0c : { // Build
+			case (byte) 0x0c : { // Build
 				// TODO: parse this to determine building name indices
 				skipBytes = 7;
 				break;
 			}
-			case 0x0d : { // Vision
+			case (byte) 0x0d : { // Vision
 				skipBytes = 2;
 				break;
 			}
-			case 0x0e : { // Ally
+			case (byte) 0x0e : { // Ally
 				skipBytes = 4;
 				break;
 			}
-			case 0x13 : { // Hotkey
+			case (byte) 0x13 : { // Hotkey
 				final byte type = commandsBuffer.get();
 				action = new Action( frame, ( type == (byte) 0x00 ? Action.HOTKEY_ACTION_PARAM_NAME_SELECT : Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN ) + "," + commandsBuffer.get(), Action.ACTION_NAME_INDEX_HOTKEY, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
-			case 0x14 : { // Move
+			case (byte) 0x14 : { // Move
 				final short posX   = commandsBuffer.getShort();
 				final short posY   = commandsBuffer.getShort();
 				/*final short unitId = */commandsBuffer.getShort(); // Move to (posX;posY) if this is 0xffff, or move to this unit if it's a valid unit id (if it's not 0xffff)
@@ -312,7 +317,7 @@ public class BinRepParser {
 				action = new Action( frame, posX + "," + posY, Action.ACTION_NAME_INDEX_MOVE, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
-			case 0x15 : { // Attach/Right Click/Cast Magic/Use ability
+			case (byte) 0x15 : { // Attach/Right Click/Cast Magic/Use ability
 				final short posX   = commandsBuffer.getShort();
 				final short posY   = commandsBuffer.getShort();
 				/*final short unitId = */commandsBuffer.getShort(); // (posX;posY) if this is 0xffff, or target this unit if it's a valid unit id (if it's not 0xffff)
@@ -320,54 +325,55 @@ public class BinRepParser {
 				final byte type    = commandsBuffer.get();
 				
 				int actionNameIndex = Action.ACTION_NAME_INDEX_UNKNOWN;
-				if ( type == 0x00 || type == 0x06 ) // Move with right click or Move by click move icon
+				if ( type == (byte) 0x00 || type == (byte) 0x06 ) // Move with right click or Move by click move icon
 					actionNameIndex = Action.ACTION_NAME_INDEX_MOVE;
-				else if ( type == 0x0e ) // Attack move
+				else if ( type == (byte) 0x0e ) // Attack move
 					actionNameIndex = Action.ACTION_NAME_INDEX_ATTACK_MOVE;
 				
 				commandsBuffer.get(); // Type2: 0x00 for normal attack, 0x01 for shift attack
 				action = new Action( frame, posX + "," + posY, actionNameIndex, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
-			case 0x1f : { // Train
+			case (byte) 0x1f : { // Train
 				final short unitId = commandsBuffer.getShort();
 				// TODO: determine unit name index
 				action = new Action( frame, unitTypesMap.get( unitId ), Action.ACTION_NAME_INDEX_TRAIN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
-			case 0x20 : { // Cancel train
+			case (byte) 0x20 : { // Cancel train
 				skipBytes = 2;
 				action = new Action( frame, "", Action.ACTION_NAME_INDEX_CANCEL_TRAIN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
-			case 0x23 : { // Hatch
+			case (byte) 0x23 : { // Hatch
 				final short unitId = commandsBuffer.getShort();
 				// TODO: determine unit name index
 				action = new Action( frame, unitTypesMap.get( unitId ), Action.ACTION_NAME_INDEX_HATCH, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
-			case 0x1e :   // Return chargo
-			case 0x21 :   // Cloack
-			case 0x22 :   // Decloack
-			case 0x25 :   // Unsiege
-			case 0x26 :   // Siege
-			case 0x28 :   // Unload all
-			case 0x2b :   // Hold position
-			case 0x2c :   // Burrow
-			case 0x2d :   // Unburrow
-			case 0x30 :   // Research
-			case 0x32 :   // Upgrade
-			case 0x57 :   // Leave game
-			case 0x1a : { // Stop
+			case (byte) 0x1e :   // Return chargo
+			case (byte) 0x21 :   // Cloack
+			case (byte) 0x22 :   // Decloack
+			case (byte) 0x25 :   // Unsiege
+			case (byte) 0x26 :   // Siege
+			case (byte) 0x28 :   // Unload all
+			case (byte) 0x2b :   // Hold position
+			case (byte) 0x2c :   // Burrow
+			case (byte) 0x2d :   // Unburrow
+			case (byte) 0x30 :   // Research
+			case (byte) 0x32 :   // Upgrade
+			case (byte) 0x57 :   // Leave game
+			case (byte) 0x1a : { // Stop
 				skipBytes = 1;
 				break;
 			}
-			case 0x35 :   // Morph
-			case 0x29 : { // Unload
+			case (byte) 0x35 :   // Morph
+			case (byte) 0x29 : { // Unload
 				skipBytes = 2;
 				break;
 			}
-			case 0x2f : { // Lift
+			case (byte) 0x58 :   // Minimap ping (?)
+			case (byte) 0x2f : { // Lift
 				skipBytes = 4;
 				break;
 			}
