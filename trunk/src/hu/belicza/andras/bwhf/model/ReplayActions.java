@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Class modelling the actions of a replay.
+ * Class modeling the actions of a replay.
  * 
  * @author Andras Belicza
  */
@@ -17,9 +17,9 @@ public class ReplayActions {
 	public final PlayerActions[] players;
 	
 	/**
-	 * Creates a new Replay.
+	 * Creates a new ReplayActions.
 	 * 
-	 * @param playerNameActionListMap map containint the actions of the players of the replay
+	 * @param playerNameActionListMap map containing the actions of the players of the replay
 	 */
 	public ReplayActions( final Map< String, List< Action > >playerNameActionListMap ) {
 		this.playerNameActionListMap = playerNameActionListMap;
