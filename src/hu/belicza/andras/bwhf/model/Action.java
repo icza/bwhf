@@ -20,7 +20,7 @@ public class Action {
 	
 	
 	/** Possible action names. */
-	private static final String[] ACTION_NAMES = {
+	public static final String[] ACTION_NAMES = {
 		"HACK",
 		"Cancel Train",
 		"!0x33",
@@ -167,4 +167,23 @@ public class Action {
 		parameterUnitNameIndex = parameterUnitNameIndex_;
 	}
 	
+	/**
+	 * Creates a new Action with pre-identified indices.
+	 * 
+	 * @param iteration                  iteration of the action
+	 * @param parameters                 parameter string of the atcion
+	 * @param actionNameIndex            index determining the action name
+	 * @param parameterUnitNameIndex     index determining the unit name
+	 * @param parameterBuildingNameIndex index determining the building name
+	 */
+	public Action( final int iteration, final String parameters, final int actionNameIndex, final int parameterUnitNameIndex, final int parameterBuildingNameIndex ) { 
+		this.iteration  = iteration;
+		this.name       = null;
+		this.parameters = parameters;
+		this.unitIds    = null;
+		
+		this.actionNameIndex            = actionNameIndex;
+		this.parameterUnitNameIndex     = parameterUnitNameIndex;
+		this.parameterBuildingNameIndex = parameterBuildingNameIndex;
+	}
 }

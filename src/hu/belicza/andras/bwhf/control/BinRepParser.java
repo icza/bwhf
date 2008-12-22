@@ -1,6 +1,8 @@
 package hu.belicza.andras.bwhf.control;
 
+import hu.belicza.andras.bwhf.model.Action;
 import hu.belicza.andras.bwhf.model.Replay;
+import hu.belicza.andras.bwhf.model.ReplayActions;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.File;
@@ -9,7 +11,9 @@ import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Replay parser to produce a {@link Replay} java object from a binary replay file.
@@ -23,8 +27,11 @@ public class BinRepParser {
 	 * @param arguments
 	 */
 	public static void main( final String[] arguments ) {
-		//final String[] replays = new String[] { "w:/sample/nonhack rain/0288 CrT HoP coT StT sOP MP.rep", "w:/sample/Dakota hacks.rep", "w:/sample/00135_wrx-sti_mc - hack.rep" };
-		final String[] replayNames = new String[] { "w:/Dakota hacks.rep", "w:/9369 NiT thT LT DP gP DT sZ.rep", "w:/9745 SuT TCT wNT NeP DoZ DZ.rep" };
+		//final String[] replayNames = new String[] { "w:/sample/nonhack rain/0288 CrT HoP coT StT sOP MP.rep" };
+		//final String[] replayNames = new String[] { "w:/sample/Dakota hacks.rep" };
+		final String[] replayNames = new String[] { "w:/sample/00135_wrx-sti_mc - hack.rep" };
+		//final String[] replayNames = new String[] { "w:/sample/nonhack rain/0288 CrT HoP coT StT sOP MP.rep", "w:/sample/Dakota hacks.rep", "w:/sample/00135_wrx-sti_mc - hack.rep" };
+		//final String[] replayNames = new String[] { "w:/Dakota hacks.rep", "w:/9369 NiT thT LT DP gP DT sZ.rep", "w:/9745 SuT TCT wNT NeP DoZ DZ.rep" };
 		
 		for ( final String replayName : replayNames ) {
 			final Replay replay = parseReplay( new File( replayName ) );
@@ -79,36 +86,48 @@ public class BinRepParser {
 					replayHeader.playerNames[ i ] = playerName;
 			}
 			
+			replayHeader.playerRecords = Arrays.copyOfRange( headerData, 0xa1, 0xa1 + 431 );
 			for ( int i = 0; i < replayHeader.playerColors.length; i++ )
 				replayHeader.playerColors[ i ] = headerBuffer.getInt( 0x251 + i * 4 );
 			replayHeader.playerSpotIndices = Arrays.copyOfRange( headerData, 0x271, 0x271 + 8 );
 			
 			// Player commands length section
 			final int playerCommandsLength = Integer.reverseBytes( ByteBuffer.wrap( unpacker.unpackSection( 4 ) ).getInt() );
-			System.out.println( playerCommandsLength );
 			
 			// Player commands section
-			final ByteBuffer playerCommandsBuffer = ByteBuffer.wrap( unpacker.unpackSection( playerCommandsLength ) );
-			playerCommandsBuffer.order( ByteOrder.LITTLE_ENDIAN );
-			final List< String > pl = new ArrayList< String >();
-			for ( final String n : replayHeader.playerNames )
-				if ( n!= null )
-					pl.add( n );
-			do {
-				//frame += playerCommandsBuffer.getInt(); // frames past
-				final int frame = playerCommandsBuffer.getInt();
-				final int commandBlocksLength = playerCommandsBuffer.get() & 0xff;
-				final int playerId            = playerCommandsBuffer.get() & 0xff;
-				final int blockId             = playerCommandsBuffer.get() & 0xff;
-				
-				//System.out.println( "Command blocks length: " + commandBlocksLength );
-				System.out.println( frame + " Player ID: " + pl.get( playerId ) );
-				//System.out.println( "Block ID: " + blockId );
-				
-				playerCommandsBuffer.position( playerCommandsBuffer.position() + commandBlocksLength - 2 );
-			} while ( Math.random() < 2 );
+			final ByteBuffer commandsBuffer = ByteBuffer.wrap( unpacker.unpackSection( playerCommandsLength ) );
+			commandsBuffer.order( ByteOrder.LITTLE_ENDIAN );
 			
-			return new Replay( replayHeader, null );
+			final Map< Integer, Integer > playerIdPlayerIndexMap= new HashMap< Integer, Integer >();
+			final List< String > playerNameList = new ArrayList< String >();
+			for ( int i = 0; i < replayHeader.playerNames.length; i++ )
+				if ( replayHeader.playerNames[ i ] != null ) {
+					// playerid: playerRecords[ playerIndex * 36 + 4 ]
+					playerIdPlayerIndexMap.put( replayHeader.playerRecords[ i * 36 + 4 ] & 0xff, playerNameList.size() );
+					playerNameList.add( replayHeader.playerNames[ i ] );
+				}
+			
+			final List< Action >[] playerActionLists = new ArrayList[ playerNameList.size() ]; // Indexed by playerId!
+			for ( int i = 0; i < playerActionLists.length; i++ )
+				playerActionLists[ i ] = new ArrayList< Action >();
+			
+			while ( commandsBuffer.position() < playerCommandsLength ) {
+				final int frame               = commandsBuffer.getInt();
+				int       commandBlocksLength = commandsBuffer.get() & 0xff;
+				final int commandBlocksEndPos = commandsBuffer.position() + commandBlocksLength;
+				
+				while ( commandsBuffer.position() < commandBlocksEndPos ) {
+					final int  playerId = commandsBuffer.get() & 0xff;
+					playerActionLists[ playerId ].add( readNextAction( frame, commandsBuffer ) );
+				}
+			}
+			
+			// Now create the ReplayActions object, and we can return the replay
+			final Map< String, List< Action > > playerNameActionListMap = new HashMap< String, List< Action > >( playerNameList.size() );
+			for ( int playerId = 0; playerId < playerActionLists.length; playerId++ )
+				playerNameActionListMap.put( playerNameList.get( playerIdPlayerIndexMap.get( playerId ) ), playerActionLists[ playerId ] );
+			
+			return new Replay( replayHeader, new ReplayActions( playerNameActionListMap ) );
 		}
 		catch ( final Exception e ) {
 			e.printStackTrace();
@@ -120,6 +139,14 @@ public class BinRepParser {
 		}
 	}
 	
+	/**
+	 * Returns a string from a "C" style buffer array.<br>
+	 * That means we take the bytes of a string form a buffer until we find a 0x00 terminating character.
+	 * @param data   data to read from
+	 * @param offset offset to read from
+	 * @param length max length of the string
+	 * @return the zero padded string read from the buffer
+	 */
 	private static String getZeroPaddedString( final byte[] data, final int offset, final int length ) {
 		String string = new String( data, offset, length );
 		
@@ -128,6 +155,231 @@ public class BinRepParser {
 			string = string.substring( 0, firstNullCharPos );
 		
 		return string;
+	}
+	
+	private static final Map< Short, String > unitTypesMap = new HashMap< Short, String >();
+	static {
+		unitTypesMap.put( (short) 0x00, "Marine" );
+		unitTypesMap.put( (short) 0x01, "Ghost" );
+		unitTypesMap.put( (short) 0x02, "Vulture" );
+		unitTypesMap.put( (short) 0x03, "Goliath" );
+		unitTypesMap.put( (short) 0x05, "Siege Tank" );
+		unitTypesMap.put( (short) 0x07, "SCV" );
+		unitTypesMap.put( (short) 0x07, "Wraith" );
+		unitTypesMap.put( (short) 0x09, "Science Vessel" );
+		unitTypesMap.put( (short) 0x0B, "Dropship" );
+		unitTypesMap.put( (short) 0x0C, "Battlecruiser" );
+		unitTypesMap.put( (short) 0x0E, "Nuke" );
+		unitTypesMap.put( (short) 0x20, "Firebat" );
+		unitTypesMap.put( (short) 0x22, "Medic" );
+		unitTypesMap.put( (short) 0x25, "Zergling" );
+		unitTypesMap.put( (short) 0x26, "Hydralisk" );
+		unitTypesMap.put( (short) 0x27, "Ultralisk" );
+		unitTypesMap.put( (short) 0x29, "Drone" );
+		unitTypesMap.put( (short) 0x2A, "Overlord" );
+		unitTypesMap.put( (short) 0x2B, "Mutalisk" );
+		unitTypesMap.put( (short) 0x2C, "Guardian" );
+		unitTypesMap.put( (short) 0x2D, "Queen" );
+		unitTypesMap.put( (short) 0x2E, "Defiler" );
+		unitTypesMap.put( (short) 0x2F, "Scourge" );
+		unitTypesMap.put( (short) 0x32, "Infested Terran" );
+		unitTypesMap.put( (short) 0x3A, "Valkyrie" );
+		unitTypesMap.put( (short) 0x3C, "Corsair" );
+		unitTypesMap.put( (short) 0x3D, "Dark Templar" );
+		unitTypesMap.put( (short) 0x3E, "Devourer" );
+		unitTypesMap.put( (short) 0x40, "Probe" );
+		unitTypesMap.put( (short) 0x41, "Zealot" );
+		unitTypesMap.put( (short) 0x42, "Dragoon" );
+		unitTypesMap.put( (short) 0x43, "High Templar" );
+		unitTypesMap.put( (short) 0x45, "Shuttle" );
+		unitTypesMap.put( (short) 0x46, "Scout" );
+		unitTypesMap.put( (short) 0x47, "Arbiter" );
+		unitTypesMap.put( (short) 0x48, "Carrier" );
+		unitTypesMap.put( (short) 0x53, "Reaver" );
+		unitTypesMap.put( (short) 0x54, "Observer" );
+		unitTypesMap.put( (short) 0x67, "Lurker" );
+		unitTypesMap.put( (short) 0x6A, "Command Center" );
+		unitTypesMap.put( (short) 0x6B, "ComSat" );
+		unitTypesMap.put( (short) 0x6C, "Nuclear Silo" );
+		unitTypesMap.put( (short) 0x6D, "Supply Depot" );
+		unitTypesMap.put( (short) 0x6E, "Refinery" ); //refinery?
+		unitTypesMap.put( (short) 0x6F, "Barracks" );
+		unitTypesMap.put( (short) 0x70, "Academy" ); //Academy?
+		unitTypesMap.put( (short) 0x71, "Factory" );
+		unitTypesMap.put( (short) 0x72, "Starport" );
+		unitTypesMap.put( (short) 0x73, "Control Tower" );
+		unitTypesMap.put( (short) 0x74, "Science Facility" );
+		unitTypesMap.put( (short) 0x75, "Covert Ops" );
+		unitTypesMap.put( (short) 0x76, "Physics Lab" );
+		unitTypesMap.put( (short) 0x78, "Machine Shop" );
+		unitTypesMap.put( (short) 0x7A, "Engineering Bay" );
+		unitTypesMap.put( (short) 0x7B, "Armory" );
+		unitTypesMap.put( (short) 0x7C, "Missile Turret" );
+		unitTypesMap.put( (short) 0x7D, "Bunker" );
+		unitTypesMap.put( (short) 0x82, "Infested CC" );
+		unitTypesMap.put( (short) 0x83, "Hatchery" );
+		unitTypesMap.put( (short) 0x84, "Lair" );
+		unitTypesMap.put( (short) 0x85, "Hive" );
+		unitTypesMap.put( (short) 0x86, "Nydus Canal" );
+		unitTypesMap.put( (short) 0x87, "Hydralisk Den" );
+		unitTypesMap.put( (short) 0x88, "Defiler Mound" );
+		unitTypesMap.put( (short) 0x89, "Greater Spire" );
+		unitTypesMap.put( (short) 0x8A, "Queens Nest" );
+		unitTypesMap.put( (short) 0x8B, "Evolution Chamber" );
+		unitTypesMap.put( (short) 0x8C, "Ultralisk Cavern" );
+		unitTypesMap.put( (short) 0x8D, "Spire" );
+		unitTypesMap.put( (short) 0x8E, "Spawning Pool" );
+		unitTypesMap.put( (short) 0x8F, "Creep Colony" );
+		unitTypesMap.put( (short) 0x90, "Spore Colony" );
+		unitTypesMap.put( (short) 0x92, "Sunken Colony" );
+		unitTypesMap.put( (short) 0x95, "Extractor" );
+		unitTypesMap.put( (short) 0x9A, "Nexus" );
+		unitTypesMap.put( (short) 0x9B, "Robotics Facility" );
+		unitTypesMap.put( (short) 0x9C, "Pylon" );
+		unitTypesMap.put( (short) 0x9D, "Assimilator" );
+		unitTypesMap.put( (short) 0x9F, "Observatory" );
+		unitTypesMap.put( (short) 0xA0, "Gateway" );
+		unitTypesMap.put( (short) 0xA2, "Photon Cannon" );
+		unitTypesMap.put( (short) 0xA3, "Citadel of Adun" );
+		unitTypesMap.put( (short) 0xA4, "Cybernetics Core" );
+		unitTypesMap.put( (short) 0xA5, "Templar Archives" );
+		unitTypesMap.put( (short) 0xA6, "Forge" );
+		unitTypesMap.put( (short) 0xA7, "Stargate" );
+		unitTypesMap.put( (short) 0xA9, "Fleet Beacon" );
+		unitTypesMap.put( (short) 0xAA, "Arbiter Tribunal" );
+		unitTypesMap.put( (short) 0xAB, "Robotics Support Bay" );
+		unitTypesMap.put( (short) 0xAC, "Shield Battery" );
+		unitTypesMap.put( (short) 0xC0, "Larva" );
+		unitTypesMap.put( (short) 0xC1, "Rine/Bat" );
+		unitTypesMap.put( (short) 0xC2, "Dark Archon" );
+		unitTypesMap.put( (short) 0xC3, "Archon" );
+		unitTypesMap.put( (short) 0xC4, "Scarab" );
+		unitTypesMap.put( (short) 0xC5, "Interceptor" );
+		unitTypesMap.put( (short) 0xC6, "Interceptor/Scarab" );		
+	}
+	
+	/**
+	 * Reads the next action in the commands buffer.<br>
+	 * Only parses actions which are important in hack detection.
+	 * @param frame          frame of the action
+	 * @param commandsBuffer commands buffer to be read from
+	 * @return the next action object
+	 */
+	private static Action readNextAction( final int frame, final ByteBuffer commandsBuffer ) {
+		final byte blockId  = commandsBuffer.get();
+		
+		Action action    = null;
+		int    skipBytes = 0;
+		
+		switch ( blockId ) {
+			case 0x09 :   // Select units
+			case 0x0a :   // Shift select units
+			case 0x0b : { // Shift deselect units
+				int unitsCount = commandsBuffer.get() & 0xff;
+				final StringBuilder parametersBuilder = new StringBuilder();
+				for ( ; unitsCount > 0; unitsCount-- ) {
+					parametersBuilder.append( commandsBuffer.getShort() );
+					if ( unitsCount > 1 )
+						parametersBuilder.append( ',' );
+				}
+				// TODO: determine unit name indices
+				action = new Action( frame, parametersBuilder.toString(), blockId == 0x09 ? Action.ACTION_NAME_INDEX_SELECT : Action.ACTION_NAME_INDEX_UNKNOWN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				break;
+			}
+			case 0x0c : { // Build
+				// TODO: parse this to determine building name indices
+				skipBytes = 7;
+				break;
+			}
+			case 0x0d : { // Vision
+				skipBytes = 2;
+				break;
+			}
+			case 0x0e : { // Ally
+				skipBytes = 4;
+				break;
+			}
+			case 0x13 : { // Hotkey
+				final byte type = commandsBuffer.get();
+				action = new Action( frame, ( type == (byte) 0x00 ? Action.HOTKEY_ACTION_PARAM_NAME_SELECT : Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN ) + "," + commandsBuffer.get(), Action.ACTION_NAME_INDEX_HOTKEY, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				break;
+			}
+			case 0x14 : { // Move
+				final short posX   = commandsBuffer.getShort();
+				final short posY   = commandsBuffer.getShort();
+				/*final short unitId = */commandsBuffer.getShort(); // Move to (posX;posY) if this is 0xffff, or move to this unit if it's a valid unit id (if it's not 0xffff)
+				skipBytes = 3;
+				action = new Action( frame, posX + "," + posY, Action.ACTION_NAME_INDEX_MOVE, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				break;
+			}
+			case 0x15 : { // Attach/Right Click/Cast Magic/Use ability
+				final short posX   = commandsBuffer.getShort();
+				final short posY   = commandsBuffer.getShort();
+				/*final short unitId = */commandsBuffer.getShort(); // (posX;posY) if this is 0xffff, or target this unit if it's a valid unit id (if it's not 0xffff)
+				commandsBuffer.getShort(); // Unknown
+				final byte type    = commandsBuffer.get();
+				
+				int actionNameIndex = Action.ACTION_NAME_INDEX_UNKNOWN;
+				if ( type == 0x00 || type == 0x06 ) // Move with right click or Move by click move icon
+					actionNameIndex = Action.ACTION_NAME_INDEX_MOVE;
+				else if ( type == 0x0e ) // Attack move
+					actionNameIndex = Action.ACTION_NAME_INDEX_ATTACK_MOVE;
+				
+				commandsBuffer.get(); // Type2: 0x00 for normal attack, 0x01 for shift attack
+				action = new Action( frame, posX + "," + posY, actionNameIndex, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				break;
+			}
+			case 0x1f : { // Train
+				final short unitId = commandsBuffer.getShort();
+				// TODO: determine unit name index
+				action = new Action( frame, unitTypesMap.get( unitId ), Action.ACTION_NAME_INDEX_TRAIN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				break;
+			}
+			case 0x20 : { // Cancel train
+				skipBytes = 2;
+				action = new Action( frame, "", Action.ACTION_NAME_INDEX_CANCEL_TRAIN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				break;
+			}
+			case 0x23 : { // Hatch
+				final short unitId = commandsBuffer.getShort();
+				// TODO: determine unit name index
+				action = new Action( frame, unitTypesMap.get( unitId ), Action.ACTION_NAME_INDEX_HATCH, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				break;
+			}
+			case 0x1e :   // Return chargo
+			case 0x21 :   // Cloack
+			case 0x22 :   // Decloack
+			case 0x25 :   // Unsiege
+			case 0x26 :   // Siege
+			case 0x28 :   // Unload all
+			case 0x2b :   // Hold position
+			case 0x2c :   // Burrow
+			case 0x2d :   // Unburrow
+			case 0x30 :   // Research
+			case 0x32 :   // Upgrade
+			case 0x57 :   // Leave game
+			case 0x1a : { // Stop
+				skipBytes = 1;
+				break;
+			}
+			case 0x35 :   // Morph
+			case 0x29 : { // Unload
+				skipBytes = 2;
+				break;
+			}
+			case 0x2f : { // Lift
+				skipBytes = 4;
+				break;
+			}
+		}
+		
+		if ( skipBytes > 0 )
+			commandsBuffer.position( commandsBuffer.position() + skipBytes );
+		
+		if ( action == null )
+			action = new Action( frame, "", Action.ACTION_NAME_INDEX_UNKNOWN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+		
+		return action;
 	}
 	
 	/**

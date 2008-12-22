@@ -21,7 +21,7 @@ public class ReplayActions {
 	 * 
 	 * @param playerNameActionListMap map containing the actions of the players of the replay
 	 */
-	public ReplayActions( final Map< String, List< Action > >playerNameActionListMap ) {
+	public ReplayActions( final Map< String, List< Action > > playerNameActionListMap ) {
 		this.playerNameActionListMap = playerNameActionListMap;
 		
 		players = new PlayerActions[ playerNameActionListMap.size() ];
