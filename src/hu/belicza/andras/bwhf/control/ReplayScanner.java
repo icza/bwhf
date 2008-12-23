@@ -39,7 +39,7 @@ public class ReplayScanner {
 	 */
 	private static void scanPlayerForHacks( final PlayerActions player, final List< HackDescription > hackDescriptionList, final boolean skipLatterActionsOfHackers ) {
 		final Action[] playerActions = player.actions;
-		final int actionsCount = playerActions.length;
+		final int      actionsCount  = playerActions.length;
 		
 		final int initialHackDescriptionListSize = hackDescriptionList.size();
 		
@@ -128,23 +128,17 @@ public class ReplayScanner {
 					hackDescriptionList.add( new HackDescription( player.name, player.name + " used zerg moneyhack at " + action.iteration ) );
 			
 			// Multicommand hack: giving "several" actions in the same iteration
-			if ( lastIteration == action.iteration ) {
+			// If actions being next to each other are the same actions (regardless to its parameters),
+			// it can be due to lag and/or "action spam". Don't count and report those
+			// This "same" action checking is not completely correct, since we don't distinguish between a lot of actions,
+			// but this is accurate enough since we parse and use the most common actions for hack detection
+			if ( lastIteration == action.iteration && lastAction.actionNameIndex != action.actionNameIndex ) {
 				if ( action.actionNameIndex != Action.ACTION_NAME_INDEX_HOTKEY )
 					nonHotkeyActionsCountInSameIteration++;
 			}
 			else {
-				if ( nonHotkeyActionsCountInSameIteration > 14 ) {
-					// If all of the counted actions are the same (like "Move", it can be due to lag and/or "action spam").
-					boolean multicommandHack = false;
-					final int referenceActionNameIndex = playerActions[ actionIndex - 1 ].actionNameIndex;
-					for ( int i = nonHotkeyActionsCountInSameIteration; i > 1; i-- )
-						if ( playerActions[ actionIndex - i ].actionNameIndex != referenceActionNameIndex ) {
-							multicommandHack = true;
-							break;
-						}
-					if ( multicommandHack )
-						hackDescriptionList.add( new HackDescription( player.name, player.name + " used multicommand hack at " + lastAction.iteration ) );
-				}
+				if ( nonHotkeyActionsCountInSameIteration > 14 )
+					hackDescriptionList.add( new HackDescription( player.name, player.name + " used multicommand hack at " + lastAction.iteration ) );
 				lastIteration = action.iteration;
 				nonHotkeyActionsCountInSameIteration = 0;
 			}

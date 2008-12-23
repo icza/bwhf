@@ -5,16 +5,22 @@ package hu.belicza.andras.hackerdb;
  * 
  * @author Andras Belicza
  */
-public class ApiConsts {
+public class ServerApiConsts {
 	
-	/** Name of the operation request parameter.   */
-	public static final String REQUEST_PARAMETER_NAME_OPERATION = "op";
-	/** Name of the key request parameter.         */
-	public static final String REQUEST_PARAMETER_NAME_KEY       = "key";
-	/** Name of the player name request parameter. */
-	public static final String REQUEST_PARAMETER_NAME_PLAYER    = "pln";
-	/** Name of the gateway request parameter.     */
-	public static final String REQUEST_PARAMETER_NAME_GATEWAY   = "gat";
+	/** Name of the operation request parameter.       */
+	public static final String REQUEST_PARAMETER_NAME_OPERATION   = "op";
+	/** Name of the key request parameter.             */
+	public static final String REQUEST_PARAMETER_NAME_KEY         = "key";
+	/** Name of the player name request parameter.     */
+	public static final String REQUEST_PARAMETER_NAME_PLAYER      = "pln";
+	/** Name of the gateway request parameter.         */
+	public static final String REQUEST_PARAMETER_NAME_GATEWAY     = "gat";
+	/** Name of the game engine request parameter.     */
+	public static final String REQUEST_PARAMETER_NAME_GAME_ENGINE = "gen";
+	/** Name of the map name request parameter.        */
+	public static final String REQUEST_PARAMETER_NAME_MAP_NAME    = "mpn";
+	/** Name of the filters present request parameter. */
+	public static final String REQUEST_PARAMETER_FILTERS_PRESENT  = "fpr";
 	
 	/** List hackers operation value.            */
 	public static final String OPERATION_LIST   = "lst";
@@ -23,15 +29,22 @@ public class ApiConsts {
 	/** Report hackers operation value.          */
 	public static final String OPERATION_REPORT = "rep";
 	
-	/** String representations of gateways. Only the index should be sent over. */
-	public static final String[] GATEWAYS = new String[] { "USEast", "USWest", "Europe", "Asia", "iCCup", "Other" };
+	/** Message to be sent back to the client if his/her report was accepted and processed. */
+	public static final String REPORT_ACCEPTED_MESSAGE = "OK";
+	
+	/** String representations of gateways. Only the index should is sent over. */
+	public static final String[] GATEWAYS     = new String[] { "USEast", "USWest", "Europe", "Asia", "iCCup", "Other" };
+	/** String representations of game engines. Only the index is be sent over. */
+	public static final String[] GAME_ENGINES = new String[] { "Starcraft", "Broodwar" };
 	
 	/** Filter name for name.              */
 	public static final String FILTER_NAME_NAME              = "nam";
-	/** Filter name for no all gateways.   */
-	public static final String FILTER_NAME_NO_ALL_GATEWAYS   = "nag";
 	/** Filter name for gateway.           */
 	public static final String FILTER_NAME_GATEWAY           = "gat";
+	/** Filter name for game engine.       */
+	public static final String FILTER_NAME_GAME_ENGINE       = "gen";
+	/** Filter name for game engine.       */
+	public static final String FILTER_NAME_MAP_NAME          = "mpn";
 	/** Filter name for min report count.  */
 	public static final String FILTER_NAME_MIN_REPORT_COUNT  = "mrc";
 	/** Filter name for reported with key. */

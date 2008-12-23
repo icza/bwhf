@@ -1,6 +1,9 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhf.control.BinRepParser;
 import hu.belicza.andras.bwhf.control.HackDescription;
+import hu.belicza.andras.bwhf.control.ReplayScanner;
+import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhfagent.Consts;
 
 import swingwt.awt.event.ActionEvent;
@@ -150,7 +153,9 @@ public class ManualScanTab extends LoggedTab {
 			@Override
 			public void run() {
 				try {
-					logMessage( "", false ); // Prints an empty line
+					final boolean skipLatterActionsOfHackers = MainFrame.getInstance().generalSettingsTab.skipLatterActionsOfHackersCheckBox.isSelected();
+					
+					logMessage( "\n", false ); // Prints 2 empty lines
 					if ( !isLastReplay )
 						logMessage( "Counting replays..." );
 					
@@ -174,7 +179,11 @@ public class ManualScanTab extends LoggedTab {
 						if ( requestedToStop )
 							return;
 						
-						final List< HackDescription > hackDescriptionList = Utils.scanReplayFile( replayFile );
+						List< HackDescription > hackDescriptionList = null; 
+						final Replay replay = BinRepParser.parseReplay( replayFile );
+						if ( replay != null )
+							hackDescriptionList = ReplayScanner.scanReplayForHacks( replay.replayActions, skipLatterActionsOfHackers );
+						
 						if ( hackDescriptionList == null ) {
 							skippedRepsCount++;
 							logMessage( "Could not scan " + replayFile.getAbsolutePath() + "!" );

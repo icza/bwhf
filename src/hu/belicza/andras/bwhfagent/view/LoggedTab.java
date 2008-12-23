@@ -94,7 +94,8 @@ public abstract class LoggedTab extends Tab {
 	 * @param appendTimeStamp tells whether timestamp should be appended to the message
 	 */
 	protected void logMessage( final String message, final boolean appendTimeStamp ) {
-		final String formattedMessage = ( appendTimeStamp ? DATE_FORMAT.format( new Date() ) + " - " : "" ) + message + "\n";
+		// In SwingWT tabs are not working, so we replace them.
+		final String formattedMessage = ( appendTimeStamp ? DATE_FORMAT.format( new Date() ) + " - " : "" ) + message.replace( "\t", "    " ) + "\n";
 		
 		final int caretPosition = logTextArea.getCaretPosition();
 		logTextArea.append( formattedMessage );

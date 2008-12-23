@@ -1,10 +1,7 @@
 package hu.belicza.andras.bwhfagent.view;
 
-import hu.belicza.andras.bwhf.control.BinRepParser;
-import hu.belicza.andras.bwhf.control.HackDescription;
-import hu.belicza.andras.bwhf.control.ReplayScanner;
 import hu.belicza.andras.bwhfagent.Consts;
-import hu.belicza.andras.hackerdb.ApiConsts;
+import hu.belicza.andras.hackerdb.ServerApiConsts;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -15,7 +12,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
@@ -31,7 +27,6 @@ import swingwt.awt.FlowLayout;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.JButton;
-import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComponent;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JPanel;
@@ -234,21 +229,6 @@ public class Utils {
 	}
 	
 	/**
-	 * Scans a replay file and returns the hack descriptions found in it.
-	 * @param replayFile file to be scanned
-	 * @return the list of {@link HackDescription}s found in the replay or <code>null</code> if scanning the replay failed
-	 */
-	public static List< HackDescription > scanReplayFile( final File replayFile ) {
-		final JCheckBox skipLatterActionsOfHackersCheckBox = MainFrame.getInstance().generalSettingsTab.skipLatterActionsOfHackersCheckBox;
-		
-		try {
-			return ReplayScanner.scanReplayForHacks( BinRepParser.parseReplay( replayFile ).replayActions, skipLatterActionsOfHackersCheckBox.isSelected() );
-		} catch ( final Exception e ) {
-			return null;
-		}
-	}
-	
-	/**
 	 * Copies the source file to the destination folder using the specified destination file name.<br>
 	 * If destination folder does not exist, tries to create it (recursively).
 	 * 
@@ -301,7 +281,7 @@ public class Utils {
 	public static Boolean checkAuthorizationKey( final String key ) {
 		BufferedReader input = null;
 		try {
-			input = new BufferedReader( new InputStreamReader( new URL( Consts.BWHF_HACKER_DATA_BASE_SERVER_URL + "?" + ApiConsts.REQUEST_PARAMETER_NAME_OPERATION + "=" + ApiConsts.OPERATION_CHECK + "&" + ApiConsts.REQUEST_PARAMETER_NAME_KEY + "=" + URLEncoder.encode( key, "UTF-8" ) ).openStream() ) );
+			input = new BufferedReader( new InputStreamReader( new URL( Consts.BWHF_HACKER_DATA_BASE_SERVER_URL + "?" + ServerApiConsts.REQUEST_PARAMETER_NAME_OPERATION + "=" + ServerApiConsts.OPERATION_CHECK + "&" + ServerApiConsts.REQUEST_PARAMETER_NAME_KEY + "=" + URLEncoder.encode( key, "UTF-8" ) ).openStream() ) );
 			return Boolean.parseBoolean( input.readLine() );
 		} catch ( final Exception e ) {
 			if ( input != null )
@@ -314,25 +294,29 @@ public class Utils {
 	 * Sends a report to the BWHF hacker data base server.
 	 * @param gateway       gateway of the reported players
 	 * @param key           authorization key to be used
+	 * @param gameEngine    game engine
+	 * @param mapName       map name
 	 * @param playerNameSet set of player names that were found hacking
 	 * @return null if report succeeded; an error message otherwise
 	 */
-	public static String sendHackerReport( final String key, final int gateway, final Set< String > playerNameSet ) {
+	public static String sendHackerReport( final String key, final int gateway, final int gameEngine, final String mapName, final Set< String > playerNameSet ) {
 		BufferedReader input = null;
 		try {
 			final StringBuilder reportURLBuilder = new StringBuilder( Consts.BWHF_HACKER_DATA_BASE_SERVER_URL );
-			reportURLBuilder.append( '?' ).append( ApiConsts.REQUEST_PARAMETER_NAME_OPERATION ).append( '=' ).append( ApiConsts.OPERATION_REPORT        )
-							.append( '&' ).append( ApiConsts.REQUEST_PARAMETER_NAME_KEY       ).append( '=' ).append( URLEncoder.encode( key, "UTF-8" ) )
-							.append( '&' ).append( ApiConsts.REQUEST_PARAMETER_NAME_GATEWAY   ).append( '=' ).append( gateway                           );
+			reportURLBuilder.append( '?' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_OPERATION   ).append( '=' ).append( ServerApiConsts.OPERATION_REPORT      )
+							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_KEY         ).append( '=' ).append( URLEncoder.encode( key, "UTF-8" )     )
+							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_GATEWAY     ).append( '=' ).append( gateway                               )
+							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_GAME_ENGINE ).append( '=' ).append( gameEngine                            )
+							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_MAP_NAME    ).append( '=' ).append( URLEncoder.encode( mapName, "UTF-8" ) );
 			
 			int i = 0;
 			for ( final String playerName : playerNameSet )
-				reportURLBuilder.append( '&' ).append( ApiConsts.REQUEST_PARAMETER_NAME_PLAYER ).append( i++ ).append( '=' ).append( URLEncoder.encode( playerName, "UTF-8" ) );
+				reportURLBuilder.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_PLAYER ).append( i++ ).append( '=' ).append( URLEncoder.encode( playerName, "UTF-8" ) );
 			
 			input = new BufferedReader( new InputStreamReader( new URL( reportURLBuilder.toString() ).openStream() ) );
 			final String message = input.readLine();
 			
-			return message.length() == 0 ? null : message;
+			return message.equals( ServerApiConsts.REPORT_ACCEPTED_MESSAGE ) ? null : message;
 		} catch ( final Exception e ) {
 			if ( input != null )
 				try { input.close(); } catch ( final IOException ie ) {}

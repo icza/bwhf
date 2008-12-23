@@ -1,8 +1,11 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhf.control.BinRepParser;
 import hu.belicza.andras.bwhf.control.HackDescription;
+import hu.belicza.andras.bwhf.control.ReplayScanner;
+import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhfagent.Consts;
-import hu.belicza.andras.hackerdb.ApiConsts;
+import hu.belicza.andras.hackerdb.ServerApiConsts;
 
 import java.io.File;
 import java.text.DateFormat;
@@ -62,7 +65,7 @@ public class AutoscanTab extends LoggedTab {
 	/** Checkbox to enable/disable reporting hackers.                           */
 	private final JCheckBox  reportHackersCheckBox          = new JCheckBox( "Report hackers to a central hacker database with Battle.net gateway:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPORT_HACKERS ) ) );
 	/** Combobox to select the gateway of the user.                             */
-	private final JComboBox gatewayComboBox                 = new JComboBox( ApiConsts.GATEWAYS );
+	private final JComboBox gatewayComboBox                 = new JComboBox( ServerApiConsts.GATEWAYS );
 	
 	/** Authorization key to report hackers.      */
 	private String           authorizationKey = Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTHORIZATION_KEY );
@@ -250,7 +253,8 @@ public class AutoscanTab extends LoggedTab {
 			
 			@Override
 			public void run() {
-				final JTextField starcraftFolderTextField = MainFrame.getInstance().starcraftFolderTextField;
+				final JTextField starcraftFolderTextField           = MainFrame.getInstance().starcraftFolderTextField;
+				final JCheckBox  skipLatterActionsOfHackersCheckBox = MainFrame.getInstance().generalSettingsTab.skipLatterActionsOfHackersCheckBox;
 				
 				Date autoscanEnabledTime       = null;
 				long lastModifiedOfLastChecked = 0l; // Last modified time of the LastReplay.rep that was checked lastly.
@@ -272,7 +276,11 @@ public class AutoscanTab extends LoggedTab {
 								logMessage( "LastReplay.rep was modified - proceeding to scan..." );
 								lastModifiedOfLastChecked = newLastReplayLastModified;
 								
-								final List< HackDescription > hackDescriptionList = Utils.scanReplayFile( lastReplayFile );
+								List< HackDescription > hackDescriptionList = null; 
+								final Replay replay = BinRepParser.parseReplay( lastReplayFile );
+								if ( replay != null )
+									hackDescriptionList = ReplayScanner.scanReplayForHacks( replay.replayActions, skipLatterActionsOfHackersCheckBox.isSelected() );
+								
 								if ( hackDescriptionList == null )
 									logMessage( "Could not scan LastReplay.rep!" );
 								else
@@ -295,7 +303,7 @@ public class AutoscanTab extends LoggedTab {
 											for ( final HackDescription hackDescription : hackDescriptionList )
 												playerNameSet.add( hackDescription.playerName );
 											
-											final String message = Utils.sendHackerReport( authorizationKey, gatewayComboBox.getSelectedIndex(), playerNameSet );
+											final String message = Utils.sendHackerReport( authorizationKey, gatewayComboBox.getSelectedIndex(), replay.replayHeader.gameEngine & 0xff, replay.replayHeader.mapName, playerNameSet );
 											if ( message == null )
 												logMessage( "Sending hacker report succeeded." );
 											else
