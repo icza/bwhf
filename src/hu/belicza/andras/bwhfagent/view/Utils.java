@@ -85,19 +85,20 @@ public class Utils {
 	 * Creates and returns a button with a registered action listener which opens a file chooser
 	 * with the specified file selection mode, and on approved returned option stores the selected file
 	 * into the target text field. 
-	 * @param parent              component to be used as parent for the file chooser dialog
-	 * @param targetTextField     text field to be updated if file/folder is selected
-	 * @param fileSelectionMode   the type of files to be displayed
-	 * 							  <ul>
-	 * 								<li>JFileChooser.FILES_ONLY
-	 * 								<li>JFileChooser.DIRECTORIES_ONLY
-	 * 								<li>JFileChooser.FILES_AND_DIRECTORIES
-	 * 							  </ul>
-	 * @param choosableFileFilter file filter to add as a choosable file filter
+	 * @param parent                component to be used as parent for the file chooser dialog
+	 * @param targetTextField       text field to be updated if file/folder is selected
+	 * @param fileSelectionMode     the type of files to be displayed
+	 * 								<ul>
+	 * 									<li>JFileChooser.FILES_ONLY
+	 * 									<li>JFileChooser.DIRECTORIES_ONLY
+	 * 									<li>JFileChooser.FILES_AND_DIRECTORIES
+	 * 								</ul>
+	 * @param choosableFileFilter   file filter to add as a choosable file filter for Swing
+	 * @param choosableFileFilterWT file filter to add as a choosable file filter for SwingWT
 	 * @param taskOnApprove       task to be executed after selection if approve is performed, can be null
 	 * @return a button handling the file chooser
 	 */
-	public static JButton createFileChooserButton( final Component parent, final JTextField targetTextField, final int fileSelectionMode, final FileFilter choosableFileFilter, final Runnable taskOnApprove ) {
+	public static JButton createFileChooserButton( final Component parent, final JTextField targetTextField, final int fileSelectionMode, final FileFilter choosableFileFilter, final String[][] choosableFileFilterWT, final Runnable taskOnApprove ) {
 		final JButton chooseButton = new JButton( "Choose..." );
 		
 		chooseButton.addActionListener( new ActionListener() {
@@ -106,6 +107,8 @@ public class Utils {
 				
 				if ( choosableFileFilter != null )
 					fileChooser.addChoosableFileFilter( choosableFileFilter ); 
+				if ( choosableFileFilterWT != null )
+					fileChooser.setExtensionFilters( choosableFileFilterWT[ 0 ], choosableFileFilterWT[ 1 ] );
 				
 				fileChooser.setFileSelectionMode( fileSelectionMode );
 				if ( fileChooser.showOpenDialog( parent ) == JFileChooser.APPROVE_OPTION )

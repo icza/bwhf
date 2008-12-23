@@ -17,6 +17,7 @@ import java.util.Map.Entry;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JFileChooser;
+import swingwtx.swing.JPanel;
 import swingwtx.swing.filechooser.FileFilter;
 
 
@@ -46,14 +47,16 @@ public class ManualScanTab extends LoggedTab {
 		}
 	};
 	
-	/** Button to scan the last replay.             */
-	private final JButton   scanLastReplayButton        = new JButton( "Scan 'LastReplay.rep'" );
-	/** Button to select files and folders to scan. */
-	private final JButton   selectFilesAndFoldersButton = new JButton( "Select files and folders to scan recursively" );
-	/** Button to stop the current scan.            */
-	private final JButton   stopScanButton              = new JButton( "Stop current scan" );
-	/** Flag hacker reps checkbox.                  */
-	private final JCheckBox flagHackerRepsCheckBox      = new JCheckBox( "Flag hacker replays by appending '" + HACKER_REPS_POSTFIX + "' to the end of their names", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS ) ) );
+	/** Button to scan the last replay.   */
+	private final JButton   scanLastReplayButton   = new JButton( "Scan 'LastReplay.rep'" );
+	/** Button to select folders to scan. */
+	private final JButton   selectFoldersButton    = new JButton( "Select folders to scan recursively" );
+	/** Button to select files to scan.   */
+	private final JButton   selectFilesButton      = new JButton( "Select files to scan" );
+	/** Button to stop the current scan.  */
+	private final JButton   stopScanButton         = new JButton( "Stop current scan" );
+	/** Flag hacker reps checkbox.        */
+	private final JCheckBox flagHackerRepsCheckBox = new JCheckBox( "Flag hacker replays by appending '" + HACKER_REPS_POSTFIX + "' to the end of their names", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS ) ) );
 	
 	/** Variable to store stop requests of scan.    */
 	private volatile boolean requestedToStop;
@@ -74,25 +77,36 @@ public class ManualScanTab extends LoggedTab {
 		scanLastReplayButton.setMnemonic( 'L' );
 		scanLastReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				scanFilesAndFolders( new File[] { new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) } );
+				scanFilesAndFolders( new File[] { new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) }, true );
 			}
 		} );
 		contentBox.add( Utils.wrapInPanel( scanLastReplayButton ) );
 		
-		selectFilesAndFoldersButton.setMnemonic( 'f' );
-		selectFilesAndFoldersButton.addActionListener( new ActionListener() {
+		final ActionListener selectFilesAndFoldersActionListener = new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				final JFileChooser fileChooser = new JFileChooser( new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.STARCRAFT_REPLAY_FOLDER ) );
 				
+				// This is for SwingWT:
+				fileChooser.setExtensionFilters( new String[] { "*.rep", "*.*" }, new String[] { "Replay Files (*.rep)", "All files (*.*)" } );
+				// This is for Swing:
 				fileChooser.addChoosableFileFilter( SWING_REPLAY_FILE_FILTER ); 
 				
-				fileChooser.setFileSelectionMode( JFileChooser.FILES_AND_DIRECTORIES );
+				fileChooser.setFileSelectionMode( event.getSource() == selectFoldersButton ? JFileChooser.DIRECTORIES_ONLY : JFileChooser.FILES_AND_DIRECTORIES );
 				fileChooser.setMultiSelectionEnabled( true );
+				// SwingWT does not support selecting multiple directories yet, getSelectedFiles() returns null so I have to call getSelectedFile() in case of folders.
 				if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION )
-					scanFilesAndFolders( fileChooser.getSelectedFiles() );
+					scanFilesAndFolders( event.getSource() == selectFoldersButton ? new File[] { fileChooser.getSelectedFile() } : fileChooser.getSelectedFiles(), false );
 			}
-		} );
-		contentBox.add( Utils.wrapInPanel( selectFilesAndFoldersButton ) );
+		};
+		
+		final JPanel selectButtonsPanel = new JPanel();
+		selectFoldersButton.setMnemonic( 'd' );
+		selectFoldersButton.addActionListener( selectFilesAndFoldersActionListener );
+		selectButtonsPanel.add( selectFoldersButton );
+		selectFilesButton.setMnemonic( 'f' );
+		selectFilesButton.addActionListener( selectFilesAndFoldersActionListener );
+		selectButtonsPanel.add( selectFilesButton );
+		contentBox.add( selectButtonsPanel );
 		
 		stopScanButton.setEnabled( false );
 		stopScanButton.setMnemonic( 't' );
@@ -119,13 +133,15 @@ public class ManualScanTab extends LoggedTab {
 	
 	/**
 	 * Scans the specified files and folders.
-	 * @param files files and folders to be scanned
+	 * @param files        files and folders to be scanned
+	 * @param isLastReplay tells whether the lastreplay scan button was activated
 	 */
-	private void scanFilesAndFolders( final File[] files ) {
+	private void scanFilesAndFolders( final File[] files, final boolean isLastReplay ) {
 		requestedToStop = false;
-		scanLastReplayButton       .setEnabled( false );
-		selectFilesAndFoldersButton.setEnabled( false );
-		stopScanButton             .setEnabled( true  );
+		scanLastReplayButton.setEnabled( false );
+		selectFoldersButton .setEnabled( false );
+		selectFilesButton   .setEnabled( false );
+		stopScanButton      .setEnabled( true  );
 		
 		new NormalThread() {
 			/** List of replay files to be scanned. */
@@ -135,7 +151,8 @@ public class ManualScanTab extends LoggedTab {
 			public void run() {
 				try {
 					logMessage( "", false ); // Prints an empty line
-					logMessage( "Counting replays..." );
+					if ( !isLastReplay )
+						logMessage( "Counting replays..." );
 					
 					chooseReplayFiles( files );
 					
@@ -144,13 +161,14 @@ public class ManualScanTab extends LoggedTab {
 					
 					final long startTimeNanons = System.nanoTime();
 					
-					final String scanningMessage = "Scanning " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" );
+					final String scanningMessage = "Scanning " 
+						+ ( isLastReplay ? new File( Consts.LAST_REPLAY_FILE_NAME ).getName() : replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" ) );
 					logMessage( scanningMessage + "..." );
 					
 					int hackerRepsCount  = 0;
 					int skippedRepsCount = 0;
 					
-					final Map< String, IntWrapper > playerHackerRepsCountMap = new HashMap< String, IntWrapper >(); // We count the number of replays every hacker was caguht in
+					final Map< String, IntWrapper > playerHackerRepsCountMap = new HashMap< String, IntWrapper >(); // We count the replays for every hacker in which he was caught
 					
 					for ( final File replayFile : replayFileList ) {
 						if ( requestedToStop )
@@ -178,7 +196,7 @@ public class ManualScanTab extends LoggedTab {
 										playerHackerRepsCount.value++;
 									}
 								}
-								if ( flagHackerRepsCheckBox.isSelected() ) {
+								if ( flagHackerRepsCheckBox.isSelected() && !isLastReplay ) {
 									final String replayName = replayFile.getName().substring( 0, replayFile.getName().length() - REPLAY_FILE_EXTENSION.length() );
 									if ( !replayName.endsWith( HACKER_REPS_POSTFIX ) )
 										replayFile.renameTo( new File( replayFile.getParent(), replayName + HACKER_REPS_POSTFIX + REPLAY_FILE_EXTENSION ) );
@@ -210,9 +228,10 @@ public class ManualScanTab extends LoggedTab {
 				finally {
 					if ( requestedToStop )
 						logMessage( "Scan was manually aborted!" );
-					stopScanButton             .setEnabled( false );
-					selectFilesAndFoldersButton.setEnabled( true  );
-					scanLastReplayButton       .setEnabled( true  );
+					stopScanButton      .setEnabled( false );
+					selectFilesButton   .setEnabled( true  );
+					selectFoldersButton .setEnabled( true  );
+					scanLastReplayButton.setEnabled( true  );
 				}
 			}
 			
@@ -227,6 +246,8 @@ public class ManualScanTab extends LoggedTab {
 			 * @param files files and folders to be chosen from
 			 */
 			private void chooseReplayFiles( final File[] files ) {
+				if ( files == null )
+					return;
 				for ( final File file : files ) {
 					if ( requestedToStop )
 						return;
