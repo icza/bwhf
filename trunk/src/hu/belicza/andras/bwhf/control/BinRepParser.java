@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * Replay parser to produce a {@link Replay} java object from a binary replay file.
@@ -32,7 +33,7 @@ public class BinRepParser {
 		//final String[] replayNames = new String[] { "w:/sample/00135_wrx-sti_mc - hack.rep" };
 		//final String[] replayNames = new String[] { "w:/sample/nonhack rain/0288 CrT HoP coT StT sOP MP.rep" };//, "w:/sample/Dakota hacks.rep", "w:/sample/00135_wrx-sti_mc - hack.rep" };
 		//final String[] replayNames = new String[] { "w:/Dakota hacks.rep", "w:/9369 NiT thT LT DP gP DT sZ.rep", "w:/9745 SuT TCT wNT NeP DoZ DZ.rep" };
-		final String[] replayNames = new String[] { "X:\\maps\\replays\\nd]hunter mc hack.rep" };
+		final String[] replayNames = new String[] { "w:/someother/10143 ihT feP DaT vaZ yP tP.rep" };
 		
 		
 		for ( final String replayName : replayNames ) {
@@ -100,18 +101,7 @@ public class BinRepParser {
 			final ByteBuffer commandsBuffer = ByteBuffer.wrap( unpacker.unpackSection( playerCommandsLength ) );
 			commandsBuffer.order( ByteOrder.LITTLE_ENDIAN );
 			
-			final Map< Integer, Integer > playerIdPlayerIndexMap= new HashMap< Integer, Integer >();
-			final List< String > playerNameList = new ArrayList< String >();
-			for ( int i = 0; i < replayHeader.playerNames.length; i++ )
-				if ( replayHeader.playerNames[ i ] != null ) {
-					final int playerId = replayHeader.playerRecords[ i * 36 + 4 ] & 0xff;
-					if ( playerId != 0xff ) { // Computers are listed with playerId values of 0xff, but no actions are recorded from them.
-						playerIdPlayerIndexMap.put( playerId, playerNameList.size() );
-						playerNameList.add( replayHeader.playerNames[ i ] );
-					}
-				}
-			
-			final List< Action >[] playerActionLists = new ArrayList[ playerNameList.size() ]; // Indexed by playerId!
+			final List< Action >[] playerActionLists = new ArrayList[ replayHeader.playerNames.length ]; // This will be indexed by playerId!
 			for ( int i = 0; i < playerActionLists.length; i++ )
 				playerActionLists[ i ] = new ArrayList< Action >();
 			
@@ -122,15 +112,18 @@ public class BinRepParser {
 				
 				while ( commandsBuffer.position() < commandBlocksEndPos ) {
 					final int  playerId = commandsBuffer.get() & 0xff;
-					playerActionLists[ playerId ].add( readNextAction( frame, commandsBuffer ) );
+					playerActionLists[ playerId ].add( readNextAction( frame, commandsBuffer, commandBlocksEndPos ) );
 				}
 			}
 			
 			// Now create the ReplayActions object, and we can return the replay
-			final Map< String, List< Action > > playerNameActionListMap = new HashMap< String, List< Action > >( playerNameList.size() );
-			for ( int playerId = 0; playerId < playerActionLists.length; playerId++ ) {
-				playerNameActionListMap.put( playerNameList.get( playerIdPlayerIndexMap.get( playerId ) ), playerActionLists[ playerId ] );
-			}
+			final Map< String, List< Action > > playerNameActionListMap = new HashMap< String, List< Action > >();
+			for ( int i = 0; i < replayHeader.playerNames.length; i++ )
+				if ( replayHeader.playerNames[ i ] != null ) {
+					final int playerId = replayHeader.playerRecords[ i * 36 + 4 ] & 0xff;
+					if ( playerId != 0xff )  // Computers are listed with playerId values of 0xff, but no actions are recorded from them.
+						playerNameActionListMap.put( replayHeader.playerNames[ i ], playerActionLists[ playerId ] );
+				}
 			
 			return new Replay( replayHeader, new ReplayActions( playerNameActionListMap ) );
 		}
@@ -266,11 +259,12 @@ public class BinRepParser {
 	/**
 	 * Reads the next action in the commands buffer.<br>
 	 * Only parses actions which are important in hack detection.
-	 * @param frame          frame of the action
-	 * @param commandsBuffer commands buffer to be read from
+	 * @param frame               frame of the action
+	 * @param commandsBuffer      commands buffer to be read from
+	 * @param commandBlocksEndPos end position of the current command blocks
 	 * @return the next action object
 	 */
-	private static Action readNextAction( final int frame, final ByteBuffer commandsBuffer ) {
+	private static Action readNextAction( final int frame, final ByteBuffer commandsBuffer, final int commandBlocksEndPos ) {
 		final byte blockId  = commandsBuffer.get();
 		
 		Action action    = null;
@@ -375,6 +369,21 @@ public class BinRepParser {
 			case (byte) 0x58 :   // Minimap ping (?)
 			case (byte) 0x2f : { // Lift
 				skipBytes = 4;
+				break;
+			}
+			case (byte) 0x18 :   // Cancel
+			case (byte) 0x19 :   // Cancel hatch
+			case (byte) 0x27 :   // Build interceptor/scarab
+			case (byte) 0x2a :   // Merge archon
+			case (byte) 0x2e :   // Cancel nuke
+			case (byte) 0x31 :   // Cancel research
+			case (byte) 0x36 :   // Stim
+			case (byte) 0x5a : { // Merge dark archon
+				// No additional data
+				break;
+			}
+			default: { // We don't know how to handle actions, we have to skip the whole time frame which means we might lose some actions!
+				skipBytes = commandBlocksEndPos - commandsBuffer.position();
 				break;
 			}
 		}
