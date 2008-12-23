@@ -28,13 +28,7 @@ public class BinRepParser {
 	 * @param arguments
 	 */
 	public static void main( final String[] arguments ) {
-		//final String[] replayNames = new String[] { "w:/sample/nonhack rain/0288 CrT HoP coT StT sOP MP.rep" };
-		//final String[] replayNames = new String[] { "w:/sample/Dakota hacks.rep" };
-		//final String[] replayNames = new String[] { "w:/sample/00135_wrx-sti_mc - hack.rep" };
-		//final String[] replayNames = new String[] { "w:/sample/nonhack rain/0288 CrT HoP coT StT sOP MP.rep" };//, "w:/sample/Dakota hacks.rep", "w:/sample/00135_wrx-sti_mc - hack.rep" };
-		//final String[] replayNames = new String[] { "w:/Dakota hacks.rep", "w:/9369 NiT thT LT DP gP DT sZ.rep", "w:/9745 SuT TCT wNT NeP DoZ DZ.rep" };
 		final String[] replayNames = new String[] { "w:/someother/10143 ihT feP DaT vaZ yP tP.rep" };
-		
 		
 		for ( final String replayName : replayNames ) {
 			final Replay replay = parseReplay( new File( replayName ) );

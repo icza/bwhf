@@ -9,6 +9,8 @@ public class FiltersWrapper {
 	
 	public String    name;
 	public boolean[] gateways;
+	public boolean[] gameEngines;
+	public String    mapName;
 	public int       minReportCount;
 	public String    reportedWithKey;
 	public String    sortByValue;

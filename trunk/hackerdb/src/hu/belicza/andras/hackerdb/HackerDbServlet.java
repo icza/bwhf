@@ -1,6 +1,6 @@
 package hu.belicza.andras.hackerdb;
 
-import static hu.belicza.andras.hackerdb.ApiConsts.*;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.*;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -94,7 +94,11 @@ public class HackerDbServlet extends HttpServlet {
 				filtersWrapper.name              = getStringParamValue( request, FILTER_NAME_NAME );
 				filtersWrapper.gateways          = new boolean[ GATEWAYS.length ];
 				for ( int i = 0; i < filtersWrapper.gateways.length; i++ )
-					filtersWrapper.gateways[ i ] = request.getParameter( FILTER_NAME_NO_ALL_GATEWAYS ) == null || request.getParameter( FILTER_NAME_GATEWAY + i ) != null;
+					filtersWrapper.gateways[ i ] = request.getParameter( REQUEST_PARAMETER_FILTERS_PRESENT ) == null || request.getParameter( FILTER_NAME_GATEWAY + i ) != null;
+				filtersWrapper.gameEngines       = new boolean[ GAME_ENGINES.length ];
+				for ( int i = 0; i < filtersWrapper.gameEngines.length; i++ )
+					filtersWrapper.gameEngines[ i ] = request.getParameter( REQUEST_PARAMETER_FILTERS_PRESENT ) == null || request.getParameter( FILTER_NAME_GAME_ENGINE + i ) != null;
+				filtersWrapper.mapName           = getStringParamValue( request, FILTER_NAME_MAP_NAME );
 				filtersWrapper.minReportCount    = getIntParamValue( request, FILTER_NAME_MIN_REPORT_COUNT, FILTER_DEFAULT_MIN_REPORT_COUNT );
 				filtersWrapper.reportedWithKey   = getStringParamValue( request, FILTER_NAME_REPORTED_WITH_KEY );
 				filtersWrapper.sortByValue       = getStringParamValue( request, FILTER_NAME_SORT_BY );
@@ -132,6 +136,19 @@ public class HackerDbServlet extends HttpServlet {
 				if ( gatewayIndex < 0 || gatewayIndex >= GATEWAYS.length )
 					throw new BadRequestException();
 				
+				int gameEngine = 0;
+				try {
+					gameEngine = Integer.parseInt( request.getParameter( REQUEST_PARAMETER_NAME_GAME_ENGINE ) );
+				}
+				catch ( final Exception e ) {
+					throw new BadRequestException();
+				}
+				
+				String mapName = request.getParameter( REQUEST_PARAMETER_NAME_MAP_NAME );
+				if ( mapName == null )
+					throw new BadRequestException();
+				mapName = mapName.toLowerCase(); // We store lowercased version to search fast without case sensitivity
+				
 				final List< String > playerNameList = new ArrayList< String >( MAX_PLAYERS_IN_REPORT );
 				String playerName;
 				for ( int i = 0; i <= MAX_PLAYERS_IN_REPORT && ( playerName = request.getParameter( REQUEST_PARAMETER_NAME_PLAYER + i ) ) != null; i++ )
@@ -139,7 +156,7 @@ public class HackerDbServlet extends HttpServlet {
 				if ( playerNameList.isEmpty() )
 					throw new BadRequestException();
 				
-				sendBackPlainMessage( handleReport( key, gatewayIndex, playerNameList.toArray( new String[ playerNameList.size() ] ), request.getRemoteAddr() ), response );
+				sendBackPlainMessage( handleReport( key, gatewayIndex, gameEngine, mapName, playerNameList.toArray( new String[ playerNameList.size() ] ), request.getRemoteAddr() ), response );
 			}
 		}
 		catch ( final BadRequestException bre ) {
@@ -234,15 +251,21 @@ public class HackerDbServlet extends HttpServlet {
 			
 			// Controls section
 			outputWriter.println( "<form id='" + FORM_ID + "' action='hackers' method='POST'>" );
+			outputWriter.println( "<input name='" + REQUEST_PARAMETER_FILTERS_PRESENT + "' type=hidden value='yes'>" ); // We might use default values if this is not present (for example gateways and game engines). 
 			
 			// Filters
-			outputWriter.println( "<b>Filters</b> <button type=button onclick=\"javascript:document.getElementsByName('" + FILTER_NAME_NAME + "')[0].value='';for(var i=0;i<" + GATEWAYS.length + ";i++) document.getElementsByName('" + FILTER_NAME_GATEWAY + "'+i)[0].checked=true;document.getElementsByName('" + FILTER_NAME_MIN_REPORT_COUNT + "')[0].value='" + FILTER_DEFAULT_MIN_REPORT_COUNT + "';document.getElementsByName('" + FILTER_NAME_REPORTED_WITH_KEY + "')[0].value='';\">Reset filters</button><table border=1>" );
-			outputWriter.println( "<tr><th>Name:<td><input name='" + FILTER_NAME_NAME + "' type=text value='" + filtersWrapper.name + "' style='width:100%'>" );
-			outputWriter.print  ( "<tr><th>Gateways:<td>" );
+			outputWriter.println( "<b>Filters</b> <button type=button onclick=\"" + getJavaScriptForResetFilters( filtersWrapper ) + "\">Reset filters</button><table border=1>" );
+			outputWriter.println( "<tr><th>Hacker name:<td><input name='" + FILTER_NAME_NAME + "' type=text value='" + filtersWrapper.name + "' style='width:100%'>" );
 			// Render gateways here
-			outputWriter.println( "<input name='" + FILTER_NAME_NO_ALL_GATEWAYS + "' type=hidden value='no'>" ); // First we select all gateways, on subsequent calls we only want to select selected gateways
+			outputWriter.print  ( "<tr><th>Gateways:<td>" );
 			for ( int i = 0; i < GATEWAYS.length; i++ )
 				outputWriter.println( "<input name='" + FILTER_NAME_GATEWAY + i + "' type=checkbox " + ( filtersWrapper.gateways[ i ] ? "checked" : "" ) + ">" + GATEWAYS[ i ] );
+			outputWriter.print  ( "<tr><th>Gateways:<td>" );
+			// Render game engines here
+			outputWriter.print  ( "<tr><th>Game engines:<td>" );
+			for ( int i = 0; i < GAME_ENGINES.length; i++ )
+				outputWriter.println( "<input name='" + FILTER_NAME_GAME_ENGINE + i + "' type=checkbox " + ( filtersWrapper.gameEngines[ i ] ? "checked" : "" ) + ">" + GAME_ENGINES[ i ] );
+			outputWriter.println( "<tr><th>Map name:<td><input name='" + FILTER_NAME_MAP_NAME + "' type=text value='" + filtersWrapper.mapName + "' style='width:100%'>" );
 			outputWriter.println( "<tr><th>Min report count:<td><input name='" + FILTER_NAME_MIN_REPORT_COUNT +"' type=text value='" + filtersWrapper.minReportCount + "' style='width:100%'>" );
 			outputWriter.println( "<tr><th>Reported with key:<td><input name='" + FILTER_NAME_REPORTED_WITH_KEY +"' type=text value='" + filtersWrapper.reportedWithKey + "' style='width:100%'>" );
 			outputWriter.println( "</table>" );
@@ -310,12 +333,29 @@ public class HackerDbServlet extends HttpServlet {
 	}
 	
 	/**
+	 * Builds a javascript code to be used to reset the filters.
+	 * @param filtersWrapper filters wrapper holding the filter parameters
+	 * @return the javascript code to be used to reset the filters
+	 */
+	private static String getJavaScriptForResetFilters( final FiltersWrapper filtersWrapper ) {
+		final StringBuilder scriptBuilder = new StringBuilder( "javascript:" );
+		scriptBuilder
+			.append( "document.getElementsByName('" ).append( FILTER_NAME_NAME ).append( "')[0].value='';" )
+			.append( "for(var i=0;i<" ).append( GATEWAYS.length ).append( ";i++) document.getElementsByName('" ).append( FILTER_NAME_GATEWAY ).append( "'+i)[0].checked=true;" )
+			.append( "for(var i=0;i<" ).append( GAME_ENGINES.length ).append( ";i++) document.getElementsByName('" ).append( FILTER_NAME_GAME_ENGINE ).append( "'+i)[0].checked=true;" )
+			.append( "document.getElementsByName('" ).append( FILTER_NAME_MAP_NAME ).append( "')[0].value='';" )
+			.append( "document.getElementsByName('" ).append( FILTER_NAME_MIN_REPORT_COUNT ).append( "')[0].value='" ).append( FILTER_DEFAULT_MIN_REPORT_COUNT ).append( "';" )
+			.append( "document.getElementsByName('" ).append( FILTER_NAME_REPORTED_WITH_KEY ).append( "')[0].value='';" );
+		return scriptBuilder.toString();
+	}
+	
+	/**
 	 * Builds a javascript code to be used for sorting column header onclick event.
 	 * @param headerName     name of the header to generate javascript for
 	 * @param filtersWrapper filters wrapper holding the filter parameters
-	 * @return
+	 * @return the javascript code to be used for sorting column header onclick event
 	 */
-	private String getJavaScriptForSortingColumn( final String headerName, final FiltersWrapper filtersWrapper ) {
+	private static String getJavaScriptForSortingColumn( final String headerName, final FiltersWrapper filtersWrapper ) {
 		final StringBuilder scriptBuilder = new StringBuilder( "javascript:" );
 		
 		if ( !filtersWrapper.sortByValue.equals( headerName ) )
@@ -344,12 +384,18 @@ public class HackerDbServlet extends HttpServlet {
 		
 		queryBuilder.append( " FROM hacker h, report r, key k WHERE r.hacker=h.id AND r.key=k.id AND k.revocated=FALSE" );
 		
-		int sqlParamsCounter = 0;
-		int nameParamIndex   = 0;
-		int keyParamIndex    = 0;
+		int sqlParamsCounter  = 0;
+		int nameParamIndex    = 0;
+		int mapNameParamIndex = 0;
+		int keyParamIndex     = 0;
 		if ( filtersWrapper.name.length() > 0 ) {
 			queryBuilder.append( " AND h.name LIKE ?" );
 			nameParamIndex = ++sqlParamsCounter;
+		}
+		
+		if ( filtersWrapper.mapName.length() > 0 ) {
+			queryBuilder.append( " AND r.map_name LIKE ?" );
+			mapNameParamIndex = ++sqlParamsCounter;
 		}
 		
 		if ( filtersWrapper.reportedWithKey.length() > 0 ) {
@@ -367,6 +413,20 @@ public class HackerDbServlet extends HttpServlet {
 			queryBuilder.append( " AND h.gateway IN (" );
 			for ( int i = filtersWrapper.gateways.length - 1; i >=0; i-- )
 				if ( filtersWrapper.gateways[ i ] )
+					queryBuilder.append( i ).append( ',' );
+			queryBuilder.append( -1 ).append( ')' );
+		}
+		
+		boolean dontNeedAllGameEngines= false; // Only want to append game engine filter if not all is required
+		for ( final boolean gameEngine : filtersWrapper.gameEngines )
+			if ( !gameEngine ) {
+				dontNeedAllGameEngines = true;
+				break;
+			}
+		if ( dontNeedAllGameEngines ) {
+			queryBuilder.append( " AND r.game_engine IN (" );
+			for ( int i = filtersWrapper.gameEngines.length - 1; i >=0; i-- )
+				if ( filtersWrapper.gameEngines[ i ] )
 					queryBuilder.append( i ).append( ',' );
 			queryBuilder.append( -1 ).append( ')' );
 		}
@@ -392,6 +452,8 @@ public class HackerDbServlet extends HttpServlet {
 		final PreparedStatement statement = connection.prepareStatement( queryBuilder.toString() );
 		if ( nameParamIndex > 0 )
 			statement.setString( nameParamIndex, "%" + filtersWrapper.name + "%" );
+		if ( mapNameParamIndex > 0 )
+			statement.setString( mapNameParamIndex, "%" + filtersWrapper.mapName + "%" );
 		if ( keyParamIndex > 0 )
 			statement.setString( keyParamIndex, filtersWrapper.reportedWithKey );
 		
@@ -438,11 +500,13 @@ public class HackerDbServlet extends HttpServlet {
 	 * Handles a report.
 	 * @param key         authorization key of the reporter
 	 * @param gateway     gateway of the reported players
+	 * @param gameEngine  game engine
+	 * @param mapName     map name
 	 * @param playerNames names of players being reported; only non-null values contain information
 	 * @param ip          ip of the reporter's computer
 	 * @return an error message if report fails; an empty string otherwise
 	 */
-	private String handleReport( final String key, final int gateway, final String[] playerNames, final String ip ) {
+	private String handleReport( final String key, final int gateway, final int gameEngine, final String mapName, final String[] playerNames, final String ip ) {
 		Connection        connection = null;
 		PreparedStatement statement  = null;
 		ResultSet         resultSet  = null;
@@ -507,9 +571,11 @@ public class HackerDbServlet extends HttpServlet {
 			statement.close();
 			
 			// Lastly insert the report records
-			statement = connection.prepareStatement( "INSERT INTO report (hacker,key,ip) VALUES (?,?,?)" );
-			statement.setInt   ( 2, keyId );
-			statement.setString( 3, ip    );
+			statement = connection.prepareStatement( "INSERT INTO report (hacker,game_engine,map_name,key,ip) VALUES (?,?,?,?,?)" );
+			statement.setInt   ( 2, gameEngine );
+			statement.setString( 3, mapName    );
+			statement.setInt   ( 4, keyId      );
+			statement.setString( 5, ip         );
 			for ( int i = 0; i < hackerIds.length && hackerIds[ i ] != null; i++ ) {
 				statement.setInt( 1, hackerIds[ i ] );
 				if ( statement.executeUpdate() <= 0 )
@@ -520,7 +586,7 @@ public class HackerDbServlet extends HttpServlet {
 			connection.commit();
 			connection.setAutoCommit( true );
 			
-			return "";
+			return REPORT_ACCEPTED_MESSAGE;
 		} catch ( final SQLException se ) {
 			se.printStackTrace();
 			if ( connection != null )
