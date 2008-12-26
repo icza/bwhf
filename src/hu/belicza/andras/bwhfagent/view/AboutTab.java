@@ -65,13 +65,13 @@ public class AboutTab extends Tab {
 		
 		editorPane = new JEditorPane( "text/html", aboutHtml );
 		editorPane.setEditable( false );
-		editorPane.addHyperlinkListener( new HyperlinkListener() {
+		/*editorPane.addHyperlinkListener( new HyperlinkListener() {
 			public void hyperlinkUpdate( final HyperlinkEvent event ) {
 				if ( event.getEventType() == HyperlinkEvent.EventType.ACTIVATED )
 					if ( event.getURL() != null )
 						Utils.showURLInBrowser( event.getURL().toString() );
 			}
-		} );
+		} );*/
 		
 		// Why do we need this?
 		// Not setting preferred size of the editorPane results in really wide window size after pack,

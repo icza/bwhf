@@ -14,7 +14,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * Replay parser to produce a {@link Replay} java object from a binary replay file.
@@ -48,6 +47,7 @@ public class BinRepParser {
 	 * @param replayFile replay file to be parsed
 	 * @return a {@link Replay} object describing the replay
 	 */
+	@SuppressWarnings("unchecked")
 	public static Replay parseReplay( final File replayFile ) {
 		BinReplayUnpacker unpacker = null;
 		try {
