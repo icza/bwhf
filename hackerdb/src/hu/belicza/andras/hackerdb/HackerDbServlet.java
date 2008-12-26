@@ -34,8 +34,7 @@ import org.apache.commons.dbcp.BasicDataSource;
 public class HackerDbServlet extends HttpServlet {
 	
 	/** URL of the hacker data base. */
-	//private static final String DATABASE_URL = "jdbc:hsqldb:hsql://localhost/hackers";
-	private static final String DATABASE_URL = "jdbc:hsqldb:hsql://iczavds.selfip.com/testhackers";
+	private static final String DATABASE_URL = "jdbc:hsqldb:hsql://localhost/hackers";
 	
 	/** Max players in a report. */
 	private static final int MAX_PLAYERS_IN_REPORT = 8;
@@ -149,6 +148,10 @@ public class HackerDbServlet extends HttpServlet {
 					throw new BadRequestException();
 				mapName = mapName.toLowerCase(); // We store lowercased version to search fast without case sensitivity
 				
+				String agentVersion = request.getParameter( REQUEST_PARAMETER_NAME_AGENT_VERSION );
+				if ( agentVersion == null )
+					throw new BadRequestException();
+				
 				final List< String > playerNameList = new ArrayList< String >( MAX_PLAYERS_IN_REPORT );
 				String playerName;
 				for ( int i = 0; i <= MAX_PLAYERS_IN_REPORT && ( playerName = request.getParameter( REQUEST_PARAMETER_NAME_PLAYER + i ) ) != null; i++ )
@@ -156,7 +159,7 @@ public class HackerDbServlet extends HttpServlet {
 				if ( playerNameList.isEmpty() )
 					throw new BadRequestException();
 				
-				sendBackPlainMessage( handleReport( key, gatewayIndex, gameEngine, mapName, playerNameList.toArray( new String[ playerNameList.size() ] ), request.getRemoteAddr() ), response );
+				sendBackPlainMessage( handleReport( key, gatewayIndex, gameEngine, mapName, agentVersion, playerNameList.toArray( new String[ playerNameList.size() ] ), request.getRemoteAddr() ), response );
 			}
 		}
 		catch ( final BadRequestException bre ) {
@@ -502,11 +505,12 @@ public class HackerDbServlet extends HttpServlet {
 	 * @param gateway     gateway of the reported players
 	 * @param gameEngine  game engine
 	 * @param mapName     map name
+	 * @param mapName     BWHF agent version
 	 * @param playerNames names of players being reported; only non-null values contain information
 	 * @param ip          ip of the reporter's computer
 	 * @return an error message if report fails; an empty string otherwise
 	 */
-	private String handleReport( final String key, final int gateway, final int gameEngine, final String mapName, final String[] playerNames, final String ip ) {
+	private String handleReport( final String key, final int gateway, final int gameEngine, final String mapName, final String agentVersion, final String[] playerNames, final String ip ) {
 		Connection        connection = null;
 		PreparedStatement statement  = null;
 		ResultSet         resultSet  = null;
@@ -571,11 +575,12 @@ public class HackerDbServlet extends HttpServlet {
 			statement.close();
 			
 			// Lastly insert the report records
-			statement = connection.prepareStatement( "INSERT INTO report (hacker,game_engine,map_name,key,ip) VALUES (?,?,?,?,?)" );
-			statement.setInt   ( 2, gameEngine );
-			statement.setString( 3, mapName    );
-			statement.setInt   ( 4, keyId      );
-			statement.setString( 5, ip         );
+			statement = connection.prepareStatement( "INSERT INTO report (hacker,game_engine,map_name,agent_version,key,ip) VALUES (?,?,?,?,?,?)" );
+			statement.setInt   ( 2, gameEngine   );
+			statement.setString( 3, mapName      );
+			statement.setString( 4, agentVersion );
+			statement.setInt   ( 5, keyId        );
+			statement.setString( 6, ip           );
 			for ( int i = 0; i < hackerIds.length && hackerIds[ i ] != null; i++ ) {
 				statement.setInt( 1, hackerIds[ i ] );
 				if ( statement.executeUpdate() <= 0 )

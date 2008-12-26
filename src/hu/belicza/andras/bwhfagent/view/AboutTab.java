@@ -2,17 +2,15 @@ package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhfagent.Consts;
 
-import swingwt.awt.Dimension;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
+import swingwt.awt.Dimension;
 import swingwtx.swing.JEditorPane;
 import swingwtx.swing.JScrollPane;
-import swingwtx.swing.event.HyperlinkEvent;
-import swingwtx.swing.event.HyperlinkListener;
 
 /**
  * About tab.
