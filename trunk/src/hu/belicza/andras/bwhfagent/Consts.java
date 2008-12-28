@@ -22,7 +22,7 @@ public class Consts {
 	public static final String LATEST_STABLE_VERSION_TEXT_URL   = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version.txt";
 	
 	/** URL of the BWHF hacker data base server.                       */
-	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL = "http://hackerdb.selfip.com/";
+	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL = "http://94.199.240.39/hackerdb/hackers";
 	
 	/** Name of the resource containing the about html template.       */
 	public static final String ABOUT_TEMLATE_RESOURCE_NAME      = "about_template.html";

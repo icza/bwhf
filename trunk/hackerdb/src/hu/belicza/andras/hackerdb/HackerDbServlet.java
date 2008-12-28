@@ -52,7 +52,7 @@ public class HackerDbServlet extends HttpServlet {
 	/** Default value of the page filter.             */
 	private static final int FILTER_DEFAULT_PAGE             = 1;
 	/** Default value of the page size filter.        */
-	private static final int FILTER_DEFAULT_PAGE_SIZE        = 20;
+	private static final int FILTER_DEFAULT_PAGE_SIZE        = 25;
 	
 	/** Default value of ascendant sorting for the different sorting by values. */
 	private static final Map< String, Boolean > FILTER_DEFAULT_ASCENDANT_SORTING_MAP = new HashMap< String, Boolean >();
@@ -263,7 +263,6 @@ public class HackerDbServlet extends HttpServlet {
 			outputWriter.print  ( "<tr><th>Gateways:<td>" );
 			for ( int i = 0; i < GATEWAYS.length; i++ )
 				outputWriter.println( "<input name='" + FILTER_NAME_GATEWAY + i + "' type=checkbox " + ( filtersWrapper.gateways[ i ] ? "checked" : "" ) + ">" + GATEWAYS[ i ] );
-			outputWriter.print  ( "<tr><th>Gateways:<td>" );
 			// Render game engines here
 			outputWriter.print  ( "<tr><th>Game engines:<td>" );
 			for ( int i = 0; i < GAME_ENGINES.length; i++ )

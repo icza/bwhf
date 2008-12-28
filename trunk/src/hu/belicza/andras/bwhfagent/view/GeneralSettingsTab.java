@@ -38,7 +38,7 @@ public class GeneralSettingsTab extends Tab {
 		buildGUI();
 		
 		if ( checkUpdatesOnStartupCheckBox.isSelected() )
-			checkUpdatesButton.doClick();//checkUpdates();
+			checkUpdatesButton.doClick();
 	}
 	
 	/**
