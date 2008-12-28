@@ -65,7 +65,7 @@ public class AutoscanTab extends LoggedTab {
 	/** Checkbox to enable/disable reporting hackers.                           */
 	private final JCheckBox  reportHackersCheckBox          = new JCheckBox( "Report hackers to a central hacker database with Battle.net gateway:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPORT_HACKERS ) ) );
 	/** Combobox to select the gateway of the user.                             */
-	private final JComboBox gatewayComboBox                 = new JComboBox( ServerApiConsts.GATEWAYS );
+	private final JComboBox gatewayComboBox                 = new JComboBox();
 	
 	/** Authorization key to report hackers.      */
 	private String           authorizationKey = Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTHORIZATION_KEY );
@@ -79,6 +79,10 @@ public class AutoscanTab extends LoggedTab {
 	 */
 	public AutoscanTab() {
 		super( "Autoscan", LOG_FILE_NAME );
+		
+		gatewayComboBox.addItem( "<select your gateway>" );
+		for ( final String gateway : ServerApiConsts.GATEWAYS )
+			gatewayComboBox.addItem( gateway );
 		
 		gatewayComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_GATEWAY ) ) );
 		
@@ -169,8 +173,13 @@ public class AutoscanTab extends LoggedTab {
 		reportHackersCheckBox.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				if ( reportHackersCheckBox.isSelected() ) {
-					reportHackersCheckBox.setEnabled( false );
 					reportHackersCheckBox.setSelected( false );
+					if ( gatewayComboBox.getSelectedIndex() == 0 ) {
+						JOptionPane.showMessageDialog( getContent(), "Please select your gateway corresponding to where you play in order to report hackers!", "Error", JOptionPane.ERROR_MESSAGE );
+						return;
+					}
+					reportHackersCheckBox.setEnabled( false );
+					gatewayComboBox.setEnabled( false );
 					new NormalThread() {
 						public void run() {
 							checkKeyButton.doClick();
@@ -185,6 +194,7 @@ public class AutoscanTab extends LoggedTab {
 							else
 								reportHackersCheckBox.setSelected( true );
 							
+							gatewayComboBox.setEnabled( true );
 							reportHackersCheckBox.setEnabled( true );
 						}
 					}.start();
@@ -298,16 +308,20 @@ public class AutoscanTab extends LoggedTab {
 											Utils.copyFile( lastReplayFile, new File( hackerRepsDestinationTextField.getText() ), DATE_FORMAT.format( new Date() ) + " LastReplay.rep" );
 										
 										if ( reportHackersCheckBox.isSelected() ) {
-											logMessage( "Sending hacker report..." );
-											final Set< String > playerNameSet = new HashSet< String >( 8 );
-											for ( final HackDescription hackDescription : hackDescriptionList )
-												playerNameSet.add( hackDescription.playerName );
-											
-											final String message = Utils.sendHackerReport( authorizationKey, gatewayComboBox.getSelectedIndex(), replay.replayHeader.gameEngine & 0xff, replay.replayHeader.mapName, playerNameSet );
-											if ( message == null )
-												logMessage( "Sending hacker report succeeded." );
-											else
-												logMessage( "Sending hacker report failed: " + message );
+											if ( gatewayComboBox.getSelectedIndex() == 0 )
+												logMessage( "Error! Hacker report was not sent due to no gateway is selected!" );
+											else {
+												logMessage( "Sending hacker report..." );
+												final Set< String > playerNameSet = new HashSet< String >( 8 );
+												for ( final HackDescription hackDescription : hackDescriptionList )
+													playerNameSet.add( hackDescription.playerName );
+												
+												final String message = Utils.sendHackerReport( authorizationKey, gatewayComboBox.getSelectedIndex() - 1, replay.replayHeader.gameEngine & 0xff, replay.replayHeader.mapName, playerNameSet );
+												if ( message == null )
+													logMessage( "Sending hacker report succeeded." );
+												else
+													logMessage( "Sending hacker report failed: " + message );
+											}
 										}
 									}
 									else
