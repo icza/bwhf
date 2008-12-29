@@ -7,7 +7,7 @@ java -version
 }}}
 
 ==Autoscan doesn't work?==
-You have to set Starcraft directory to let BWHF Agent know where to look LastReplay.rep for.
+You have to set Starcraft directory to let BWHF Agent know where to look !LastReplay.rep for.
 
 ==Can't report hackers?==
 You have to select your gateway corresponding to where you play in order to report hackers. Moreover you need a valid autorization key. You can read about these keys here: AuthorizationKeys
