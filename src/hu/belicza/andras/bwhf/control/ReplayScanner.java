@@ -54,7 +54,7 @@ public class ReplayScanner {
 			hackDescriptionList.add( new HackDescription( player.name, player.name + " used autogather/autotrain hack at 5" ) );
 		
 		
-		int            lastIteration                        = 0;
+		int            lastIteration                        = -1;
 		int            nonHotkeyActionsCountInSameIteration = 0;
 		Action         lastAction                           = null;
 		boolean        foundTerranComsatCancelHack          = false;
