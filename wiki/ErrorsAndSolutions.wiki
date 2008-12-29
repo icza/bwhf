@@ -1,3 +1,5 @@
+#summary Possible errors and their solutions regarding to BWHF Agent
+
 =BWHF Agent errors and solutions=
 
 ==Can't start BWHF Agent?==
