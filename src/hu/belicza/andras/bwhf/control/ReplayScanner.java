@@ -132,10 +132,8 @@ public class ReplayScanner {
 			// it can be due to lag and/or "action spam". Don't count and report those
 			// This "same" action checking is not completely correct, since we don't distinguish between a lot of actions,
 			// but this is accurate enough since we parse and use the most common actions for hack detection
-			if ( lastIteration == action.iteration && lastAction.actionNameIndex != action.actionNameIndex ) {
-				if ( action.actionNameIndex != Action.ACTION_NAME_INDEX_HOTKEY )
-					nonHotkeyActionsCountInSameIteration++;
-			}
+			if ( lastIteration == action.iteration && lastAction.actionNameIndex != action.actionNameIndex && action.actionNameIndex != Action.ACTION_NAME_INDEX_HOTKEY )
+				nonHotkeyActionsCountInSameIteration++;
 			else {
 				if ( nonHotkeyActionsCountInSameIteration > 14 )
 					hackDescriptionList.add( new HackDescription( player.name, player.name + " used multicommand hack at " + lastAction.iteration ) );
