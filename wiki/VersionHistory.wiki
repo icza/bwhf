@@ -1,0 +1,10 @@
+#summary One-sentence summary of this page.
+
+=BWHF Agent version history=
+
+====1.00 ??? ====
+The upcoming new release.
+Fixed a bug which caused the scan process to hang when tried to scan a replay with actions being at iteration 0.
+
+====0.99 2008-12-28====
+The first, initial release.
