@@ -1,3 +1,5 @@
+#summary This page describes the autorization keys required to automatically report hackers.
+
 =BWHF Authorization keys=
 
 ==What is this key?==
