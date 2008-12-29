@@ -19,3 +19,5 @@ You have to select your gateway corresponding to where you play in order to repo
 
 ==I think BWHF Agent misbehaving, but I don't see any errors==
 Try to start the program with the `BWHFAgent-console.cmd` script. That way you get a console where you might see some errors and details.
+
+In a case when error or exception occurs, you are welcome to report it by creating an issue here in the *Issues* tab.
