@@ -3,7 +3,7 @@
 =BWHF Agent errors and solutions=
 
 ==Can't start BWHF Agent?==
-First check if you have Java installed in your system. BWHF Agent requires Java 5.0 or higher. Type in a command window to check what version and if you have Java installed:
+First check if you have Java installed in your system. BWHF Agent requires Java 6.0 or higher. Type in a command window to check what version and if you have Java installed:
 {{{
 java -version
 }}}
