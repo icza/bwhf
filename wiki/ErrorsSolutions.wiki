@@ -1,0 +1,18 @@
+#summary One-sentence summary of this page.
+
+=BWHF Agent errors and solutions=
+
+==Can't start BWHF Agent?==
+First check if you have Java installed in your system. BWHF Agent requires Java 5.0 or higher. Type in a command window to check what version and if you have a Java installed:
+{{{
+java -version
+}}}
+
+==Autoscan doesn't work?==
+You have to set Starcraft directory to let BWHF Agent know where to look LastReplay.rep for.
+
+==Can't report hackers?==
+You have to select your gateway corresponding to where you play in order to report hackers. Moreover you need a valid autorization key. You can read about these keys here: AuthorizationKeys
+
+==I think BWHF Agent misbehaving, but I don't see any errors==
+Try to start the program with the BWHFAgent-console.cmd script. That way you get a console where you might see some errors and details.
