@@ -7,6 +7,7 @@ First check if you have Java installed in your system. BWHF Agent requires Java 
 {{{
 java -version
 }}}
+You can download and install Java for free here: [http://www.java.com/download]
 
 ==Autoscan doesn't work?==
 You have to set Starcraft directory to let BWHF Agent know where to look for !LastReplay.rep.
