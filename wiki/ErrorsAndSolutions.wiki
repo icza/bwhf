@@ -9,7 +9,7 @@ java -version
 }}}
 You can download and install Java here: [http://www.java.com/download]
 
-Next, you have to start it with `BWHFAgent.cmd` and not with the jar file.
+Next thing you should know is you have to start it with `BWHFAgent.cmd` and not with the jar file.
 
 ==Autoscan doesn't work?==
 You have to set Starcraft directory to let BWHF Agent know where to look for !LastReplay.rep.
