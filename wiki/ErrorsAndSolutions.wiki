@@ -8,6 +8,7 @@ First check if you have Java installed in your system. BWHF Agent requires Java 
 java -version
 }}}
 You can download and install Java here: [http://www.java.com/download]
+
 Next, you have to start it with `BWHFAgent.cmd` and not with the jar file.
 
 ==Autoscan doesn't work?==
