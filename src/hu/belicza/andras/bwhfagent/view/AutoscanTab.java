@@ -305,7 +305,7 @@ public class AutoscanTab extends LoggedTab {
 											logMessage( "\t" + hackDescription.description, false );
 										
 										if ( saveHackerRepsCheckBox.isSelected() )
-											Utils.copyFile( lastReplayFile, new File( hackerRepsDestinationTextField.getText() ), DATE_FORMAT.format( new Date() ) + " LastReplay.rep" );
+											Utils.copyFile( lastReplayFile, new File( hackerRepsDestinationTextField.getText() ), DATE_FORMAT.format( new Date() ) + " LastRep.rep" );
 										
 										if ( reportHackersCheckBox.isSelected() ) {
 											if ( gatewayComboBox.getSelectedIndex() == 0 )
