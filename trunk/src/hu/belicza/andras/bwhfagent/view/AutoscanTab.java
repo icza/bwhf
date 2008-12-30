@@ -281,7 +281,7 @@ public class AutoscanTab extends LoggedTab {
 							
 							if ( newLastReplayLastModified >= autoscanEnabledTime.getTime() && newLastReplayLastModified != lastModifiedOfLastChecked ) {
 								if ( saveAllRepsCheckBox.isSelected() )
-									Utils.copyFile( lastReplayFile, new File( allRepsDestinationTextField.getText() ), DATE_FORMAT.format( new Date() ) + " LastReplay.rep" );
+									Utils.copyFile( lastReplayFile, new File( allRepsDestinationTextField.getText() ), DATE_FORMAT.format( new Date() ) + " LastRep.rep" );
 								
 								logMessage( "LastReplay.rep was modified - proceeding to scan..." );
 								lastModifiedOfLastChecked = newLastReplayLastModified;
