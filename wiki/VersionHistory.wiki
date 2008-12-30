@@ -2,8 +2,7 @@
 
 =BWHF Agent version history=
 
-====1.00 ??? ====
-The upcoming new release.
+====1.00 2008-12-30====
  * Fixed a bug which caused the scan process to hang when tried to scan a replay with actions starting at iteration 0.
  * Fixed a false multicommand hack alert.
  * Changed the generated names of the autosaved replays (the previous one was too long and Starcraft couldn't play it without renaming).
