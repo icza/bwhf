@@ -11,6 +11,13 @@ You can download and install Java here: [http://www.java.com/download]
 
 Next thing you should know is you have to start it with `BWHFAgent.cmd` and not with the jar file.
 
+==I have Java installed, still can't start==
+This might be because even if you have java installed in your system, the java.exe and the javaw.exe commands are available because their folder is not in the execution path.
+
+You can fix this in 2 ways:
+ * You can add the java installation folder to your PATH environment. In fact you have to add the bin subfolder of it where actually the java exe files are located. For example this folder can be: `"C:\Program Files\Java\jre6\bin"`
+ * You can edit the `BWHFAgent.cmd` and `BWHFAgent-console.cmd` scripts, and add the full path of java.exe where it is installed. Don't forget to put it in quotes if the directiry names contain spaces. For example: `"C:\Program Files\Java\jre6\bin\java.exe" -Djava.library.path=...`
+
 ==Autoscan doesn't work?==
 You have to set Starcraft directory to let BWHF Agent know where to look for !LastReplay.rep.
 
