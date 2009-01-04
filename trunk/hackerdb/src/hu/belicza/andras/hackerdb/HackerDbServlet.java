@@ -9,6 +9,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +38,9 @@ public class HackerDbServlet extends HttpServlet {
 	/** URL of the hacker data base. */
 	private static final String DATABASE_URL = "jdbc:hsqldb:hsql://localhost/hackers";
 	
+	/** Date format to be used to format output dates. */
+	private static final DateFormat DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd HH:mm" );
+	
 	/** Max players in a report. */
 	private static final int MAX_PLAYERS_IN_REPORT = 8;
 	
@@ -57,9 +62,11 @@ public class HackerDbServlet extends HttpServlet {
 	/** Default value of ascendant sorting for the different sorting by values. */
 	private static final Map< String, Boolean > FILTER_DEFAULT_ASCENDANT_SORTING_MAP = new HashMap< String, Boolean >();
 	static {
-		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_NAME        , true  );
-		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_GATEWAY     , true  );
-		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_REPORT_COUNT, false );
+		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_NAME          , true  );
+		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_GATEWAY       , true  );
+		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_REPORT_COUNT  , false );
+		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_FIRST_REPORTED, false );
+		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_LAST_REPORTED , false );
 	}
 	
 	/** Data source to provide pooled connections to the hacker database. */
@@ -102,8 +109,8 @@ public class HackerDbServlet extends HttpServlet {
 				filtersWrapper.reportedWithKey   = getStringParamValue( request, FILTER_NAME_REPORTED_WITH_KEY );
 				filtersWrapper.sortByValue       = getStringParamValue( request, FILTER_NAME_SORT_BY );
 				if ( filtersWrapper.sortByValue.length() == 0 )
-					filtersWrapper.sortByValue   = SORT_BY_VALUE_NAME;
-				filtersWrapper.ascendantSorting  = request.getParameter( FILTER_NAME_ASCENDANT_SORTING ) == null ? FILTER_DEFAULT_ASCENDANT_SORTING_MAP.get( SORT_BY_VALUE_NAME ) : request.getParameter( FILTER_NAME_ASCENDANT_SORTING ).equalsIgnoreCase( "true" );
+					filtersWrapper.sortByValue   = SORT_BY_VALUE_FIRST_REPORTED;
+				filtersWrapper.ascendantSorting  = request.getParameter( FILTER_NAME_ASCENDANT_SORTING ) == null ? FILTER_DEFAULT_ASCENDANT_SORTING_MAP.get( filtersWrapper.sortByValue ) : request.getParameter( FILTER_NAME_ASCENDANT_SORTING ).equalsIgnoreCase( "true" );
 				filtersWrapper.page              = getIntParamValue( request, FILTER_NAME_PAGE, FILTER_DEFAULT_PAGE );
 				filtersWrapper.pageSize          = getIntParamValue( request, FILTER_NAME_PAGE_SIZE, FILTER_DEFAULT_PAGE_SIZE );
 				filtersWrapper.stepDirection     = request.getParameter( FILTER_NAME_STEP_DIRECTION );
@@ -292,16 +299,18 @@ public class HackerDbServlet extends HttpServlet {
 			
 			// Hackers table section
 			outputWriter.println( "<table border=1>" );
-			outputWriter.println( "<tr><th>#<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_NAME        , filtersWrapper ) + "\">Name"         + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME         ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
-										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_GATEWAY     , filtersWrapper ) + "\">Gateway"      + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_GATEWAY      ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
-										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_REPORT_COUNT, filtersWrapper ) + "\">Report count" + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_REPORT_COUNT ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" ) );
+			outputWriter.println( "<tr><th>#<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_NAME          , filtersWrapper ) + "\">Name"           + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME           ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
+										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_GATEWAY       , filtersWrapper ) + "\">Gateway"        + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_GATEWAY        ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
+										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_REPORT_COUNT  , filtersWrapper ) + "\">Report count"   + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_REPORT_COUNT   ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
+										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_FIRST_REPORTED, filtersWrapper ) + "\">First reported" + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_FIRST_REPORTED ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
+										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_LAST_REPORTED , filtersWrapper ) + "\">Last reported"  + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_LAST_REPORTED  ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" ) );
 			if ( matchingRecordsCount > 0 ) {
 				int recordNumber = ( filtersWrapper.page - 1 )* filtersWrapper.pageSize;
 				statement = buildHackersQueryStatement( filtersWrapper, false, connection );
 				resultSet = statement.executeQuery();
 				while ( resultSet.next() ) {
 					final int gateway = resultSet.getInt( 2 );
-					outputWriter.println( "<tr class='gat" + ( gateway < GATEWAY_STYLES.length ? gateway : "Un" ) + "'><td align=right>" + (++recordNumber) + "<td>" + resultSet.getString( 1 ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td align=center>" + resultSet.getInt( 3 ) );
+					outputWriter.println( "<tr class='gat" + ( gateway < GATEWAY_STYLES.length ? gateway : "Un" ) + "'><td align=right>" + (++recordNumber) + "<td>" + resultSet.getString( 1 ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td align=center>" + resultSet.getInt( 3 ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 4 ) ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 5 ) ) );
 				}
 			}
 			outputWriter.println( "</table>" );
@@ -382,7 +391,7 @@ public class HackerDbServlet extends HttpServlet {
 		if ( countOnly )
 			queryBuilder.append( "SELECT COUNT(*) FROM (SELECT h.gateway" );
 		else
-			queryBuilder.append( "SELECT h.name, h.gateway, COUNT(h.gateway) AS reportsCount" );
+			queryBuilder.append( "SELECT h.name, h.gateway, COUNT(h.gateway) AS reportsCount, MIN(r.version) AS firstReported, MAX(r.version) AS lastReported" );
 		
 		queryBuilder.append( " FROM hacker h, report r, key k WHERE r.hacker=h.id AND r.key=k.id AND k.revocated=FALSE" );
 		
@@ -439,12 +448,16 @@ public class HackerDbServlet extends HttpServlet {
 			queryBuilder.append( ')' );
 		else {
 			queryBuilder.append( " ORDER BY " );
-			if ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_GATEWAY ) )
+			if ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_LAST_REPORTED ) )
+				queryBuilder.append( "lastReported" );
+			else if ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_GATEWAY ) )
 				queryBuilder.append( "h.gateway" );
 			else if ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_REPORT_COUNT ) )
 				queryBuilder.append( "reportsCount" );
-			else
+			else if ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME ) )
 				queryBuilder.append( "h.name" );
+			else // Default sorting...
+				queryBuilder.append( "firstReported" );
 			
 			queryBuilder.append( filtersWrapper.ascendantSorting ? " ASC" : " DESC" );
 			

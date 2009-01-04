@@ -68,6 +68,10 @@ public class ServerApiConsts {
 	public static final String SORT_BY_VALUE_GATEWAY         = "sgt";
 	/** Sort by value for report count.    */
 	public static final String SORT_BY_VALUE_REPORT_COUNT    = "src";
+	/** Sort by value for first reported.  */
+	public static final String SORT_BY_VALUE_FIRST_REPORTED  = "sfr";
+	/** Sort by value for last reported.   */
+	public static final String SORT_BY_VALUE_LAST_REPORTED   = "slr";
 	
 	/** Step direction value for first.    */
 	public static final String STEP_DIRECTION_FIRST          = "First";
