@@ -15,7 +15,7 @@ Next thing you should know is you have to start it with `BWHFAgent.cmd` and not 
 This might be because even if you have java installed in your system, the java.exe and the javaw.exe commands are available because their folder is not in the execution path.
 
 You can fix this in 2 ways:
- * You can add the java installation folder to your PATH environment. In fact you have to add the bin subfolder of it where actually the java exe files are located. For example this folder can be: `"C:\Program Files\Java\jre6\bin"` Google it how to set/change the PATH environment variable
+ * You can add the java installation folder to your PATH environment. In fact you have to add the bin subfolder of it where actually the java exe files are located. For example this folder can be: `"C:\Program Files\Java\jre6\bin"` Google it how to set/change the PATH environment variable.
  * You can edit the `BWHFAgent.cmd` and `BWHFAgent-console.cmd` scripts, and add the full path of java.exe where it is installed. Don't forget to put it in quotes if the directiry names contain spaces. For example: `"C:\Program Files\Java\jre6\bin\java.exe" -Djava.library.path=...`
 
 Tip: you can check the value of the PATH environment variable by typing `PATH` in a command window.
