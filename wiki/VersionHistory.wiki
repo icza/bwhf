@@ -5,6 +5,7 @@
 ====1.10 ???====
  * Volume control settings of alert sounds.
  * Handling a kind of replay corruption (fixes a false alert).
+ * Hack report at the end of manual scan is built with no case sensitivity in hacker's name.
 
 ====1.00 2008-12-30====
  * Fixed a bug which caused the scan process to hang when tried to scan a replay with actions starting at iteration 0.
