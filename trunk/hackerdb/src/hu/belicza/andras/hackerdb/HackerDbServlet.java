@@ -257,7 +257,7 @@ public class HackerDbServlet extends HttpServlet {
 			
 			// Header section
 			outputWriter.println( "<h2>BWHF Hacker data base</h2>" );
-			outputWriter.println( "<p align=right>Go to <a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></p>" );
+			outputWriter.println( "<table border=0 width='100%'><td align=left><a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help about this page (filters, sorting)</a><td align=right>Go to <a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></table>" );
 			
 			// Controls section
 			outputWriter.println( "<form id='" + FORM_ID + "' action='hackers' method='POST'>" );
@@ -316,7 +316,7 @@ public class HackerDbServlet extends HttpServlet {
 			outputWriter.println( "</table>" );
 			
 			// Footer section
-			outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008</i></p>" );
+			outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></p>" );
 			outputWriter.println( "</center></body></html>" );
 			
 			outputWriter.flush();
