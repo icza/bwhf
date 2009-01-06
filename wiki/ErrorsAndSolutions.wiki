@@ -12,7 +12,9 @@ You can download and install Java here: [http://www.java.com/download]
 Next thing you should know is you have to start it with `BWHFAgent.cmd` and not with the jar file.
 
 ==I have Java installed, still can't start==
-This might be because even if you have java installed in your system, the java.exe and the javaw.exe commands are available because their folder is not in the execution path.
+BWHF Agent requires the 32 bit version of the java. If you installed the 64 version, please install the 32 bit version too, and edit the starter scripts to use the 32 bit version's java.exe and javaw.exe.
+
+Another cause can be that even if you might have java installed in your system, the java.exe and the javaw.exe commands are available because their folder is not in the execution path.
 
 You can fix this in 2 ways:
  * You can add the java installation folder to your PATH environment. In fact you have to add the bin subfolder of it where actually the java exe files are located. For example this folder can be: `"C:\Program Files\Java\jre6\bin"` Google it how to set/change the PATH environment variable.
