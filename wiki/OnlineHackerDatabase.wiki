@@ -22,7 +22,7 @@ A report/hacker will be counted if:
 
 ==Sorting==
 
-You can sort the results by clicking on the column you want to sort by. Clicking on the same column again will change the sort order (reverse it).
+You can sort the results by clicking on the header of the column you want to sort by. Clicking on the same column again will change the sort order (reverse it).
 
 The columns and their meaning:
  * *#:* the ordinal of the hacker in the current sorting
