@@ -8,6 +8,8 @@ The BWHF online hacker database is available here:
 
 On that page you can list, search, filter, sort existing hackers.
 
+==Filters==
+
 You can filter the hackers with various properties. Only those reports will be counted and displayed which match all the filters.
 
 A report/hacker will be counted if:
@@ -18,3 +20,16 @@ A report/hacker will be counted if:
  * *Min report count:* the hacker has received at least reports of this count
  * *Reported with key:* the report was done using this key; you can use this to list your own reports/hackers
 
+==Sorting==
+
+You can sort the results by clicking on the column you want to sort by. Clicking on the same column again will change the sort order (reverse it).
+
+The columns and their meaning:
+ * *#:* the ordinal of the hacker in the current sorting
+ * *Name:* the name of the hacker
+ * *Gateway:* the gatway of the hacker
+ * *Report count:* the number of reports of the hacker
+ * *First reported:* the date and time of when the first report of the hacker arrived; this has the meaning of how long has been the hacker hacking, or rather when was he recorded in the database
+ * *Last reported:* the date and time of when the last report of the hacker arrived; this has the meaning of when was the last activity of the hacker, or rather when was he last recorded
+
+The *First reported* column shows how old the hacker is using hacks and the *Last reported* column shows how recently was the hacker active (based on the reports arrived to the BWHF system).
