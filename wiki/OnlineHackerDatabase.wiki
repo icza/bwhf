@@ -32,4 +32,6 @@ The columns and their meaning:
  * *First reported:* the date and time of when the first report of the hacker arrived; this has the meaning of how long has been the hacker hacking, or rather when was he recorded in the database
  * *Last reported:* the date and time of when the last report of the hacker arrived; this has the meaning of when was the last activity of the hacker, or rather when was he last recorded
 
-The *First reported* column shows how old the hacker is using hacks and the *Last reported* column shows how recently was the hacker active (based on the reports arrived to the BWHF system).
+The *First reported* column shows how long the hacker is using hacks and the *Last reported* column shows how recently was the hacker active (based on the reports arrived to the BWHF system).
+
+The default sorting column is the *First reported* column, which will put the newly recorded hackers to the top of the list. Sorting by the *Last reported* column puts the most recent active hackers to the top of the list (again, based on the reports arrived to the BWHF system).
