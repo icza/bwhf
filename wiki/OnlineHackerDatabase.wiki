@@ -8,7 +8,7 @@ The BWHF online hacker database is available here:
 
 On that page you can list, search, filter, sort existing hackers.
 
-==Filters==
+==Filtering==
 
 You can filter the hackers with various properties. Only those reports will be counted and displayed which match all the filters.
 
