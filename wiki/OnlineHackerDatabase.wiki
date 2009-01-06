@@ -1,0 +1,20 @@
+#summary Describes the online hacker database.
+
+=BWHF Online Hacker Database=
+
+The BWHF online hacker database is available here:
+
+[http://94.199.240.39/hackerdb/hackers]
+
+On that page you can list, search, filter, sort existing hackers.
+
+You can filter the hackers with various properties. Only those reports will be counted and displayed which match all the filters.
+
+A report/hacker will be counted if:
+ * *Hacker name:* the hacker name contains this lowercased text
+ * *Gateways:* the report is assigned to one the selected gateways
+ * *Game engines:* the replay of the report has been played with one of the selected game engines
+ * *Map name:* the map of the replay of the report contains this lowercased text
+ * *Min report count:* the hacker has received at least reports of this count
+ * *Reported with key:* the report was done using this key; you can use this to list your own reports/hackers
+
