@@ -19,6 +19,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.SourceDataLine;
 
 import swingwt.awt.Component;
@@ -198,6 +199,11 @@ public class Utils {
 			final SourceDataLine   audioLine        = (SourceDataLine) AudioSystem.getLine( new DataLine.Info( SourceDataLine.class, audioFormat ) );
 			
 			audioLine.open( audioFormat );
+			
+			if ( audioLine.isControlSupported( FloatControl.Type.MASTER_GAIN ) ) {
+				final FloatControl volume = (FloatControl) audioLine.getControl( FloatControl.Type.MASTER_GAIN );
+	            volume.setValue( (float) ( 20.0*Math.log10( MainFrame.getInstance().generalSettingsTab.soundVolumeSlider.getValue() / 100.0 ) ) );
+			}
 			
 			new Thread() {
 				@Override
