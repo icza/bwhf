@@ -17,6 +17,7 @@ public class Action {
 	public static final int ACTION_NAME_INDEX_SELECT       =  6;
 	public static final int ACTION_NAME_INDEX_MOVE         =  7;
 	public static final int ACTION_NAME_INDEX_ATTACK_MOVE  =  8;
+	public static final int ACTION_NAME_INDEX_GATHER       =  9;
 	
 	
 	/** Possible action names. */
@@ -29,7 +30,8 @@ public class Action {
 		"Hotkey",
 		"Select",
 		"Move",
-		"Attack Move"
+		"Attack Move",
+		"Gather"
 	};
 	
 	
