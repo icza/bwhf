@@ -6,8 +6,6 @@ import hu.belicza.andras.bwhf.control.ReplayScanner;
 import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhfagent.Consts;
 
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -15,8 +13,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.Map.Entry;
 
+import swingwt.awt.event.ActionEvent;
+import swingwt.awt.event.ActionListener;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JFileChooser;
@@ -196,12 +197,13 @@ public class ManualScanTab extends LoggedTab {
 								for ( final HackDescription hackDescription : hackDescriptionList ) {
 									logMessage( "\t" + hackDescription.description, false );
 									
-									if ( !hackersOfReplaySet.contains( hackDescription.playerName ) ) {
+									final String lowerCasedHackerName = hackDescription.playerName.toLowerCase();
+									if ( !hackersOfReplaySet.contains( lowerCasedHackerName ) ) {
 										// Only count a player once per replay in the overall statistics
-										hackersOfReplaySet.add( hackDescription.playerName );
-										IntWrapper playerHackerRepsCount = playerHackerRepsCountMap.get( hackDescription.playerName );
+										hackersOfReplaySet.add( lowerCasedHackerName );
+										IntWrapper playerHackerRepsCount = playerHackerRepsCountMap.get( lowerCasedHackerName );
 										if ( playerHackerRepsCount == null )
-											playerHackerRepsCountMap.put( hackDescription.playerName, playerHackerRepsCount = new IntWrapper() );
+											playerHackerRepsCountMap.put( lowerCasedHackerName, playerHackerRepsCount = new IntWrapper() );
 										playerHackerRepsCount.value++;
 									}
 								}
@@ -222,7 +224,8 @@ public class ManualScanTab extends LoggedTab {
 					if ( !playerHackerRepsCountMap.isEmpty() ) {
 						final StringBuilder hackersBuilder = new StringBuilder( "\tThe following player" + ( playerHackerRepsCountMap.size() == 1 ? " was" : "s were" ) + " found hacking: " );
 						boolean firstHacker = true;
-						for ( final Entry< String, IntWrapper > playerHackerRepsCount : playerHackerRepsCountMap.entrySet() ) {
+						// First me make a TreeMap so we will list hackers sorted by their name
+						for ( final Entry< String, IntWrapper > playerHackerRepsCount : new TreeMap< String, IntWrapper >( playerHackerRepsCountMap ).entrySet() ) {
 							if ( firstHacker )
 								firstHacker = false;
 							else
