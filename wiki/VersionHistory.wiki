@@ -3,7 +3,7 @@
 =BWHF Agent version history=
 
 ====1.10 ???====
- * Volume control settings of alert sounds.
+ * Volume control settings for alert sounds.
  * Handling a kind of replay corruption (fixes a false alert).
  * Hack report at the end of manual scan is built with no case sensitivity in hacker's name, and the list is sorted by name.
 
