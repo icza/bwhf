@@ -27,7 +27,7 @@ public class BinRepParser {
 	 * @param arguments
 	 */
 	public static void main( final String[] arguments ) {
-		final String[] replayNames = new String[] { "w:/someother/10143 ihT feP DaT vaZ yP tP.rep" };
+		final String[] replayNames = new String[] { "c:/replays/a.rep" };
 		
 		for ( final String replayName : replayNames ) {
 			final Replay replay = parseReplay( new File( replayName ) );
@@ -315,6 +315,8 @@ public class BinRepParser {
 				int actionNameIndex = Action.ACTION_NAME_INDEX_UNKNOWN;
 				if ( type == (byte) 0x00 || type == (byte) 0x06 ) // Move with right click or Move by click move icon
 					actionNameIndex = Action.ACTION_NAME_INDEX_MOVE;
+				else if ( type == (byte) 0x09 || type == (byte) 0x4f || type == (byte) 0x50 ) // Gather
+					actionNameIndex = Action.ACTION_NAME_INDEX_GATHER;
 				else if ( type == (byte) 0x0e ) // Attack move
 					actionNameIndex = Action.ACTION_NAME_INDEX_ATTACK_MOVE;
 				
