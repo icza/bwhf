@@ -186,4 +186,10 @@ public class Action {
 		this.parameterUnitNameIndex     = parameterUnitNameIndex;
 		this.parameterBuildingNameIndex = parameterBuildingNameIndex;
 	}
+	
+	@Override
+	public String toString() {
+		return iteration + "\t" + ( name == null ? actionNameIndex : name ) + "\t" + parameters;
+	}
+	
 }
