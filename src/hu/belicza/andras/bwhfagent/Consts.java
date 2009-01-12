@@ -51,6 +51,14 @@ public class Consts {
 			REPLAY_CONVERTER_EXECUTABLE_FILE = null;
 	}
 	
+	/** Labels for the possible values of flag hacker replays position. */
+	public static final String[] FLAG_HACKER_REPS_POSITION_LABELS = new String[] { "beginning", "end" };
+	/** Index for the beginning flag hacker reps position. */
+	public static final int FLAG_HACKER_REPS_POSITION_BEGINNING = 0;
+	/** Index for the end flag hacker reps position.       */
+	public static final int FLAG_HACKER_REPS_POSITION_END       = 1;
+	
+	
 	/** Name of the settings properties file. */
 	public static final String SETTINGS_PROPERTIES_FILE = "settings.properites";
 	
@@ -80,6 +88,8 @@ public class Consts {
 	public static final String PROPERTY_AUTHORIZATION_KEY              = "authorizationKey";
 	/** Flag hacker reps property.               */
 	public static final String PROPERTY_FLAG_HACKER_REPS               = "flagHackerReps";
+	/** Flag hacker reps property.               */
+	public static final String PROPERTY_FLAG_HACKER_REPS_POSITION      = "flagHackerRepsPosition";
 	/** Check updates on startup property.       */
 	public static final String PROPERTY_CHECK_UPDATES_ON_STARTUP       = "checkUpdatesOnStartup";
 	/** Skip latter actions of hackers property. */
@@ -103,6 +113,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_GATEWAY                       , "0" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTHORIZATION_KEY             , "" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FLAG_HACKER_REPS              , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FLAG_HACKER_REPS_POSITION     , Integer.toString( FLAG_HACKER_REPS_POSITION_END ) );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHECK_UPDATES_ON_STARTUP      , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SOUND_VOLUME                  , "70" );

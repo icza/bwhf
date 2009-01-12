@@ -84,9 +84,10 @@ public class AutoscanTab extends LoggedTab {
 		for ( final String gateway : ServerApiConsts.GATEWAYS )
 			gatewayComboBox.addItem( gateway );
 		
+		buildGUI();
+		
 		gatewayComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_GATEWAY ) ) );
 		
-		buildGUI();
 		startAutoscanner();
 	}
 	
