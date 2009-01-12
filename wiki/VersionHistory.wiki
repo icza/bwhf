@@ -2,7 +2,7 @@
 
 =BWHF Agent version history=
 
-====1.10 ???====
+====1.10 2009-01-12====
  * Added option to define the position (beginning or end) where to flag hacker replays on the Manual scan tab.
  * Added volume control setting for alert sounds.
  * Handling a kind of replay corruption (fixes a false alert).
