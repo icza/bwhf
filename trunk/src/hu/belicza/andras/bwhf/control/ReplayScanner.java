@@ -46,7 +46,7 @@ public class ReplayScanner {
 		// Autogather/autotrain hack: having more than 1 action at iteration 5
 		int actionsAtIteration5Count = 0;
 		for ( int actionIndex = 0; actionIndex < actionsCount && actionIndex < 5; actionIndex++ )
-			if ( playerActions[ actionIndex ].iteration == 5 )
+			if ( playerActions[ actionIndex ].iteration == 5 && playerActions[ actionIndex ].actionNameIndex != Action.ACTION_NAME_INDEX_UNKNOWN )
 				actionsAtIteration5Count++;
 			else
 				break;
