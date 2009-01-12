@@ -20,7 +20,9 @@ import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
+import swingwtx.swing.JComboBox;
 import swingwtx.swing.JFileChooser;
+import swingwtx.swing.JLabel;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.filechooser.FileFilter;
 
@@ -37,7 +39,7 @@ public class ManualScanTab extends LoggedTab {
 	/** Replay file extension.          */
 	private static final String REPLAY_FILE_EXTENSION = ".rep";
 	/** Appendable hacker reps postfix. */
-	private static final String HACKER_REPS_POSTFIX   = " - hack";
+	private static final String HACKER_REPS_FLAG      = "hack";
 	
 	/** Replay file filter. */
 	private static final FileFilter SWING_REPLAY_FILE_FILTER = new FileFilter() {
@@ -51,16 +53,18 @@ public class ManualScanTab extends LoggedTab {
 		}
 	};
 	
-	/** Button to scan the last replay.   */
-	private final JButton   scanLastReplayButton   = new JButton( "Scan 'LastReplay.rep'" );
-	/** Button to select folders to scan. */
-	private final JButton   selectFoldersButton    = new JButton( "Select folders to scan recursively" );
-	/** Button to select files to scan.   */
-	private final JButton   selectFilesButton      = new JButton( "Select files to scan" );
-	/** Button to stop the current scan.  */
-	private final JButton   stopScanButton         = new JButton( "Stop current scan" );
-	/** Flag hacker reps checkbox.        */
-	private final JCheckBox flagHackerRepsCheckBox = new JCheckBox( "Flag hacker replays by appending '" + HACKER_REPS_POSTFIX + "' to the end of their names", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS ) ) );
+	/** Button to scan the last replay.                  */
+	private final JButton   scanLastReplayButton           = new JButton( "Scan 'LastReplay.rep'" );
+	/** Button to select folders to scan.                */
+	private final JButton   selectFoldersButton            = new JButton( "Select folders to scan recursively" );
+	/** Button to select files to scan.                  */
+	private final JButton   selectFilesButton              = new JButton( "Select files to scan" );
+	/** Button to stop the current scan.                 */
+	private final JButton   stopScanButton                 = new JButton( "Stop current scan" );
+	/** Flag hacker reps checkbox.                       */
+	private final JCheckBox flagHackerRepsCheckBox         = new JCheckBox( "Flag hacker replays by appending '" + HACKER_REPS_FLAG + "' to the", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS ) ) );
+	/** Position where to flag hacker replays combo box. */
+	private final JComboBox flagHackerRepsPositionComboBox = new JComboBox( Consts.FLAG_HACKER_REPS_POSITION_LABELS );
 	
 	/** Variable to store stop requests of scan.    */
 	private volatile boolean requestedToStop;
@@ -72,6 +76,8 @@ public class ManualScanTab extends LoggedTab {
 		super( "Manual scan", LOG_FILE_NAME );
 		
 		buildGUI();
+		
+		flagHackerRepsPositionComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS_POSITION ) ) );
 	}
 	
 	/**
@@ -122,7 +128,11 @@ public class ManualScanTab extends LoggedTab {
 		} );
 		contentBox.add( Utils.wrapInPanel( stopScanButton ) );
 		
-		contentBox.add( Utils.wrapInPanel( flagHackerRepsCheckBox ) );
+		final JPanel flagHackerRepsPanel = new JPanel();
+		flagHackerRepsPanel.add( flagHackerRepsCheckBox );
+		flagHackerRepsPanel.add( flagHackerRepsPositionComboBox );
+		flagHackerRepsPanel.add( new JLabel( "of their names" ) );
+		contentBox.add( flagHackerRepsPanel );
 		
 		super.buildGUI();
 	}
@@ -209,8 +219,19 @@ public class ManualScanTab extends LoggedTab {
 								}
 								if ( flagHackerRepsCheckBox.isSelected() && !isLastReplay ) {
 									final String replayName = replayFile.getName().substring( 0, replayFile.getName().length() - REPLAY_FILE_EXTENSION.length() );
-									if ( !replayName.endsWith( HACKER_REPS_POSTFIX ) )
-										replayFile.renameTo( new File( replayFile.getParent(), replayName + HACKER_REPS_POSTFIX + REPLAY_FILE_EXTENSION ) );
+									String flaggedReplayName = null;
+									switch ( flagHackerRepsPositionComboBox.getSelectedIndex() ) {
+										case Consts.FLAG_HACKER_REPS_POSITION_BEGINNING :
+											if ( !replayName.startsWith( HACKER_REPS_FLAG + " - " ) )
+												flaggedReplayName = HACKER_REPS_FLAG + " - " + replayName;
+											break;
+										case Consts.FLAG_HACKER_REPS_POSITION_END :
+											if ( !replayName.endsWith( " - " + HACKER_REPS_FLAG ) )
+												flaggedReplayName = replayName + " - " + HACKER_REPS_FLAG;
+											break;
+									}
+									if ( flaggedReplayName != null )
+										replayFile.renameTo( new File( replayFile.getParent(), flaggedReplayName + REPLAY_FILE_EXTENSION ) );
 								}
 							}
 							else
@@ -276,7 +297,8 @@ public class ManualScanTab extends LoggedTab {
 	
 	@Override
 	public void assignUsedProperties() {
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_FLAG_HACKER_REPS, Boolean.toString( flagHackerRepsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_FLAG_HACKER_REPS         , Boolean.toString( flagHackerRepsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_FLAG_HACKER_REPS_POSITION, Integer.toString( flagHackerRepsPositionComboBox.getSelectedIndex() ) );
 	}
 	
 }
