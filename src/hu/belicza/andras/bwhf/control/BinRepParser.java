@@ -27,7 +27,7 @@ public class BinRepParser {
 	 * @param arguments
 	 */
 	public static void main( final String[] arguments ) {
-		final String[] replayNames = new String[] { "c:/replays/a.rep" };
+		final String[] replayNames = new String[] { "c:/replays/hack - a.rep" };
 		
 		for ( final String replayName : replayNames ) {
 			final Replay replay = parseReplay( new File( replayName ) );
@@ -110,7 +110,7 @@ public class BinRepParser {
 				}
 			}
 			
-			// Now create the ReplayActions object, and we can return the replay
+			// Now create the ReplayActions object
 			final Map< String, List< Action > > playerNameActionListMap = new HashMap< String, List< Action > >();
 			for ( int i = 0; i < replayHeader.playerNames.length; i++ )
 				if ( replayHeader.playerNames[ i ] != null ) {
@@ -118,8 +118,30 @@ public class BinRepParser {
 					if ( playerId != 0xff )  // Computers are listed with playerId values of 0xff, but no actions are recorded from them.
 						playerNameActionListMap.put( replayHeader.playerNames[ i ], playerActionLists[ playerId ] );
 				}
+			final ReplayActions replayActions = new ReplayActions( playerNameActionListMap );
 			
-			return new Replay( replayHeader, new ReplayActions( playerNameActionListMap ) );
+			// Map data length section
+			final int mapDataLength = Integer.reverseBytes( ByteBuffer.wrap( unpacker.unpackSection( 4 ) ).getInt() );
+			
+			// Map data section
+			final ByteBuffer mapDataBuffer = ByteBuffer.wrap( unpacker.unpackSection( mapDataLength ) );
+			mapDataBuffer.order( ByteOrder.LITTLE_ENDIAN );
+			
+			final byte[] sectionNameBuffer = new byte[ 4 ];
+			while ( mapDataBuffer.position() < mapDataLength ) {
+				mapDataBuffer.get( sectionNameBuffer );
+				final String sectionName   = new String( sectionNameBuffer, "US-ASCII" );
+				final int    sectionLength = mapDataBuffer.getInt();
+				final int    sectionEndPos = mapDataBuffer.position() + sectionLength;
+				
+				if ( false )
+					System.out.println( sectionName );
+				
+				if ( mapDataBuffer.position() < sectionEndPos )
+					mapDataBuffer.position( sectionEndPos );
+			}
+			
+			return new Replay( replayHeader, replayActions );
 		}
 		catch ( final Exception e ) {
 			e.printStackTrace();
