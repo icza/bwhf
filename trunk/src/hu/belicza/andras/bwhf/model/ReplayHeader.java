@@ -14,6 +14,10 @@ public class ReplayHeader {
 	public static final byte GAME_ENGINE_STARCRAFT = (byte) 0x00;
 	public static final byte GAME_ENGINE_BROODWAR  = (byte) 0x01;
 	
+	public static final byte RACE_ZERG    = (byte) 0x00;
+	public static final byte RACE_TERRAN  = (byte) 0x01;
+	public static final byte RACE_PROTOSS = (byte) 0x02;
+	
 	// Header fields
 	
 	public byte     gameEngine;
@@ -24,10 +28,14 @@ public class ReplayHeader {
 	public short    mapHeight;
 	public String   creatorName;
 	public String   mapName;
-	public String[] playerNames = new String[ 12 ];
 	public byte[]   playerRecords = new byte[ 432 ]; // 12 player records, 12*36 bytes
 	public int[]    playerColors  = new int[ 8 ]; // Player spot color index (ABGR?)
 	public byte[]   playerSpotIndices = new byte[ 8 ]; 
+	
+	// Derived data from player records:
+	public String[] playerNames = new String[ 12 ];
+	public byte[]   playerRaces = new byte[ 12 ];
+	public int[]    playerIds   = new int[ 12 ];
 	
 	/**
 	 * Returns the game duration in seconds.
