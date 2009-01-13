@@ -27,7 +27,7 @@ public class BinRepParser {
 	 * @param arguments
 	 */
 	public static void main( final String[] arguments ) {
-		final String[] replayNames = new String[] { "c:/replays/hack - a.rep" };
+		final String[] replayNames = new String[] { "c:/replays/hack - d - hack.rep" };
 		
 		for ( final String replayName : replayNames ) {
 			final Replay replay = parseReplay( new File( replayName ) );
@@ -41,6 +41,9 @@ public class BinRepParser {
 	
 	/** Size of the header section */
 	public static final int HEADER_SIZE = 0x279;
+	
+	/** Name of the unit section in the map data replay section. */
+	private static final String UNIT_SECTION_NAME = "UNIT";
 	
 	/**
 	 * Parses a binary replay file and returns a {@link Replay} object describing it.
@@ -120,7 +123,7 @@ public class BinRepParser {
 				}
 			final ReplayActions replayActions = new ReplayActions( playerNameActionListMap );
 			
-			// Map data length section
+			/*// Map data length section
 			final int mapDataLength = Integer.reverseBytes( ByteBuffer.wrap( unpacker.unpackSection( 4 ) ).getInt() );
 			
 			// Map data section
@@ -134,12 +137,24 @@ public class BinRepParser {
 				final int    sectionLength = mapDataBuffer.getInt();
 				final int    sectionEndPos = mapDataBuffer.position() + sectionLength;
 				
-				if ( false )
-					System.out.println( sectionName );
+				if ( sectionName.equals( UNIT_SECTION_NAME ) ) {
+					//System.out.println( sectionName + ", length=" + sectionLength );
+					while ( mapDataBuffer.position() < sectionEndPos ) {
+						final int unitRecordEndPos = mapDataBuffer.position() + 36; // unit record length is 36 bytes
+						final int unitId = mapDataBuffer.getInt();
+						mapDataBuffer.position( mapDataBuffer.position() + 4 ); // We skip the x and y coordinates
+						final int unitType = mapDataBuffer.getInt();
+						//System.out.println( unitId + " - " + unitType );
+						mapDataBuffer.position( unitRecordEndPos );
+					}
+					break; // We only needed the unit section
+				}
 				
 				if ( mapDataBuffer.position() < sectionEndPos )
 					mapDataBuffer.position( sectionEndPos );
 			}
+			if ( mapDataBuffer.position() < mapDataLength ) // We might have skipped some parts of map data, so we position to the end
+				mapDataBuffer.position( mapDataLength );*/
 			
 			return new Replay( replayHeader, replayActions );
 		}
