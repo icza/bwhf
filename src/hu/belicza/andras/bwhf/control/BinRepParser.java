@@ -80,16 +80,19 @@ public class BinRepParser {
 			
 			replayHeader.mapName     = getZeroPaddedString( headerData, 0x61, 26 );
 			
-			for ( int i = 0; i < 12; i++ ) {
-				final String playerName = getZeroPaddedString( headerData, 0xa1 + i * 36 + 11, 26 );
-				if ( playerName.length() > 0 )
-					replayHeader.playerNames[ i ] = playerName;
-			}
-			
-			replayHeader.playerRecords = Arrays.copyOfRange( headerData, 0xa1, 0xa1 + 431 );
+			replayHeader.playerRecords = Arrays.copyOfRange( headerData, 0xa1, 0xa1 + 432 );
 			for ( int i = 0; i < replayHeader.playerColors.length; i++ )
 				replayHeader.playerColors[ i ] = headerBuffer.getInt( 0x251 + i * 4 );
 			replayHeader.playerSpotIndices = Arrays.copyOfRange( headerData, 0x271, 0x271 + 8 );
+			
+			// Derived data from player records:
+			for ( int i = 0; i < 12; i++ ) {
+				final String playerName = getZeroPaddedString( replayHeader.playerRecords, i * 36 + 11, 25 );
+				if ( playerName.length() > 0 )
+					replayHeader.playerNames[ i ] = playerName;
+				replayHeader.playerRaces[ i ] = replayHeader.playerRecords[ i * 36 + 9 ];
+				replayHeader.playerIds  [ i ] = replayHeader.playerRecords[ i * 36 + 4 ] & 0xff;
+			}
 			
 			// Player commands length section
 			final int playerCommandsLength = Integer.reverseBytes( ByteBuffer.wrap( unpacker.unpackSection( 4 ) ).getInt() );
@@ -116,11 +119,9 @@ public class BinRepParser {
 			// Now create the ReplayActions object
 			final Map< String, List< Action > > playerNameActionListMap = new HashMap< String, List< Action > >();
 			for ( int i = 0; i < replayHeader.playerNames.length; i++ )
-				if ( replayHeader.playerNames[ i ] != null ) {
-					final int playerId = replayHeader.playerRecords[ i * 36 + 4 ] & 0xff;
-					if ( playerId != 0xff )  // Computers are listed with playerId values of 0xff, but no actions are recorded from them.
-						playerNameActionListMap.put( replayHeader.playerNames[ i ], playerActionLists[ playerId ] );
-				}
+				if ( replayHeader.playerNames[ i ] != null )
+					if ( replayHeader.playerIds[ i ] != 0xff )  // Computers are listed with playerId values of 0xff, but no actions are recorded from them.
+						playerNameActionListMap.put( replayHeader.playerNames[ i ], playerActionLists[ replayHeader.playerIds[ i ] ] );
 			final ReplayActions replayActions = new ReplayActions( playerNameActionListMap );
 			
 			/*// Map data length section
