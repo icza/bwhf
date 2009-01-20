@@ -2,6 +2,10 @@
 
 =BWHF Agent version history=
 
+====???====
+ * Added button to check if Starcraft folder is set correctly.
+ * Moved `BWHFAgent.jar` to the `lib` folder to avoid launching misunderstanding.
+
 ====1.10 2009-01-12====
  * Added option to define the position (beginning or end) where to flag hacker replays on the Manual scan tab.
  * Added volume control setting for alert sounds.
