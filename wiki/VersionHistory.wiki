@@ -5,6 +5,7 @@
 ====???====
  * Added button to check if Starcraft folder is set correctly.
  * Moved `BWHFAgent.jar` to the `lib` folder to avoid launching misunderstanding.
+ * Fixed an error which caused replays with no actions to fail.
 
 ====1.10 2009-01-12====
  * Added option to define the position (beginning or end) where to flag hacker replays on the Manual scan tab.
