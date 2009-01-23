@@ -6,8 +6,11 @@ import java.io.File;
 import java.io.IOException;
 
 import swingwt.awt.BorderLayout;
+import swingwt.awt.Color;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwt.awt.event.KeyEvent;
+import swingwt.awt.event.KeyListener;
 import swingwt.awt.event.WindowAdapter;
 import swingwt.awt.event.WindowEvent;
 import swingwtx.swing.ImageIcon;
@@ -46,8 +49,12 @@ public class MainFrame extends JFrame {
 	/** Current version of the application. */
 	public final String applicationVersion;
 	
-	/** Starcraft directory. */
-	public final JTextField starcraftFolderTextField = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ) );
+	/** Button to start/switch to Starcraft.                   */
+	private final JButton    startScButton              = new JButton( "Start/Switch to Starcraft" );
+	/** Starcraft directory.                                   */
+	public final  JTextField starcraftFolderTextField   = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ) );
+	/** Label to display if starcraft folder is set correctly. */
+	private final JLabel     starcraftFolderStatusLabel = new JLabel();
 	
 	/** Reference to the general settings tab. */
 	public final GeneralSettingsTab generalSettingsTab;
@@ -72,6 +79,7 @@ public class MainFrame extends JFrame {
 		generalSettingsTab = new GeneralSettingsTab();
 		tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), generalSettingsTab, new AboutTab() };
 		buildGUI();
+		checkStarcraftFolder();
 		
 		setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
 		addWindowListener( new WindowAdapter() {
@@ -95,7 +103,7 @@ public class MainFrame extends JFrame {
 	 */
 	private void buildGUI() {
 		final JPanel northPanel = new JPanel( new BorderLayout() );
-		final JButton startScButton = new JButton( "Start/Switch to Starcraft" );
+		final JPanel panel = new JPanel();
 		startScButton.setMnemonic( startScButton.getText().charAt( 0 ) );
 		startScButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
@@ -106,10 +114,28 @@ public class MainFrame extends JFrame {
 				}
 			}
 		} );
-		northPanel.add( Utils.wrapInPanel( startScButton ), BorderLayout.NORTH );
+		panel.add( startScButton );
+		panel.add( starcraftFolderStatusLabel );
+		northPanel.add( panel, BorderLayout.NORTH );
 		northPanel.add( new JLabel( "Starcraft directory:" ), BorderLayout.WEST );
+		// This is a workaround becase SwingWT does not implement DocumentListener correctly :S
+		starcraftFolderTextField.addKeyListener( new KeyListener() {
+			public void keyPressed( final KeyEvent event ) {
+				checkStarcraftFolder();
+			}
+			public void keyReleased( final KeyEvent event ) {
+				checkStarcraftFolder();
+			}
+			public void keyTyped( final KeyEvent event ) {
+				checkStarcraftFolder();
+			}
+		} );
 		northPanel.add( starcraftFolderTextField, BorderLayout.CENTER );
-		northPanel.add( Utils.createFileChooserButton( this, starcraftFolderTextField, JFileChooser.DIRECTORIES_ONLY, null, null, null ), BorderLayout.EAST );
+		northPanel.add( Utils.createFileChooserButton( this, starcraftFolderTextField, JFileChooser.DIRECTORIES_ONLY, null, null, new Runnable() {
+			public void run() {
+				checkStarcraftFolder();
+			}
+		} ), BorderLayout.EAST );
 		getContentPane().add( Utils.wrapInPanel( northPanel ), BorderLayout.NORTH );
 		
 		final JTabbedPane tabbedPane = new JTabbedPane();
@@ -134,11 +160,18 @@ public class MainFrame extends JFrame {
 	}
 	
 	/**
-	 * Returns the starcraft folder text field.
-	 * @return the starcraft folder text field
+	 * Checks if starcraft folder is set correctly.
 	 */
-	public JTextField getStarcraftFolderTextField() {
-		return starcraftFolderTextField;
+	private void checkStarcraftFolder() {
+		if ( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).exists() ) {
+			startScButton.setEnabled( true );
+			starcraftFolderStatusLabel.setText( "Starcraft directory set correctly." );
+			starcraftFolderStatusLabel.setForeground( Color.GREEN.darker() );
+		}
+		else {
+			startScButton.setEnabled( false );
+			starcraftFolderStatusLabel.setText( "Cannot find 'StarCraft.exe'!" );
+			starcraftFolderStatusLabel.setForeground( Color.RED );
+		}
 	}
-	
 }
