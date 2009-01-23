@@ -112,8 +112,8 @@ public class BinReplayUnpacker {
 	 * @throws Exception thrown if size is zero, if I/O error occurs or there's not enough data
 	 */
 	public synchronized byte[] unpackSection( final int size ) throws Exception {
-		if ( size == 0 )
-			throw new Exception();
+		if ( size == 0 ) // There might be a 0 length player commands  section (no actions)
+			return new byte[ 0 ];
 		
 		/*final int check = */readIntFromStream();
 		final int count = readIntFromStream();
