@@ -165,7 +165,7 @@ public class MainFrame extends JFrame {
 	private void checkStarcraftFolder() {
 		if ( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).exists() ) {
 			startScButton.setEnabled( true );
-			starcraftFolderStatusLabel.setText( "Starcraft directory set correctly." );
+			starcraftFolderStatusLabel.setText( "Starcraft directory is set correctly." );
 			starcraftFolderStatusLabel.setForeground( Color.GREEN.darker() );
 		}
 		else {
