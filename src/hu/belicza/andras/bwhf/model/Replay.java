@@ -1,8 +1,7 @@
 package hu.belicza.andras.bwhf.model;
 
 /**
- * Class modelling a replay.
- * For java bitwise operations, see See also: http://www.cs.utsa.edu/~wagner/laws/Abytes.html.
+ * Class modeling a replay.
  * 
  * @author Belicza Andras
  */
