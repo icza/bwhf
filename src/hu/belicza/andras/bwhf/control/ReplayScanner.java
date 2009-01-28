@@ -135,7 +135,7 @@ public class ReplayScanner {
 			if ( lastIteration == action.iteration && lastAction.actionNameIndex != action.actionNameIndex && action.actionNameIndex != Action.ACTION_NAME_INDEX_HOTKEY )
 				nonHotkeyActionsCountInSameIteration++;
 			else {
-				if ( nonHotkeyActionsCountInSameIteration > 14 )
+				if ( nonHotkeyActionsCountInSameIteration > 18 )
 					hackDescriptionList.add( new HackDescription( player.name, player.name + " used multicommand hack at " + lastAction.iteration ) );
 				lastIteration = action.iteration;
 				nonHotkeyActionsCountInSameIteration = 0;
