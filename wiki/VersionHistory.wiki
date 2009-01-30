@@ -2,12 +2,17 @@
 
 =BWHF Agent version history=
 
-====???====
+*New ideas and features to consider (post your comments and votes on these):*
+<wiki:comment>java pcx support: http://www.informit.com/articles/article.aspx?p=684049&seqNum=5</wiki:comment>
+ * Utility to convert pcx screenshot image files to jpg or gif or png.
+ * Utility to extract game chat from replays (to text files).
+
+*Upcoming features and changes in the next version:*
  * It is displayed if Starcraft folder is set correctly, and the 'Start/Switch to Starcraft' button is enabled based on that.
  * Moved `BWHFAgent.jar` to the `lib` folder to avoid launching misunderstanding.
  * Fixed an error which caused replays with no actions to fail.
  * Fine-tuned the general multicommand hack detection to fix 2 false alerts.
- * Modified the binary replay parser to recognize and parse game chat commands properly (which was introduced in Starcraft version 1.16).
+ * Updated the binary replay parser to recognize and parse game chat commands properly (which was introduced in Starcraft version 1.16).
 
 ====1.10 2009-01-12====
  * Added option to define the position (beginning or end) where to flag hacker replays on the Manual scan tab.
