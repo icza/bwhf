@@ -27,7 +27,7 @@ public class BinRepParser {
 	 * @param arguments
 	 */
 	public static void main( final String[] arguments ) {
-		final String[] replayNames = new String[] { "c:/replays/hack - d - hack.rep" };
+		final String[] replayNames = new String[] { "w:/2009-01-29 01-38-05 LastRep.rep" };
 		
 		for ( final String replayName : replayNames ) {
 			final Replay replay = parseReplay( new File( replayName ) );
@@ -414,6 +414,10 @@ public class BinRepParser {
 			case (byte) 0x36 :   // Stim
 			case (byte) 0x5a : { // Merge dark archon
 				// No additional data
+				break;
+			}
+			case (byte) 0x5c : { // Game Chat (as of 1.16)
+				skipBytes = 81;  // 1 byte for player ID, and 80 bytes of message characters
 				break;
 			}
 			default: { // We don't know how to handle actions, we have to skip the whole time frame which means we might lose some actions!
