@@ -8,11 +8,10 @@
 
 *Upcoming features and changes in the next version:*
  * It is displayed if Starcraft folder is set correctly, and the 'Start/Switch to Starcraft' button is enabled based on that.
- * Moved `BWHFAgent.jar` to the `lib` folder to avoid launching misunderstanding.
+ * Moved `BWHFAgent.jar` to the `lib` folder to avoid launching misunderstanding and added a `BWHFAgent.exe` starter program.
  * Fixed an error which caused replays with no actions to fail.
  * Fine-tuned the general multicommand hack detection to fix 2 false alerts.
  * Updated the binary replay parser to recognize and parse game chat commands properly (which was introduced in Starcraft version 1.16).
- * Added a `BWHFAgent.exe` starter program.
 
 ====1.10 2009-01-12====
  * Added option to define the position (beginning or end) where to flag hacker replays on the Manual scan tab.
