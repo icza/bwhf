@@ -3,7 +3,6 @@
 =BWHF Agent version history=
 
 *New ideas and features to consider (post your comments and votes on these):*
-<wiki:comment>java pcx support: http://www.informit.com/articles/article.aspx?p=684049&seqNum=5</wiki:comment>
  * Utility to convert pcx screenshot image files to jpg or gif or png.
  * Utility to extract game chat from replays (to text files).
 
