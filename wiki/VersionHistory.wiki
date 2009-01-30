@@ -7,6 +7,7 @@
  * Moved `BWHFAgent.jar` to the `lib` folder to avoid launching misunderstanding.
  * Fixed an error which caused replays with no actions to fail.
  * Fine-tuned the general multicommand hack detection to fix 2 false alerts.
+ * Modified the binary replay parser to recognize and parse game chat commands properly (which was introduced in Starcraft version 1.16).
 
 ====1.10 2009-01-12====
  * Added option to define the position (beginning or end) where to flag hacker replays on the Manual scan tab.
