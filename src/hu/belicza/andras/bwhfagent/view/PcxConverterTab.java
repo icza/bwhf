@@ -149,7 +149,8 @@ public class PcxConverterTab extends LoggedTab {
 									throw new Exception( "Failed parsing PCX file: " + absolutePcxPath );
 								ImageIO.write( image, formatName, new File( ( extensionIndex < 0 ? absolutePcxPath : absolutePcxPath.substring( 0, extensionIndex ) ) + extension ) );
 								logMessage( "'" + absolutePcxPath + "' converted successfully." );
-								pcxFile.delete();
+								if ( deleteOnSuccess )
+									pcxFile.delete();
 							} catch ( final Exception e ) {
 								logMessage( "Failed to convert '" + absolutePcxPath + "'!");
 							}
