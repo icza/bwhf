@@ -175,11 +175,11 @@ public class ManualScanTab extends LoggedTab {
 					if ( requestedToStop )
 						return;
 					
-					final long startTimeNanons = System.nanoTime();
-					
 					final String scanningMessage = "Scanning " 
 						+ ( isLastReplay ? new File( Consts.LAST_REPLAY_FILE_NAME ).getName() : replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" ) );
 					logMessage( scanningMessage + "..." );
+					
+					final long startTimeNanons = System.nanoTime();
 					
 					int hackerRepsCount  = 0;
 					int skippedRepsCount = 0;

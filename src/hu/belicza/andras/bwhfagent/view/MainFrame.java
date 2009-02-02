@@ -77,7 +77,7 @@ public class MainFrame extends JFrame {
 		setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
 		
 		generalSettingsTab = new GeneralSettingsTab();
-		tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), generalSettingsTab, new AboutTab() };
+		tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), new PcxConverterTab(), generalSettingsTab, new AboutTab() };
 		buildGUI();
 		checkStarcraftFolder();
 		

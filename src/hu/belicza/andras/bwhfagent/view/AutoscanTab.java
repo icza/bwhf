@@ -333,7 +333,8 @@ public class AutoscanTab extends LoggedTab {
 							autoscanEnabledTime = null;
 						
 						sleep( TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS );
-					} catch ( final InterruptedException ie ) {
+					}
+					catch ( final InterruptedException ie ) {
 					}
 				}
 			}
