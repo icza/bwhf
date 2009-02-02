@@ -6,7 +6,7 @@
  * Utility to extract game chat from replays (to text files).
 
 *Upcoming features and changes in the next version:*
- * A new *PCX converter* tab which can convert your Starcraft PCX screenshots files to jpg, gif, png or bmp files. The tab has an auto converter feature which automatically converts your Starcraft screenshots, and you don't have to do anything manually, you will find the jpg (or png or gif or bmp) screenshots in your Starcraft directory right away.
+ * A new *PCX converter* tab which can convert your Starcraft PCX screenshot files to jpg, gif, png or bmp image files. The tab has an auto converter feature which automatically converts your Starcraft screenshots so you don't have to do it manually. You will find the jpg (or png or gif or bmp) screenshots in your Starcraft directory right away as if Starcraft would save the screenshots in jpg in the first place.
  * It is displayed if Starcraft folder is set correctly, and the 'Start/Switch to Starcraft' button is enabled based on that.
  * Moved `BWHFAgent.jar` to the `lib` folder to avoid launching misunderstanding and added a `BWHFAgent.exe` starter program.
  * Fixed an error which caused scanning a replay with no actions to fail.
