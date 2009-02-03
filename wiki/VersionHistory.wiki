@@ -1,4 +1,5 @@
 #summary Version history and changes in BWHF Agent.
+#labels Featured
 
 =BWHF Agent version history=
 
