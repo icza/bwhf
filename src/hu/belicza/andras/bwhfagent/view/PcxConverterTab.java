@@ -76,7 +76,8 @@ public class PcxConverterTab extends LoggedTab {
 		
 		for ( final String string : strings ) {
 			final String uppercasedString = string.toUpperCase();
-			unifiedStringSet.add( uppercasedString.equals( "JPEG" ) ? "JPG" : uppercasedString );
+			if ( !uppercasedString.equals( "WBMP" ) ) // WBMP conversion doesn't really work...
+				unifiedStringSet.add( uppercasedString.equals( "JPEG" ) ? "JPG" : uppercasedString );
 		}
 		
 		return unifiedStringSet.toArray( new String[ unifiedStringSet.size() ] );

@@ -288,7 +288,7 @@ public class AutoscanTab extends LoggedTab {
 								lastModifiedOfLastChecked = newLastReplayLastModified;
 								
 								List< HackDescription > hackDescriptionList = null; 
-								final Replay replay = BinRepParser.parseReplay( lastReplayFile );
+								final Replay replay = BinRepParser.parseReplay( lastReplayFile, false );
 								if ( replay != null )
 									hackDescriptionList = ReplayScanner.scanReplayForHacks( replay.replayActions, skipLatterActionsOfHackersCheckBox.isSelected() );
 								

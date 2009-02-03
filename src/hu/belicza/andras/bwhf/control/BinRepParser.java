@@ -23,14 +23,14 @@ import java.util.Map;
 public class BinRepParser {
 	
 	/**
-	 * For temporary testing purposes only. 
+	 * For testing purposes only.
 	 * @param arguments
 	 */
 	public static void main( final String[] arguments ) {
-		final String[] replayNames = new String[] { "w:/2009-01-29 01-38-05 LastRep.rep" };
+		final String[] replayNames = new String[] { "t:/starcraft/maps/replays/2009-01-27 01-05-21 LastRep.rep" };
 		
 		for ( final String replayName : replayNames ) {
-			final Replay replay = parseReplay( new File( replayName ) );
+			final Replay replay = parseReplay( new File( replayName ), false );
 			if ( replay != null )
 				displayReplayInformation( replay );
 			else
@@ -46,12 +46,41 @@ public class BinRepParser {
 	private static final String UNIT_SECTION_NAME = "UNIT";
 	
 	/**
-	 * Parses a binary replay file and returns a {@link Replay} object describing it.
+	 * Wrapper class to build the game chat.
+	 * @author Andras Belicza
+	 */
+	private static class GameChatWrapper {
+		
+		/** <code>StringBuilder</code> for the game chat.  */
+		public final StringBuilder          gameChatBuilder;
+		/** Map from the player IDs to their name.         */
+		public final Map< Integer, String > playerIndexNameMap;
+		/** Message buffer to be used to extract messages. */
+		public final byte[]                 messageBuffer = new byte[ 80 ];
+		
+		/**
+		 * Creates a new GameChatWrapper.
+		 */
+		public GameChatWrapper( final String[] playerNames, final int[] playerIds ) {
+			gameChatBuilder = new StringBuilder();
+			
+			playerIndexNameMap = new HashMap< Integer, String >();
+			for ( int i = 0; i < playerNames.length; i++ )
+				if ( playerNames[ i ] != null && playerIds[ i ] != 0xff ) // Computers are listed with playerId values of 0xff.
+					playerIndexNameMap.put( i, playerNames[ i ] );
+		}
+	}
+	
+	/**
+	 * Parses a binary replay file.<br>
+	 * If <code>gameChatOnly</code> is <code>true</code>, only the game chat will be extracted,
+	 * else the game actions important to hack detection will be extracted.
 	 * @param replayFile replay file to be parsed
-	 * @return a {@link Replay} object describing the replay
+	 * @param gameChatOnly tells if only game chat is desired
+	 * @return a {@link Replay} object describing the replay; or <code>null</code> if replay cannot be parsed 
 	 */
 	@SuppressWarnings("unchecked")
-	public static Replay parseReplay( final File replayFile ) {
+	public static Replay parseReplay( final File replayFile, final boolean gameChatOnly ) {
 		BinReplayUnpacker unpacker = null;
 		try {
 			unpacker = new BinReplayUnpacker( replayFile );
@@ -101,9 +130,18 @@ public class BinRepParser {
 			final ByteBuffer commandsBuffer = ByteBuffer.wrap( unpacker.unpackSection( playerCommandsLength ) );
 			commandsBuffer.order( ByteOrder.LITTLE_ENDIAN );
 			
-			final List< Action >[] playerActionLists = new ArrayList[ replayHeader.playerNames.length ]; // This will be indexed by playerId!
-			for ( int i = 0; i < playerActionLists.length; i++ )
-				playerActionLists[ i ] = new ArrayList< Action >();
+			final List< Action >[] playerActionLists;
+			final GameChatWrapper  gameChatWrapper;
+			if ( gameChatOnly ) {
+				gameChatWrapper   = new GameChatWrapper( replayHeader.playerNames, replayHeader.playerIds );
+				playerActionLists = null;
+			}
+			else {
+				gameChatWrapper   = null;
+				playerActionLists = new ArrayList[ replayHeader.playerNames.length ]; // This will be indexed by playerId!
+				for ( int i = 0; i < playerActionLists.length; i++ )
+					playerActionLists[ i ] = new ArrayList< Action >();
+			}
 			
 			while ( commandsBuffer.position() < playerCommandsLength ) {
 				final int frame               = commandsBuffer.getInt();
@@ -111,10 +149,15 @@ public class BinRepParser {
 				final int commandBlocksEndPos = commandsBuffer.position() + commandBlocksLength;
 				
 				while ( commandsBuffer.position() < commandBlocksEndPos ) {
-					final int  playerId = commandsBuffer.get() & 0xff;
-					playerActionLists[ playerId ].add( readNextAction( frame, commandsBuffer, commandBlocksEndPos ) );
+					final int playerId = commandsBuffer.get() & 0xff;
+					final Action action = readNextAction( frame, commandsBuffer, commandBlocksEndPos, gameChatWrapper );
+					if ( playerActionLists != null )
+						playerActionLists[ playerId ].add( action );
 				}
 			}
+			
+			if ( gameChatWrapper != null )
+				return new Replay( replayHeader, null, gameChatWrapper.gameChatBuilder.toString() );
 			
 			// Now create the ReplayActions object
 			final Map< String, List< Action > > playerNameActionListMap = new HashMap< String, List< Action > >();
@@ -157,7 +200,7 @@ public class BinRepParser {
 			if ( mapDataBuffer.position() < mapDataLength ) // We might have skipped some parts of map data, so we position to the end
 				mapDataBuffer.position( mapDataLength );*/
 			
-			return new Replay( replayHeader, replayActions );
+			return new Replay( replayHeader, replayActions, null );
 		}
 		catch ( final Exception e ) {
 			e.printStackTrace();
@@ -187,6 +230,7 @@ public class BinRepParser {
 		return string;
 	}
 	
+	/** Map of unit IDs and their names. */
 	private static final Map< Short, String > unitTypesMap = new HashMap< Short, String >();
 	static {
 		unitTypesMap.put( (short) 0x00, "Marine" );
@@ -294,9 +338,10 @@ public class BinRepParser {
 	 * @param frame               frame of the action
 	 * @param commandsBuffer      commands buffer to be read from
 	 * @param commandBlocksEndPos end position of the current command blocks
+	 * @param gameChatWrapper     game chat wrapper to be used if game chat is desired
 	 * @return the next action object
 	 */
-	private static Action readNextAction( final int frame, final ByteBuffer commandsBuffer, final int commandBlocksEndPos ) {
+	private static Action readNextAction( final int frame, final ByteBuffer commandsBuffer, final int commandBlocksEndPos, final GameChatWrapper gameChatWrapper ) {
 		final byte blockId  = commandsBuffer.get();
 		
 		Action action    = null;
@@ -417,7 +462,16 @@ public class BinRepParser {
 				break;
 			}
 			case (byte) 0x5c : { // Game Chat (as of 1.16)
-				skipBytes = 81;  // 1 byte for player ID, and 80 bytes of message characters
+				if ( gameChatWrapper == null )
+					skipBytes = 81;  // 1 byte for player index, and 80 bytes of message characters
+				else {
+					if ( gameChatWrapper.gameChatBuilder.length() > 0 )
+						gameChatWrapper.gameChatBuilder.append( "\r\n" );
+					ReplayHeader.formatFrames( frame, gameChatWrapper.gameChatBuilder );
+					gameChatWrapper.gameChatBuilder.append( " - " ).append( gameChatWrapper.playerIndexNameMap.get( commandsBuffer.get() & 0xff ) );
+					commandsBuffer.get( gameChatWrapper.messageBuffer );
+					gameChatWrapper.gameChatBuilder.append( ": " ).append( getZeroPaddedString( gameChatWrapper.messageBuffer, 0, gameChatWrapper.messageBuffer.length ) );
+				}
 				break;
 			}
 			default: { // We don't know how to handle actions, we have to skip the whole time frame which means we might lose some actions!

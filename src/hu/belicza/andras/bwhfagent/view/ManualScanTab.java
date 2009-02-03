@@ -42,7 +42,7 @@ public class ManualScanTab extends LoggedTab {
 	private static final String HACKER_REPS_FLAG      = "hack";
 	
 	/** Replay file filter. */
-	private static final FileFilter SWING_REPLAY_FILE_FILTER = new FileFilter() {
+	public static final FileFilter SWING_REPLAY_FILE_FILTER = new FileFilter() {
 		@Override
 		public boolean accept( final File file ) {
 			return file.isDirectory() || file.getName().toLowerCase().endsWith( REPLAY_FILE_EXTENSION );
@@ -191,7 +191,7 @@ public class ManualScanTab extends LoggedTab {
 							return;
 						
 						List< HackDescription > hackDescriptionList = null; 
-						final Replay replay = BinRepParser.parseReplay( replayFile );
+						final Replay replay = BinRepParser.parseReplay( replayFile, false );
 						if ( replay != null )
 							hackDescriptionList = ReplayScanner.scanReplayForHacks( replay.replayActions, skipLatterActionsOfHackers );
 						
