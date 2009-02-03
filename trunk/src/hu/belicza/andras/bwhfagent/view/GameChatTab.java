@@ -7,10 +7,12 @@ import hu.belicza.andras.bwhfagent.Consts;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.PrintWriter;
+import java.io.StringWriter;
 
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.JButton;
+import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JFileChooser;
 
 
@@ -24,10 +26,12 @@ public class GameChatTab extends LoggedTab {
 	/** Log file name for game chat. */
 	private static final String LOG_FILE_NAME = "game_chat.log";
 	
-	/** Button to extract game chat frm the last replay. */
+	/** Button to extract game chat frm the last replay.   */
 	private final JButton   extractFromLastReplayButton = new JButton( "Extract game chat from 'LastReplay.rep'" );
-	/** Button to select files to extract game chat.     */
+	/** Button to select files to extract game chat.       */
 	private final JButton   selectFilesButton           = new JButton( "Select files to extract game chat from" );
+	/** Checkbox to tell whether to include replay header. */
+	private final JCheckBox includeReplayHeaderCheckBox = new JCheckBox( "Also include replay header information", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_INCLUDE_REPLAY_HEADER ) ) );
 	
 	/**
 	 * Creates a new PcxConverterTab.
@@ -50,6 +54,13 @@ public class GameChatTab extends LoggedTab {
 				if ( replay == null )
 					logMessage( "Could not extract game chat from '" + Consts.LAST_REPLAY_FILE_NAME + "'!" );
 				else {
+					if ( includeReplayHeaderCheckBox.isSelected() ) {
+						logMessage( "Replay header information of '" + Consts.LAST_REPLAY_FILE_NAME + "':" );
+						final StringWriter headerInfoWriter = new StringWriter();
+						replay.replayHeader.printHeaderInformation( new PrintWriter( headerInfoWriter ) );
+						logMessage( headerInfoWriter.toString(), false );
+						logMessage( "", false ); // Prints an empty line
+					}
 					logMessage( "Game chat of '" + Consts.LAST_REPLAY_FILE_NAME + "':" );
 					logMessage( replay.gameChat, false );
 					logMessage( "End of game chat of '" + Consts.LAST_REPLAY_FILE_NAME + "'." );
@@ -90,7 +101,14 @@ public class GameChatTab extends LoggedTab {
 							PrintWriter output = null;
 							try {
 								output = new PrintWriter( new FileWriter( gameChatFileName ) );
+								if ( includeReplayHeaderCheckBox.isSelected() ) {
+									output.println( "Replay header information of '" + absoluteReplayPath + "':" );
+									replay.replayHeader.printHeaderInformation( output );
+									output.println();
+								}
+								output.println( "Game chat of '" + absoluteReplayPath + "':" );
 								output.println( replay.gameChat );
+								output.flush();
 								logMessage( "Game chat from '" + absoluteReplayPath + "' successfully extracted." );
 							}
 							catch ( final Exception e ) {
@@ -110,11 +128,14 @@ public class GameChatTab extends LoggedTab {
 		} );
 		contentBox.add( Utils.wrapInPanel( selectFilesButton ) );
 		
+		contentBox.add( Utils.wrapInPanel( includeReplayHeaderCheckBox ) );
+		
 		super.buildGUI();
 	}
 	
 	@Override
 	public void assignUsedProperties() {
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_INCLUDE_REPLAY_HEADER, Boolean.toString( includeReplayHeaderCheckBox.isSelected() ) );
 	}
 	
 }
