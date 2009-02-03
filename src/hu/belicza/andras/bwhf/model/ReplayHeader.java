@@ -1,5 +1,6 @@
 package hu.belicza.andras.bwhf.model;
 
+import java.io.PrintWriter;
 import java.util.Date;
 
 /**
@@ -119,6 +120,22 @@ public class ReplayHeader {
 			}
 		
 		return playerNamesBuilder.toString();
+	}
+	
+	/**
+	 * Prints the replay header information into the specified output writer.
+	 * @param output output print writer to be used
+	 */
+	public void printHeaderInformation( final PrintWriter output ) {
+		output.println( "Game engine: " + getGameEngineString() );
+		output.println( "Duration: " + getDurationString() );
+		output.println( "Saved on: " + saveTime );
+		output.println( "Game name: " + gameName );
+		output.println( "Map size: " + getMapSize() );
+		output.println( "Creator name: " + creatorName );
+		output.println( "Map name: " + mapName );
+		output.println( "Players: " + getPlayerNamesString() );
+		output.flush();
 	}
 	
 }

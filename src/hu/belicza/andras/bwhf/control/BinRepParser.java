@@ -6,6 +6,7 @@ import hu.belicza.andras.bwhf.model.ReplayActions;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.File;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -32,7 +33,7 @@ public class BinRepParser {
 		for ( final String replayName : replayNames ) {
 			final Replay replay = parseReplay( new File( replayName ), false );
 			if ( replay != null )
-				displayReplayInformation( replay );
+				replay.replayHeader.printHeaderInformation( new PrintWriter( System.out ) );
 			else
 				System.out.println( "Could not parse " + replayName + "!" );
 			System.out.println();
@@ -487,23 +488,6 @@ public class BinRepParser {
 			action = new Action( frame, "", Action.ACTION_NAME_INDEX_UNKNOWN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 		
 		return action;
-	}
-	
-	/**
-	 * Displays the replay header informations.
-	 * @param replay replay to be displayed informations about
-	 */
-	public static void displayReplayInformation( final Replay replay ) {
-		final ReplayHeader replayHeader = replay.replayHeader;
-		
-		System.out.println( "Game engine:  " + replayHeader.getGameEngineString () );
-		System.out.println( "Duration:     " + replayHeader.getDurationString   () );
-		System.out.println( "Save time:    " + replayHeader.saveTime               );
-		System.out.println( "Game name:    " + replayHeader.gameName               );
-		System.out.println( "Map size:     " + replayHeader.getMapSize          () );
-		System.out.println( "Creator name: " + replayHeader.creatorName            );
-		System.out.println( "Map name:     " + replayHeader.mapName                );
-		System.out.println( "Players:      " + replayHeader.getPlayerNamesString() );
 	}
 	
 }

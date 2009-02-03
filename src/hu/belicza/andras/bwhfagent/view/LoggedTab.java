@@ -25,7 +25,9 @@ import swingwtx.swing.JTextArea;
 public abstract class LoggedTab extends Tab {
 	
 	/** Date format to create timestamps for logging. */
-	private static final DateFormat DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
+	private static final DateFormat DATE_FORMAT    = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
+	/** The default system dependent line separator.  */
+	private static final String     LINE_SEPARATOR = System.getProperty( "line.separator", "\r\n" );
 	
 	/** Log text area.        */
 	private final JTextArea logTextArea        = new JTextArea( 5, 10 );
@@ -95,7 +97,7 @@ public abstract class LoggedTab extends Tab {
 	 */
 	protected void logMessage( final String message, final boolean appendTimeStamp ) {
 		// In SwingWT tabs are not working, so we replace them.
-		final String formattedMessage = ( appendTimeStamp ? DATE_FORMAT.format( new Date() ) + " - " : "" ) + message.replace( "\t", "    " ) + "\n";
+		final String formattedMessage = ( appendTimeStamp ? DATE_FORMAT.format( new Date() ) + " - " : "" ) + message.replace( "\t", "    " ) + LINE_SEPARATOR;
 		
 		final int caretPosition = logTextArea.getCaretPosition();
 		logTextArea.append( formattedMessage );

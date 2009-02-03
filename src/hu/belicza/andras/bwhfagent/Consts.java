@@ -74,10 +74,12 @@ public class Consts {
 	public static final String PROPERTY_SAVE_ALL_REPS                  = "saveAllReps";
 	/** All reps destination property.           */
 	public static final String PROPERTY_ALL_REPS_DESTINATION           = "allRepsDestination";
-	/** Auto convert PCX enabled property .      */
+	/** Auto convert PCX enabled property.       */
 	public static final String PROPERTY_AUTO_CONVERT_PCX_ENABLED       = "autoConvertPcxEnabled";
-	/** PCX output format property .             */
+	/** PCX output format property.              */
 	public static final String PROPERTY_PCX_OUTPUT_FORMAT              = "pcxOutputFormat";
+	/** Include replay header property.          */
+	public static final String PROPERTY_INCLUDE_REPLAY_HEADER          = "includeReplayHeader";
 	/** Play sound property.                     */
 	public static final String PROPERTY_PLAY_SOUND                     = "playSound";
 	/** Found hacks wav file property.           */
@@ -112,6 +114,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_REPS_DESTINATION          , "c:/replays/allreps" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_CONVERT_PCX_ENABLED      , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PCX_OUTPUT_FORMAT             , "JPG" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_INCLUDE_REPLAY_HEADER         , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAY_SOUND                    , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FOUND_HACKS_WAV_FILE          , SOUNDS_DIRECTORY_NAME + "/falling.wav" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_BRING_TO_FRONT                , "false" );
