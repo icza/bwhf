@@ -38,38 +38,53 @@ public class ReplayHeader {
 	public int[]    playerIds   = new int[ 12 ];
 	
 	/**
+	 * Converts the specified amount of frames to seconds.
+	 * @return the specified amount of frames in seconds
+	 */
+	public static int convertFramesToSeconds( final int frames ) {
+		return frames * 42 / 1000; 
+	}
+	
+	/**
 	 * Returns the game duration in seconds.
 	 * @return the game duration in seconds
 	 */
 	public int getDurationSeconds() {
-		return gameFrames * 42 / 1000; 
+		return convertFramesToSeconds( gameFrames );
 	}
 	
 	/**
-	 * Returns the duration as a human friendly string.<br>
+	 * Converts the specified amount of frames to a human friendly time format.
+	 * @param frames amount of frames to be formatted
+	 * @param formatBuilder builder to be used to append the output to
+	 */
+	public static void formatFrames( final int frames, final StringBuilder formatBuilder ) {
+		int seconds = convertFramesToSeconds( frames );
+		
+		final int hours = seconds / 3600;
+		if ( hours > 0 )
+			formatBuilder.append( hours ).append( ':' );
+		
+		seconds %= 3600;
+		final int minutes = seconds / 60;
+		if ( hours > 0 && minutes < 10 )
+			formatBuilder.append( 0 );
+		formatBuilder.append( minutes ).append( ':' );
+		
+		seconds %= 60;
+		if ( seconds < 10 )
+			formatBuilder.append( 0 );
+		formatBuilder.append( seconds );
+	}
+	
+	/**
+	 * Returns the duration as a human friendly string.
 	 * @return the duration as a human friendly string
 	 */
 	public String getDurationString() {
-		final StringBuilder durationBuilder = new StringBuilder();
-		
-		int durationSeconds = getDurationSeconds();
-		
-		final int hours = durationSeconds / 3600;
-		if ( hours > 0 )
-			durationBuilder.append( hours ).append( ':' );
-		
-		durationSeconds %= 3600;
-		final int minutes = durationSeconds / 60;
-		if ( hours > 0 && minutes < 10 )
-			durationBuilder.append( 0 );
-		durationBuilder.append( minutes ).append( ':' );
-		
-		durationSeconds %= 60;
-		if ( durationSeconds < 10 )
-			durationBuilder.append( 0 );
-		durationBuilder.append( durationSeconds );
-		
-		return durationBuilder.toString();
+		final StringBuilder formatBuilder = new StringBuilder();
+		formatFrames( gameFrames, formatBuilder );
+		return formatBuilder.toString();
 	}
 	
 	/**
