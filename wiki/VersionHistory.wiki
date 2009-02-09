@@ -3,6 +3,7 @@
 =BWHF Agent version history=
 
 *Features and changes in the upcoming new version:*
+ * Fixed a bug which caused `LastReplay.rep` to be saved and scanned twice when changed.
  * Renamed `settings.properites` to `settings.properties`.
 
 ====1.20 2009-02-03====
