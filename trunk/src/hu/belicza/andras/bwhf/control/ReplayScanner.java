@@ -46,12 +46,24 @@ public class ReplayScanner {
 		// Autogather/autotrain hack: having more than 1 action at iteration 5
 		int actionsAtIteration5Count = 0;
 		for ( int actionIndex = 0; actionIndex < actionsCount && actionIndex < 5; actionIndex++ )
-			if ( playerActions[ actionIndex ].iteration == 5 && playerActions[ actionIndex ].actionNameIndex != Action.ACTION_NAME_INDEX_UNKNOWN )
-				actionsAtIteration5Count++;
+			if ( playerActions[ actionIndex ].iteration == 5 ) {
+				if ( playerActions[ actionIndex ].actionNameIndex != Action.ACTION_NAME_INDEX_UNKNOWN )
+					actionsAtIteration5Count++;
+			}
 			else
 				break;
-		if ( actionsAtIteration5Count > 1 )
-			hackDescriptionList.add( new HackDescription( player.name, player.name + " used autogather/autotrain hack at 5" ) );
+		if ( actionsAtIteration5Count > 1 ) {
+			// If the player has actions at iteration 10, it is more likely because he's using the latchanger program.
+			// In that case we don't report augogather/autotrain.
+			boolean hasActionAtIteration10 = false;
+			for ( int actionIndex = 0; actionIndex < actionsCount && playerActions[ actionIndex ].iteration <= 10; actionIndex++ )
+				if ( playerActions[ actionIndex ].iteration == 10 ) {
+					hasActionAtIteration10 = true;
+					break;
+				}
+			if ( !hasActionAtIteration10 )
+				hackDescriptionList.add( new HackDescription( player.name, player.name + " used autogather/autotrain hack at 5" ) );
+		}
 		
 		
 		int            lastIteration                        = -1;
