@@ -60,7 +60,7 @@ public class Consts {
 	
 	
 	/** Name of the settings properties file. */
-	public static final String SETTINGS_PROPERTIES_FILE = "settings.properites";
+	public static final String SETTINGS_PROPERTIES_FILE = "settings.properties";
 	
 	/** Starcraft folder property.               */
 	public static final String PROPERTY_STARCRAFT_FOLDER               = "starcraftFolder";
