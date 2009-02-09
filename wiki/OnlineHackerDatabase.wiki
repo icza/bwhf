@@ -29,7 +29,7 @@ The columns and their meaning:
  * *Name:* the name of the hacker
  * *Gateway:* the gatway of the hacker
  * *Report count:* the number of reports of the hacker
- * *First reported:* the date and time of when the first report of the hacker arrived; this has the meaning of how long has been the hacker hacking, or rather when was he recorded in the database
+ * *First reported:* the date and time of when the first report of the hacker arrived; this has the meaning of how long has been the hacker hacking, or rather when was he first recorded in the database
  * *Last reported:* the date and time of when the last report of the hacker arrived; this has the meaning of when was the last activity of the hacker, or rather when was he last recorded
 
 Note that all times and dates are in the server's time zone which is GMT+1 (CET and CEST).
