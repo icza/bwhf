@@ -2,6 +2,9 @@
 
 =BWHF Agent version history=
 
+*Features and changes in the upcoming new version:*
+ * Renamed `settings.properites` to `settings.properties`
+
 ====1.20 2009-02-03====
  * A new *PCX converter* tab which can convert your Starcraft PCX screenshot files to JPG, GIF, PNG or BMP image files. The tab has an auto converter feature which automatically converts your Starcraft screenshots so you don't have to do it manually. You will find the JPG (or PNG or GIF or BMP) screenshots in your Starcraft directory right away as if Starcraft would save the screenshots in JPG format (or in the format of your choice) in the first place.
  * A new *Game chat* tab which can extract replay header information and game chat from replays and save them to text files.
