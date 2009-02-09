@@ -10,7 +10,7 @@ On that page you can list, search, filter, sort existing hackers.
 
 ==Filtering==
 
-You can filter the hackers with various properties. Only those reports will be counted and displayed which match all the filters.
+You can filter the hackers with various properties. Only reports matching all the filters will be counted and displayed.
 
 A report/hacker will be counted if:
  * *Hacker name:* the hacker name contains this lowercased text
