@@ -81,7 +81,7 @@ public class GameChatTab extends LoggedTab {
 				
 				fileChooser.setFileSelectionMode( JFileChooser.FILES_AND_DIRECTORIES );
 				fileChooser.setMultiSelectionEnabled( true );
-				// SwingWT does not support selecting multiple directories yet, getSelectedFiles() returns null so I have to call getSelectedFile() in case of folders.
+				
 				if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION ) {
 					final File[] replayFiles = fileChooser.getSelectedFiles();
 					logMessage( "\n", false ); // Prints 2 empty lines
