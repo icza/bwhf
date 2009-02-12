@@ -261,7 +261,7 @@ public class ManualScanTab extends LoggedTab {
 					if ( !playerHackerRepsCountMap.isEmpty() ) {
 						final StringBuilder hackersBuilder = new StringBuilder( "\tThe following player" + ( playerHackerRepsCountMap.size() == 1 ? " was" : "s were" ) + " found hacking: " );
 						boolean firstHacker = true;
-						// First me make a TreeMap so we will list hackers sorted by their name
+						// First we make a TreeMap so we will list hackers sorted by their name
 						for ( final Entry< String, IntWrapper > playerHackerRepsCount : new TreeMap< String, IntWrapper >( playerHackerRepsCountMap ).entrySet() ) {
 							if ( firstHacker )
 								firstHacker = false;
