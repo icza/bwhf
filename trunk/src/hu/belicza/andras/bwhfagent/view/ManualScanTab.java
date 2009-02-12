@@ -65,6 +65,8 @@ public class ManualScanTab extends LoggedTab {
 	private final JCheckBox flagHackerRepsCheckBox         = new JCheckBox( "Flag hacker replays by appending '" + HACKER_REPS_FLAG + "' to the", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS ) ) );
 	/** Position where to flag hacker replays combo box. */
 	private final JComboBox flagHackerRepsPositionComboBox = new JComboBox( Consts.FLAG_HACKER_REPS_POSITION_LABELS );
+	/** Clean hack flag checkbox.                        */
+	private final JCheckBox cleanHackFlagCheckBox          = new JCheckBox( "Clean the '" + HACKER_REPS_FLAG + "' flag from replays where no hackers were found during the scan", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CLEAN_HACK_FLAG ) ) );
 	
 	/** Variable to store stop requests of scan.    */
 	private volatile boolean requestedToStop;
@@ -133,6 +135,8 @@ public class ManualScanTab extends LoggedTab {
 		flagHackerRepsPanel.add( flagHackerRepsPositionComboBox );
 		flagHackerRepsPanel.add( new JLabel( "of their names" ) );
 		contentBox.add( flagHackerRepsPanel );
+		
+		contentBox.add( Utils.wrapInPanel( cleanHackFlagCheckBox ) );
 		
 		super.buildGUI();
 	}
@@ -218,7 +222,7 @@ public class ManualScanTab extends LoggedTab {
 									}
 								}
 								if ( flagHackerRepsCheckBox.isSelected() && !isLastReplay ) {
-									final String replayName = replayFile.getName().substring( 0, replayFile.getName().length() - REPLAY_FILE_EXTENSION.length() );
+									final String replayName  = replayFile.getName().substring( 0, replayFile.getName().length() - REPLAY_FILE_EXTENSION.length() );
 									String flaggedReplayName = null;
 									switch ( flagHackerRepsPositionComboBox.getSelectedIndex() ) {
 										case Consts.FLAG_HACKER_REPS_POSITION_BEGINNING :
@@ -234,8 +238,20 @@ public class ManualScanTab extends LoggedTab {
 										replayFile.renameTo( new File( replayFile.getParent(), flaggedReplayName + REPLAY_FILE_EXTENSION ) );
 								}
 							}
-							else
+							else {
 								logMessage( "Found no hacks in " + replayFile.getAbsolutePath() + "." );
+								
+								if ( cleanHackFlagCheckBox.isSelected() ) {
+									final String replayName  = replayFile.getName().substring( 0, replayFile.getName().length() - REPLAY_FILE_EXTENSION.length() );
+									String cleanedReplayName = replayName;
+									if ( cleanedReplayName.startsWith( HACKER_REPS_FLAG + " - " ) )
+										cleanedReplayName = cleanedReplayName.substring( ( HACKER_REPS_FLAG + " - " ).length() );
+									if ( cleanedReplayName.endsWith( " - " + HACKER_REPS_FLAG ) )
+										cleanedReplayName = cleanedReplayName.substring( 0, cleanedReplayName.length() - ( " - " + HACKER_REPS_FLAG ).length() + 1 );
+									if ( replayName.length() != cleanedReplayName.length() )
+										replayFile.renameTo( new File( replayFile.getParent(), cleanedReplayName + REPLAY_FILE_EXTENSION ) );
+								}
+							}
 					}
 					
 					final long endTimeNanons = System.nanoTime();
@@ -299,6 +315,7 @@ public class ManualScanTab extends LoggedTab {
 	public void assignUsedProperties() {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_FLAG_HACKER_REPS         , Boolean.toString( flagHackerRepsCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_FLAG_HACKER_REPS_POSITION, Integer.toString( flagHackerRepsPositionComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_CLEAN_HACK_FLAG          , Boolean.toString( cleanHackFlagCheckBox.isSelected() ) );
 	}
 	
 }
