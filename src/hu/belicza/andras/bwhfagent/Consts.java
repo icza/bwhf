@@ -96,6 +96,8 @@ public class Consts {
 	public static final String PROPERTY_FLAG_HACKER_REPS               = "flagHackerReps";
 	/** Flag hacker reps property.               */
 	public static final String PROPERTY_FLAG_HACKER_REPS_POSITION      = "flagHackerRepsPosition";
+	/** Clean 'hack' flag property.              */
+	public static final String PROPERTY_CLEAN_HACK_FLAG                = "cleanHackFlag";
 	/** Check updates on startup property.       */
 	public static final String PROPERTY_CHECK_UPDATES_ON_STARTUP       = "checkUpdatesOnStartup";
 	/** Skip latter actions of hackers property. */
@@ -123,6 +125,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTHORIZATION_KEY             , "" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FLAG_HACKER_REPS              , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FLAG_HACKER_REPS_POSITION     , Integer.toString( FLAG_HACKER_REPS_POSITION_END ) );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CLEAN_HACK_FLAG               , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHECK_UPDATES_ON_STARTUP      , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SOUND_VOLUME                  , "70" );
