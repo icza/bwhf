@@ -3,11 +3,11 @@
 =BWHF Agent version history=
 
 *Features and changes in the upcoming new version:*
+ * New setting to clean the 'hack' flag from replays where no hackers were found during the scan on the manual scan tab
  * Fixed a bug which occasionally caused `LastReplay.rep` to be saved and scanned (and reported hackers if found) twice when changed.
  * Renamed `settings.properites` to `settings.properties`.
 
 *To consider:*
- * Checkbox: "Clean the 'hack' flag from replays where no hackers were found during the scan"
  * HTML table report at the end of manual scan, maybe with a checkbox to enable/disable it. The generated HTML would include javascript to sort/filter the result table.
 
 ----
