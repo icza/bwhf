@@ -7,7 +7,7 @@
  * Renamed `settings.properites` to `settings.properties`.
 
 *To consider:*
- * Checkbox: "Remove 'hack' from replays where no hackers found during the scan"
+ * Checkbox: "Clean the 'hack' flag from replays where no hackers were found during the scan"
  * HTML table report at the end of manual scan, maybe with a checkbox to enable/disable it. The generated HTML would include javascript to sort/filter the result table.
 
 ----
