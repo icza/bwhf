@@ -25,9 +25,9 @@ import swingwtx.swing.JTextArea;
 public abstract class LoggedTab extends Tab {
 	
 	/** Date format to create timestamps for logging. */
-	private static final DateFormat DATE_FORMAT    = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
+	protected static final DateFormat DATE_FORMAT    = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
 	/** The default system dependent line separator.  */
-	private static final String     LINE_SEPARATOR = System.getProperty( "line.separator", "\r\n" );
+	private   static final String     LINE_SEPARATOR = System.getProperty( "line.separator", "\r\n" );
 	
 	/** Log text area.        */
 	private final JTextArea logTextArea        = new JTextArea( 5, 10 );

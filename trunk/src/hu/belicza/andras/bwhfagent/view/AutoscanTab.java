@@ -8,8 +8,6 @@ import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.hackerdb.ServerApiConsts;
 
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -37,13 +35,11 @@ import swingwtx.swing.filechooser.FileFilter;
  */
 public class AutoscanTab extends LoggedTab {
 	
-	/** Log file name for autoscan.                             */
+	/** Log file name for autoscan.                 */
 	private static final String LOG_FILE_NAME                         = "autoscan.log";
-	/** Time between checking for new replay in ms.             */
+	/** Time between checking for new replay in ms. */
 	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS = 2000l;
-	/** Date format to create timestamps for copied file names. */
-	private static final DateFormat DATE_FORMAT                       = new SimpleDateFormat( "yyyy-MM-dd HH-mm-ss" );
-	/** Text of the check key button.                           */
+	/** Text of the check key button.               */
 	private static final String CHECK_KEY_BUTTON_TEXT                 = "Check key";
 	
 	/** Checkbox to enable/disable the autoscan.                                */
@@ -286,7 +282,7 @@ public class AutoscanTab extends LoggedTab {
 								newLastReplayLastModified = lastReplayFile.lastModified();
 								
 								if ( saveAllRepsCheckBox.isSelected() )
-									Utils.copyFile( lastReplayFile, new File( allRepsDestinationTextField.getText() ), DATE_FORMAT.format( new Date() ) + " LastRep.rep" );
+									Utils.copyFile( lastReplayFile, new File( allRepsDestinationTextField.getText() ), Utils.DATE_FORMAT.format( new Date() ) + " LastRep.rep" );
 								
 								logMessage( "LastReplay.rep was modified - proceeding to scan..." );
 								lastModifiedOfLastChecked = newLastReplayLastModified;
@@ -310,7 +306,7 @@ public class AutoscanTab extends LoggedTab {
 											logMessage( "\t" + hackDescription.description, false );
 										
 										if ( saveHackerRepsCheckBox.isSelected() )
-											Utils.copyFile( lastReplayFile, new File( hackerRepsDestinationTextField.getText() ), DATE_FORMAT.format( new Date() ) + " LastRep.rep" );
+											Utils.copyFile( lastReplayFile, new File( hackerRepsDestinationTextField.getText() ), Utils.DATE_FORMAT.format( new Date() ) + " LastRep.rep" );
 										
 										if ( reportHackersCheckBox.isSelected() ) {
 											if ( gatewayComboBox.getSelectedIndex() == 0 )

@@ -9,47 +9,38 @@ import java.util.Properties;
  */
 public class Consts {
 	
-	/** Name of the application.                                       */
+	/** Name of the application.                                               */
 	public static final String APPLICATION_NAME                 = "BWHF Agent";
-	/** Author of the application.                                     */
+	/** Author of the application.                                             */
 	public static final String APPLICATION_AUTHOR               = "András Belicza";
 	
-	/** Home page url string.                                          */
+	/** Home page url string.                                                  */
 	public static final String HOME_PAGE_URL                    = "http://code.google.com/p/bwhf/";
-	/** Name of the current version resource file.                     */
+	/** Name of the current version resource file.                             */
 	public static final String VERSION_RESOURCE_NAME            = "current_version.txt";
-	/** URL pointing to the latest stable version text.                */
+	/** URL pointing to the latest stable version text.                        */
 	public static final String LATEST_STABLE_VERSION_TEXT_URL   = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version.txt";
 	
-	/** URL of the BWHF hacker data base server.                       */
+	/** URL of the BWHF hacker data base server.                               */
 	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL = "http://94.199.240.39/hackerdb/hackers";
 	
-	/** Name of the resource containing the about html template.       */
+	/** Name of the resource containing the about html template.               */
 	public static final String ABOUT_TEMLATE_RESOURCE_NAME      = "about_template.html";
 	
-	/** Default Starcraft directory.                                   */
+	/** Default Starcraft directory.                                           */
 	public static final String DEFAULT_STARCRAFT_DIRECTORY      = "C:/Program Files/Starcraft";
-	/** Starcraft replay folder relative to the Starcraft folder.      */
+	/** Starcraft replay folder relative to the Starcraft folder.              */
 	public static final String STARCRAFT_REPLAY_FOLDER          = "maps/replays";
-	/** Name of the last replay file relative to the starcraft folder. */
+	/** Name of the last replay file relative to the starcraft folder.         */
 	public static final String LAST_REPLAY_FILE_NAME            = "maps/replays/LastReplay.rep";
-	/** Name of the Starcraft executable file.                         */
+	/** Name of the Starcraft executable file.                                 */
 	public static final String STARCRAFT_EXECUTABLE_FILE_NAME   = "StarCraft.exe";
-	/** Name of directory containing sound samples.                    */
+	/** Name of directory containing sound samples.                            */
 	public static final String SOUNDS_DIRECTORY_NAME            = "sounds";
-	/** Name of directory containing utility programs.                 */
+	/** Name of directory containing utility programs.                         */
 	public static final String UTILS_DIRECTORY_NAME             = "utils";
-	
-	/** Replay converter utility to extract actions from a replay.     */
-	public static final String REPLAY_CONVERTER_EXECUTABLE_FILE;
-	static {
-		final String osName = System.getProperty( "os.name" );
-		
-		if ( osName != null && osName.startsWith( "Windows" ) )
-			REPLAY_CONVERTER_EXECUTABLE_FILE = UTILS_DIRECTORY_NAME + "/repextractor.exe";
-		else
-			REPLAY_CONVERTER_EXECUTABLE_FILE = null;
-	}
+	/** Name of directory containing the HTML summary reports of manual scans. */
+	public static final String HTML_REPORT_DIRECTORY_NAME       = "HTML Reports";
 	
 	/** Labels for the possible values of flag hacker replays position. */
 	public static final String[] FLAG_HACKER_REPS_POSITION_LABELS = new String[] { "beginning", "end" };
@@ -98,6 +89,8 @@ public class Consts {
 	public static final String PROPERTY_FLAG_HACKER_REPS_POSITION      = "flagHackerRepsPosition";
 	/** Clean 'hack' flag property.              */
 	public static final String PROPERTY_CLEAN_HACK_FLAG                = "cleanHackFlag";
+	/** Create HTML summary report property.     */
+	public static final String PROPERTY_CREATE_HTML_SUMMARY_REPORT     = "createHtmlSummaryReport";
 	/** Check updates on startup property.       */
 	public static final String PROPERTY_CHECK_UPDATES_ON_STARTUP       = "checkUpdatesOnStartup";
 	/** Skip latter actions of hackers property. */
@@ -126,6 +119,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FLAG_HACKER_REPS              , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FLAG_HACKER_REPS_POSITION     , Integer.toString( FLAG_HACKER_REPS_POSITION_END ) );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CLEAN_HACK_FLAG               , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CREATE_HTML_SUMMARY_REPORT    , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHECK_UPDATES_ON_STARTUP      , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SOUND_VOLUME                  , "70" );

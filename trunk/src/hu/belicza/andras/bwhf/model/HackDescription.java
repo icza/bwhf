@@ -25,8 +25,6 @@ public class HackDescription {
 	public static final int HACK_TYPE_MULTICOMMAND_RALLY_SET    = 7;
 	/** General multicommand hack.      */
 	public static final int HACK_TYPE_MULTICOMMAND              = 8;
-	/** hack.   */
-	public static final int HACK_TYPE_   = 1;
 	
 	/** Human readably names of the different types of hacks. */
 	public static final String[] HACK_TYPE_NAMES = {

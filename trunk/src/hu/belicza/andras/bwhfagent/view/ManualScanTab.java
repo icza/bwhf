@@ -7,9 +7,14 @@ import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhfagent.Consts;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -54,19 +59,21 @@ public class ManualScanTab extends LoggedTab {
 	};
 	
 	/** Button to scan the last replay.                  */
-	private final JButton   scanLastReplayButton           = new JButton( "Scan 'LastReplay.rep'" );
+	private final JButton   scanLastReplayButton            = new JButton( "Scan 'LastReplay.rep'" );
 	/** Button to select folders to scan.                */
-	private final JButton   selectFoldersButton            = new JButton( "Select folders to scan recursively" );
+	private final JButton   selectFoldersButton             = new JButton( "Select folders to scan recursively" );
 	/** Button to select files to scan.                  */
-	private final JButton   selectFilesButton              = new JButton( "Select files to scan" );
+	private final JButton   selectFilesButton               = new JButton( "Select files to scan" );
 	/** Button to stop the current scan.                 */
-	private final JButton   stopScanButton                 = new JButton( "Stop current scan" );
+	private final JButton   stopScanButton                  = new JButton( "Stop current scan" );
 	/** Flag hacker reps checkbox.                       */
-	private final JCheckBox flagHackerRepsCheckBox         = new JCheckBox( "Flag hacker replays by appending '" + HACKER_REPS_FLAG + "' to the", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS ) ) );
+	private final JCheckBox flagHackerRepsCheckBox          = new JCheckBox( "Flag hacker replays by appending '" + HACKER_REPS_FLAG + "' to the", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS ) ) );
 	/** Position where to flag hacker replays combo box. */
-	private final JComboBox flagHackerRepsPositionComboBox = new JComboBox( Consts.FLAG_HACKER_REPS_POSITION_LABELS );
+	private final JComboBox flagHackerRepsPositionComboBox  = new JComboBox( Consts.FLAG_HACKER_REPS_POSITION_LABELS );
 	/** Clean hack flag checkbox.                        */
-	private final JCheckBox cleanHackFlagCheckBox          = new JCheckBox( "Clean the '" + HACKER_REPS_FLAG + "' flag from replays where no hackers were found during the scan", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CLEAN_HACK_FLAG ) ) );
+	private final JCheckBox cleanHackFlagCheckBox           = new JCheckBox( "Clean the '" + HACKER_REPS_FLAG + "' flag from replays where no hackers were found during the scan", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CLEAN_HACK_FLAG ) ) );
+	/** Create HTML report summary checkbox.             */
+	private final JCheckBox createHtmlSummaryReportCheckBox = new JCheckBox( "Create and open a detailed HTML summary report at the end of scan", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CREATE_HTML_SUMMARY_REPORT ) ) );
 	
 	/** Variable to store stop requests of scan.    */
 	private volatile boolean requestedToStop;
@@ -138,6 +145,8 @@ public class ManualScanTab extends LoggedTab {
 		
 		contentBox.add( Utils.wrapInPanel( cleanHackFlagCheckBox ) );
 		
+		contentBox.add( Utils.wrapInPanel( createHtmlSummaryReportCheckBox ) );
+		
 		super.buildGUI();
 	}
 	
@@ -183,16 +192,24 @@ public class ManualScanTab extends LoggedTab {
 						+ ( isLastReplay ? new File( Consts.LAST_REPLAY_FILE_NAME ).getName() : replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" ) );
 					logMessage( scanningMessage + "..." );
 					
-					final long startTimeNanons = System.nanoTime();
+					final long startNanoTime = System.nanoTime();
+					final Date startTime     = new Date();
 					
 					int hackerRepsCount  = 0;
 					int skippedRepsCount = 0;
 					
-					final Map< String, IntWrapper > playerHackerRepsCountMap = new HashMap< String, IntWrapper >(); // We count the replays for every hacker in which he was caught
+					// We count the replays for every hacker in which he was caught
+					final Map< String, IntWrapper > playerHackerRepsCountMap = new HashMap< String, IntWrapper >();
+					
+					// For the HTML summary report
+					final Map< String, Map< String, Set< Integer > > > playerNameHackerRepMapMap =
+						createHtmlSummaryReportCheckBox.isSelected() && !isLastReplay ? new HashMap< String, Map< String, Set< Integer > > >() : null;
 					
 					for ( final File replayFile : replayFileList ) {
 						if ( requestedToStop )
 							return;
+						
+						final String replayFileAbsolutePath = replayFile.getAbsolutePath();
 						
 						List< HackDescription > hackDescriptionList = null; 
 						final Replay replay = BinRepParser.parseReplay( replayFile, false );
@@ -201,12 +218,12 @@ public class ManualScanTab extends LoggedTab {
 						
 						if ( hackDescriptionList == null ) {
 							skippedRepsCount++;
-							logMessage( "Could not scan " + replayFile.getAbsolutePath() + "!" );
+							logMessage( "Could not scan " + replayFileAbsolutePath + "!" );
 						}
 						else
 							if ( !hackDescriptionList.isEmpty() ) {
 								hackerRepsCount++;
-								logMessage( "Found " + hackDescriptionList.size() + " hack" + (hackDescriptionList.size() == 1 ? "" : "s" ) + " in " + replayFile.getAbsolutePath() + ":" );
+								logMessage( "Found " + hackDescriptionList.size() + " hack" + (hackDescriptionList.size() == 1 ? "" : "s" ) + " in " + replayFileAbsolutePath + ":" );
 								final Set< String > hackersOfReplaySet = new HashSet< String >();
 								for ( final HackDescription hackDescription : hackDescriptionList ) {
 									logMessage( "\t" + hackDescription.description, false );
@@ -219,6 +236,21 @@ public class ManualScanTab extends LoggedTab {
 										if ( playerHackerRepsCount == null )
 											playerHackerRepsCountMap.put( lowerCasedHackerName, playerHackerRepsCount = new IntWrapper() );
 										playerHackerRepsCount.value++;
+									}
+									
+									// Build data for the HTML summary report:
+									if ( playerNameHackerRepMapMap != null ) {
+										Map< String, Set< Integer > > replayNameUsedHackTypeSet = playerNameHackerRepMapMap.get( lowerCasedHackerName );
+										if ( replayNameUsedHackTypeSet == null ) {
+											replayNameUsedHackTypeSet = new HashMap< String, Set< Integer > >( 1 );
+											playerNameHackerRepMapMap.put( lowerCasedHackerName, replayNameUsedHackTypeSet );
+										}
+										Set< Integer > usedHackTypeSet = replayNameUsedHackTypeSet.get( replayFileAbsolutePath );
+										if ( usedHackTypeSet == null ) {
+											usedHackTypeSet = new HashSet< Integer >( 1 );
+											replayNameUsedHackTypeSet.put( replayFileAbsolutePath, usedHackTypeSet );
+										}
+										usedHackTypeSet.add( hackDescription.hackType );
 									}
 								}
 								if ( flagHackerRepsCheckBox.isSelected() && !isLastReplay ) {
@@ -239,7 +271,7 @@ public class ManualScanTab extends LoggedTab {
 								}
 							}
 							else {
-								logMessage( "Found no hacks in " + replayFile.getAbsolutePath() + "." );
+								logMessage( "Found no hacks in " + replayFileAbsolutePath + "." );
 								
 								if ( cleanHackFlagCheckBox.isSelected() && !isLastReplay ) {
 									final String replayName  = replayFile.getName().substring( 0, replayFile.getName().length() - REPLAY_FILE_EXTENSION.length() );
@@ -254,10 +286,13 @@ public class ManualScanTab extends LoggedTab {
 							}
 					}
 					
-					final long endTimeNanons = System.nanoTime();
-					logMessage( scanningMessage + " done in " + Utils.formatNanoTimeAmount( endTimeNanons - startTimeNanons ) );
-					logMessage( "\tFound " + hackerRepsCount + " hacker replay" + ( hackerRepsCount == 1 ? "" : "s" ) + ".", false );
-					logMessage( "\tSkipped " + skippedRepsCount + " replay" + ( skippedRepsCount == 1 ? "" : "s" ) + ".", false );
+					final long endNanoTime = System.nanoTime();
+					final Date endTime     = new Date();
+					
+					final String[] infoMessages = new String[ 3 ];
+					logMessage( infoMessages[ 0 ] = ( scanningMessage + " done in " + Utils.formatNanoTimeAmount( endNanoTime - startNanoTime ) ) );
+					logMessage( infoMessages[ 1 ] = ( "\tFound " + hackerRepsCount + " hacker replay" + ( hackerRepsCount == 1 ? "" : "s" ) + "." ), false );
+					logMessage( infoMessages[ 2 ] = ( "\tSkipped " + skippedRepsCount + " replay" + ( skippedRepsCount == 1 ? "" : "s" ) + "." ), false );
 					if ( !playerHackerRepsCountMap.isEmpty() ) {
 						final StringBuilder hackersBuilder = new StringBuilder( "\tThe following player" + ( playerHackerRepsCountMap.size() == 1 ? " was" : "s were" ) + " found hacking: " );
 						boolean firstHacker = true;
@@ -273,6 +308,9 @@ public class ManualScanTab extends LoggedTab {
 						}
 						logMessage( hackersBuilder.toString(), false );
 					}
+					
+					if ( playerNameHackerRepMapMap != null )
+						saveAndOpenHtmlSummaryReport( playerNameHackerRepMapMap, startTime, endTime, infoMessages );
 				}
 				finally {
 					if ( requestedToStop )
@@ -311,11 +349,105 @@ public class ManualScanTab extends LoggedTab {
 		}.start();
 	}
 	
+	/**
+	 * Saves and opens the detailed HTML summary report of the scan.
+	 * @param playerNameHackerRepMapMap map containing the replays of players where they were found hacking, and the types of hacks they used
+	 * @param scanStartTime start time of the scan
+	 * @param scanEndTime   end time of the scan
+	 * @param infoMessages  contains information messages to be included in the report
+	 */
+	private void saveAndOpenHtmlSummaryReport( final Map< String, Map< String, Set< Integer > > > playerNameHackerRepMapMap, final Date scanStartTime, final Date scanEndTime, final String[] infoMessages ) {
+		final File htmlReportDirectory = new File( Consts.HTML_REPORT_DIRECTORY_NAME );
+		final File htmlReportFile      = new File( htmlReportDirectory, "Manual scan report " + Utils.DATE_FORMAT.format( new Date() ) + ".html" );
+		
+		PrintWriter output = null;
+		try {
+			if ( !htmlReportDirectory.exists() )
+				htmlReportDirectory.mkdir();
+			
+			output = new PrintWriter( new OutputStreamWriter( new FileOutputStream( htmlReportFile ), "UTF-8" ) );
+			
+			output.println( "<html>" );
+			output.println( "<head>" );
+			output.println( "<title>BWHF Agent Manual Scan Summary Report</title>" );
+			output.println( "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />" );
+			output.println( "<style>" );
+			output.println( ".row00 {background:#9999ff;}" );
+			output.println( ".row01 {background:#9999cc;}" );
+			output.println( ".row10 {background:#ff9999;}" );
+			output.println( ".row11 {background:#cc9999;}" );
+			output.println( "</style>" );
+			output.println( "</head>" );
+			
+			output.println( "<body><center>" );
+			output.println( "<h2>BWHF Agent Manual Scan Summary Report</h2>" );
+			output.println( "The manual scan took place between <b>" + DATE_FORMAT.format( scanStartTime ) + "</b> and <b>" + DATE_FORMAT.format( scanEndTime ) + "</b>" );
+			output.println( "<br><br>" );
+			for ( final String infoMessage : infoMessages ) {
+				output.println( infoMessage );
+				output.println( "<br>" );
+			}
+			output.println( "<br>" );
+			
+			output.println( "<b>The following players were found hacking:</b><br>" );
+			output.println( "(You can use your browser's search function to find a specific name.)" );
+			output.println( "<table border=1>" );
+			output.println( "<tr><th>&nbsp;#&nbsp;<th>Hacker<th>Replays count<th>Replay<th>Hacks used" );
+			int counter = 0;
+			for ( final Map.Entry< String, Map< String, Set< Integer > > > playerNameHackerRepMapMapEntry :
+						new TreeMap< String, Map< String, Set< Integer > > >( playerNameHackerRepMapMap ).entrySet() ) {
+				counter++;
+				
+				final String playerName   = playerNameHackerRepMapMapEntry.getKey();
+				final int    replayCount  = playerNameHackerRepMapMapEntry.getValue().size();
+				
+				output.println( "<tr class='row" + (counter & 0x01) + "0'><td align=right rowspan=" + replayCount + ">" + counter + "<td rowspan=" + replayCount + ">" + playerName + "<td align=center rowspan=" + replayCount + ">" + replayCount );
+				
+				int counter2 = 0;
+				for ( final  Map.Entry< String, Set< Integer > > replayNameUsedHackTypeSetEntry : playerNameHackerRepMapMapEntry.getValue().entrySet() ) {
+					if ( counter2++ > 0 )
+						output.print( ( "<tr class='row" + (counter & 0x01) ) + (counter2 + 1 & 0x1) + "'>" );
+					output.print( "<td>" + replayNameUsedHackTypeSetEntry.getKey() + "<td>" );
+					final Iterator< Integer > usedHackTypeIterator = replayNameUsedHackTypeSetEntry.getValue().iterator();
+					while ( usedHackTypeIterator.hasNext() ) {
+						output.print( HackDescription.HACK_TYPE_NAMES[ usedHackTypeIterator.next() ] + "hack" );
+						if ( usedHackTypeIterator.hasNext() )
+							output.print( ", " );
+						else
+							output.println();
+					}
+				}
+				
+			}
+			output.println( "</table>" );
+			
+			output.println( "</center></body>" );
+			output.println( "</html>" );
+			
+			output.flush();
+			output.close();
+			
+			logMessage( "A detailed HTML summary report has been saved to file '" + htmlReportFile.getAbsolutePath() + "'." );
+			
+			Utils.showURLInBrowser( htmlReportFile.toURI().toURL().toString() );
+		}
+		catch ( final Exception e ) {
+			logMessage( "Failed to save HTML summary report to file '" + htmlReportFile.getAbsolutePath() + "'!" );
+		}
+		finally {
+			if ( output != null ) {
+				output.flush();
+				output.close();
+			}
+		}
+	}
+	
 	@Override
 	public void assignUsedProperties() {
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_FLAG_HACKER_REPS         , Boolean.toString( flagHackerRepsCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_FLAG_HACKER_REPS_POSITION, Integer.toString( flagHackerRepsPositionComboBox.getSelectedIndex() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_CLEAN_HACK_FLAG          , Boolean.toString( cleanHackFlagCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_FLAG_HACKER_REPS          , Boolean.toString( flagHackerRepsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_FLAG_HACKER_REPS_POSITION , Integer.toString( flagHackerRepsPositionComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_CLEAN_HACK_FLAG           , Boolean.toString( cleanHackFlagCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_CREATE_HTML_SUMMARY_REPORT, Boolean.toString( createHtmlSummaryReportCheckBox.isSelected() ) );
 	}
 	
 }
