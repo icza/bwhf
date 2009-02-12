@@ -58,7 +58,7 @@ public class HackDescription {
 		this.hackType   = hackType;
 		this.iteration  = iteration;
 		
-		this.description = playerName + " used " + HACK_TYPE_NAMES[ hackType ] + " hack at iteration " + iteration
+		this.description = playerName + " used " + HACK_TYPE_NAMES[ hackType ] + "hack at iteration " + iteration
 			+ (hackType == HACK_TYPE_TERRAN_MONEYHACK ? " (this hack is reported only once)" : "" );
 	}
 	
