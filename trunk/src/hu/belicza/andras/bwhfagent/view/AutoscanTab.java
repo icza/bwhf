@@ -1,8 +1,8 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhf.control.BinRepParser;
-import hu.belicza.andras.bwhf.control.HackDescription;
 import hu.belicza.andras.bwhf.control.ReplayScanner;
+import hu.belicza.andras.bwhf.model.HackDescription;
 import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.hackerdb.ServerApiConsts;

@@ -1,8 +1,8 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhf.control.BinRepParser;
-import hu.belicza.andras.bwhf.control.HackDescription;
 import hu.belicza.andras.bwhf.control.ReplayScanner;
+import hu.belicza.andras.bwhf.model.HackDescription;
 import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhfagent.Consts;
 
@@ -241,7 +241,7 @@ public class ManualScanTab extends LoggedTab {
 							else {
 								logMessage( "Found no hacks in " + replayFile.getAbsolutePath() + "." );
 								
-								if ( cleanHackFlagCheckBox.isSelected() ) {
+								if ( cleanHackFlagCheckBox.isSelected() && !isLastReplay ) {
 									final String replayName  = replayFile.getName().substring( 0, replayFile.getName().length() - REPLAY_FILE_EXTENSION.length() );
 									String cleanedReplayName = replayName;
 									if ( cleanedReplayName.startsWith( HACKER_REPS_FLAG + " - " ) )
