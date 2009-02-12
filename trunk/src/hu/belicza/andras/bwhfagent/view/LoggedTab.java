@@ -78,7 +78,7 @@ public abstract class LoggedTab extends Tab {
 		controlPanel.add( clearLogButton );
 		logPanel.add( controlPanel, BorderLayout.SOUTH );
 		
-		logPanel.setBorder( BorderFactory.createTitledBorder( "Log: " + logFileName + "" ) );
+		logPanel.setBorder( BorderFactory.createTitledBorder( "This content is also saved to file '" + logFileName + "'." ) );
 		contentBox.add( logPanel );
 	}
 	
