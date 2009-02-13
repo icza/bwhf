@@ -37,7 +37,7 @@ import swingwtx.swing.filechooser.FileFilter;
  * 
  * @author Andras Belicza
  */
-public class ManualScanTab extends LoggedTab {
+public class ManualScanTab extends ProgressLoggedTab {
 	
 	/** Log file name for autoscan.     */
 	private static final String LOG_FILE_NAME         = "manual_scan.log";
@@ -177,6 +177,8 @@ public class ManualScanTab extends LoggedTab {
 			@Override
 			public void run() {
 				try {
+					progressBar.setValue( 0 );
+					
 					final boolean skipLatterActionsOfHackers = MainFrame.getInstance().generalSettingsTab.skipLatterActionsOfHackersCheckBox.isSelected();
 					
 					logMessage( "\n", false ); // Prints 2 empty lines
@@ -184,6 +186,7 @@ public class ManualScanTab extends LoggedTab {
 						logMessage( "Counting replays..." );
 					
 					chooseReplayFiles( files );
+					progressBar.setMaximum( replayFileList.size() );
 					
 					if ( requestedToStop )
 						return;
@@ -205,6 +208,7 @@ public class ManualScanTab extends LoggedTab {
 					final Map< String, Map< String, Set< Integer > > > playerNameHackerRepMapMap =
 						createHtmlSummaryReportCheckBox.isSelected() && !isLastReplay ? new HashMap< String, Map< String, Set< Integer > > >() : null;
 					
+					int counter = 0;	
 					for ( final File replayFile : replayFileList ) {
 						if ( requestedToStop )
 							return;
@@ -284,6 +288,8 @@ public class ManualScanTab extends LoggedTab {
 										replayFile.renameTo( new File( replayFile.getParent(), cleanedReplayName + REPLAY_FILE_EXTENSION ) );
 								}
 							}
+						
+						progressBar.setValue( ++counter );
 					}
 					
 					final long endNanoTime = System.nanoTime();

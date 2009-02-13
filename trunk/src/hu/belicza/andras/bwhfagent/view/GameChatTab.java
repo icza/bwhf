@@ -21,7 +21,7 @@ import swingwtx.swing.JFileChooser;
  * 
  * @author Andras Belicza
  */
-public class GameChatTab extends LoggedTab {
+public class GameChatTab extends ProgressLoggedTab {
 	
 	/** Log file name for game chat. */
 	private static final String LOG_FILE_NAME = "game_chat.log";
@@ -49,6 +49,8 @@ public class GameChatTab extends LoggedTab {
 		extractFromLastReplayButton.setMnemonic( 'l' );
 		extractFromLastReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
+				progressBar.setValue( 0 );
+				progressBar.setMaximum( 1 );
 				final Replay replay = BinRepParser.parseReplay( new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ), true );
 				logMessage( "\n", false ); // Prints 2 empty lines
 				if ( replay == null )
@@ -65,6 +67,7 @@ public class GameChatTab extends LoggedTab {
 					logMessage( replay.gameChat, false );
 					logMessage( "End of game chat of '" + Consts.LAST_REPLAY_FILE_NAME + "'." );
 				}
+				progressBar.setValue( 1 );
 			}
 		} );
 		contentBox.add( Utils.wrapInPanel( extractFromLastReplayButton ) );
@@ -82,14 +85,37 @@ public class GameChatTab extends LoggedTab {
 				fileChooser.setFileSelectionMode( JFileChooser.FILES_AND_DIRECTORIES );
 				fileChooser.setMultiSelectionEnabled( true );
 				
-				if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION ) {
-					final File[] replayFiles = fileChooser.getSelectedFiles();
+				if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION )
+					extractGameChatFromFiles( fileChooser.getSelectedFiles() );
+			}
+		} );
+		contentBox.add( Utils.wrapInPanel( selectFilesButton ) );
+		
+		contentBox.add( Utils.wrapInPanel( includeReplayHeaderCheckBox ) );
+		
+		super.buildGUI();
+	}
+	
+	/**
+	 * Extracts game chat from the specified files and writes them to text files.
+	 * @param replayFiles replay files to extract game chat from
+	 */
+	private void extractGameChatFromFiles( final File[] replayFiles ) {
+		selectFilesButton.setEnabled( false );
+		extractFromLastReplayButton.setEnabled( false );
+		new NormalThread() {
+			@Override
+			public void run() {
+				try {
+					progressBar.setValue( 0 );
+					progressBar.setMaximum( replayFiles.length );
 					logMessage( "\n", false ); // Prints 2 empty lines
 					final String extractingMessage = "Extracting game chat from " + replayFiles.length + " replay" + ( replayFiles.length == 1 ? "" : "s" );
 					logMessage( extractingMessage + "..." );
 					logMessage( "Game chats will be written to text files named after the replays." );
 					final long startTimeNanons = System.nanoTime();
 					
+					int counter = 0;
 					for ( final File replayFile : replayFiles ) {
 						final String absoluteReplayPath = replayFile.getAbsolutePath();
 						final Replay replay = BinRepParser.parseReplay( replayFile, true );
@@ -119,18 +145,18 @@ public class GameChatTab extends LoggedTab {
 									output.close();
 							}
 						}
+						progressBar.setValue( ++counter );
 					}
 					
 					final long endTimeNanons = System.nanoTime();
 					logMessage( extractingMessage + " done in " + Utils.formatNanoTimeAmount( endTimeNanons - startTimeNanons ) );
 				}
+				finally {
+					selectFilesButton.setEnabled( true );
+					extractFromLastReplayButton.setEnabled( true );
+				}
 			}
-		} );
-		contentBox.add( Utils.wrapInPanel( selectFilesButton ) );
-		
-		contentBox.add( Utils.wrapInPanel( includeReplayHeaderCheckBox ) );
-		
-		super.buildGUI();
+		}.start();
 	}
 	
 	@Override
