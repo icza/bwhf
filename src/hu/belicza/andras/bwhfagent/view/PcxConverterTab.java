@@ -26,7 +26,7 @@ import swingwtx.swing.filechooser.FileFilter;
  * 
  * @author Andras Belicza
  */
-public class PcxConverterTab extends LoggedTab {
+public class PcxConverterTab extends ProgressLoggedTab {
 	
 	/** Log file name for PCX converter.               */
 	private static final String LOG_FILE_NAME                            = "pcx_converter.log";
@@ -119,6 +119,9 @@ public class PcxConverterTab extends LoggedTab {
 		super.buildGUI();
 	}
 	
+	/** Lock to synchronize auto and manual convert. */
+	private final Object lock = new Object();
+	
 	/**
 	 * Converts pcx files to the selected output format.
 	 * @param pcxFiles pcx files to be converted
@@ -131,34 +134,41 @@ public class PcxConverterTab extends LoggedTab {
 			@Override
 			public void run() {
 				try {
-					if ( printNewLinesAtStart )
-						logMessage( "\n", false ); // Prints 2 empty lines
-					final String convertingMessage = "Converting " + pcxFiles.length + " pcx file" + ( pcxFiles.length == 1 ? "" : "s" );
-					logMessage( convertingMessage + "..." );
-					
-					final long startTimeNanons = System.nanoTime();
-					
-					final String formatName = (String) outputFormatComboBox.getSelectedItem();
-					final String extension = "." + formatName.toLowerCase();
-					for ( final File pcxFile : pcxFiles )
-						if ( pcxFile.isFile() ) {
-							final String absolutePcxPath = pcxFile.getAbsolutePath();
-							try {
-								final int extensionIndex = absolutePcxPath.lastIndexOf( '.' );
-								final BufferedImage image = ImageIO.read( pcxFile );
-								if ( image == null )
-									throw new Exception( "Failed parsing PCX file: " + absolutePcxPath );
-								ImageIO.write( image, formatName, new File( ( extensionIndex < 0 ? absolutePcxPath : absolutePcxPath.substring( 0, extensionIndex ) ) + extension ) );
-								logMessage( "'" + absolutePcxPath + "' converted successfully." );
-								if ( deleteOnSuccess )
-									pcxFile.delete();
-							} catch ( final Exception e ) {
-								logMessage( "Failed to convert '" + absolutePcxPath + "'!");
+					synchronized (lock) {
+						progressBar.setValue( 0 );
+						progressBar.setMaximum( pcxFiles.length );
+						if ( printNewLinesAtStart )
+							logMessage( "\n", false ); // Prints 2 empty lines
+						final String convertingMessage = "Converting " + pcxFiles.length + " pcx file" + ( pcxFiles.length == 1 ? "" : "s" );
+						logMessage( convertingMessage + "..." );
+						
+						final long startTimeNanons = System.nanoTime();
+						
+						final String formatName = (String) outputFormatComboBox.getSelectedItem();
+						final String extension = "." + formatName.toLowerCase();
+						int counter = 0;
+						for ( final File pcxFile : pcxFiles ) {
+							if ( pcxFile.isFile() ) {
+								final String absolutePcxPath = pcxFile.getAbsolutePath();
+								try {
+									final int extensionIndex = absolutePcxPath.lastIndexOf( '.' );
+									final BufferedImage image = ImageIO.read( pcxFile );
+									if ( image == null )
+										throw new Exception( "Failed parsing PCX file: " + absolutePcxPath );
+									ImageIO.write( image, formatName, new File( ( extensionIndex < 0 ? absolutePcxPath : absolutePcxPath.substring( 0, extensionIndex ) ) + extension ) );
+									logMessage( "'" + absolutePcxPath + "' converted successfully." );
+									if ( deleteOnSuccess )
+										pcxFile.delete();
+								} catch ( final Exception e ) {
+									logMessage( "Failed to convert '" + absolutePcxPath + "'!");
+								}
 							}
+							progressBar.setValue( ++counter );
 						}
-					
-					final long endTimeNanons = System.nanoTime();
-					logMessage( convertingMessage + " done in " + Utils.formatNanoTimeAmount( endTimeNanons - startTimeNanons ) );
+						
+						final long endTimeNanons = System.nanoTime();
+						logMessage( convertingMessage + " done in " + Utils.formatNanoTimeAmount( endTimeNanons - startTimeNanons ) );
+					}
 				}
 				finally {
 					selectFilesButton.setEnabled( true );
@@ -180,24 +190,26 @@ public class PcxConverterTab extends LoggedTab {
 				final Date[] autoscanEnabledTimeHolder = new Date[ 1 ];
 				while ( true ) {
 					try {
-						if ( autoConvertEnabledCheckBox.isSelected() ) {
-							if ( autoscanEnabledTimeHolder[ 0 ] == null ) {
-								autoscanEnabledTimeHolder[ 0 ] = new Date();
-							}
-							
-							final File[] pcxFiles = new File( starcraftFolderTextField.getText() ).listFiles( new java.io.FileFilter() {
-								public boolean accept( final File pathname ) {
-									return pathname.lastModified() > autoscanEnabledTimeHolder[ 0 ].getTime() && pathname.getName().toLowerCase().endsWith( PCX_FILE_EXTENSION );
+						synchronized (lock) {
+							if ( autoConvertEnabledCheckBox.isSelected() ) {
+								if ( autoscanEnabledTimeHolder[ 0 ] == null ) {
+									autoscanEnabledTimeHolder[ 0 ] = new Date();
 								}
-							} );
-							if ( pcxFiles != null && pcxFiles.length > 0 ) {
-								logMessage( "\n", false ); // Prints 2 empty lines
-								logMessage( "New PCX file" + ( pcxFiles.length == 1 ? "" : "s" ) + " detected - proceeding to convert..." );
-								convertPcxFiles( pcxFiles, true, false );
+								
+								final File[] pcxFiles = new File( starcraftFolderTextField.getText() ).listFiles( new java.io.FileFilter() {
+									public boolean accept( final File pathname ) {
+										return pathname.lastModified() > autoscanEnabledTimeHolder[ 0 ].getTime() && pathname.getName().toLowerCase().endsWith( PCX_FILE_EXTENSION );
+									}
+								} );
+								if ( pcxFiles != null && pcxFiles.length > 0 ) {
+									logMessage( "\n", false ); // Prints 2 empty lines
+									logMessage( "New PCX file" + ( pcxFiles.length == 1 ? "" : "s" ) + " detected - proceeding to convert..." );
+									convertPcxFiles( pcxFiles, true, false );
+								}
 							}
+							else
+								autoscanEnabledTimeHolder[ 0 ] = null;
 						}
-						else
-							autoscanEnabledTimeHolder[ 0 ] = null;
 						
 						sleep( TIME_BETWEEN_CHECKS_FOR_NEW_PCX_FILES_MS );
 					}
