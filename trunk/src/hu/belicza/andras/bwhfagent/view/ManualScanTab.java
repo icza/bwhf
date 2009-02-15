@@ -161,7 +161,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 	/**
 	 * Scans the specified files and folders.
 	 * @param files        files and folders to be scanned
-	 * @param isLastReplay tells whether the lastreplay scan button was activated
+	 * @param isLastReplay tells if the 'Scan LastReplay.rep' button was activated
 	 */
 	private void scanFilesAndFolders( final File[] files, final boolean isLastReplay ) {
 		requestedToStop = false;
@@ -427,8 +427,15 @@ public class ManualScanTab extends ProgressLoggedTab {
 			}
 			output.println( "</table>" );
 			
-			output.println( "</center></body>" );
-			output.println( "</html>" );
+			output.println( "</center>" );
+			
+			output.println( "<hr>" );
+			output.println( "<table width='100%' border=0>" );
+			output.println( "<tr><td align=left><i>This report was created with BWHF Agent ver <b>" + MainFrame.getInstance().applicationVersion + "</b></i>" );
+			output.println( "<td align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i>" );
+			output.println( "</table>" );
+			
+			output.println( "</body></html>" );
 			
 			output.flush();
 			output.close();
