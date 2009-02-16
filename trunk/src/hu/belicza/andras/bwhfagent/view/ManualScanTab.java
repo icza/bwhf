@@ -10,6 +10,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -28,6 +29,7 @@ import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JLabel;
+import swingwtx.swing.JOptionPane;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.filechooser.FileFilter;
 
@@ -43,6 +45,8 @@ public class ManualScanTab extends ProgressLoggedTab {
 	private static final String LOG_FILE_NAME         = "manual_scan.log";
 	/** Replay file extension.          */
 	private static final String REPLAY_FILE_EXTENSION = ".rep";
+	/** HTML file extension.            */
+	private static final String HTML_FILE_EXTENSION   = ".html";
 	/** Appendable hacker reps postfix. */
 	private static final String HACKER_REPS_FLAG      = "hack";
 	
@@ -55,6 +59,18 @@ public class ManualScanTab extends ProgressLoggedTab {
 		@Override
 		public String getDescription() {
 			return "Replay files (*.rep)";
+		}
+	};
+	
+	/** HTML file filter. */
+	public static final FileFilter HTML_FILE_FILTER = new FileFilter() {
+		@Override
+		public boolean accept( final File file ) {
+			return file.isDirectory() || file.getName().toLowerCase().endsWith( HTML_FILE_EXTENSION );
+		}
+		@Override
+		public String getDescription() {
+			return "HTML report files (*.html)";
 		}
 	};
 	
@@ -93,13 +109,32 @@ public class ManualScanTab extends ProgressLoggedTab {
 	 * Builds the GUI of the tab.
 	 */
 	protected void buildGUI() {
-		scanLastReplayButton.setMnemonic( 'L' );
-		scanLastReplayButton.addActionListener( new ActionListener() {
+		final JButton openPreviousReportButton = new JButton( "Open a previous HTML report" );
+		openPreviousReportButton.setMnemonic( 'h' );
+		openPreviousReportButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				scanFilesAndFolders( new File[] { new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) }, true );
+				final File htmlReportDirectory = new File( Consts.HTML_REPORT_DIRECTORY_NAME );
+				if ( !htmlReportDirectory.exists() || !htmlReportDirectory.isDirectory() ) {
+					JOptionPane.showMessageDialog( MainFrame.getInstance(), "You do not have previous reports!", "Error", JOptionPane.ERROR_MESSAGE );
+					return;
+				}
+				final JFileChooser fileChooser = new JFileChooser( htmlReportDirectory );
+				
+				// This is for SwingWT:
+				fileChooser.setExtensionFilters( new String[] { "*.html", "*.*" }, new String[] { "HTML report files (*.html)", "All files (*.*)" } );
+				// This is for Swing:
+				fileChooser.addChoosableFileFilter( HTML_FILE_FILTER ); 
+				
+				fileChooser.setFileSelectionMode( JFileChooser.FILES_AND_DIRECTORIES );
+				fileChooser.setMultiSelectionEnabled( false );
+				if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION )
+					try {
+						Utils.showURLInBrowser( fileChooser.getSelectedFile().toURI().toURL().toString() );
+					} catch ( final MalformedURLException mue ) {
+					}
 			}
 		} );
-		contentBox.add( Utils.wrapInPanel( scanLastReplayButton ) );
+		contentBox.add( Utils.wrapInPanel( openPreviousReportButton ) );
 		
 		final ActionListener selectFilesAndFoldersActionListener = new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
@@ -119,12 +154,19 @@ public class ManualScanTab extends ProgressLoggedTab {
 		};
 		
 		final JPanel selectButtonsPanel = new JPanel();
-		selectFoldersButton.setMnemonic( 'd' );
-		selectFoldersButton.addActionListener( selectFilesAndFoldersActionListener );
-		selectButtonsPanel.add( selectFoldersButton );
+		scanLastReplayButton.setMnemonic( 'L' );
+		scanLastReplayButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				scanFilesAndFolders( new File[] { new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) }, true );
+			}
+		} );
+		selectButtonsPanel.add( scanLastReplayButton );
 		selectFilesButton.setMnemonic( 'f' );
 		selectFilesButton.addActionListener( selectFilesAndFoldersActionListener );
 		selectButtonsPanel.add( selectFilesButton );
+		selectFoldersButton.setMnemonic( 'd' );
+		selectFoldersButton.addActionListener( selectFilesAndFoldersActionListener );
+		selectButtonsPanel.add( selectFoldersButton );
 		contentBox.add( selectButtonsPanel );
 		
 		stopScanButton.setEnabled( false );
@@ -398,7 +440,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 			output.println( "<b>The following players were found hacking:</b><br>" );
 			output.println( "(You can use your browser's search function to find a specific name.)" );
 			output.println( "<table border=1>" );
-			output.println( "<tr><th>&nbsp;#&nbsp;<th>Hacker<th>Replays count<th>Replay<th>Hacks used" );
+			output.println( "<tr><th>&nbsp;#&nbsp;<th>Hacker<th>Replays count<th>Replay<th>Hacks used<a href='#hacksUsedNote'>*</a>" );
 			int counter = 0;
 			for ( final Map.Entry< String, Map< String, Set< Integer > > > playerNameHackerRepMapMapEntry :
 						new TreeMap< String, Map< String, Set< Integer > > >( playerNameHackerRepMapMap ).entrySet() ) {
@@ -426,6 +468,8 @@ public class ManualScanTab extends ProgressLoggedTab {
 				
 			}
 			output.println( "</table>" );
+			
+			output.println( "<a name='hacksUsedNote'><p style='color:#000000;background:#c0f0c0;font-style:italic;'>Note: the list of used hacks might be incomplete if you have fast scanning enabled on the general settings tab (which stops scanning a player if a hack was already found).</p></a>" );
 			
 			output.println( "</center>" );
 			
