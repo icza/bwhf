@@ -7,6 +7,7 @@
  * Added a button to the manual scan tab to open previous HTML reports.
  * New setting to clean the 'hack' flag from replays where no hackers were found during the scan on the manual scan tab.
  * Added a progress bar to the manual scan, PCX converter and Game chat tabs.
+ * Game chat extraction now contains more info about players (race and APM).
  * Fixed a bug which occasionally caused `LastReplay.rep` to be saved and scanned (and reported hackers if found) twice when changed.
  * Logged text areas have more descriptive titles.
  * Renamed `settings.properites` to `settings.properties`.
