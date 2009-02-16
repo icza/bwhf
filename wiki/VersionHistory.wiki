@@ -4,6 +4,7 @@
 
 *Features and changes in the upcoming new version:*
  * New setting to create and open a detailed HTML summary report at the end of manual scan. These HTML reports are also saved in the `HTML reports` folder so you can view them later or share them on the internet.
+ * Added a button to the manual scan tab to open previous HTML reports.
  * New setting to clean the 'hack' flag from replays where no hackers were found during the scan on the manual scan tab.
  * Added a progress bar to the manual scan, PCX converter and Game chat tabs.
  * Fixed a bug which occasionally caused `LastReplay.rep` to be saved and scanned (and reported hackers if found) twice when changed.
