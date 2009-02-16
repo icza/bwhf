@@ -1,7 +1,11 @@
 package hu.belicza.andras.bwhf.model;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 
 /**
  * Class modeling the header of a replay.
@@ -19,6 +23,8 @@ public class ReplayHeader {
 	public static final byte RACE_TERRAN  = (byte) 0x01;
 	public static final byte RACE_PROTOSS = (byte) 0x02;
 	
+	public static final char[] RACE_CHARACTERS = { 'Z', 'T', 'P' };
+	
 	// Header fields
 	
 	public byte     gameEngine;
@@ -34,9 +40,12 @@ public class ReplayHeader {
 	public byte[]   playerSpotIndices = new byte[ 8 ]; 
 	
 	// Derived data from player records:
-	public String[] playerNames = new String[ 12 ];
-	public byte[]   playerRaces = new byte[ 12 ];
-	public int[]    playerIds   = new int[ 12 ];
+	public String[] playerNames        = new String[ 12 ];
+	public byte[]   playerRaces        = new byte[ 12 ];
+	public int[]    playerIds          = new int[ 12 ];
+	
+	// Calculated data when parsing the replay
+	public int[]    playerIdActionsCounts = new int[ 12 ];
 	
 	/**
 	 * Converts the specified amount of frames to seconds.
@@ -134,7 +143,27 @@ public class ReplayHeader {
 		output.println( "Map size: " + getMapSize() );
 		output.println( "Creator name: " + creatorName );
 		output.println( "Map name: " + mapName );
-		output.println( "Players: " + getPlayerNamesString() );
+		output.println( "Players: " );
+		
+		final int seconds = getDurationSeconds();
+		// We want to sort players by their APM
+		final List< Object[] > playerDescriptionList = new ArrayList< Object[] >( 12 );
+		for ( int i = 0; i < playerNames.length; i++ )
+			if ( playerNames[ i ] != null ) {
+				final Integer apm               = playerIdActionsCounts[ playerIds[ i ] ] * 60 / seconds;
+				final String  playerDescription = "    " + playerNames[ i ] + " (" + RACE_CHARACTERS[ playerRaces[ i ] ] + ") APM: " + apm;
+				playerDescriptionList.add( new Object[] { apm, playerDescription } );
+			}
+		
+		Collections.sort( playerDescriptionList, new Comparator< Object[] >() {
+			public int compare( final Object[] object1, final Object[] object2 ) {
+				return -( (Integer) object1[ 0 ] ).compareTo( (Integer) object2[ 0 ] );
+			}
+		} );
+		
+		for ( final Object[] playerDescription : playerDescriptionList )
+			output.println( (String) playerDescription[ 1 ] );
+		
 		output.flush();
 	}
 	

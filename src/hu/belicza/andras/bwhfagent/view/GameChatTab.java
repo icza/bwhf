@@ -26,8 +26,8 @@ public class GameChatTab extends ProgressLoggedTab {
 	/** Log file name for game chat. */
 	private static final String LOG_FILE_NAME = "game_chat.log";
 	
-	/** Button to extract game chat frm the last replay.   */
-	private final JButton   extractFromLastReplayButton = new JButton( "Extract game chat from 'LastReplay.rep'" );
+	/** Button to display game chat from the last replay.  */
+	private final JButton   displayFromLastReplayButton = new JButton( "Display game chat from 'LastReplay.rep'" );
 	/** Button to select files to extract game chat.       */
 	private final JButton   selectFilesButton           = new JButton( "Select files to extract game chat from" );
 	/** Checkbox to tell whether to include replay header. */
@@ -46,8 +46,8 @@ public class GameChatTab extends ProgressLoggedTab {
 	 * Builds the GUI of the tab.
 	 */
 	protected void buildGUI() {
-		extractFromLastReplayButton.setMnemonic( 'l' );
-		extractFromLastReplayButton.addActionListener( new ActionListener() {
+		displayFromLastReplayButton.setMnemonic( 'l' );
+		displayFromLastReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				progressBar.setValue( 0 );
 				progressBar.setMaximum( 1 );
@@ -70,7 +70,7 @@ public class GameChatTab extends ProgressLoggedTab {
 				progressBar.setValue( 1 );
 			}
 		} );
-		contentBox.add( Utils.wrapInPanel( extractFromLastReplayButton ) );
+		contentBox.add( Utils.wrapInPanel( displayFromLastReplayButton ) );
 		
 		selectFilesButton.setMnemonic( 'f' );
 		selectFilesButton.addActionListener( new ActionListener() {
@@ -102,7 +102,7 @@ public class GameChatTab extends ProgressLoggedTab {
 	 */
 	private void extractGameChatFromFiles( final File[] replayFiles ) {
 		selectFilesButton.setEnabled( false );
-		extractFromLastReplayButton.setEnabled( false );
+		displayFromLastReplayButton.setEnabled( false );
 		new NormalThread() {
 			@Override
 			public void run() {
@@ -153,7 +153,7 @@ public class GameChatTab extends ProgressLoggedTab {
 				}
 				finally {
 					selectFilesButton.setEnabled( true );
-					extractFromLastReplayButton.setEnabled( true );
+					displayFromLastReplayButton.setEnabled( true );
 				}
 			}
 		}.start();

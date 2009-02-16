@@ -43,9 +43,6 @@ public class BinRepParser {
 	/** Size of the header section */
 	public static final int HEADER_SIZE = 0x279;
 	
-	/** Name of the unit section in the map data replay section. */
-	private static final String UNIT_SECTION_NAME = "UNIT";
-	
 	/**
 	 * Wrapper class to build the game chat.
 	 * @author Andras Belicza
@@ -152,8 +149,11 @@ public class BinRepParser {
 				while ( commandsBuffer.position() < commandBlocksEndPos ) {
 					final int playerId = commandsBuffer.get() & 0xff;
 					final Action action = readNextAction( frame, commandsBuffer, commandBlocksEndPos, gameChatWrapper );
-					if ( playerActionLists != null )
-						playerActionLists[ playerId ].add( action );
+					if ( action != null ) {
+						replayHeader.playerIdActionsCounts[ playerId ]++;
+						if ( playerActionLists != null )
+							playerActionLists[ playerId ].add( action );
+					}
 				}
 			}
 			
@@ -176,6 +176,8 @@ public class BinRepParser {
 			mapDataBuffer.order( ByteOrder.LITTLE_ENDIAN );
 			
 			final byte[] sectionNameBuffer = new byte[ 4 ];
+			// Name of the unit section in the map data replay section.
+			final String UNIT_SECTION_NAME = "UNIT";
 			while ( mapDataBuffer.position() < mapDataLength ) {
 				mapDataBuffer.get( sectionNameBuffer );
 				final String sectionName   = new String( sectionNameBuffer, "US-ASCII" );
@@ -483,6 +485,9 @@ public class BinRepParser {
 		
 		if ( skipBytes > 0 )
 			commandsBuffer.position( commandsBuffer.position() + skipBytes );
+		
+		if ( blockId == 0x5c ) // Game chat is not a "real" action
+			return null;
 		
 		if ( action == null )
 			action = new Action( frame, "", Action.ACTION_NAME_INDEX_UNKNOWN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
