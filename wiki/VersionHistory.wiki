@@ -9,7 +9,7 @@
  * Added a progress bar to the manual scan, PCX converter and Game chat tabs.
  * Game chat extraction now contains more info about players (race and APM).
  * Fixed a bug which occasionally caused `LastReplay.rep` to be saved and scanned (and reported hackers if found) twice when changed.
- * Players using latency changer program might occasionally got reported using autogather/autotrain hack. This is no longer the case.
+ * Players using latency changer program might have occasionally got reported using autogather/autotrain hack. This is no longer the case.
  * Logged text areas have more descriptive titles.
  * Renamed `settings.properites` to `settings.properties`.
 
