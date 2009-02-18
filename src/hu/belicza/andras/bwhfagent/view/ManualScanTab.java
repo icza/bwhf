@@ -115,7 +115,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 			public void actionPerformed( final ActionEvent event ) {
 				final File htmlReportDirectory = new File( Consts.HTML_REPORT_DIRECTORY_NAME );
 				if ( !htmlReportDirectory.exists() || !htmlReportDirectory.isDirectory() ) {
-					JOptionPane.showMessageDialog( MainFrame.getInstance(), "You do not have previous reports!", "Error", JOptionPane.ERROR_MESSAGE );
+					JOptionPane.showMessageDialog( MainFrame.getInstance(), "You do not have saved reports!", "Notification", JOptionPane.INFORMATION_MESSAGE );
 					return;
 				}
 				final JFileChooser fileChooser = new JFileChooser( htmlReportDirectory );
