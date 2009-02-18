@@ -3,10 +3,10 @@
 =BWHF Agent version history=
 
 ====1.30 2009-02-18====
- * New setting to create and open a detailed HTML summary report at the end of manual scan. These HTML reports are also saved in the `HTML reports` folder so you can view them later or share them on the internet.
+ * New setting to create and open a *detailed HTML summary report* at the end of manual scan. These HTML reports are also saved in the `HTML reports` folder so you can view them later or share them on the internet.
  * Added a button to the manual scan tab to open previous HTML reports.
  * New setting to clean the 'hack' flag from replays where no hackers were found during the scan on the manual scan tab.
- * Added a progress bar to the manual scan, PCX converter and Game chat tabs.
+ * Added a *progress bar* to the manual scan, PCX converter and Game chat tabs.
  * Game chat extraction now contains more info about players (race and APM).
  * Fixed a bug which occasionally caused `LastReplay.rep` to be saved and scanned (and reported hackers if found) twice when changed.
  * Players using latency changer program might occasionally got reported using autogather/autotrain hack. This is no longer the case.
