@@ -1,9 +1,12 @@
 package hu.belicza.andras.bwhfagent.view.charts;
 
 import hu.belicza.andras.bwhf.control.ReplayScanner;
+import hu.belicza.andras.bwhf.model.Action;
 import hu.belicza.andras.bwhf.model.HackDescription;
+import hu.belicza.andras.bwhf.model.PlayerActions;
 import hu.belicza.andras.bwhf.model.Replay;
 
+import java.util.Arrays;
 import java.util.List;
 
 import swingwt.awt.BorderLayout;
@@ -13,7 +16,7 @@ import swingwt.awt.Graphics2D;
 import swingwtx.swing.JPanel;
 
 /**
- * Component to visialise charts.
+ * Component to visialize charts.
  * 
  * @author Andras Belicza
  */
@@ -27,7 +30,7 @@ public class ChartsComponent extends JPanel {
 	private static final Color CHART_HACK_COLOR       = Color.RED;
 	
 	/** Chart granularity in pixels. */
-	private static final int CHART_GRANULARITY = 15;
+	private static final int CHART_GRANULARITY = 10;
 	
 	/**
 	 * The supported types of charts.
@@ -67,6 +70,7 @@ public class ChartsComponent extends JPanel {
 	 */
 	public void setChartType( final ChartType chartType ) {
 		this.chartType = chartType;
+		
 		repaint();
 	}
 	
@@ -105,16 +109,45 @@ public class ChartsComponent extends JPanel {
 		final int maxY = getHeight() - 1;
 		
 		graphics.setColor( CHART_INFO_COLOR );
-		final int frames = replay.replayHeader.gameFrames;
 		
-		final int[] xPoints = new int[ maxX / CHART_GRANULARITY + 1 ];
-		final int[] yPoints = new int[ xPoints.length ];
-		yPoints[ 0 ] = xPoints[ 0 ] = 0;
+		final int chartPoints       = maxX / CHART_GRANULARITY + 1;
+		final int frames            = replay.replayHeader.gameFrames;
+		final int framesGranularity = frames / chartPoints;
 		
-		final int frameGranularity = frames * CHART_GRANULARITY / getWidth();
+		final int[] xPoints = new int[ chartPoints + 1 ];
+		final int[] yPoints = new int[ chartPoints + 1 ];
 		int pointIndex = 0;
-		for ( int frame = 0; frame <= frames; frame += frameGranularity, pointIndex++ ) {
+		for ( int x = 0; x <= maxX; x+= CHART_GRANULARITY, pointIndex++ ) // Last point might not get value!
+			xPoints[ pointIndex ] = x;
+		
+		
+		int counter = 0;
+		for ( final PlayerActions playerActions : replay.replayActions.players ) {
+			if ( counter++ > 0 )
+				break;
+			Arrays.fill( yPoints, 0 );
 			
+			for ( final Action action : playerActions.actions )
+				try {
+					yPoints[ 1 + action.iteration / framesGranularity ]++; // The last few actions might be over the last domain, we ignore them.
+				} catch ( final ArrayIndexOutOfBoundsException aioobe ) {}
+			
+			int maxFrames = 0; 
+			for ( final int framesInDomain : yPoints )
+				if ( maxFrames < framesInDomain )
+					maxFrames = framesInDomain;
+			
+			if ( maxFrames > 0 )
+				for ( pointIndex = yPoints.length - 1; pointIndex > 0; pointIndex-- )
+					yPoints[ pointIndex ] = maxY - yPoints[ pointIndex ] * maxY / maxFrames;
+			else
+				Arrays.fill( yPoints, maxY ); // No actions, we cannot divide by zero, just fill with maxY
+			
+			// Chart should not start from zero, we "double" the first point:
+			yPoints[ 0 ] = yPoints[ 1 ];
+			
+			graphics.setColor( Color.WHITE );
+			graphics.drawPolyline( xPoints, yPoints, xPoints.length - 1 ); // Last point is excluded, it might not be a whole domain
 		}
 	}
 	

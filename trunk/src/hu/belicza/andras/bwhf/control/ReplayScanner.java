@@ -63,7 +63,7 @@ public class ReplayScanner {
 					break;
 				}
 			if ( !hasActionAtIteration10 )
-				hackDescriptionList.add( new HackDescription( player.name, HackDescription.HACK_TYPE_AUTOGATHER_AUTOTRAIN, 5 ) );
+				hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_AUTOGATHER_AUTOTRAIN, 5 ) );
 		}
 		
 		
@@ -91,18 +91,18 @@ public class ReplayScanner {
 					if ( action.parameterBuildingNameIndex < Action.BUILDING_NAME_INDEX_FIRST_ZERG_BUILDING || action.parameterBuildingNameIndex > Action.BUILDING_NAME_INDEX_LAST_ZERG_BUILDING ) // Not a zerg building selected multiple times (that can be done wihtout hack by selecting drones about to morph)
 						if ( action.parameters.length() != Action.BUILDING_NAMES[ action.parameterBuildingNameIndex ].length() )
 							if ( action.parameters.startsWith( Action.BUILDING_NAMES[ action.parameterBuildingNameIndex ] + "(x" ) )
-								hackDescriptionList.add( new HackDescription( player.name, HackDescription.HACK_TYPE_BUILDING_SELECTION, action.iteration ) );
+								hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_BUILDING_SELECTION, action.iteration ) );
 			
 			// Old zerg and protoss moneyhacks
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_0X33 )
 				if ( lastSelectAction.parameterUnitNameIndex == Action.UNIT_NAME_INDEX_PROBE )
-					hackDescriptionList.add( new HackDescription( player.name, HackDescription.HACK_TYPE_PROTOSS_MONEYHACK, action.iteration ) );
+					hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_PROTOSS_MONEYHACK, action.iteration ) );
 				else
 					if ( lastSelectAction.parameterUnitNameIndex == Action.UNIT_NAME_INDEX_DRONE )
-						hackDescriptionList.add( new HackDescription( player.name, HackDescription.HACK_TYPE_ZERG_MONEYHACK, action.iteration ) );
+						hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_ZERG_MONEYHACK, action.iteration ) );
 					else
 						if ( lastSelectAction.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_NON_BUILDING ) // giving !0x33 means cancel upgrade; sometimes it's just a number (not recognized by BWChart), if not a building => moneyhack
-							hackDescriptionList.add( new HackDescription( player.name, HackDescription.HACK_TYPE_MONEYHACK, action.iteration ) );
+							hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_MONEYHACK, action.iteration ) );
 			
 			// Old terran moneyhack (comsat cancel)
 			if ( !foundTerranComsatCancelHack )
@@ -110,7 +110,7 @@ public class ReplayScanner {
 					if ( lastAction != null && lastAction.actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN
 							&& ( lastAction.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_COMSAT || lastAction.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_CONTROL_TOWER ) ) {
 						foundTerranComsatCancelHack = true;
-						hackDescriptionList.add( new HackDescription( player.name, HackDescription.HACK_TYPE_TERRAN_MONEYHACK, action.iteration ) );
+						hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_TERRAN_MONEYHACK, action.iteration ) );
 					}
 			
 			// Multicommand unit control hack and multicommand rally set hack
@@ -125,20 +125,20 @@ public class ReplayScanner {
 					  && actionAhead1.actionNameIndex == actionAhead3.actionNameIndex
 					  && actionAhead1.parameters.equals( actionAhead3.parameters ) ) {
 						if ( action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_NON_BUILDING )
-							hackDescriptionList.add( new HackDescription( player.name, HackDescription.HACK_TYPE_MULTICOMMAND_UNIT_CONTROL, action.iteration ) );
+							hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_MULTICOMMAND_UNIT_CONTROL, action.iteration ) );
 						else
-							hackDescriptionList.add( new HackDescription( player.name, HackDescription.HACK_TYPE_MULTICOMMAND_RALLY_SET, action.iteration ) );
+							hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_MULTICOMMAND_RALLY_SET, action.iteration ) );
 					}
 			}
 			
 			// Old protoss moneyhack
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BWCHART_HACK && action.parameters.startsWith( "00 15" ) )
-				hackDescriptionList.add( new HackDescription( player.name, HackDescription.HACK_TYPE_PROTOSS_MONEYHACK, action.iteration ) );
+				hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_PROTOSS_MONEYHACK, action.iteration ) );
 			
 			// Zerg moneyhack with cancelling eggs (from Starcraft version 1.15.1)
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_CANCEL_TRAIN && ( action.parameters.equals( "FE 00" ) || action.parameters.equals( "00 00" ) ) )
 				if ( lastAction != null && lastAction.actionNameIndex == Action.ACTION_NAME_INDEX_HATCH )
-					hackDescriptionList.add( new HackDescription( player.name, HackDescription.HACK_TYPE_ZERG_MONEYHACK, action.iteration ) );
+					hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_ZERG_MONEYHACK, action.iteration ) );
 			
 			// Multicommand hack: giving "several" actions in the same iteration
 			// If actions being next to each other are the same actions (regardless to its parameters),
@@ -149,7 +149,7 @@ public class ReplayScanner {
 				nonHotkeyActionsCountInSameIteration++;
 			else {
 				if ( nonHotkeyActionsCountInSameIteration > 18 )
-					hackDescriptionList.add( new HackDescription( player.name, HackDescription.HACK_TYPE_MULTICOMMAND, lastAction.iteration ) );
+					hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_MULTICOMMAND, lastAction.iteration ) );
 				lastIteration = action.iteration;
 				nonHotkeyActionsCountInSameIteration = 0;
 			}
