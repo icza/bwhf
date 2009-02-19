@@ -7,11 +7,18 @@ package hu.belicza.andras.bwhf.model;
  */
 public class PlayerActions {
 	
-	public final String   name;
+	/** Name of the player.    */
+	public final String   playerName;
+	/** Actions of the player. */
 	public final Action[] actions;
 	
-	public PlayerActions( final String name, final Action[] actions ) {
-		this.name    = name;
+	/**
+	 * Creates a new PlayerActions.
+	 * @param playerName name of the player
+	 * @param actions    actions of the player
+	 */
+	public PlayerActions( final String playerName, final Action[] actions ) {
+		this.playerName    = playerName;
 		this.actions = actions;
 	}
 	
