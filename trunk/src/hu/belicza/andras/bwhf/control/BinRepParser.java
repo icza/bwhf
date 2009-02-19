@@ -206,7 +206,6 @@ public class BinRepParser {
 			return new Replay( replayHeader, replayActions, null );
 		}
 		catch ( final Exception e ) {
-			e.printStackTrace();
 			return null;
 		}
 		finally {

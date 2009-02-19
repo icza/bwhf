@@ -82,7 +82,7 @@ public class GameChatTab extends ProgressLoggedTab {
 				// This is for Swing:
 				fileChooser.addChoosableFileFilter( ManualScanTab.SWING_REPLAY_FILE_FILTER ); 
 				
-				fileChooser.setFileSelectionMode( JFileChooser.FILES_AND_DIRECTORIES );
+				fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
 				fileChooser.setMultiSelectionEnabled( true );
 				
 				if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION )
