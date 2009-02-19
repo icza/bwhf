@@ -2,6 +2,10 @@
 
 =BWHF Agent version history=
 
+*Features and changes in the upcoming new version:
+ * A new *Charts* tab which with APM chart.
+
+----
 ====1.30 2009-02-18====
  * New setting to create and open a *detailed HTML summary report* at the end of manual scan. These HTML reports are also saved in the `HTML reports` folder so you can view them later or share them on the internet.
  * Added a button to the manual scan tab to open previous HTML reports.
