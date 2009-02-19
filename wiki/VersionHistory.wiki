@@ -3,7 +3,7 @@
 =BWHF Agent version history=
 
 *Features and changes in the upcoming new version:*
- * A new *Charts* tab which can visualize APM of players of a replay.
+ * A new *Charts* tab which can visualize players' APM from replays.
 
 ----
 ====1.30 2009-02-18====
