@@ -5,14 +5,18 @@ import hu.belicza.andras.bwhf.model.Action;
 import hu.belicza.andras.bwhf.model.HackDescription;
 import hu.belicza.andras.bwhf.model.PlayerActions;
 import hu.belicza.andras.bwhf.model.Replay;
+import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.util.Arrays;
 import java.util.List;
 
+import swingwt.awt.BasicStroke;
 import swingwt.awt.BorderLayout;
 import swingwt.awt.Color;
+import swingwt.awt.Font;
 import swingwt.awt.Graphics;
 import swingwt.awt.Graphics2D;
+import swingwt.awt.Stroke;
 import swingwtx.swing.JPanel;
 
 /**
@@ -22,12 +26,26 @@ import swingwtx.swing.JPanel;
  */
 public class ChartsComponent extends JPanel {
 	
-	/** Background color for charts.          */
-	private static final Color CHART_BACKGROUND_COLOR = Color.BLACK;
-	/** Color to use for axis and info texts. */
-	private static final Color CHART_INFO_COLOR       = Color.YELLOW;
-	/** Color to use for indicating hacks.    */
-	private static final Color CHART_HACK_COLOR       = Color.RED;
+	/** Background color for charts.                 */
+	private static final Color  CHART_BACKGROUND_COLOR   = Color.BLACK;
+	/** Color to use for axis and info texts.        */
+	private static final Color  CHART_INFO_COLOR         = Color.YELLOW;
+	/** Color to use for axis and info texts.        */
+	private static final Color  CHART_COLOR              = Color.WHITE;
+	/** Color to use for axis and info texts.        */
+	private static final Color  CHART_ASSIST_LINES_COLOR = new Color( 80, 80, 80 );
+	/** Color to use for indicating hacks.           */
+	private static final Color  CHART_HACK_COLOR         = Color.RED;
+	/** Font to use to draw main texts in the chart. */
+	private static final Font   CHART_MAIN_FONT          = new Font( "Courier New", Font.BOLD , 10 );
+	/** Font to use to draw info texts in the chart. */
+	private static final Font   CHART_INFO_FONT          = new Font( "Courier New", Font.PLAIN, 8  );
+	/** Stroke to be used to draw charts.            */
+	private static final Stroke CHART_STROKE             = new BasicStroke( 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND );
+	/** Stroke to be used to draw everything else.   */
+	private static final Stroke CHART_REST_STROKE        = new BasicStroke( 1.0f );
+	/** Number of assist lines to be painted in each chart. */
+	private final int           ASSIST_LINES_COUNT       = 5;
 	
 	/** Chart granularity in pixels. */
 	private static final int CHART_GRANULARITY = 10;
@@ -56,6 +74,8 @@ public class ChartsComponent extends JPanel {
 	private Replay                  replay;
 	/** List of hack descriptions of the replay. */
 	private List< HackDescription > hackDescriptionList;
+	/** Player indices to be shown.              */
+	private int[]                   playerIndicesToShow;
 	
 	/**
 	 * Creates a new ChartsComponent.
@@ -85,6 +105,10 @@ public class ChartsComponent extends JPanel {
 		else
 			hackDescriptionList = null;
 		
+		playerIndicesToShow = new int[ replay.replayActions.players.length ];
+		for ( int i = 0; i < playerIndicesToShow.length; i++ )
+			playerIndicesToShow[ i ] = i;
+		
 		repaint();
 	}
 	
@@ -105,49 +129,79 @@ public class ChartsComponent extends JPanel {
 		if ( getWidth() < CHART_GRANULARITY )
 			return;
 		
-		final int maxX = getWidth () - 1;
-		final int maxY = getHeight() - 1;
+		final int AXIS_SPACE_X = 23;
+		final int AXIS_SPACE_Y = 20;
 		
-		graphics.setColor( CHART_INFO_COLOR );
+		final int chartWidth  = getWidth () - AXIS_SPACE_X;
+		final int chartHeight = ( getHeight() - AXIS_SPACE_Y ) / playerIndicesToShow.length - AXIS_SPACE_Y;
+		final int x1          = AXIS_SPACE_X;
+		final int maxXInChart = chartWidth  - 1;
+		final int maxYInChart = chartHeight - 1;
 		
-		final int chartPoints       = maxX / CHART_GRANULARITY + 1;
+		final int chartPoints       = maxXInChart / CHART_GRANULARITY + 1;
 		final int frames            = replay.replayHeader.gameFrames;
 		final int framesGranularity = frames / chartPoints;
 		
 		final int[] xPoints = new int[ chartPoints + 1 ];
 		final int[] yPoints = new int[ chartPoints + 1 ];
 		int pointIndex = 0;
-		for ( int x = 0; x <= maxX; x+= CHART_GRANULARITY, pointIndex++ ) // Last point might not get value!
+		for ( int x = x1; pointIndex < xPoints.length ; pointIndex++, x+= CHART_GRANULARITY )
 			xPoints[ pointIndex ] = x;
 		
+		graphics.setFont( CHART_MAIN_FONT );
+		graphics.setColor( CHART_INFO_COLOR );
+		graphics.drawString( "APM", 1, 0 );
 		
-		int counter = 0;
-		for ( final PlayerActions playerActions : replay.replayActions.players ) {
-			if ( counter++ > 0 )
-				break;
+		graphics.setFont( CHART_INFO_FONT );
+		
+		for ( int i = 0; i < playerIndicesToShow.length; i++ ) {
+			final PlayerActions playerActions = replay.replayActions.players[ playerIndicesToShow[ i ] ];
+			
+			graphics.setColor( CHART_INFO_COLOR );
+			final int y1 = ( chartHeight + AXIS_SPACE_Y ) * i + AXIS_SPACE_Y;
+			graphics.drawLine( x1, y1, x1, y1 + chartHeight );
+			graphics.drawLine( x1, y1 + maxYInChart, x1 + maxXInChart, y1 + maxYInChart );
+			
 			Arrays.fill( yPoints, 0 );
 			
 			for ( final Action action : playerActions.actions )
 				try {
-					yPoints[ 1 + action.iteration / framesGranularity ]++; // The last few actions might be over the last domain, we ignore them.
-				} catch ( final ArrayIndexOutOfBoundsException aioobe ) {}
+					yPoints[ 1 + action.iteration / framesGranularity ]++;
+				} catch ( final ArrayIndexOutOfBoundsException aioobe ) {
+					// The last few actions might be over the last domain, we ignore them.
+				}
 			
-			int maxFrames = 0; 
-			for ( final int framesInDomain : yPoints )
-				if ( maxFrames < framesInDomain )
-					maxFrames = framesInDomain;
+			int maxActions = 0; 
+			for ( final int actionsInDomain : yPoints )
+				if ( maxActions < actionsInDomain )
+					maxActions = actionsInDomain;
 			
-			if ( maxFrames > 0 )
+			final int maxY = maxYInChart;
+			// Normalize chart to its height
+			if ( maxActions > 0 )
 				for ( pointIndex = yPoints.length - 1; pointIndex > 0; pointIndex-- )
-					yPoints[ pointIndex ] = maxY - yPoints[ pointIndex ] * maxY / maxFrames;
+					yPoints[ pointIndex ] = y1 + maxY - yPoints[ pointIndex ] * maxY / maxActions;
 			else
-				Arrays.fill( yPoints, maxY ); // No actions, we cannot divide by zero, just fill with maxY
+				Arrays.fill( yPoints, y1 + maxY ); // No actions, we cannot divide by zero, just fill with maxY
+			
+			final int maxApm = maxActions * ( chartPoints - 1 ) * 60 / ReplayHeader.convertFramesToSeconds( frames );
+			for ( int j = 0; j <= ASSIST_LINES_COUNT; j++ ) {
+				final int y   = y1 + maxYInChart - ( maxYInChart * j / ASSIST_LINES_COUNT );
+				final int apm = maxApm * j / ASSIST_LINES_COUNT;
+				graphics.setColor( CHART_INFO_COLOR );
+				graphics.drawString( ( apm < 100 ? ( apm < 10 ? "  " : " " ) : "" ) + apm, 1, y - 7 );
+				if ( j > 0 ) {
+					graphics.setColor( CHART_ASSIST_LINES_COLOR );
+					graphics.drawLine( x1 + 1, y, x1 + maxXInChart, y );
+				}
+			}
 			
 			// Chart should not start from zero, we "double" the first point:
 			yPoints[ 0 ] = yPoints[ 1 ];
-			
-			graphics.setColor( Color.WHITE );
+			graphics.setColor( CHART_COLOR );
+			( (Graphics2D) graphics ).setStroke( CHART_STROKE );
 			graphics.drawPolyline( xPoints, yPoints, xPoints.length - 1 ); // Last point is excluded, it might not be a whole domain
+			( (Graphics2D) graphics ).setStroke( CHART_REST_STROKE );
 		}
 	}
 	
