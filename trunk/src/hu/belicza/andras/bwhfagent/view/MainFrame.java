@@ -77,7 +77,7 @@ public class MainFrame extends JFrame {
 		setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
 		
 		generalSettingsTab = new GeneralSettingsTab();
-		tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), new PcxConverterTab(), new GameChatTab(), new ChartsTab(), generalSettingsTab, new AboutTab() };
+		tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), new ChartsTab(), new GameChatTab(), new PcxConverterTab(), generalSettingsTab, new AboutTab() };
 		buildGUI();
 		checkStarcraftFolder();
 		
@@ -94,7 +94,7 @@ public class MainFrame extends JFrame {
 			}
 		} );
 		
-		setBounds( 90, 90, 790, 590 );
+		setBounds( 90, 90, 850, 650 );
 		setVisible( true );
 	}
 	
