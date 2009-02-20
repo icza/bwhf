@@ -132,6 +132,22 @@ public class ReplayHeader {
 	}
 	
 	/**
+	 * Returns the description of a player specified by his/her name.<br>
+	 * The description contains the name, race and APM of the player in the following format:<br>
+	 * <code>player_name (R), actions: xxx, APM: yyy</code>
+	 * @param playerName name of the player being queried
+	 * @return the description of the player
+	 */
+	public String getPlayerDescription( final String playerName ) {
+		for ( int i = 0; i < playerNames.length; i++ )
+			if ( playerNames[ i ] != null && playerNames[ i ].equals( playerName ) ) {
+				final Integer apm = playerIdActionsCounts[ playerIds[ i ] ] * 60 / getDurationSeconds();
+				return playerNames[ i ] + " (" + RACE_CHARACTERS[ playerRaces[ i ] ] + "), actions: " + playerIdActionsCounts[ playerIds[ i ] ] + ", APM: " + apm;
+			}
+		return null;
+	}
+	
+	/**
 	 * Prints the replay header information into the specified output writer.
 	 * @param output output print writer to be used
 	 */

@@ -27,25 +27,29 @@ import swingwtx.swing.JPanel;
 public class ChartsComponent extends JPanel {
 	
 	/** Background color for charts.                 */
-	private static final Color  CHART_BACKGROUND_COLOR   = Color.BLACK;
+	private static final Color  CHART_BACKGROUND_COLOR         = Color.BLACK;
+	/** Color to use for axis lines and axis titles. */
+	private static final Color  CHART_AXIS_COLOR               = Color.YELLOW;
+	/** Color to use for the chart curve.            */
+	private static final Color  CHART_COLOR                    = Color.WHITE;
 	/** Color to use for axis and info texts.        */
-	private static final Color  CHART_INFO_COLOR         = Color.YELLOW;
-	/** Color to use for axis and info texts.        */
-	private static final Color  CHART_COLOR              = Color.WHITE;
-	/** Color to use for axis and info texts.        */
-	private static final Color  CHART_ASSIST_LINES_COLOR = new Color( 80, 80, 80 );
+	private static final Color  CHART_ASSIST_LINES_COLOR       = new Color( 80, 80, 80 );
+	/** Color to use for axis labels.                */
+	private static final Color  CHART_AXIS_LABEL_COLOR         = new Color( 0, 255, 255 );
+	/** Color to use for player descriptions.        */
+	private static final Color  CHART_PLAYER_DESCRIPTION_COLOR = Color.GREEN;
 	/** Color to use for indicating hacks.           */
-	private static final Color  CHART_HACK_COLOR         = Color.RED;
-	/** Font to use to draw main texts in the chart. */
-	private static final Font   CHART_MAIN_FONT          = new Font( "Courier New", Font.BOLD , 10 );
-	/** Font to use to draw info texts in the chart. */
-	private static final Font   CHART_INFO_FONT          = new Font( "Courier New", Font.PLAIN, 8  );
+	private static final Color  CHART_HACK_COLOR               = Color.RED;
+	/** Font to use to draw descriptions and titles. */
+	private static final Font   CHART_MAIN_FONT                = new Font( "Times", Font.BOLD , 10 );
+	/** Font to use to draw axis labels.             */
+	private static final Font   CHART_AXIS_LABEL_FONT          = new Font( "Courier New", Font.PLAIN, 8  );
 	/** Stroke to be used to draw charts.            */
-	private static final Stroke CHART_STROKE             = new BasicStroke( 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND );
+	private static final Stroke CHART_STROKE                   = new BasicStroke( 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND );
 	/** Stroke to be used to draw everything else.   */
-	private static final Stroke CHART_REST_STROKE        = new BasicStroke( 1.0f );
+	private static final Stroke CHART_REST_STROKE              = new BasicStroke( 1.0f );
 	/** Number of assist lines to be painted in each chart. */
-	private final int           ASSIST_LINES_COUNT       = 5;
+	private final int           ASSIST_LINES_COUNT             = 5;
 	
 	/** Chart granularity in pixels. */
 	private static final int CHART_GRANULARITY = 10;
@@ -149,15 +153,16 @@ public class ChartsComponent extends JPanel {
 			xPoints[ pointIndex ] = x;
 		
 		graphics.setFont( CHART_MAIN_FONT );
-		graphics.setColor( CHART_INFO_COLOR );
+		graphics.setColor( CHART_AXIS_COLOR );
 		graphics.drawString( "APM", 1, 0 );
 		
-		graphics.setFont( CHART_INFO_FONT );
+		graphics.setFont( CHART_AXIS_LABEL_FONT );
 		
 		for ( int i = 0; i < playerIndicesToShow.length; i++ ) {
 			final PlayerActions playerActions = replay.replayActions.players[ playerIndicesToShow[ i ] ];
 			
-			graphics.setColor( CHART_INFO_COLOR );
+			// Draw the axis
+			graphics.setColor( CHART_AXIS_COLOR );
 			final int y1 = ( chartHeight + AXIS_SPACE_Y ) * i + AXIS_SPACE_Y;
 			graphics.drawLine( x1, y1, x1, y1 + chartHeight );
 			graphics.drawLine( x1, y1 + maxYInChart, x1 + maxXInChart, y1 + maxYInChart );
@@ -184,11 +189,13 @@ public class ChartsComponent extends JPanel {
 			else
 				Arrays.fill( yPoints, y1 + maxY ); // No actions, we cannot divide by zero, just fill with maxY
 			
+			// Draw APM axis labels
+			graphics.setFont( CHART_AXIS_LABEL_FONT );
 			final int maxApm = maxActions * ( chartPoints - 1 ) * 60 / ReplayHeader.convertFramesToSeconds( frames );
 			for ( int j = 0; j <= ASSIST_LINES_COUNT; j++ ) {
 				final int y   = y1 + maxYInChart - ( maxYInChart * j / ASSIST_LINES_COUNT );
 				final int apm = maxApm * j / ASSIST_LINES_COUNT;
-				graphics.setColor( CHART_INFO_COLOR );
+				graphics.setColor( CHART_AXIS_LABEL_COLOR );
 				graphics.drawString( ( apm < 100 ? ( apm < 10 ? "  " : " " ) : "" ) + apm, 1, y - 7 );
 				if ( j > 0 ) {
 					graphics.setColor( CHART_ASSIST_LINES_COLOR );
@@ -202,6 +209,11 @@ public class ChartsComponent extends JPanel {
 			( (Graphics2D) graphics ).setStroke( CHART_STROKE );
 			graphics.drawPolyline( xPoints, yPoints, xPoints.length - 1 ); // Last point is excluded, it might not be a whole domain
 			( (Graphics2D) graphics ).setStroke( CHART_REST_STROKE );
+			
+			// Draw player's name and description
+			graphics.setFont( CHART_MAIN_FONT );
+			graphics.setColor( CHART_PLAYER_DESCRIPTION_COLOR );
+			graphics.drawString( replay.replayHeader.getPlayerDescription( replay.replayActions.players[ playerIndicesToShow[ i ] ].playerName ), AXIS_SPACE_X + 15, y1 - 14 );
 		}
 	}
 	
