@@ -42,4 +42,4 @@
 
 ----
 ====0.99 2008-12-28====
-The first, initial release.
+The first public release.
