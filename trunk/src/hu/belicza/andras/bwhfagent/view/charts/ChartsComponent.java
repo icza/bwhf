@@ -6,8 +6,12 @@ import hu.belicza.andras.bwhf.model.HackDescription;
 import hu.belicza.andras.bwhf.model.PlayerActions;
 import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
+import hu.belicza.andras.bwhfagent.view.ChartsTab;
+import hu.belicza.andras.bwhfagent.view.MainFrame;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 import swingwt.awt.BasicStroke;
@@ -17,6 +21,10 @@ import swingwt.awt.Font;
 import swingwt.awt.Graphics;
 import swingwt.awt.Graphics2D;
 import swingwt.awt.Stroke;
+import swingwt.awt.event.ActionEvent;
+import swingwt.awt.event.ActionListener;
+import swingwtx.swing.JCheckBox;
+import swingwtx.swing.JLabel;
 import swingwtx.swing.JPanel;
 
 /**
@@ -30,18 +38,18 @@ public class ChartsComponent extends JPanel {
 	private static final Color  CHART_BACKGROUND_COLOR         = Color.BLACK;
 	/** Color to use for axis lines and axis titles. */
 	private static final Color  CHART_AXIS_COLOR               = Color.YELLOW;
-	/** Color to use for the chart curve.            */
-	private static final Color  CHART_COLOR                    = Color.WHITE;
+	/** Default color to use for the chart curve.    */
+	private static final Color  CHART_DEFAULT_COLOR            = Color.WHITE;
 	/** Color to use for axis and info texts.        */
 	private static final Color  CHART_ASSIST_LINES_COLOR       = new Color( 80, 80, 80 );
 	/** Color to use for axis labels.                */
-	private static final Color  CHART_AXIS_LABEL_COLOR         = new Color( 0, 255, 255 );
+	private static final Color  CHART_AXIS_LABEL_COLOR         = Color.CYAN;
 	/** Color to use for player descriptions.        */
 	private static final Color  CHART_PLAYER_DESCRIPTION_COLOR = Color.GREEN;
 	/** Color to use for indicating hacks.           */
 	private static final Color  CHART_HACK_COLOR               = Color.RED;
 	/** Font to use to draw descriptions and titles. */
-	private static final Font   CHART_MAIN_FONT                = new Font( "Times", Font.BOLD , 10 );
+	private static final Font   CHART_MAIN_FONT                = new Font( "Times", Font.BOLD, 10 );
 	/** Font to use to draw axis labels.             */
 	private static final Font   CHART_AXIS_LABEL_FONT          = new Font( "Courier New", Font.PLAIN, 8  );
 	/** Stroke to be used to draw charts.            */
@@ -72,30 +80,42 @@ public class ChartsComponent extends JPanel {
 		}
 	}
 	
-	/** Type of chart to be painted.             */
-	private ChartType               chartType = ChartType.APM;
-	/** Replay whose charts to be visualized.    */
+	/** Reference to the charts tab.                                  */
+	private final ChartsTab         chartsTab;
+	/** Panel containing the chart canvas and other control elements. */
+	private final JPanel            contentPanel = new JPanel( new BorderLayout() );
+	/** Panel containing checkboxes of players.                       */
+	private final JPanel            playersPanel = new JPanel();
+	/** Replay whose charts to be visualized.                         */
 	private Replay                  replay;
-	/** List of hack descriptions of the replay. */
+	/** List of hack descriptions of the replay.                      */
 	private List< HackDescription > hackDescriptionList;
-	/** Player indices to be shown.              */
-	private int[]                   playerIndicesToShow;
+	/** List of player indices to be shown.                           */
+	private List< Integer >         playerIndexToShowList;
 	
 	/**
 	 * Creates a new ChartsComponent.
 	 */
-	public ChartsComponent() {
+	public ChartsComponent( final ChartsTab chartsTab ) {
 		super( new BorderLayout() );
+		this.chartsTab = chartsTab;
+		
+		buildConentGUI();
 	}
 	
 	/**
-	 * Sets the chart type to be painted.
-	 * @param chartType chart type to be painted
+	 * Builds the GUI of the content panel.
 	 */
-	public void setChartType( final ChartType chartType ) {
-		this.chartType = chartType;
-		
-		repaint();
+	private void buildConentGUI() {
+		contentPanel.add( playersPanel, BorderLayout.NORTH );
+		contentPanel.add( this, BorderLayout.CENTER );
+	}
+	
+	/**
+	 * Builds the panel containing the chart component and
+	 */
+	public JPanel getContentPanel() {
+		return contentPanel;
 	}
 	
 	/**
@@ -104,15 +124,52 @@ public class ChartsComponent extends JPanel {
 	 */
 	public void setReplay( final Replay replay ) {
 		this.replay = replay;
-		if ( replay != null )
+		if ( replay != null ) {
 			hackDescriptionList = ReplayScanner.scanReplayForHacks( replay.replayActions, false );
+			
+			final PlayerActions[] playerActions = replay.replayActions.players;
+			
+			// removeAll() does not work properly in SwingWT, we remove previous checkboxes manually!
+			while ( playersPanel.getComponentCount() > 1 )
+				playersPanel.remove( 1 );
+			if ( playersPanel.getComponentCount() == 0 ) // If players label has not yet been added
+				playersPanel.add( new JLabel( "Players: " ) );
+			
+			// To store player checkboxes and their index
+			final Object[][] players = new Object[ playerActions.length ][ 2 ];
+			
+			final ActionListener playerCheckBoxActionListener = new ActionListener() {
+				public void actionPerformed( final ActionEvent event ) {
+					playerIndexToShowList.clear();
+					for ( int i = 0; i < players.length; i++ )
+						if ( ( (JCheckBox) players[ i ][ 0 ] ).isSelected() )
+							playerIndexToShowList.add( (Integer) players[ i ][ 1 ] );
+					repaint();
+				}
+			};
+			for ( int i = 0; i < players.length; i++ ) {
+				players[ i ][ 0 ] = new JCheckBox( playerActions[ i ].playerName, true );
+				players[ i ][ 1 ] = i;
+				( (JCheckBox) players[ i ][ 0 ] ).addActionListener( playerCheckBoxActionListener );
+			}
+			// Order players by the number of their actions
+			Arrays.sort( players, new Comparator< Object[] >() {
+				public int compare( final Object[] o1, final Object[] o2 ) {
+					return -Integer.valueOf( playerActions[ (Integer) o1[ 1 ] ].actions.length )
+							.compareTo( playerActions[ (Integer) o2[ 1 ] ].actions.length );
+				}
+			} );
+			
+			playerIndexToShowList = new ArrayList< Integer >( players.length );
+			for ( final Object[] player : players ) {
+				playerIndexToShowList.add( (Integer) player[ 1 ] );
+				playersPanel.add( (JCheckBox) player[ 0 ] );
+			}
+		}
 		else
 			hackDescriptionList = null;
 		
-		playerIndicesToShow = new int[ replay.replayActions.players.length ];
-		for ( int i = 0; i < playerIndicesToShow.length; i++ )
-			playerIndicesToShow[ i ] = i;
-		
+		MainFrame.getInstance().pack();
 		repaint();
 	}
 	
@@ -121,8 +178,8 @@ public class ChartsComponent extends JPanel {
 		( (Graphics2D) graphics ).setBackground( CHART_BACKGROUND_COLOR );
 		graphics.clearRect( 0, 0, getWidth(), getHeight() );
 		
-		if ( replay != null )
-			switch ( chartType ) {
+		if ( replay != null && playerIndexToShowList.size() > 0 )
+			switch ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() ) {
 				case APM :
 					paintApmCharts( graphics );
 					break;
@@ -136,8 +193,8 @@ public class ChartsComponent extends JPanel {
 		final int AXIS_SPACE_X = 23;
 		final int AXIS_SPACE_Y = 20;
 		
-		final int chartWidth  = getWidth () - AXIS_SPACE_X;
-		final int chartHeight = ( getHeight() - AXIS_SPACE_Y ) / playerIndicesToShow.length - AXIS_SPACE_Y;
+		final int chartWidth  = getWidth() - AXIS_SPACE_X;
+		final int chartHeight = ( getHeight() - AXIS_SPACE_Y ) / playerIndexToShowList.size() - AXIS_SPACE_Y;
 		final int x1          = AXIS_SPACE_X;
 		final int maxXInChart = chartWidth  - 1;
 		final int maxYInChart = chartHeight - 1;
@@ -158,8 +215,8 @@ public class ChartsComponent extends JPanel {
 		
 		graphics.setFont( CHART_AXIS_LABEL_FONT );
 		
-		for ( int i = 0; i < playerIndicesToShow.length; i++ ) {
-			final PlayerActions playerActions = replay.replayActions.players[ playerIndicesToShow[ i ] ];
+		for ( int i = 0; i < playerIndexToShowList.size(); i++ ) {
+			final PlayerActions playerActions = replay.replayActions.players[ playerIndexToShowList.get( i ) ];
 			
 			// Draw the axis
 			graphics.setColor( CHART_AXIS_COLOR );
@@ -205,7 +262,7 @@ public class ChartsComponent extends JPanel {
 			
 			// Chart should not start from zero, we "double" the first point:
 			yPoints[ 0 ] = yPoints[ 1 ];
-			graphics.setColor( CHART_COLOR );
+			graphics.setColor( CHART_DEFAULT_COLOR );
 			( (Graphics2D) graphics ).setStroke( CHART_STROKE );
 			graphics.drawPolyline( xPoints, yPoints, xPoints.length - 1 ); // Last point is excluded, it might not be a whole domain
 			( (Graphics2D) graphics ).setStroke( CHART_REST_STROKE );
@@ -213,7 +270,7 @@ public class ChartsComponent extends JPanel {
 			// Draw player's name and description
 			graphics.setFont( CHART_MAIN_FONT );
 			graphics.setColor( CHART_PLAYER_DESCRIPTION_COLOR );
-			graphics.drawString( replay.replayHeader.getPlayerDescription( replay.replayActions.players[ playerIndicesToShow[ i ] ].playerName ), AXIS_SPACE_X + 15, y1 - 14 );
+			graphics.drawString( replay.replayHeader.getPlayerDescription( replay.replayActions.players[ playerIndexToShowList.get( i ) ].playerName ), AXIS_SPACE_X + 15, y1 - 14 );
 		}
 	}
 	

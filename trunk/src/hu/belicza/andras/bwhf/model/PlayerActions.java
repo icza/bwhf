@@ -18,8 +18,8 @@ public class PlayerActions {
 	 * @param actions    actions of the player
 	 */
 	public PlayerActions( final String playerName, final Action[] actions ) {
-		this.playerName    = playerName;
-		this.actions = actions;
+		this.playerName = playerName;
+		this.actions    = actions;
 	}
 	
 }

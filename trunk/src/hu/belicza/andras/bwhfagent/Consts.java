@@ -97,6 +97,10 @@ public class Consts {
 	public static final String PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS = "skipLatterActionsOfHackers";
 	/** Sound volume property.                   */
 	public static final String PROPERTY_SOUND_VOLUME                   = "soundVolume";
+	/** Chart type property.                     */
+	public static final String PROPERTY_CHART_TYPE                     = "chartType";
+	/** Use players' in-game colors property.    */
+	public static final String PROPERTY_USE_PLAYERS_IN_GAME_COLOR      = "usePlayersInGameColor";
 	
 	/** Properties holding the default settings. */
 	public static final Properties DEFAULT_SETTINGS_PROPERTIES = new Properties();
@@ -123,6 +127,8 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHECK_UPDATES_ON_STARTUP      , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SOUND_VOLUME                  , "60" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHART_TYPE                    , "0" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_USE_PLAYERS_IN_GAME_COLOR     , "true" );
 	}
 	
 }

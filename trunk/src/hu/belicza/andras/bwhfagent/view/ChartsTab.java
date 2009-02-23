@@ -10,6 +10,8 @@ import java.io.File;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.JButton;
+import swingwtx.swing.JCheckBox;
+import swingwtx.swing.JComboBox;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JPanel;
@@ -28,13 +30,21 @@ public class ChartsTab extends Tab {
 	/** Label to display the loaded replay.                */
 	private final JLabel    loadedReplayLabel    = new JLabel();
 	
-	/** The component visualising the charts. */
-	private final ChartsComponent chartsComponent = new ChartsComponent();
+	/** Combobox to select the chart type.                                  */
+	public final JComboBox chartTypeComboBox        = new JComboBox( ChartsComponent.ChartType.values() );
+	/** Checkbox to enable/disable using players' in-game color for charts. */
+	public final JCheckBox usePlayersColorsCheckBox = new JCheckBox( "Use players' in-game color for charts", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLOR ) ) );
+	
+	
+	/** The component visualizing the charts. */
+	private final ChartsComponent chartsComponent = new ChartsComponent( this );
 	
 	public ChartsTab() {
 		super( "Charts" );
 		
 		buildGUI();
+		
+		chartTypeComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHART_TYPE ) ) );
 	}
 	
 	/**
@@ -68,9 +78,22 @@ public class ChartsTab extends Tab {
 		panel.add( selectFileButton );
 		contentBox.add( panel );
 		
+		final JPanel chartsControlPanel = new JPanel();
+		chartsControlPanel.add( new JLabel( "Chart type:" ) );
+		final ActionListener chartRepainterActionListener = new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				chartsComponent.repaint();
+			}
+		};
+		chartTypeComboBox.addActionListener( chartRepainterActionListener );
+		chartsControlPanel.add( chartTypeComboBox );
+		usePlayersColorsCheckBox.addActionListener( chartRepainterActionListener );
+		chartsControlPanel.add( usePlayersColorsCheckBox );
+		contentBox.add( chartsControlPanel );
+		
 		contentBox.add( loadedReplayLabel );
 		
-		contentBox.add( chartsComponent );
+		contentBox.add( chartsComponent.getContentPanel() );
 	}
 	
 	private void setReplayFile( final File file ) {
@@ -86,6 +109,8 @@ public class ChartsTab extends Tab {
 	
 	@Override
 	public void assignUsedProperties() {
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLOR, Boolean.toString( usePlayersColorsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_CHART_TYPE               , Integer.toString( chartTypeComboBox.getSelectedIndex() ) );
 	}
 	
 }
