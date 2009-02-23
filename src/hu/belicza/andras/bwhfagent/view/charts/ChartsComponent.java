@@ -61,6 +61,8 @@ public class ChartsComponent extends JPanel {
 	private static final Stroke CHART_REST_STROKE              = new BasicStroke( 1.0f );
 	/** Number of assist lines to be painted in each chart. */
 	private final int           ASSIST_LINES_COUNT             = 5;
+	/** Number of time lables to be painted in each chart.  */
+	private final int           TIME_LABELS_COUNT              = 5;
 	
 	/**
 	 * The supported types of charts.
@@ -225,7 +227,7 @@ public class ChartsComponent extends JPanel {
 			return;
 		
 		final int AXIS_SPACE_X = 23;
-		final int AXIS_SPACE_Y = 20;
+		final int AXIS_SPACE_Y = 23;
 		
 		final int chartWidth  = getWidth() - AXIS_SPACE_X;
 		final int chartHeight = ( getHeight() - AXIS_SPACE_Y ) / playerIndexToShowList.size() - AXIS_SPACE_Y;
@@ -294,6 +296,16 @@ public class ChartsComponent extends JPanel {
 				}
 			}
 			
+			// Draw time axis labels
+			graphics.setColor( CHART_AXIS_LABEL_COLOR );
+			for ( int j = 0; j <= TIME_LABELS_COUNT; j++ ) {
+				final StringBuilder timeBuilder = new StringBuilder();
+				ReplayHeader.formatFrames( frames * j / TIME_LABELS_COUNT, timeBuilder );
+				final int x = x1 + ( maxXInChart * j / TIME_LABELS_COUNT )
+								- ( j == 0 ? 0 : ( j == TIME_LABELS_COUNT ? timeBuilder.length() * 7 : timeBuilder.length() * 7 / 2 ) );
+				graphics.drawString( timeBuilder.toString(), x, y1 + maxYInChart + 1 );
+			}
+			
 			// Chart should not start from zero, we "double" the first point:
 			yPoints[ 0 ] = yPoints[ 1 ];
 			graphics.setColor( CHART_DEFAULT_COLOR );
@@ -304,7 +316,7 @@ public class ChartsComponent extends JPanel {
 			// Draw player's name and description
 			graphics.setFont( CHART_MAIN_FONT );
 			graphics.setColor( CHART_PLAYER_DESCRIPTION_COLOR );
-			graphics.drawString( replay.replayHeader.getPlayerDescription( replay.replayActions.players[ playerIndexToShowList.get( i ) ].playerName ), AXIS_SPACE_X + 15, y1 - 14 );
+			graphics.drawString( replay.replayHeader.getPlayerDescription( replay.replayActions.players[ playerIndexToShowList.get( i ) ].playerName ), AXIS_SPACE_X + 15, y1 - 12 );
 		}
 	}
 	
