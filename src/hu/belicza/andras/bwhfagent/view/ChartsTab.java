@@ -4,6 +4,7 @@ import hu.belicza.andras.bwhf.control.BinRepParser;
 import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.bwhfagent.view.charts.ChartsComponent;
+import hu.belicza.andras.bwhfagent.view.charts.ChartsComponent.ChartType;
 
 import java.io.File;
 
@@ -28,7 +29,7 @@ public class ChartsTab extends Tab {
 	/** Button to select files to extract game chat.       */
 	private final JButton   selectFileButton     = new JButton( "Select file to open" );
 	/** Label to display the loaded replay.                */
-	private final JLabel    loadedReplayLabel    = new JLabel();
+	private final JLabel    loadedReplayLabel    = new JLabel( "No replays loaded." );
 	
 	/** Combobox to select the chart type.                                  */
 	public final JComboBox chartTypeComboBox        = new JComboBox( ChartsComponent.ChartType.values() );
@@ -45,6 +46,7 @@ public class ChartsTab extends Tab {
 		buildGUI();
 		
 		chartTypeComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHART_TYPE ) ) );
+		chartsComponent.setChartType( (ChartType) chartTypeComboBox.getSelectedItem() );
 	}
 	
 	/**
@@ -80,18 +82,21 @@ public class ChartsTab extends Tab {
 		
 		final JPanel chartsControlPanel = new JPanel();
 		chartsControlPanel.add( new JLabel( "Chart type:" ) );
-		final ActionListener chartRepainterActionListener = new ActionListener() {
+		chartTypeComboBox.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				chartsComponent.setChartType( (ChartType) chartTypeComboBox.getSelectedItem() );
+			}
+		} );
+		chartsControlPanel.add( chartTypeComboBox );
+		usePlayersColorsCheckBox.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				chartsComponent.repaint();
 			}
-		};
-		chartTypeComboBox.addActionListener( chartRepainterActionListener );
-		chartsControlPanel.add( chartTypeComboBox );
-		usePlayersColorsCheckBox.addActionListener( chartRepainterActionListener );
+		} );
 		chartsControlPanel.add( usePlayersColorsCheckBox );
 		contentBox.add( chartsControlPanel );
 		
-		contentBox.add( loadedReplayLabel );
+		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
 		
 		contentBox.add( chartsComponent.getContentPanel() );
 	}
@@ -109,8 +114,10 @@ public class ChartsTab extends Tab {
 	
 	@Override
 	public void assignUsedProperties() {
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLOR, Boolean.toString( usePlayersColorsCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_CHART_TYPE               , Integer.toString( chartTypeComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLOR, Boolean.toString( usePlayersColorsCheckBox.isSelected() ) );
+		
+		chartsComponent.assignUsedProperties();
 	}
 	
 }
