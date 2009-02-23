@@ -139,12 +139,24 @@ public class ReplayHeader {
 	 * @return the description of the player
 	 */
 	public String getPlayerDescription( final String playerName ) {
+		final int playerIndex = getPlayerIndexByName( playerName );
+		if ( playerIndex < 0 )
+			return null;
+		
+		final Integer apm = playerIdActionsCounts[ playerIds[ playerIndex ] ] * 60 / getDurationSeconds();
+		return playerNames[ playerIndex ] + " (" + RACE_CHARACTERS[ playerRaces[ playerIndex ] ] + "), actions: " + playerIdActionsCounts[ playerIds[ playerIndex ] ] + ", APM: " + apm;
+	}
+	
+	/**
+	 * Returns the index of a player specified by his/her name.
+	 * @param playerName name of player to be searched
+	 * @return the index of a player specified by his/her name; or -1 if player name not found
+	 */
+	public int getPlayerIndexByName( final String playerName ) {
 		for ( int i = 0; i < playerNames.length; i++ )
-			if ( playerNames[ i ] != null && playerNames[ i ].equals( playerName ) ) {
-				final Integer apm = playerIdActionsCounts[ playerIds[ i ] ] * 60 / getDurationSeconds();
-				return playerNames[ i ] + " (" + RACE_CHARACTERS[ playerRaces[ i ] ] + "), actions: " + playerIdActionsCounts[ playerIds[ i ] ] + ", APM: " + apm;
-			}
-		return null;
+			if ( playerNames[ i ] != null && playerNames[ i ].equals( playerName ) )
+				return i;
+		return -1;
 	}
 	
 	/**
