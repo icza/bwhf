@@ -101,6 +101,8 @@ public class Consts {
 	public static final String PROPERTY_CHART_TYPE                     = "chartType";
 	/** Use players' in-game colors property.    */
 	public static final String PROPERTY_USE_PLAYERS_IN_GAME_COLOR      = "usePlayersInGameColor";
+	/** APM chart detail level property.         */
+	public static final String PROPERTY_APM_CHART_DETAIL_LEVEL         = "apmChartDetailLevel";
 	
 	/** Properties holding the default settings. */
 	public static final Properties DEFAULT_SETTINGS_PROPERTIES = new Properties();
@@ -129,6 +131,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SOUND_VOLUME                  , "60" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHART_TYPE                    , "0" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_USE_PLAYERS_IN_GAME_COLOR     , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_APM_CHART_DETAIL_LEVEL        , "4" );
 	}
 	
 }

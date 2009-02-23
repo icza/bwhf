@@ -6,8 +6,10 @@ import hu.belicza.andras.bwhf.model.HackDescription;
 import hu.belicza.andras.bwhf.model.PlayerActions;
 import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
+import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.bwhfagent.view.ChartsTab;
 import hu.belicza.andras.bwhfagent.view.MainFrame;
+import hu.belicza.andras.bwhfagent.view.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -24,6 +26,7 @@ import swingwt.awt.Stroke;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.JCheckBox;
+import swingwtx.swing.JComboBox;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JPanel;
 
@@ -59,9 +62,6 @@ public class ChartsComponent extends JPanel {
 	/** Number of assist lines to be painted in each chart. */
 	private final int           ASSIST_LINES_COUNT             = 5;
 	
-	/** Chart granularity in pixels. */
-	private static final int CHART_GRANULARITY = 10;
-	
 	/**
 	 * The supported types of charts.
 	 * @author Andras Belicza
@@ -83,15 +83,20 @@ public class ChartsComponent extends JPanel {
 	/** Reference to the charts tab.                                  */
 	private final ChartsTab         chartsTab;
 	/** Panel containing the chart canvas and other control elements. */
-	private final JPanel            contentPanel = new JPanel( new BorderLayout() );
+	private final JPanel            contentPanel      = new JPanel( new BorderLayout() );
+	/** Panel containing options of the selected chart type.          */
+	private final JPanel            chartOptionsPanel = new JPanel();
 	/** Panel containing checkboxes of players.                       */
-	private final JPanel            playersPanel = new JPanel();
+	private final JPanel            playersPanel      = new JPanel();
 	/** Replay whose charts to be visualized.                         */
 	private Replay                  replay;
 	/** List of hack descriptions of the replay.                      */
 	private List< HackDescription > hackDescriptionList;
 	/** List of player indices to be shown.                           */
 	private List< Integer >         playerIndexToShowList;
+	
+	/** APM chart detail level in pixels combo box. */
+	private final JComboBox apmChartDetailLevelComboBox = new JComboBox( new Object[] { 1, 2, 3, 4, 5, 10, 15, 20, 50 } );
 	
 	/**
 	 * Creates a new ChartsComponent.
@@ -101,14 +106,26 @@ public class ChartsComponent extends JPanel {
 		this.chartsTab = chartsTab;
 		
 		buildConentGUI();
+		
+		apmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL ) ) );
 	}
 	
 	/**
 	 * Builds the GUI of the content panel.
 	 */
 	private void buildConentGUI() {
-		contentPanel.add( playersPanel, BorderLayout.NORTH );
+		final JPanel controlPanel = new JPanel( new BorderLayout() );
+		controlPanel.add( chartOptionsPanel, BorderLayout.NORTH );
+		controlPanel.add( playersPanel, BorderLayout.CENTER );
+		contentPanel.add( controlPanel, BorderLayout.NORTH );
+		
 		contentPanel.add( this, BorderLayout.CENTER );
+		
+		apmChartDetailLevelComboBox.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				repaint();
+			}
+		} );
 	}
 	
 	/**
@@ -116,6 +133,22 @@ public class ChartsComponent extends JPanel {
 	 */
 	public JPanel getContentPanel() {
 		return contentPanel;
+	}
+	
+	public void setChartType( final ChartType chartType ) {
+		// removeAll() does not work properly in SwingWT, we remove components manually!
+		while ( chartOptionsPanel.getComponentCount() > 0 )
+			chartOptionsPanel.remove( chartOptionsPanel.getComponentCount() - 1 );
+		
+		switch ( chartType ) {
+			case APM :
+				chartOptionsPanel.add( new JLabel( "Detail level: " ) );
+				chartOptionsPanel.add( apmChartDetailLevelComboBox );
+				chartOptionsPanel.add( new JLabel( " pixels." ) );
+				break;
+		}
+		
+		repaint();
 	}
 	
 	/**
@@ -133,7 +166,7 @@ public class ChartsComponent extends JPanel {
 			while ( playersPanel.getComponentCount() > 1 )
 				playersPanel.remove( 1 );
 			if ( playersPanel.getComponentCount() == 0 ) // If players label has not yet been added
-				playersPanel.add( new JLabel( "Players: " ) );
+				;playersPanel.add( new JLabel( "Players: " ) );
 			
 			// To store player checkboxes and their index
 			final Object[][] players = new Object[ playerActions.length ][ 2 ];
@@ -187,7 +220,8 @@ public class ChartsComponent extends JPanel {
 	}
 	
 	private void paintApmCharts( final Graphics graphics ) {
-		if ( getWidth() < CHART_GRANULARITY )
+		final int chartGranularity = (Integer) apmChartDetailLevelComboBox.getSelectedItem();
+		if ( getWidth() < chartGranularity )
 			return;
 		
 		final int AXIS_SPACE_X = 23;
@@ -199,14 +233,14 @@ public class ChartsComponent extends JPanel {
 		final int maxXInChart = chartWidth  - 1;
 		final int maxYInChart = chartHeight - 1;
 		
-		final int chartPoints       = maxXInChart / CHART_GRANULARITY + 1;
+		final int chartPoints       = maxXInChart / chartGranularity + 1;
 		final int frames            = replay.replayHeader.gameFrames;
 		final int framesGranularity = frames / chartPoints;
 		
 		final int[] xPoints = new int[ chartPoints + 1 ];
 		final int[] yPoints = new int[ chartPoints + 1 ];
 		int pointIndex = 0;
-		for ( int x = x1; pointIndex < xPoints.length ; pointIndex++, x+= CHART_GRANULARITY )
+		for ( int x = x1; pointIndex < xPoints.length ; pointIndex++, x+= chartGranularity )
 			xPoints[ pointIndex ] = x;
 		
 		graphics.setFont( CHART_MAIN_FONT );
@@ -272,6 +306,10 @@ public class ChartsComponent extends JPanel {
 			graphics.setColor( CHART_PLAYER_DESCRIPTION_COLOR );
 			graphics.drawString( replay.replayHeader.getPlayerDescription( replay.replayActions.players[ playerIndexToShowList.get( i ) ].playerName ), AXIS_SPACE_X + 15, y1 - 14 );
 		}
+	}
+	
+	public void assignUsedProperties() {
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL, Integer.toString( apmChartDetailLevelComboBox.getSelectedIndex() ) );
 	}
 	
 }
