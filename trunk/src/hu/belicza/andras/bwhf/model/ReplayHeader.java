@@ -25,6 +25,11 @@ public class ReplayHeader {
 	
 	public static final char[] RACE_CHARACTERS = { 'Z', 'T', 'P' };
 	
+	public static final String[] IN_GAME_COLOR_NAMES = {
+		"red", "blue", "teal", "purple", "orange", "brown", "white", "yellow",
+		"green", "pale yellow", "tan", "aqua", "pale green", "blueish gray", "pale yellow", "cyan"
+	};
+	
 	// Header fields
 	
 	public byte     gameEngine;
@@ -174,13 +179,20 @@ public class ReplayHeader {
 		output.println( "Players: " );
 		
 		final int seconds = getDurationSeconds();
-		// We want to sort players by their APM
+		// We want to sort players by the number of their actions (which is basically sorting by APM)
 		final List< Object[] > playerDescriptionList = new ArrayList< Object[] >( 12 );
 		for ( int i = 0; i < playerNames.length; i++ )
 			if ( playerNames[ i ] != null ) {
-				final Integer apm               = playerIdActionsCounts[ playerIds[ i ] ] * 60 / seconds;
-				final String  playerDescription = "    " + playerNames[ i ] + " (" + RACE_CHARACTERS[ playerRaces[ i ] ] + ") APM: " + apm;
-				playerDescriptionList.add( new Object[] { apm, playerDescription } );
+				final Integer apm = playerIdActionsCounts[ playerIds[ i ] ] * 60 / seconds;
+				String colorName;
+				try {
+					colorName = IN_GAME_COLOR_NAMES[ playerColors[ i ] ];
+				}
+				catch ( final Exception e ) {
+					colorName = "<unknown>";
+				}
+				final String  playerDescription = "    " + playerNames[ i ] + " (" + RACE_CHARACTERS[ playerRaces[ i ] ] + "), color: " + colorName + ", actions: " + playerIdActionsCounts[ playerIds[ i ] ] + ", APM: " + apm;
+				playerDescriptionList.add( new Object[] { playerIdActionsCounts[ playerIds[ i ] ], playerDescription } );
 			}
 		
 		Collections.sort( playerDescriptionList, new Comparator< Object[] >() {
