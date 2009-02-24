@@ -102,7 +102,7 @@ public class Consts {
 	/** All players on one chart property.       */
 	public static final String PROPERTY_ALL_PLAYERS_ON_ONE_CHART       = "allPlayersOnOneChart";
 	/** Use players' in-game colors property.    */
-	public static final String PROPERTY_USE_PLAYERS_IN_GAME_COLOR      = "usePlayersInGameColor";
+	public static final String PROPERTY_USE_PLAYERS_IN_GAME_COLORS     = "usePlayersInGameColors";
 	/** APM chart detail level property.         */
 	public static final String PROPERTY_APM_CHART_DETAIL_LEVEL         = "apmChartDetailLevel";
 	
@@ -133,7 +133,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SOUND_VOLUME                  , "60" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHART_TYPE                    , "0" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_PLAYERS_ON_ONE_CHART      , "false" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_USE_PLAYERS_IN_GAME_COLOR     , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_USE_PLAYERS_IN_GAME_COLORS    , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_APM_CHART_DETAIL_LEVEL        , "4" );
 	}
 	

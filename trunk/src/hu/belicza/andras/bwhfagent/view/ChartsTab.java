@@ -33,12 +33,12 @@ public class ChartsTab extends Tab {
 	/** Label to display the loaded replay.                */
 	private final JLabel    loadedReplayLabel    = new JLabel( "No replays loaded." );
 	
-	/** Combobox to select the chart type.                                  */
+	/** Combobox to select the chart type.                                   */
 	public final JComboBox chartTypeComboBox            = new JComboBox( ChartsComponent.ChartType.values() );
-	/** Checkbox to enable/disable putting all players on one chart.        */
+	/** Checkbox to enable/disable putting all players on one chart.         */
 	public final JCheckBox allPlayersOnOneChartCheckBox = new JCheckBox( "All players on one chart", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_PLAYERS_ON_ONE_CHART ) ) );
-	/** Checkbox to enable/disable using players' in-game color for charts. */
-	public final JCheckBox usePlayersColorsCheckBox     = new JCheckBox( "Use players' in-game color for charts", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLOR ) ) );
+	/** Checkbox to enable/disable using players' in-game colors for charts. */
+	public final JCheckBox usePlayersColorsCheckBox     = new JCheckBox( "Use players' in-game colors for charts", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLORS ) ) );
 	
 	
 	/** The component visualizing the charts. */
@@ -126,9 +126,9 @@ public class ChartsTab extends Tab {
 	
 	@Override
 	public void assignUsedProperties() {
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_CHART_TYPE               , Integer.toString( chartTypeComboBox.getSelectedIndex() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_ALL_PLAYERS_ON_ONE_CHART , Boolean.toString( allPlayersOnOneChartCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLOR, Boolean.toString( usePlayersColorsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_CHART_TYPE                , Integer.toString( chartTypeComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_ALL_PLAYERS_ON_ONE_CHART  , Boolean.toString( allPlayersOnOneChartCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLORS, Boolean.toString( usePlayersColorsCheckBox.isSelected() ) );
 		
 		chartsComponent.assignUsedProperties();
 	}
