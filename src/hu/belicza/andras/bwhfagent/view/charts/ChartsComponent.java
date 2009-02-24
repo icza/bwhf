@@ -22,6 +22,7 @@ import swingwt.awt.Color;
 import swingwt.awt.Font;
 import swingwt.awt.Graphics;
 import swingwt.awt.Graphics2D;
+import swingwt.awt.RenderingHints;
 import swingwt.awt.Stroke;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
@@ -29,6 +30,8 @@ import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JPanel;
+import swingwtx.swing.event.ChangeEvent;
+import swingwtx.swing.event.ChangeListener;
 
 /**
  * Component to visialize charts.
@@ -36,6 +39,12 @@ import swingwtx.swing.JPanel;
  * @author Andras Belicza
  */
 public class ChartsComponent extends JPanel {
+	
+	/** Value of in-game colors. */
+	private static final Color[] IN_GAME_COLORS = new Color[] {
+		new Color( 244,   4, 4 ), new Color(  12,  72, 204 ), new Color(  44, 180, 148 ), new Color( 136,  64, 156 ), new Color( 248, 140,  20 ), new Color( 112,  48,  20 ), new Color( 204, 224, 208 ), new Color( 252, 252,  56 ),
+		new Color(   8, 128, 8 ), new Color( 252, 252, 124 ), new Color( 236, 196, 176 ), new Color(  64, 104, 212 ), new Color( 116, 164, 124 ), new Color( 144, 144, 184 ), new Color( 252, 252, 124 ), new Color(   0, 228, 252 )
+	};
 	
 	/** Background color for charts.                 */
 	private static final Color  CHART_BACKGROUND_COLOR         = Color.BLACK;
@@ -123,8 +132,8 @@ public class ChartsComponent extends JPanel {
 		
 		contentPanel.add( this, BorderLayout.CENTER );
 		
-		apmChartDetailLevelComboBox.addActionListener( new ActionListener() {
-			public void actionPerformed( final ActionEvent event ) {
+		apmChartDetailLevelComboBox.addChangeListener( new ChangeListener() {
+			public void stateChanged( final ChangeEvent event ) {
 				repaint();
 			}
 		} );
@@ -229,15 +238,15 @@ public class ChartsComponent extends JPanel {
 		final int AXIS_SPACE_X = 23;
 		final int AXIS_SPACE_Y = 23;
 		
+		final int chartsCount = chartsTab.allPlayersOnOneChartCheckBox.isSelected() ? 1 : playerIndexToShowList.size();
 		final int chartWidth  = getWidth() - AXIS_SPACE_X;
-		final int chartHeight = ( getHeight() - AXIS_SPACE_Y ) / playerIndexToShowList.size() - AXIS_SPACE_Y;
+		final int chartHeight = ( getHeight() - AXIS_SPACE_Y ) / chartsCount - AXIS_SPACE_Y;
 		final int x1          = AXIS_SPACE_X;
 		final int maxXInChart = chartWidth  - 1;
 		final int maxYInChart = chartHeight - 1;
 		
 		final int chartPoints       = maxXInChart / chartGranularity + 1;
 		final int frames            = replay.replayHeader.gameFrames;
-		final int framesGranularity = frames / chartPoints;
 		
 		final int[] xPoints = new int[ chartPoints + 1 ];
 		final int[] yPoints = new int[ chartPoints + 1 ];
@@ -254,17 +263,29 @@ public class ChartsComponent extends JPanel {
 		for ( int i = 0; i < playerIndexToShowList.size(); i++ ) {
 			final PlayerActions playerActions = replay.replayActions.players[ playerIndexToShowList.get( i ) ];
 			
+			Color inGameColor = null;
+			if ( chartsTab.usePlayersColorsCheckBox.isSelected() )
+				try {
+					final int headerPlayerIndex = replay.replayHeader.getPlayerIndexByName( playerActions.playerName );
+					inGameColor = IN_GAME_COLORS[ replay.replayHeader.playerColors[ headerPlayerIndex ] ];
+				}
+				catch ( final Exception e ) {
+					e.printStackTrace();
+				}
+			
 			// Draw the axis
 			graphics.setColor( CHART_AXIS_COLOR );
-			final int y1 = ( chartHeight + AXIS_SPACE_Y ) * i + AXIS_SPACE_Y;
+			final int y1 = ( chartHeight + AXIS_SPACE_Y ) * ( chartsTab.allPlayersOnOneChartCheckBox.isSelected() ? 0 : i ) + AXIS_SPACE_Y;
 			graphics.drawLine( x1, y1, x1, y1 + chartHeight );
 			graphics.drawLine( x1, y1 + maxYInChart, x1 + maxXInChart, y1 + maxYInChart );
 			
-			Arrays.fill( yPoints, 0 );
+			if ( i > 0 ) // If this is the first iteration, yPoints contains zeros
+				Arrays.fill( yPoints, 0 );
 			
+			// Count the actions
 			for ( final Action action : playerActions.actions )
 				try {
-					yPoints[ 1 + action.iteration / framesGranularity ]++;
+					yPoints[ 1 + action.iteration * chartPoints / frames ]++;
 				} catch ( final ArrayIndexOutOfBoundsException aioobe ) {
 					// The last few actions might be over the last domain, we ignore them.
 				}
@@ -274,8 +295,8 @@ public class ChartsComponent extends JPanel {
 				if ( maxActions < actionsInDomain )
 					maxActions = actionsInDomain;
 			
-			final int maxY = maxYInChart;
 			// Normalize chart to its height
+			final int maxY = maxYInChart;
 			if ( maxActions > 0 )
 				for ( pointIndex = yPoints.length - 1; pointIndex > 0; pointIndex-- )
 					yPoints[ pointIndex ] = y1 + maxY - yPoints[ pointIndex ] * maxY / maxActions;
@@ -284,7 +305,8 @@ public class ChartsComponent extends JPanel {
 			
 			// Draw APM axis labels
 			graphics.setFont( CHART_AXIS_LABEL_FONT );
-			final int maxApm = maxActions * ( chartPoints - 1 ) * 60 / ReplayHeader.convertFramesToSeconds( frames );
+			// if no actions, let's define axis labels from zero to ASSIST_LINES_COUNT
+			final int maxApm = maxActions > 0 ? maxActions * ( chartPoints - 1 ) * 60 / ReplayHeader.convertFramesToSeconds( frames ) : ASSIST_LINES_COUNT;
 			for ( int j = 0; j <= ASSIST_LINES_COUNT; j++ ) {
 				final int y   = y1 + maxYInChart - ( maxYInChart * j / ASSIST_LINES_COUNT );
 				final int apm = maxApm * j / ASSIST_LINES_COUNT;
@@ -308,14 +330,14 @@ public class ChartsComponent extends JPanel {
 			
 			// Chart should not start from zero, we "double" the first point:
 			yPoints[ 0 ] = yPoints[ 1 ];
-			graphics.setColor( CHART_DEFAULT_COLOR );
+			graphics.setColor( inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor );
 			( (Graphics2D) graphics ).setStroke( CHART_STROKE );
 			graphics.drawPolyline( xPoints, yPoints, xPoints.length - 1 ); // Last point is excluded, it might not be a whole domain
 			( (Graphics2D) graphics ).setStroke( CHART_REST_STROKE );
 			
 			// Draw player's name and description
 			graphics.setFont( CHART_MAIN_FONT );
-			graphics.setColor( CHART_PLAYER_DESCRIPTION_COLOR );
+			graphics.setColor( inGameColor == null ? CHART_PLAYER_DESCRIPTION_COLOR : inGameColor );
 			graphics.drawString( replay.replayHeader.getPlayerDescription( replay.replayActions.players[ playerIndexToShowList.get( i ) ].playerName ), AXIS_SPACE_X + 15, y1 - 12 );
 		}
 	}

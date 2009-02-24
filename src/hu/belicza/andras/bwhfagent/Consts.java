@@ -99,6 +99,8 @@ public class Consts {
 	public static final String PROPERTY_SOUND_VOLUME                   = "soundVolume";
 	/** Chart type property.                     */
 	public static final String PROPERTY_CHART_TYPE                     = "chartType";
+	/** All players on one chart property.       */
+	public static final String PROPERTY_ALL_PLAYERS_ON_ONE_CHART       = "allPlayersOnOneChart";
 	/** Use players' in-game colors property.    */
 	public static final String PROPERTY_USE_PLAYERS_IN_GAME_COLOR      = "usePlayersInGameColor";
 	/** APM chart detail level property.         */
@@ -130,6 +132,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SOUND_VOLUME                  , "60" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHART_TYPE                    , "0" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_PLAYERS_ON_ONE_CHART      , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_USE_PLAYERS_IN_GAME_COLOR     , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_APM_CHART_DETAIL_LEVEL        , "4" );
 	}
