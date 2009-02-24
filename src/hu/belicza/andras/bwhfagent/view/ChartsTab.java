@@ -8,6 +8,7 @@ import hu.belicza.andras.bwhfagent.view.charts.ChartsComponent.ChartType;
 
 import java.io.File;
 
+import swingwt.awt.Color;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.JButton;
@@ -116,10 +117,14 @@ public class ChartsTab extends Tab {
 	private void setReplayFile( final File file ) {
 		final Replay replay = BinRepParser.parseReplay( file, false );
 		
-		if ( replay == null )
+		if ( replay == null ) {
 			loadedReplayLabel.setText( "Failed to load " + file.getAbsolutePath() + "!" );
-		else
+			loadedReplayLabel.setForeground( Color.RED );
+		}
+		else {
 			loadedReplayLabel.setText( "Loaded replay: " + file.getAbsolutePath() );
+			loadedReplayLabel.setForeground( Color.BLACK );
+		}
 		
 		chartsComponent.setReplay( replay );
 	}

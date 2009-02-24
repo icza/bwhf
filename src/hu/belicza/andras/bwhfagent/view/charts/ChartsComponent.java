@@ -168,16 +168,18 @@ public class ChartsComponent extends JPanel {
 	 */
 	public void setReplay( final Replay replay ) {
 		this.replay = replay;
+		
+		// removeAll() does not work properly in SwingWT, we remove previous checkboxes manually!
+		while ( playersPanel.getComponentCount() > 1 )
+			playersPanel.remove( playersPanel.getComponentCount() - 1 );
+		
 		if ( replay != null ) {
 			hackDescriptionList = ReplayScanner.scanReplayForHacks( replay.replayActions, false );
 			
 			final PlayerActions[] playerActions = replay.replayActions.players;
 			
-			// removeAll() does not work properly in SwingWT, we remove previous checkboxes manually!
-			while ( playersPanel.getComponentCount() > 1 )
-				playersPanel.remove( 1 );
 			if ( playersPanel.getComponentCount() == 0 ) // If players label has not yet been added
-				;playersPanel.add( new JLabel( "Players: " ) );
+				playersPanel.add( new JLabel( "Players: " ) );
 			
 			// To store player checkboxes and their index
 			final Object[][] players = new Object[ playerActions.length ][ 2 ];
