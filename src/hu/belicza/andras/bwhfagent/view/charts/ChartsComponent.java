@@ -60,10 +60,14 @@ public class ChartsComponent extends JPanel {
 	private static final Color  CHART_PLAYER_DESCRIPTION_COLOR = Color.GREEN;
 	/** Color to use for indicating hacks.           */
 	private static final Color  CHART_HACK_COLOR               = Color.RED;
+	/** 2nd color to use for indicating hacks.       */
+	private static final Color  CHART_HACK_COLOR2              = Color.YELLOW;
 	/** Font to use to draw descriptions and titles. */
 	private static final Font   CHART_MAIN_FONT                = new Font( "Times", Font.BOLD, 10 );
 	/** Font to use to draw axis labels.             */
-	private static final Font   CHART_AXIS_LABEL_FONT          = new Font( "Courier New", Font.PLAIN, 8  );
+	private static final Font   CHART_AXIS_LABEL_FONT          = new Font( "Courier New", Font.PLAIN, 8 );
+	/** Font to use to draw hack markers.            */
+	private static final Font   HACK_MARKER_FONT               = new Font( "Courier New", Font.BOLD, 13 );
 	/** Stroke to be used to draw charts.            */
 	private static final Stroke CHART_STROKE                   = new BasicStroke( 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND );
 	/** Stroke to be used to draw everything else.   */
@@ -147,6 +151,8 @@ public class ChartsComponent extends JPanel {
 	}
 	
 	public void setChartType( final ChartType chartType ) {
+		// We store values on the options panel before we remove the components
+		assignUsedProperties();
 		// removeAll() does not work properly in SwingWT, we remove components manually!
 		while ( chartOptionsPanel.getComponentCount() > 0 )
 			chartOptionsPanel.remove( chartOptionsPanel.getComponentCount() - 1 );
@@ -154,6 +160,7 @@ public class ChartsComponent extends JPanel {
 		switch ( chartType ) {
 			case APM :
 				chartOptionsPanel.add( new JLabel( "Detail level: " ) );
+				apmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL ) ) );
 				chartOptionsPanel.add( apmChartDetailLevelComboBox );
 				chartOptionsPanel.add( new JLabel( " pixels." ) );
 				break;
@@ -358,16 +365,41 @@ public class ChartsComponent extends JPanel {
 			}
 			
 			// Draw the charts
-			graphics.setColor( inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor );
+			final Color chartColor = inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor;
+			graphics.setColor( chartColor );
 			( (Graphics2D) graphics ).setStroke( CHART_STROKE );
 			graphics.drawPolyline( xPoints, yPoints, xPoints.length - 1 ); // Last point is excluded, it might not be a whole domain
 			( (Graphics2D) graphics ).setStroke( CHART_REST_STROKE );
+			
+			// Mark hack occurences
+			graphics.setColor( chartColor.getRed() > 200 && chartColor.getGreen() < 100 && chartColor.getBlue() < 100 ? CHART_HACK_COLOR2 : CHART_HACK_COLOR );
+			graphics.setFont( HACK_MARKER_FONT );
+			for ( final HackDescription hackDescription : hackDescriptionList )
+				if ( hackDescription.playerName.equalsIgnoreCase( playerActions.playerName ) ) {
+					pointIndex = hackDescription.iteration * chartPoints / frames;
+					final float position = (float) ( hackDescription.iteration - pointIndex * frames / chartPoints ) * chartPoints / frames;
+					graphics.drawString( "!",
+							interpolate( xPoints[ pointIndex ], xPoints[ pointIndex + 1 ], position ) - 4,
+							interpolate( yPoints[ pointIndex ], yPoints[ pointIndex + 1 ], position ) - 18, true );
+				}
 			
 			// Draw player's name and description
 			graphics.setFont( CHART_MAIN_FONT );
 			graphics.setColor( inGameColor == null ? CHART_PLAYER_DESCRIPTION_COLOR : inGameColor );
 			graphics.drawString( replay.replayHeader.getPlayerDescription( replay.replayActions.players[ playerIndexToShowList.get( i ) ].playerName ), AXIS_SPACE_X + 15, y1 + ( allPlayersOnOneChart ? i * 14 - 22 : -12 ) );
 		}
+	}
+	
+	/**
+	 * Interpolates a value between <code>x1</code> and <code>x2</code>.
+	 * Position is defined by <code>position</code> between <code>x1</code> and <code>x2</code> with a range of 0..1.
+	 * @param x1       lowest value of interpolation
+	 * @param x2       highest value of interpolation
+	 * @param position position between the domain, a value between 0.0 and 1.0
+	 * @return an interpolated value between the limits
+	 */
+	private int interpolate( final int x1, final int x2, final float position ) {
+		return x1 + (int) ( ( x2 - x1 ) * position );
 	}
 	
 	public void assignUsedProperties() {
