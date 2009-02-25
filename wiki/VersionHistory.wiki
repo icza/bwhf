@@ -5,6 +5,7 @@
 *Features and changes in the upcoming new version:*
  * A new *Charts* tab which can visualize players' APM from replays.
  * Extracting game chat now contains more info about players: their in-game colors and the number of their actions (along with their races and APMs).
+ * Fixed a bug which caused the agent's window to "blink" or resized when some button was pressed ("Check key" button for example).
 
 ----
 ====1.30 2009-02-18====
