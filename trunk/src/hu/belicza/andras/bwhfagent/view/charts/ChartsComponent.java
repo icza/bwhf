@@ -18,6 +18,7 @@ import java.util.List;
 import swingwt.awt.BasicStroke;
 import swingwt.awt.BorderLayout;
 import swingwt.awt.Color;
+import swingwt.awt.Dimension;
 import swingwt.awt.Font;
 import swingwt.awt.Graphics;
 import swingwt.awt.Graphics2D;
@@ -118,8 +119,8 @@ public class ChartsComponent extends JPanel {
 	 * Creates a new ChartsComponent.
 	 */
 	public ChartsComponent( final ChartsTab chartsTab ) {
-		super( new BorderLayout() );
 		setBackground( CHART_BACKGROUND_COLOR );
+		setMaximumSize( new Dimension( 10000, 10000 ) );
 		this.chartsTab = chartsTab;
 		
 		buildConentGUI();
