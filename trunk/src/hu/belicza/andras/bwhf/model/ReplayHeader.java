@@ -183,7 +183,6 @@ public class ReplayHeader {
 		final List< Object[] > playerDescriptionList = new ArrayList< Object[] >( 12 );
 		for ( int i = 0; i < playerNames.length; i++ )
 			if ( playerNames[ i ] != null ) {
-				final Integer apm = playerIdActionsCounts[ playerIds[ i ] ] * 60 / seconds;
 				String colorName;
 				try {
 					colorName = IN_GAME_COLOR_NAMES[ playerColors[ i ] ];
@@ -191,7 +190,9 @@ public class ReplayHeader {
 				catch ( final Exception e ) {
 					colorName = "<unknown>";
 				}
-				final String  playerDescription = "    " + playerNames[ i ] + " (" + RACE_CHARACTERS[ playerRaces[ i ] ] + "), color: " + colorName + ", actions: " + playerIdActionsCounts[ playerIds[ i ] ] + ", APM: " + apm;
+				final String playerDescription = "    " + playerNames[ i ] + " (" + RACE_CHARACTERS[ playerRaces[ i ] ] 
+				                + "), color: " + colorName + ", actions: " + playerIdActionsCounts[ playerIds[ i ] ] 
+				                + ", APM: " + ( playerIdActionsCounts[ playerIds[ i ] ] * 60 / seconds );
 				playerDescriptionList.add( new Object[] { playerIdActionsCounts[ playerIds[ i ] ], playerDescription } );
 			}
 		
