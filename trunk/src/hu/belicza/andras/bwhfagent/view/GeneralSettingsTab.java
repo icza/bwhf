@@ -83,6 +83,7 @@ public class GeneralSettingsTab extends Tab {
 		checkUpdatesButton.setEnabled( false );
 		
 		checkUpdatesButton.setText( "Checking..." );
+		checkUpdatesButton.getParent().doLayout();
 		
 		new NormalThread() {
 			@Override
@@ -104,7 +105,7 @@ public class GeneralSettingsTab extends Tab {
 				}
 				finally {
 					checkUpdatesButton.setEnabled( true );
-					Utils.repackMainFrameDueToButtonChange( checkUpdatesButton );
+					checkUpdatesButton.getParent().doLayout();
 				}
 			}
 		}.start();

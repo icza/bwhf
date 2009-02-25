@@ -25,7 +25,6 @@ import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.SourceDataLine;
 
 import swingwt.awt.Component;
-import swingwt.awt.Dimension;
 import swingwt.awt.FlowLayout;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
@@ -34,7 +33,6 @@ import swingwtx.swing.JComponent;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JTextField;
-import swingwtx.swing.SwingUtilities;
 import swingwtx.swing.filechooser.FileFilter;
 
 /**
@@ -67,7 +65,7 @@ public class Utils {
 	public static void saveSettingsProperties() {
 		try {
 			settingsProperties.store( new FileOutputStream( Consts.SETTINGS_PROPERTIES_FILE ), null );
-		} catch ( final Exception e) {
+		} catch ( final Exception e ) {
 		}
 	}
 	
@@ -335,25 +333,6 @@ public class Utils {
 			
 			return "Error connecting to the BWHF data base server!";
 		}
-	}
-	
-	/**
-	 * Repacks the main frame due to a button change.<br>
-	 * This is here due to some lack of delegation in the SwingWT.
-	 * @param button button that was changed and creating the need of repacking
-	 */
-	public static void repackMainFrameDueToButtonChange( final JButton button ) {
-		SwingUtilities.invokeAndWait( new Runnable() {
-			public void run() {
-				button.setSize( button.getPreferredSize() );
-				button.revalidate();
-				
-				final Dimension currentDimension = new Dimension( MainFrame.getInstance().getSize() );
-				MainFrame.getInstance().setSize( currentDimension.width+1, currentDimension.height );
-				MainFrame.getInstance().setSize( currentDimension );
-				MainFrame.getInstance().pack();
-			}
-		} );
 	}
 	
 }
