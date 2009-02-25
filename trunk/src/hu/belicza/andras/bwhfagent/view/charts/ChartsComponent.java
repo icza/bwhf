@@ -119,11 +119,13 @@ public class ChartsComponent extends JPanel {
 	 */
 	public ChartsComponent( final ChartsTab chartsTab ) {
 		super( new BorderLayout() );
+		setBackground( CHART_BACKGROUND_COLOR );
 		this.chartsTab = chartsTab;
 		
 		buildConentGUI();
 		
 		apmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL ) ) );
+		setDoubleBuffered( true );
 	}
 	
 	/**
@@ -152,7 +154,7 @@ public class ChartsComponent extends JPanel {
 	}
 	
 	public void setChartType( final ChartType chartType ) {
-		// We store values on the options panel before we remove the components
+		// We store values on the options panel before we remove the components, they might lost their values in SwingWT
 		assignUsedProperties();
 		// removeAll() does not work properly in SwingWT, we remove components manually!
 		while ( chartOptionsPanel.getComponentCount() > 0 )
@@ -161,11 +163,13 @@ public class ChartsComponent extends JPanel {
 		switch ( chartType ) {
 			case APM :
 				chartOptionsPanel.add( new JLabel( "Detail level: " ) );
-				apmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL ) ) );
 				chartOptionsPanel.add( apmChartDetailLevelComboBox );
 				chartOptionsPanel.add( new JLabel( " pixels." ) );
 				break;
 		}
+		
+		// We restore the values
+		apmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL ) ) );
 		
 		contentPanel.doLayout();
 		repaint();
