@@ -14,19 +14,19 @@ public class BWHFAgent extends JFrame {
 	
 	/**
 	 * Entry point of the program.<br>
-	 * Creates the main frame.
+	 * Calls the agent starter respectively to the OS we're running on.
 	 * 
 	 * @param arguments used to take arguments from the running environment - not used here
 	 */
 	public static void main( final String[] arguments ) {
 		SwingWTUtils.setShowSwingWTInfoOnStartup( false );
 		
-		if ( SwingWTUtils.isMacOSX()) {
-		    SwingWTUtils.initialiseMacOSX( new Runnable() {
-		        public void run() {
-		        	startAgent( arguments );
-		        }
-		    } );
+		if ( SwingWTUtils.isMacOSX() ) {
+			SwingWTUtils.initialiseMacOSX( new Runnable() {
+				public void run() {
+					startAgent( arguments );
+				}
+			} );
 		}
 		else
 			startAgent( arguments );
