@@ -379,7 +379,7 @@ public class BinRepParser {
 			}
 			case (byte) 0x13 : { // Hotkey
 				final byte type = commandsBuffer.get();
-				action = new Action( frame, ( type == (byte) 0x00 ? Action.HOTKEY_ACTION_PARAM_NAME_SELECT : Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN ) + "," + commandsBuffer.get(), Action.ACTION_NAME_INDEX_HOTKEY, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, ( type == (byte) 0x00 ? Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN : Action.HOTKEY_ACTION_PARAM_NAME_SELECT ) + "," + commandsBuffer.get(), Action.ACTION_NAME_INDEX_HOTKEY, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x14 : { // Move
