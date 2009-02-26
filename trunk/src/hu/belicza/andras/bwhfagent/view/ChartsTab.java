@@ -69,7 +69,7 @@ public class ChartsTab extends Tab {
 		selectFileButton.setMnemonic( 'f' );
 		selectFileButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				final JFileChooser fileChooser = new JFileChooser( new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.STARCRAFT_REPLAY_FOLDER ) );
+				final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.getReplayStartFolder() );
 				
 				// This is for SwingWT:
 				fileChooser.setExtensionFilters( new String[] { "*.rep", "*.*" }, new String[] { "Replay Files (*.rep)", "All files (*.*)" } );
