@@ -97,6 +97,8 @@ public class Consts {
 	public static final String PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS = "skipLatterActionsOfHackers";
 	/** Sound volume property.                   */
 	public static final String PROPERTY_SOUND_VOLUME                   = "soundVolume";
+	/** Default replay start folder property.    */
+	public static final String PROPERTY_REPLAY_START_FOLDER            = "defaultReplayStartFolder";
 	/** Chart type property.                     */
 	public static final String PROPERTY_CHART_TYPE                     = "chartType";
 	/** All players on one chart property.       */
@@ -133,6 +135,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHECK_UPDATES_ON_STARTUP      , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SOUND_VOLUME                  , "60" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPLAY_START_FOLDER           , STARCRAFT_REPLAY_FOLDER );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHART_TYPE                    , "0" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_PLAYERS_ON_ONE_CHART      , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_USE_PLAYERS_IN_GAME_COLORS    , "true" );

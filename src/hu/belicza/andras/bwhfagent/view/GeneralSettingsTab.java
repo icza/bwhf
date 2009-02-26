@@ -2,6 +2,7 @@ package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhfagent.Consts;
 
+import java.io.File;
 import java.net.URL;
 
 import swingwt.awt.BorderLayout;
@@ -10,10 +11,12 @@ import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
+import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JOptionPane;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JSlider;
+import swingwtx.swing.JTextField;
 
 /**
  * General settings tab.
@@ -33,6 +36,8 @@ public class GeneralSettingsTab extends Tab {
 	public  final JCheckBox skipLatterActionsOfHackersCheckBox = new JCheckBox( "During a replay scan if a player is found hacking, skip scanning his latter actions", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS ) ) );
 	/** Slider to set the sound volume.                                      */
 	public  final JSlider   soundVolumeSlider                  = new JSlider( 0, 100, Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_SOUND_VOLUME ) ) );
+	/** Start folder when selecting replay flies.                            */
+	public final JTextField replayStartFolderTextField         = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPLAY_START_FOLDER ) );
 	
 	/**
 	 * Creates a new GeneralSettings.
@@ -71,9 +76,25 @@ public class GeneralSettingsTab extends Tab {
 		panel.add( soundVolumeSlider );
 		contentBox.add( panel );
 		
+		panel = new JPanel();
+		panel.add( new JLabel( "Start folder when selecting replay files:" ) );
+		panel.add( replayStartFolderTextField );
+		final JButton button = Utils.createFileChooserButton( getContent(), replayStartFolderTextField, JFileChooser.DIRECTORIES_ONLY, null, null, new Runnable() {
+			public void run() {
+				// If one of Starcraft's folder was selected, we replace its path to be relative so it will work if the product is copied/moved to another directory
+				final File selectedFolder = new File( replayStartFolderTextField.getText() );
+				
+				if ( selectedFolder.equals( new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.STARCRAFT_REPLAY_FOLDER ) ) )
+					replayStartFolderTextField.setText( Consts.STARCRAFT_REPLAY_FOLDER );
+				else if ( selectedFolder.getParentFile() != null && selectedFolder.getParentFile().equals( new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.STARCRAFT_REPLAY_FOLDER ) ) )
+					replayStartFolderTextField.setText( Consts.STARCRAFT_REPLAY_FOLDER + "/" + selectedFolder.getName() );
+			}
+		} );
+		panel.add( button );
+		contentBox.add( panel );
+		
 		// To consume the remaining space:
 		contentBox.add( new JPanel( new BorderLayout() ) );
-		
 	}
 	
 	/**
@@ -111,11 +132,21 @@ public class GeneralSettingsTab extends Tab {
 		}.start();
 	}
 	
+	/**
+	 * Returns the start folder for opening replays.
+	 * @return the start folder for opening replays
+	 */
+	public File getReplayStartFolder() {
+		final File replayStartFolder = new File( replayStartFolderTextField.getText() );
+		return replayStartFolder.isAbsolute() ? replayStartFolder : new File( MainFrame.getInstance().starcraftFolderTextField.getText(), replayStartFolderTextField.getText() );
+	}
+	
 	@Override
 	public void assignUsedProperties() {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_CHECK_UPDATES_ON_STARTUP      , Boolean.toString( checkUpdatesOnStartupCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, Boolean.toString( skipLatterActionsOfHackersCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SOUND_VOLUME                  , Integer.toString( soundVolumeSlider.getValue() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_REPLAY_START_FOLDER           , replayStartFolderTextField.getText() );
 	}
 	
 }
