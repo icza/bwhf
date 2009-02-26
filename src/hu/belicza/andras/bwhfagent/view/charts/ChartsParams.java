@@ -17,6 +17,8 @@ public class ChartsParams {
 	
 	/** Tells whether to draw all players on one chart. */
 	public final boolean allPlayersOnOneChart;
+	/** Frames of the replay.                           */
+	public final int     frames;
 	/** Number of visible players.                      */
 	public final int     playersCount;
 	/** Number of charts to be drawn.                   */
@@ -32,8 +34,9 @@ public class ChartsParams {
 	/** Max y coordinate inside charts.                 */
 	public final int     maxYInChart;
 	
-	public ChartsParams( final ChartsTab chartsTab, final int playersCount, final JComponent chartsComponent ) {
+	public ChartsParams( final ChartsTab chartsTab, final int frames, final int playersCount, final JComponent chartsComponent ) {
 		allPlayersOnOneChart = chartsTab.allPlayersOnOneChartCheckBox.isSelected();
+		this.frames          = frames;
 		this.playersCount    = playersCount;
 		chartsCount          = allPlayersOnOneChart ? 1 : playersCount;
 		chartWidth           = chartsComponent.getWidth() - AXIS_SPACE_X;

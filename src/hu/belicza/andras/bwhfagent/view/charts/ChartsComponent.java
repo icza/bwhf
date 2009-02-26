@@ -114,6 +114,8 @@ public class ChartsComponent extends JPanel {
 	
 	/** APM chart detail level in pixels combo box. */
 	private final JComboBox apmChartDetailLevelComboBox = new JComboBox( new Object[] { 1, 2, 3, 4, 5, 10, 15, 20, 30, 50, 100 } );
+	/** Show select hotkeys checkbox. */
+	private final JCheckBox showSelectHotkeysCheckBox   = new JCheckBox( "Show select hotkeys", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS ) ) );
 	
 	/**
 	 * Creates a new ChartsComponent.
@@ -140,11 +142,13 @@ public class ChartsComponent extends JPanel {
 		
 		contentPanel.add( this, BorderLayout.CENTER );
 		
-		apmChartDetailLevelComboBox.addChangeListener( new ChangeListener() {
+		final ChangeListener repainterChangeListener = new ChangeListener() {
 			public void stateChanged( final ChangeEvent event ) {
 				repaint();
 			}
-		} );
+		};
+		apmChartDetailLevelComboBox.addChangeListener( repainterChangeListener );
+		showSelectHotkeysCheckBox.addChangeListener( repainterChangeListener );
 	}
 	
 	/**
@@ -167,10 +171,14 @@ public class ChartsComponent extends JPanel {
 				chartOptionsPanel.add( apmChartDetailLevelComboBox );
 				chartOptionsPanel.add( new JLabel( " pixels." ) );
 				break;
+			case HOTKEYS :
+				chartOptionsPanel.add( showSelectHotkeysCheckBox );
+				break;
 		}
 		
 		// We restore the values
 		apmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL ) ) );
+		showSelectHotkeysCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS ) ) );
 		
 		contentPanel.doLayout();
 		repaint();
@@ -239,7 +247,7 @@ public class ChartsComponent extends JPanel {
 		graphics.clearRect( 0, 0, getWidth(), getHeight() );
 		
 		if ( replay != null && playerIndexToShowList.size() > 0 ) {
-			final ChartsParams chartsParams = new ChartsParams( chartsTab, playerIndexToShowList.size(), this );
+			final ChartsParams chartsParams = new ChartsParams( chartsTab, replay.replayHeader.gameFrames, playerIndexToShowList.size(), this );
 			switch ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() ) {
 				case APM :
 					paintApmCharts( graphics, chartsParams );
@@ -261,11 +269,10 @@ public class ChartsComponent extends JPanel {
 		if ( getWidth() < chartGranularity )
 			return;
 		
-		final int chartPoints       = chartsParams.maxXInChart / chartGranularity + 1;
-		final int frames            = replay.replayHeader.gameFrames;
+		final int     chartPoints = chartsParams.maxXInChart / chartGranularity + 1;
 		
-		final int[]   xPoints  = new int[ chartPoints + 1 ];
-		final int[][] yPointss = new int[ chartsParams.playersCount ][ chartPoints + 1 ];
+		final int[]   xPoints     = new int[ chartPoints + 1 ];
+		final int[][] yPointss    = new int[ chartsParams.playersCount ][ chartPoints + 1 ];
 		int pointIndex = 0;
 		for ( int x = chartsParams.x1; pointIndex < xPoints.length ; pointIndex++, x+= chartGranularity )
 			xPoints[ pointIndex ] = x;
@@ -281,7 +288,7 @@ public class ChartsComponent extends JPanel {
 			
 			for ( final Action action : playerActions.actions )
 				try {
-					yPoints[ 1 + action.iteration * chartPoints / frames ]++;
+					yPoints[ 1 + action.iteration * chartPoints / chartsParams.frames ]++;
 				} catch ( final ArrayIndexOutOfBoundsException aioobe ) {
 					// The last few actions might be over the last domain, we ignore them.
 				}
@@ -334,7 +341,7 @@ public class ChartsComponent extends JPanel {
 			if ( !chartsParams.allPlayersOnOneChart || i == 0 ) { // We draw labels once if all players are on one chart
 				graphics.setFont( CHART_AXIS_LABEL_FONT );
 				// if no actions, let's define axis labels from zero to ASSIST_LINES_COUNT
-				final int maxApm = maxActionss[ i ] > 0 ? maxActionss[ i ] * ( chartPoints - 1 ) * 60 / ReplayHeader.convertFramesToSeconds( frames ) : ASSIST_LINES_COUNT;
+				final int maxApm = maxActionss[ i ] > 0 ? maxActionss[ i ] * ( chartPoints - 1 ) * 60 / ReplayHeader.convertFramesToSeconds( chartsParams.frames ) : ASSIST_LINES_COUNT;
 				for ( int j = 0; j <= ASSIST_LINES_COUNT; j++ ) {
 					final int y   = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
 					final int apm = maxApm * j / ASSIST_LINES_COUNT;
@@ -355,16 +362,18 @@ public class ChartsComponent extends JPanel {
 			( (Graphics2D) graphics ).setStroke( CHART_REST_STROKE );
 			
 			// Mark hack occurences
-			graphics.setColor( chartColor.getRed() > 200 && chartColor.getGreen() < 100 && chartColor.getBlue() < 100 ? CHART_HACK_COLOR2 : CHART_HACK_COLOR );
-			graphics.setFont( HACK_MARKER_FONT );
-			for ( final HackDescription hackDescription : hackDescriptionList )
-				if ( hackDescription.playerName.equalsIgnoreCase( playerActions.playerName ) ) {
-					pointIndex = hackDescription.iteration * chartPoints / frames;
-					final float position = (float) ( hackDescription.iteration - pointIndex * frames / chartPoints ) * chartPoints / frames;
-					graphics.drawString( "!",
-							interpolate( xPoints[ pointIndex ], xPoints[ pointIndex + 1 ], position ) - 4,
-							interpolate( yPoints[ pointIndex ], yPoints[ pointIndex + 1 ], position ) - 18, true );
-				}
+			if ( hackDescriptionList != null ) {
+				graphics.setColor( chartColor.getRed() > 200 && chartColor.getGreen() < 100 && chartColor.getBlue() < 100 ? CHART_HACK_COLOR2 : CHART_HACK_COLOR );
+				graphics.setFont( HACK_MARKER_FONT );
+				for ( final HackDescription hackDescription : hackDescriptionList )
+					if ( hackDescription.playerName.equalsIgnoreCase( playerActions.playerName ) ) {
+						pointIndex = hackDescription.iteration * chartPoints / chartsParams.frames;
+						final float position = (float) ( hackDescription.iteration - pointIndex * chartsParams.frames / chartPoints ) * chartPoints / chartsParams.frames;
+						graphics.drawString( "!",
+								interpolate( xPoints[ pointIndex ], xPoints[ pointIndex + 1 ], position ) - 4,
+								interpolate( yPoints[ pointIndex ], yPoints[ pointIndex + 1 ], position ) - 18, true );
+					}
+			}
 			
 			drawPlayerDescription( graphics, chartsParams, i, inGameColor );
 		}
@@ -388,14 +397,32 @@ public class ChartsComponent extends JPanel {
 	 * @param chartsParams parameters of the charts to be drawn
 	 */
 	private void paintHotkeysCharts( final Graphics graphics, final ChartsParams chartsParams ) {
-		// First count the actions
+		final boolean showSelectHotkeys = showSelectHotkeysCheckBox.isSelected();
 		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
 			final PlayerActions playerActions = replay.replayActions.players[ playerIndexToShowList.get( i ) ];
+			final int           y1            = chartsParams.getY1ForChart( i );
 			final Color         inGameColor   = getPlayerInGameColor( playerActions );
+			final Color         chartColor    = inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor;
 			
 			drawAxisAndTimeLabels( graphics, chartsParams, i );
 			
 			for ( final Action action : playerActions.actions ) {
+				graphics.setColor( chartColor );
+				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY ) {
+					final String[] params = action.parameters.split( "," );
+					
+					if ( params[ 0 ].equals( Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN ) 
+							  || showSelectHotkeys && params[ 0 ].equals( Action.HOTKEY_ACTION_PARAM_NAME_SELECT ) ) {
+						final int      hotkey = Integer.parseInt( params[ 1 ] ) % 10; // Hotkey 10 displayed as 0
+						
+						final int hotkeyX1 = chartsParams.x1 + action.iteration * chartsParams.maxXInChart / chartsParams.frames;
+						final int hotkeyY1 = y1 + hotkey * ( chartsParams.maxYInChart - 14 ) / 9;
+						if ( params[ 0 ].equals( Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN ) )
+							graphics.drawRect( hotkeyX1, hotkeyY1 + 2, 6, 10 );
+						
+						graphics.drawString( params[ 1 ], hotkeyX1, hotkeyY1, true );
+					}
+				}
 			}
 			
 			drawPlayerDescription( graphics, chartsParams, i, inGameColor );
@@ -465,8 +492,12 @@ public class ChartsComponent extends JPanel {
 				             chartsParams.getY1ForChart( chartIndex ) + ( chartsParams.allPlayersOnOneChart ? chartIndex * 14 - 22 : -12 ) );
 	}
 	
+	/**
+	 * Assignes the used properties of this component.
+	 */
 	public void assignUsedProperties() {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL, Integer.toString( apmChartDetailLevelComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS   , Boolean.toString( showSelectHotkeysCheckBox.isSelected() ) );
 	}
 	
 }
