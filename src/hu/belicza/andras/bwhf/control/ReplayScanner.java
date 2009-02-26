@@ -89,8 +89,8 @@ public class ReplayScanner {
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action.actionNameIndex == Action.ACTION_NAME_INDEX_BWCHART_HACK )
 				if ( action.parameterBuildingNameIndex != Action.BUILDING_NAME_INDEX_NON_BUILDING )
 					if ( action.parameterBuildingNameIndex < Action.BUILDING_NAME_INDEX_FIRST_ZERG_BUILDING || action.parameterBuildingNameIndex > Action.BUILDING_NAME_INDEX_LAST_ZERG_BUILDING ) // Not a zerg building selected multiple times (that can be done wihtout hack by selecting drones about to morph)
-						if ( action.parameters.length() != Action.BUILDING_NAMES[ action.parameterBuildingNameIndex ].length() )
-							if ( action.parameters.startsWith( Action.BUILDING_NAMES[ action.parameterBuildingNameIndex ] + "(x" ) )
+						if ( action.parameters.length() != Action.UNIT_ID_NAME_MAP.get( (byte) action.parameterBuildingNameIndex ).length() )
+							if ( action.parameters.startsWith( Action.UNIT_ID_NAME_MAP.get( (byte) action.parameterBuildingNameIndex ) + "(x" ) )
 								hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_BUILDING_SELECTION, action.iteration ) );
 			
 			// Old zerg and protoss moneyhacks

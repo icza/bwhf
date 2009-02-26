@@ -232,108 +232,6 @@ public class BinRepParser {
 		return string;
 	}
 	
-	/** Map of unit IDs and their names. */
-	private static final Map< Short, String > unitTypesMap = new HashMap< Short, String >();
-	static {
-		unitTypesMap.put( (short) 0x00, "Marine" );
-		unitTypesMap.put( (short) 0x01, "Ghost" );
-		unitTypesMap.put( (short) 0x02, "Vulture" );
-		unitTypesMap.put( (short) 0x03, "Goliath" );
-		unitTypesMap.put( (short) 0x05, "Siege Tank" );
-		unitTypesMap.put( (short) 0x07, "SCV" );
-		unitTypesMap.put( (short) 0x07, "Wraith" );
-		unitTypesMap.put( (short) 0x09, "Science Vessel" );
-		unitTypesMap.put( (short) 0x0B, "Dropship" );
-		unitTypesMap.put( (short) 0x0C, "Battlecruiser" );
-		unitTypesMap.put( (short) 0x0E, "Nuke" );
-		unitTypesMap.put( (short) 0x20, "Firebat" );
-		unitTypesMap.put( (short) 0x22, "Medic" );
-		unitTypesMap.put( (short) 0x25, "Zergling" );
-		unitTypesMap.put( (short) 0x26, "Hydralisk" );
-		unitTypesMap.put( (short) 0x27, "Ultralisk" );
-		unitTypesMap.put( (short) 0x29, "Drone" );
-		unitTypesMap.put( (short) 0x2A, "Overlord" );
-		unitTypesMap.put( (short) 0x2B, "Mutalisk" );
-		unitTypesMap.put( (short) 0x2C, "Guardian" );
-		unitTypesMap.put( (short) 0x2D, "Queen" );
-		unitTypesMap.put( (short) 0x2E, "Defiler" );
-		unitTypesMap.put( (short) 0x2F, "Scourge" );
-		unitTypesMap.put( (short) 0x32, "Infested Terran" );
-		unitTypesMap.put( (short) 0x3A, "Valkyrie" );
-		unitTypesMap.put( (short) 0x3C, "Corsair" );
-		unitTypesMap.put( (short) 0x3D, "Dark Templar" );
-		unitTypesMap.put( (short) 0x3E, "Devourer" );
-		unitTypesMap.put( (short) 0x40, "Probe" );
-		unitTypesMap.put( (short) 0x41, "Zealot" );
-		unitTypesMap.put( (short) 0x42, "Dragoon" );
-		unitTypesMap.put( (short) 0x43, "High Templar" );
-		unitTypesMap.put( (short) 0x45, "Shuttle" );
-		unitTypesMap.put( (short) 0x46, "Scout" );
-		unitTypesMap.put( (short) 0x47, "Arbiter" );
-		unitTypesMap.put( (short) 0x48, "Carrier" );
-		unitTypesMap.put( (short) 0x53, "Reaver" );
-		unitTypesMap.put( (short) 0x54, "Observer" );
-		unitTypesMap.put( (short) 0x67, "Lurker" );
-		unitTypesMap.put( (short) 0x6A, "Command Center" );
-		unitTypesMap.put( (short) 0x6B, "ComSat" );
-		unitTypesMap.put( (short) 0x6C, "Nuclear Silo" );
-		unitTypesMap.put( (short) 0x6D, "Supply Depot" );
-		unitTypesMap.put( (short) 0x6E, "Refinery" ); //refinery?
-		unitTypesMap.put( (short) 0x6F, "Barracks" );
-		unitTypesMap.put( (short) 0x70, "Academy" ); //Academy?
-		unitTypesMap.put( (short) 0x71, "Factory" );
-		unitTypesMap.put( (short) 0x72, "Starport" );
-		unitTypesMap.put( (short) 0x73, "Control Tower" );
-		unitTypesMap.put( (short) 0x74, "Science Facility" );
-		unitTypesMap.put( (short) 0x75, "Covert Ops" );
-		unitTypesMap.put( (short) 0x76, "Physics Lab" );
-		unitTypesMap.put( (short) 0x78, "Machine Shop" );
-		unitTypesMap.put( (short) 0x7A, "Engineering Bay" );
-		unitTypesMap.put( (short) 0x7B, "Armory" );
-		unitTypesMap.put( (short) 0x7C, "Missile Turret" );
-		unitTypesMap.put( (short) 0x7D, "Bunker" );
-		unitTypesMap.put( (short) 0x82, "Infested CC" );
-		unitTypesMap.put( (short) 0x83, "Hatchery" );
-		unitTypesMap.put( (short) 0x84, "Lair" );
-		unitTypesMap.put( (short) 0x85, "Hive" );
-		unitTypesMap.put( (short) 0x86, "Nydus Canal" );
-		unitTypesMap.put( (short) 0x87, "Hydralisk Den" );
-		unitTypesMap.put( (short) 0x88, "Defiler Mound" );
-		unitTypesMap.put( (short) 0x89, "Greater Spire" );
-		unitTypesMap.put( (short) 0x8A, "Queens Nest" );
-		unitTypesMap.put( (short) 0x8B, "Evolution Chamber" );
-		unitTypesMap.put( (short) 0x8C, "Ultralisk Cavern" );
-		unitTypesMap.put( (short) 0x8D, "Spire" );
-		unitTypesMap.put( (short) 0x8E, "Spawning Pool" );
-		unitTypesMap.put( (short) 0x8F, "Creep Colony" );
-		unitTypesMap.put( (short) 0x90, "Spore Colony" );
-		unitTypesMap.put( (short) 0x92, "Sunken Colony" );
-		unitTypesMap.put( (short) 0x95, "Extractor" );
-		unitTypesMap.put( (short) 0x9A, "Nexus" );
-		unitTypesMap.put( (short) 0x9B, "Robotics Facility" );
-		unitTypesMap.put( (short) 0x9C, "Pylon" );
-		unitTypesMap.put( (short) 0x9D, "Assimilator" );
-		unitTypesMap.put( (short) 0x9F, "Observatory" );
-		unitTypesMap.put( (short) 0xA0, "Gateway" );
-		unitTypesMap.put( (short) 0xA2, "Photon Cannon" );
-		unitTypesMap.put( (short) 0xA3, "Citadel of Adun" );
-		unitTypesMap.put( (short) 0xA4, "Cybernetics Core" );
-		unitTypesMap.put( (short) 0xA5, "Templar Archives" );
-		unitTypesMap.put( (short) 0xA6, "Forge" );
-		unitTypesMap.put( (short) 0xA7, "Stargate" );
-		unitTypesMap.put( (short) 0xA9, "Fleet Beacon" );
-		unitTypesMap.put( (short) 0xAA, "Arbiter Tribunal" );
-		unitTypesMap.put( (short) 0xAB, "Robotics Support Bay" );
-		unitTypesMap.put( (short) 0xAC, "Shield Battery" );
-		unitTypesMap.put( (short) 0xC0, "Larva" );
-		unitTypesMap.put( (short) 0xC1, "Rine/Bat" );
-		unitTypesMap.put( (short) 0xC2, "Dark Archon" );
-		unitTypesMap.put( (short) 0xC3, "Archon" );
-		unitTypesMap.put( (short) 0xC4, "Scarab" );
-		unitTypesMap.put( (short) 0xC5, "Interceptor" );
-		unitTypesMap.put( (short) 0xC6, "Interceptor/Scarab" );		
-	}
-	
 	/**
 	 * Reads the next action in the commands buffer.<br>
 	 * Only parses actions which are important in hack detection.
@@ -365,8 +263,12 @@ public class BinRepParser {
 				break;
 			}
 			case (byte) 0x0c : { // Build
-				// TODO: parse this to determine building name indices
-				skipBytes = 7;
+				final byte type = commandsBuffer.get();
+				final short posX   = commandsBuffer.getShort();
+				final short posY   = commandsBuffer.getShort();
+				commandsBuffer.getShort(); // unitId
+				
+				action = new Action( frame, "Build,(" + posX + "," + posY + ")," + Action.UNIT_ID_NAME_MAP.get( type ), Action.ACTION_NAME_INDEX_BUILD, Action.UNIT_NAME_INDEX_UNKNOWN, type & 0xff );
 				break;
 			}
 			case (byte) 0x0d : { // Vision
@@ -390,7 +292,7 @@ public class BinRepParser {
 				action = new Action( frame, posX + "," + posY, Action.ACTION_NAME_INDEX_MOVE, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
-			case (byte) 0x15 : { // Attach/Right Click/Cast Magic/Use ability
+			case (byte) 0x15 : { // Attack/Right Click/Cast Magic/Use ability
 				final short posX   = commandsBuffer.getShort();
 				final short posY   = commandsBuffer.getShort();
 				/*final short unitId = */commandsBuffer.getShort(); // (posX;posY) if this is 0xffff, or target this unit if it's a valid unit id (if it's not 0xffff)
@@ -412,7 +314,7 @@ public class BinRepParser {
 			case (byte) 0x1f : { // Train
 				final short unitId = commandsBuffer.getShort();
 				// TODO: determine unit name index
-				action = new Action( frame, unitTypesMap.get( unitId ), Action.ACTION_NAME_INDEX_TRAIN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( (byte) unitId ), Action.ACTION_NAME_INDEX_TRAIN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x20 : { // Cancel train
@@ -423,7 +325,7 @@ public class BinRepParser {
 			case (byte) 0x23 : { // Hatch
 				final short unitId = commandsBuffer.getShort();
 				// TODO: determine unit name index
-				action = new Action( frame, unitTypesMap.get( unitId ), Action.ACTION_NAME_INDEX_HATCH, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( (byte) unitId ), Action.ACTION_NAME_INDEX_HATCH, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x1e :   // Return chargo

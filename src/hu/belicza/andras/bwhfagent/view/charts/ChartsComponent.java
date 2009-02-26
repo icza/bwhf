@@ -82,10 +82,12 @@ public class ChartsComponent extends JPanel {
 	 * @author Andras Belicza
 	 */
 	public enum ChartType {
-		/** APM charts of the players of the replay.     */
+		/** APM charts of the players of the replay.         */
 		APM( "APM" ),
-		/** Hotkeys charts of the players of the replay. */
-		HOTKEYS( "Hotkeys" );
+		/** Hotkeys charts of the players of the replay.     */
+		HOTKEYS( "Hotkeys" ),
+		/** Build order charts of the players of the replay. */
+		BUILD_ORDER( "Build order" );
 		
 		private final String name;
 		private ChartType( final String name ) {
@@ -174,6 +176,8 @@ public class ChartsComponent extends JPanel {
 			case HOTKEYS :
 				chartOptionsPanel.add( showSelectHotkeysCheckBox );
 				break;
+			case BUILD_ORDER :
+				break;
 		}
 		
 		// We restore the values
@@ -254,6 +258,9 @@ public class ChartsComponent extends JPanel {
 					break;
 				case HOTKEYS :
 					paintHotkeysCharts( graphics, chartsParams );
+					break;
+				case BUILD_ORDER :
+					paintBuildOrderCharts( graphics, chartsParams );
 					break;
 			}
 		}
@@ -422,6 +429,31 @@ public class ChartsComponent extends JPanel {
 						
 						graphics.drawString( params[ 1 ], hotkeyX1, hotkeyY1, true );
 					}
+				}
+			}
+			
+			drawPlayerDescription( graphics, chartsParams, i, inGameColor );
+		}
+	}
+	
+	/**
+	 * Paints the build order charts of the players.
+	 * @param graphics     graphics to be used for painting
+	 * @param chartsParams parameters of the charts to be drawn
+	 */
+	private void paintBuildOrderCharts( final Graphics graphics, final ChartsParams chartsParams ) {
+		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
+			final PlayerActions playerActions = replay.replayActions.players[ playerIndexToShowList.get( i ) ];
+			final int           y1            = chartsParams.getY1ForChart( i );
+			final Color         inGameColor   = getPlayerInGameColor( playerActions );
+			final Color         chartColor    = inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor;
+			
+			drawAxisAndTimeLabels( graphics, chartsParams, i );
+			
+			for ( final Action action : playerActions.actions ) {
+				graphics.setColor( chartColor );
+				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
+					Integer.valueOf( y1 );
 				}
 			}
 			
