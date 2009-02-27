@@ -55,4 +55,13 @@ public class ChartsParams {
 		return ( chartHeight + AXIS_SPACE_Y ) * ( allPlayersOnOneChart ? 0 : chartIndex ) + AXIS_SPACE_Y;
 	}
 	
+	/**
+	 * Returns the x coordinate calculated for the given iteration.
+	 * @param iteration iteration whose x coordinate to be returned
+	 * @return the x coordinate calculated for the given iteration
+	 */
+	public int getXForIteration( final int iteration ) {
+		return x1 + iteration * maxXInChart / frames;
+	}
+	
 }
