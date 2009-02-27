@@ -45,37 +45,38 @@ public class ChartsComponent extends JPanel {
 		new Color(   8, 128, 8 ), new Color( 252, 252, 124 ), new Color( 236, 196, 176 ), new Color(  64, 104, 212 ), new Color( 116, 164, 124 ), new Color( 144, 144, 184 ), new Color( 252, 252, 124 ), new Color(   0, 228, 252 )
 	};
 	
-	/** Background color for charts.                 */
+	/** Background color for charts.                       */
 	private static final Color  CHART_BACKGROUND_COLOR         = Color.BLACK;
-	/** Color to use for axis lines and axis titles. */
+	/** Color to use for axis lines and axis titles.       */
 	private static final Color  CHART_AXIS_COLOR               = Color.YELLOW;
-	/** Default color to use for the chart curve.    */
+	/** Default color to use for the chart curve.          */
 	private static final Color  CHART_DEFAULT_COLOR            = Color.WHITE;
-	/** Color to use for axis and info texts.        */
+	/** Color to use for axis and info texts.              */
 	private static final Color  CHART_ASSIST_LINES_COLOR       = new Color( 80, 80, 80 );
-	/** Color to use for axis labels.                */
+	/** Color to use for axis labels.                      */
 	private static final Color  CHART_AXIS_LABEL_COLOR         = Color.CYAN;
-	/** Color to use for player descriptions.        */
+	/** Color to use for player descriptions.              */
 	private static final Color  CHART_PLAYER_DESCRIPTION_COLOR = Color.GREEN;
-	/** Color to use for indicating hacks.           */
+	/** Color to use for indicating hacks.                 */
 	private static final Color  CHART_HACK_COLOR               = Color.RED;
-	/** 2nd color to use for indicating hacks.       */
+	/** 2nd color to use for indicating hacks.             */
 	private static final Color  CHART_HACK_COLOR2              = Color.YELLOW;
-	/** Font to use to draw descriptions and titles. */
+	/** Font to use to draw descriptions and titles.       */
 	private static final Font   CHART_MAIN_FONT                = new Font( "Times", Font.BOLD, 10 );
-	/** Font to use to draw axis labels.             */
+	/** Font to use to draw axis labels.                   */
 	private static final Font   CHART_AXIS_LABEL_FONT          = new Font( "Courier New", Font.PLAIN, 8 );
-	/** Font to use to draw hack markers.            */
+	/** Font to use to draw hack markers.                  */
 	private static final Font   HACK_MARKER_FONT               = new Font( "Courier New", Font.BOLD, 13 );
-	/** Stroke to be used to draw charts.            */
+	/** Stroke to be used to draw charts.                  */
 	private static final Stroke CHART_STROKE                   = new BasicStroke( 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND );
-	/** Stroke to be used to draw everything else.   */
+	/** Stroke to be used to draw everything else.         */
 	private static final Stroke CHART_REST_STROKE              = new BasicStroke( 1.0f );
-	/** Number of assist lines to be painted in each chart. */
+	/** Number of assist lines to be painted in each chart.      */
 	private static final int    ASSIST_LINES_COUNT             = 5;
-	/** Number of time lables to be painted in each chart.  */
+	/** Number of time lables to be painted in each chart.       */
 	private static final int    TIME_LABELS_COUNT              = 7;
-	
+	/** Number of visual levels to display build order elements. */
+	private static final int    BUILD_ORDER_DISPLAY_LEVELS     = 5;
 	
 	/**
 	 * The supported types of charts.
@@ -414,23 +415,31 @@ public class ChartsComponent extends JPanel {
 			drawAxisAndTimeLabels( graphics, chartsParams, i );
 			
 			for ( final Action action : playerActions.actions ) {
-				graphics.setColor( chartColor );
+				final Color chartColor2 = new Color( ~chartColor.getRed() & 0xff, ~chartColor.getGreen() & 0xff, ~chartColor.getBlue() & 0xff );
 				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY ) {
-					final String[] params = action.parameters.split( "," );
+					final String[] params         = action.parameters.split( "," );
+					final boolean  isHotkeyAssign = params[ 0 ].equals( Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN );
 					
-					if ( params[ 0 ].equals( Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN ) 
-							  || showSelectHotkeys && params[ 0 ].equals( Action.HOTKEY_ACTION_PARAM_NAME_SELECT ) ) {
-						final int      hotkey = Integer.parseInt( params[ 1 ] ) % 10; // Hotkey 10 displayed as 0
+					if ( isHotkeyAssign || showSelectHotkeys ) {
+						final int hotkey = Integer.parseInt( params[ 1 ] ) % 10; // Hotkey 10 is displayed where hotkey 0
 						
-						final int hotkeyX1 = chartsParams.x1 + action.iteration * chartsParams.maxXInChart / chartsParams.frames;
-						final int hotkeyY1 = y1 + hotkey * ( chartsParams.maxYInChart - 14 ) / 9;
-						if ( params[ 0 ].equals( Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN ) )
-							graphics.drawRect( hotkeyX1, hotkeyY1 + 2, 6, 10 );
+						if ( isHotkeyAssign ) {
+							( (Graphics2D) graphics ).setBackground( chartColor );
+							graphics.setColor( chartColor2 );
+						}
+						else {
+							( (Graphics2D) graphics ).setBackground( CHART_BACKGROUND_COLOR );
+							graphics.setColor( chartColor );
+						}
 						
-						graphics.drawString( params[ 1 ], hotkeyX1, hotkeyY1, true );
+						graphics.drawString( params[ 1 ],
+								chartsParams.getXForIteration( action.iteration ),
+								y1 + hotkey * ( chartsParams.maxYInChart - 14 ) / 9,
+								!isHotkeyAssign );
 					}
 				}
 			}
+			( (Graphics2D) graphics ).setBackground( CHART_BACKGROUND_COLOR );
 			
 			drawPlayerDescription( graphics, chartsParams, i, inGameColor );
 		}
@@ -450,10 +459,14 @@ public class ChartsComponent extends JPanel {
 			
 			drawAxisAndTimeLabels( graphics, chartsParams, i );
 			
+			int buildOrderLevel = 0;
 			for ( final Action action : playerActions.actions ) {
 				graphics.setColor( chartColor );
 				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
+					if ( ++buildOrderLevel == BUILD_ORDER_DISPLAY_LEVELS )
+						buildOrderLevel = 0;
 					Integer.valueOf( y1 );
+					
 				}
 			}
 			
