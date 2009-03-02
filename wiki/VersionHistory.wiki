@@ -3,7 +3,10 @@
 =BWHF Agent version history=
 
 *Features and changes in the upcoming new version:*
- * A new *Charts* tab which can visualize players' *APM, hotkey usage and build orders* from replays. All players of a replay can be visualized on one chart (giving the possibility to compare the speed of players on the Build order chart for example).
+ * A new *Charts* tab. All players of a replay can be visualized on one chart (giving the possibility to compare the speed of players on the Build order chart for example).
+ * *APM* chart to visualize players' APMS.
+ * *Hotkeys* chart to show players' hotkey usage (select, assign).
+ * *Build order* chart to visualize buildings and units built/trained by the players. Worker units (such as SCV, probe, drone) can optionally be shown. Note that only the build and train/hatch actions are visualized, not the buildings/units that actually get built/trained.
  * *Linux version is available!*
  * New setting on the general settings tab: "Start folder when selecting replay files". This folder will be the start location when you want to select replay files on any tab.
  * Extracting game chat now contains more info about players: their in-game colors and the number of their actions (along with their races and APMs).
