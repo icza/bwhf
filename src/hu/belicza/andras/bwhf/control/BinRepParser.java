@@ -263,12 +263,12 @@ public class BinRepParser {
 				break;
 			}
 			case (byte) 0x0c : { // Build
-				final byte type = commandsBuffer.get();
+				final byte  type   = commandsBuffer.get();
 				final short posX   = commandsBuffer.getShort();
 				final short posY   = commandsBuffer.getShort();
-				commandsBuffer.getShort(); // unitId
+				final short unitId = commandsBuffer.getShort();
 				
-				action = new Action( frame, "Build,(" + posX + "," + posY + ")," + Action.UNIT_ID_NAME_MAP.get( type ), Action.ACTION_NAME_INDEX_BUILD, Action.UNIT_NAME_INDEX_UNKNOWN, type & 0xff );
+				action = new Action( frame, "Build,(" + posX + "," + posY + ")," + Action.UNIT_ID_NAME_MAP.get( type ), Action.ACTION_NAME_INDEX_BUILD, Action.UNIT_NAME_INDEX_UNKNOWN, unitId );
 				break;
 			}
 			case (byte) 0x0d : { // Vision
@@ -313,8 +313,7 @@ public class BinRepParser {
 			}
 			case (byte) 0x1f : { // Train
 				final short unitId = commandsBuffer.getShort();
-				// TODO: determine unit name index
-				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( (byte) unitId ), Action.ACTION_NAME_INDEX_TRAIN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( unitId ), Action.ACTION_NAME_INDEX_TRAIN, unitId, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x20 : { // Cancel train
@@ -324,8 +323,7 @@ public class BinRepParser {
 			}
 			case (byte) 0x23 : { // Hatch
 				final short unitId = commandsBuffer.getShort();
-				// TODO: determine unit name index
-				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( (byte) unitId ), Action.ACTION_NAME_INDEX_HATCH, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( unitId ), Action.ACTION_NAME_INDEX_HATCH, unitId, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x1e :   // Return chargo
