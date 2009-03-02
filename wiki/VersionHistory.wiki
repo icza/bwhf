@@ -6,7 +6,7 @@
  * A new *Charts* tab. Setting visalizing all players on separate or on one chart with any chart type (gives the possibility to compare the speed of players on the Build order chart for example). Setting to draw charts using players' in-game colors to easily associate. Setting for auto-disabling players with less than 30 APM.
  * *APM* chart to visualize players' APMs customizable by detail level in pixels. Detected hack actions are marked in the charts.
  * *Hotkeys* chart to show players' hotkey usage. Setting for showing/hiding select hotkeys.
- * *Build order* chart to visualize buildings and units built/trained by the players. Setting to show/hide units in the charts. Setting to show/hide worker units (such as SCV, probe, drone). Note that only the build/train/hatch actions are visualized which are not neccessarily the same as the buildings/units that really get built/trained. Build order display levels can be changed.
+ * *Build order* chart to visualize buildings and units built/trained by the players. Setting to show/hide units in the charts. Setting to show/hide worker units (such as SCV, probe, drone). Note that only the build/train/hatch actions are visualized which are not neccessarily the same as the buildings/units that really get built/trained. Setting for changing the build order display levels.
  * *Linux version is available!*
  * New setting on the general settings tab: "Start folder when selecting replay files". This folder will be the start location when you want to select replay files on any tab.
  * Extracting game chat now contains more info about players: their in-game colors and the number of their actions (along with their races and APMs).
