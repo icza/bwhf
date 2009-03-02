@@ -35,11 +35,13 @@ public class ChartsTab extends Tab {
 	private final JLabel    loadedReplayLabel    = new JLabel( "No replays loaded." );
 	
 	/** Combobox to select the chart type.                                   */
-	public final JComboBox chartTypeComboBox            = new JComboBox( ChartsComponent.ChartType.values() );
+	public final JComboBox chartTypeComboBox                  = new JComboBox( ChartsComponent.ChartType.values() );
 	/** Checkbox to enable/disable putting all players on one chart.         */
-	public final JCheckBox allPlayersOnOneChartCheckBox = new JCheckBox( "All players on one chart", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_PLAYERS_ON_ONE_CHART ) ) );
+	public final JCheckBox allPlayersOnOneChartCheckBox       = new JCheckBox( "All players on one chart", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_PLAYERS_ON_ONE_CHART ) ) );
 	/** Checkbox to enable/disable using players' in-game colors for charts. */
-	public final JCheckBox usePlayersColorsCheckBox     = new JCheckBox( "Use players' in-game colors for charts", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLORS ) ) );
+	public final JCheckBox usePlayersColorsCheckBox           = new JCheckBox( "Use players' in-game colors for charts", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLORS ) ) );
+	/** Checkbox to auto-disable inactive players.                           */
+	public final JCheckBox autoDisableInactivePlayersCheckBox = new JCheckBox( "Auto-disable players with less than 30 APM", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS ) ) );
 	
 	
 	/** The component visualizing the charts. */
@@ -105,8 +107,9 @@ public class ChartsTab extends Tab {
 				chartsComponent.repaint();
 			}
 		} );
-		chartsCommonControlPanel.add( usePlayersColorsCheckBox );
 		usePlayersColorsCheckBox.setEnabled( !allPlayersOnOneChartCheckBox.isSelected() );
+		chartsCommonControlPanel.add( usePlayersColorsCheckBox );
+		chartsCommonControlPanel.add( autoDisableInactivePlayersCheckBox );
 		contentBox.add( chartsCommonControlPanel );
 		
 		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
@@ -131,9 +134,10 @@ public class ChartsTab extends Tab {
 	
 	@Override
 	public void assignUsedProperties() {
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_CHART_TYPE                , Integer.toString( chartTypeComboBox.getSelectedIndex() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_ALL_PLAYERS_ON_ONE_CHART  , Boolean.toString( allPlayersOnOneChartCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLORS, Boolean.toString( usePlayersColorsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_CHART_TYPE                   , Integer.toString( chartTypeComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_ALL_PLAYERS_ON_ONE_CHART     , Boolean.toString( allPlayersOnOneChartCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLORS   , Boolean.toString( usePlayersColorsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS, Boolean.toString( autoDisableInactivePlayersCheckBox.isSelected() ) );
 		
 		chartsComponent.assignUsedProperties();
 	}
