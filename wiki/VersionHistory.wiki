@@ -3,7 +3,7 @@
 =BWHF Agent version history=
 
 *Features and changes in the upcoming new version:*
- * A new *Charts* tab. All players of a replay can be visualized on one chart (giving the possibility to compare the speed of players on the Build order chart for example).
+ * A new *Charts* tab. All players of a replay can be visualized on separate or one chart (giving the possibility to compare the speed of players on the Build order chart for example).
  * *APM* chart to visualize players' APMs customizable by detail level in pixels. Detected hack actions are mared in the charts.
  * *Hotkeys* chart to show players' hotkey usage (select, assign).
  * *Build order* chart to visualize buildings and units built/trained by the players. Worker units (such as SCV, probe, drone) can optionally be shown. Note that actually only the build and train/hatch actions are visualized, not the buildings/units that eventually get built/trained. Displayed levels can be set.
