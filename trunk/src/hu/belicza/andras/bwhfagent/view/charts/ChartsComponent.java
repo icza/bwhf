@@ -20,6 +20,7 @@ import swingwt.awt.BorderLayout;
 import swingwt.awt.Color;
 import swingwt.awt.Dimension;
 import swingwt.awt.Font;
+import swingwt.awt.FontMetrics;
 import swingwt.awt.Graphics;
 import swingwt.awt.Graphics2D;
 import swingwt.awt.Stroke;
@@ -45,38 +46,38 @@ public class ChartsComponent extends JPanel {
 		new Color(   8, 128, 8 ), new Color( 252, 252, 124 ), new Color( 236, 196, 176 ), new Color(  64, 104, 212 ), new Color( 116, 164, 124 ), new Color( 144, 144, 184 ), new Color( 252, 252, 124 ), new Color(   0, 228, 252 )
 	};
 	
-	/** Background color for charts.                       */
+	/** Background color for charts.                             */
 	private static final Color  CHART_BACKGROUND_COLOR         = Color.BLACK;
-	/** Color to use for axis lines and axis titles.       */
+	/** Color to use for axis lines and axis titles.             */
 	private static final Color  CHART_AXIS_COLOR               = Color.YELLOW;
-	/** Default color to use for the chart curve.          */
+	/** Default color to use for the chart curve.                */
 	private static final Color  CHART_DEFAULT_COLOR            = Color.WHITE;
-	/** Color to use for axis and info texts.              */
+	/** Color to use for axis and info texts.                    */
 	private static final Color  CHART_ASSIST_LINES_COLOR       = new Color( 80, 80, 80 );
-	/** Color to use for axis labels.                      */
+	/** Color to use for axis labels.                            */
 	private static final Color  CHART_AXIS_LABEL_COLOR         = Color.CYAN;
-	/** Color to use for player descriptions.              */
+	/** Color to use for player descriptions.                    */
 	private static final Color  CHART_PLAYER_DESCRIPTION_COLOR = Color.GREEN;
-	/** Color to use for indicating hacks.                 */
+	/** Color to use for indicating hacks.                       */
 	private static final Color  CHART_HACK_COLOR               = Color.RED;
-	/** 2nd color to use for indicating hacks.             */
+	/** 2nd color to use for indicating hacks.                   */
 	private static final Color  CHART_HACK_COLOR2              = Color.YELLOW;
-	/** Font to use to draw descriptions and titles.       */
+	/** Font to use to draw descriptions and titles.             */
 	private static final Font   CHART_MAIN_FONT                = new Font( "Times", Font.BOLD, 10 );
-	/** Font to use to draw axis labels.                   */
+	/** Font to use to draw axis labels.                         */
 	private static final Font   CHART_AXIS_LABEL_FONT          = new Font( "Courier New", Font.PLAIN, 8 );
-	/** Font to use to draw hack markers.                  */
+	/** Font to use to draw hack markers.                        */
 	private static final Font   HACK_MARKER_FONT               = new Font( "Courier New", Font.BOLD, 13 );
-	/** Stroke to be used to draw charts.                  */
+	/** Font to use to draw texts as part of charts.             */
+	private static final Font   CHART_PART_TEXT_FONT           = new Font( "Courier New", Font.PLAIN, 8 );
+	/** Stroke to be used to draw charts.                        */
 	private static final Stroke CHART_STROKE                   = new BasicStroke( 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND );
-	/** Stroke to be used to draw everything else.         */
+	/** Stroke to be used to draw everything else.               */
 	private static final Stroke CHART_REST_STROKE              = new BasicStroke( 1.0f );
 	/** Number of assist lines to be painted in each chart.      */
 	private static final int    ASSIST_LINES_COUNT             = 5;
 	/** Number of time lables to be painted in each chart.       */
-	private static final int    TIME_LABELS_COUNT              = 7;
-	/** Number of visual levels to display build order elements. */
-	private static final int    BUILD_ORDER_DISPLAY_LEVELS     = 5;
+	private static final int    TIME_LABELS_COUNT              = 8;
 	
 	/**
 	 * The supported types of charts.
@@ -116,9 +117,15 @@ public class ChartsComponent extends JPanel {
 	private List< Integer >         playerIndexToShowList;
 	
 	/** APM chart detail level in pixels combo box. */
-	private final JComboBox apmChartDetailLevelComboBox = new JComboBox( new Object[] { 1, 2, 3, 4, 5, 10, 15, 20, 30, 50, 100 } );
-	/** Show select hotkeys checkbox. */
-	private final JCheckBox showSelectHotkeysCheckBox   = new JCheckBox( "Show select hotkeys", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS ) ) );
+	private final JComboBox apmChartDetailLevelComboBox    = new JComboBox( new Object[] { 1, 2, 3, 4, 5, 10, 15, 20, 30, 50, 100 } );
+	/** Show select hotkeys checkbox.               */
+	private final JCheckBox showSelectHotkeysCheckBox      = new JCheckBox( "Show select hotkeys", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS ) ) );
+	/** Build order display levels combo box.       */
+	private final JComboBox buildOrderDisplayLevelComboBox = new JComboBox( new Object[] { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 } );
+	/** Show units on build order checkbox.         */
+	private final JCheckBox showUnitsOnBuildOrderCheckBox  = new JCheckBox( "Show units", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_UNITS_ON_BUILD_ORDER ) ) );
+	/** Hide worker units checkbox.                 */
+	private final JCheckBox hideWorkerUnitsCheckBox        = new JCheckBox( "Hide worker units", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_WORKER_UNITS ) ) );
 	
 	/**
 	 * Creates a new ChartsComponent.
@@ -131,7 +138,7 @@ public class ChartsComponent extends JPanel {
 		buildConentGUI();
 		
 		apmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL ) ) );
-		setDoubleBuffered( true );
+		buildOrderDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_BUILD_ORDER_DISPLAY_LEVELS ) ) );
 	}
 	
 	/**
@@ -152,6 +159,15 @@ public class ChartsComponent extends JPanel {
 		};
 		apmChartDetailLevelComboBox.addChangeListener( repainterChangeListener );
 		showSelectHotkeysCheckBox.addChangeListener( repainterChangeListener );
+		buildOrderDisplayLevelComboBox.addChangeListener( repainterChangeListener );
+		showUnitsOnBuildOrderCheckBox.addChangeListener( new ChangeListener() {
+			public void stateChanged( final ChangeEvent event ) {
+				hideWorkerUnitsCheckBox.setEnabled( showUnitsOnBuildOrderCheckBox.isSelected() );
+			}
+		} );
+		showUnitsOnBuildOrderCheckBox.addChangeListener( repainterChangeListener );
+		hideWorkerUnitsCheckBox.addChangeListener( repainterChangeListener );
+		hideWorkerUnitsCheckBox.setEnabled( showUnitsOnBuildOrderCheckBox.isSelected() );
 	}
 	
 	/**
@@ -178,12 +194,20 @@ public class ChartsComponent extends JPanel {
 				chartOptionsPanel.add( showSelectHotkeysCheckBox );
 				break;
 			case BUILD_ORDER :
+				chartOptionsPanel.add( new JLabel( "Display levels: " ) );
+				chartOptionsPanel.add( buildOrderDisplayLevelComboBox );
+				chartOptionsPanel.add( new JLabel( " " ) );
+				chartOptionsPanel.add( showUnitsOnBuildOrderCheckBox );
+				chartOptionsPanel.add( hideWorkerUnitsCheckBox );
 				break;
 		}
 		
 		// We restore the values
 		apmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL ) ) );
 		showSelectHotkeysCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS ) ) );
+		showUnitsOnBuildOrderCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_UNITS_ON_BUILD_ORDER ) ) );
+		buildOrderDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_BUILD_ORDER_DISPLAY_LEVELS ) ) );
+		hideWorkerUnitsCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_WORKER_UNITS ) ) );
 		
 		contentPanel.doLayout();
 		repaint();
@@ -414,6 +438,8 @@ public class ChartsComponent extends JPanel {
 			
 			drawAxisAndTimeLabels( graphics, chartsParams, i );
 			
+			graphics.setFont( CHART_PART_TEXT_FONT );
+			
 			for ( final Action action : playerActions.actions ) {
 				final Color chartColor2 = new Color( ~chartColor.getRed() & 0xff, ~chartColor.getGreen() & 0xff, ~chartColor.getBlue() & 0xff );
 				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY ) {
@@ -451,22 +477,42 @@ public class ChartsComponent extends JPanel {
 	 * @param chartsParams parameters of the charts to be drawn
 	 */
 	private void paintBuildOrderCharts( final Graphics graphics, final ChartsParams chartsParams ) {
+		final boolean     showUnits               = showUnitsOnBuildOrderCheckBox.isSelected();
+		final int         buildOrderDisplayLevels = (Integer) buildOrderDisplayLevelComboBox.getSelectedItem() - 1;
+		final boolean     hideWorkerUnits         = hideWorkerUnitsCheckBox.isSelected();
+		final FontMetrics fontMetrics             = graphics.getFontMetrics( CHART_PART_TEXT_FONT );
+		
 		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
-			final PlayerActions playerActions = replay.replayActions.players[ playerIndexToShowList.get( i ) ];
+			final int           playerIndex   = playerIndexToShowList.get( i );
+			final PlayerActions playerActions = replay.replayActions.players[ playerIndex ];
 			final int           y1            = chartsParams.getY1ForChart( i );
+			final int           y2            = y1 + chartsParams.maxYInChart - 1;
 			final Color         inGameColor   = getPlayerInGameColor( playerActions );
 			final Color         chartColor    = inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor;
 			
 			drawAxisAndTimeLabels( graphics, chartsParams, i );
 			
-			int buildOrderLevel = 0;
+			graphics.setFont( CHART_PART_TEXT_FONT );
+			
+			int buildOrderLevel = chartsParams.allPlayersOnOneChart ? playerIndex % ( buildOrderDisplayLevels + 1 ) : buildOrderDisplayLevels;
 			for ( final Action action : playerActions.actions ) {
 				graphics.setColor( chartColor );
-				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
-					if ( ++buildOrderLevel == BUILD_ORDER_DISPLAY_LEVELS )
-						buildOrderLevel = 0;
-					Integer.valueOf( y1 );
-					
+				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD
+				  || showUnits && ( action.actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN || action.actionNameIndex == Action.ACTION_NAME_INDEX_HATCH ) ) {
+					final short unitId = action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ? action.parameterBuildingNameIndex : action.parameterUnitNameIndex;
+					if ( !( hideWorkerUnits && ( unitId == Action.UNIT_NAME_INDEX_DRONE || unitId == Action.UNIT_NAME_INDEX_PROBE || unitId == Action.UNIT_NAME_INDEX_SCV ) ) ) {
+						String buildingName = Action.UNIT_ID_NAME_MAP.get( unitId );
+						buildingName = buildingName == null ? "" : buildingName;
+						
+						final int x = chartsParams.getXForIteration( action.iteration );
+						final int y = y1 + 14 + buildOrderLevel * ( chartsParams.maxYInChart - 23 ) / buildOrderDisplayLevels;
+						
+						graphics.drawLine( x, y, x, y2 );
+						graphics.drawString( buildingName, x - fontMetrics.stringWidth( buildingName ) / 2 - 4, y - 14, true );
+						
+						if ( --buildOrderLevel < 0 )
+							buildOrderLevel = buildOrderDisplayLevels;
+					}
 				}
 			}
 			
@@ -541,8 +587,11 @@ public class ChartsComponent extends JPanel {
 	 * Assignes the used properties of this component.
 	 */
 	public void assignUsedProperties() {
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL, Integer.toString( apmChartDetailLevelComboBox.getSelectedIndex() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS   , Boolean.toString( showSelectHotkeysCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL    , Integer.toString( apmChartDetailLevelComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS       , Boolean.toString( showSelectHotkeysCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_BUILD_ORDER_DISPLAY_LEVELS, Integer.toString( buildOrderDisplayLevelComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_UNITS_ON_BUILD_ORDER , Boolean.toString( showUnitsOnBuildOrderCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_HIDE_WORKER_UNITS         , Boolean.toString( hideWorkerUnitsCheckBox.isSelected() ) );
 	}
 	
 }
