@@ -78,6 +78,8 @@ public class ChartsComponent extends JPanel {
 	private static final int    ASSIST_LINES_COUNT             = 5;
 	/** Number of time lables to be painted in each chart.       */
 	private static final int    TIME_LABELS_COUNT              = 8;
+	/** Auto disabling APM limit.                                */
+	private static final int    AUTO_DISABLING_APM_LIMIT       = 30;
 	
 	/**
 	 * The supported types of charts.
@@ -244,8 +246,9 @@ public class ChartsComponent extends JPanel {
 					repaint();
 				}
 			};
+			final int autoDisablingActionsCountLimit = AUTO_DISABLING_APM_LIMIT * replay.replayHeader.getDurationSeconds() / 60;
 			for ( int i = 0; i < players.length; i++ ) {
-				players[ i ][ 0 ] = new JCheckBox( playerActions[ i ].playerName, true );
+				players[ i ][ 0 ] = new JCheckBox( playerActions[ i ].playerName, !chartsTab.autoDisableInactivePlayersCheckBox.isSelected() || playerActions[ i ].actions.length > autoDisablingActionsCountLimit );
 				players[ i ][ 1 ] = i;
 				( (JCheckBox) players[ i ][ 0 ] ).addActionListener( playerCheckBoxActionListener );
 			}
@@ -257,11 +260,12 @@ public class ChartsComponent extends JPanel {
 				}
 			} );
 			
-			playerIndexToShowList = new ArrayList< Integer >( players.length );
-			for ( final Object[] player : players ) {
-				playerIndexToShowList.add( (Integer) player[ 1 ] );
+			for ( final Object[] player : players )
 				playersPanel.add( (JCheckBox) player[ 0 ] );
-			}
+			
+			playerIndexToShowList = new ArrayList< Integer >( players.length );
+			// Set the initially visible players:
+			playerCheckBoxActionListener.actionPerformed( null );
 		}
 		else
 			hackDescriptionList = null;
