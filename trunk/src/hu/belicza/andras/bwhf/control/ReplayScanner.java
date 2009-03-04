@@ -46,7 +46,7 @@ public class ReplayScanner {
 		
 		// Autogather/autotrain hack: having more than 1 action at iteration 5
 		int actionsAtIteration5Count = 0;
-		for ( int actionIndex = 0; actionIndex < actionsCount && actionIndex < 5; actionIndex++ )
+		for ( int actionIndex = 0; actionIndex < actionsCount && actionIndex < 25; actionIndex++ )
 			if ( playerActions[ actionIndex ].iteration == 5 ) {
 				if ( playerActions[ actionIndex ].actionNameIndex != Action.ACTION_NAME_INDEX_UNKNOWN )
 					actionsAtIteration5Count++;
@@ -55,14 +55,15 @@ public class ReplayScanner {
 				break;
 		if ( actionsAtIteration5Count > 1 ) {
 			// If the player has actions at iteration 10, it is more likely because he's using the latchanger program.
-			// In that case we don't report augogather/autotrain.
+			// In that case we don't report autogather/autotrain.
+			// If the player had more than 10 actions at iteration 5, we take that as proof of hack nonetheless.
 			boolean hasActionAtIteration10 = false;
 			for ( int actionIndex = 0; actionIndex < actionsCount && playerActions[ actionIndex ].iteration <= 10; actionIndex++ )
 				if ( playerActions[ actionIndex ].iteration == 10 ) {
 					hasActionAtIteration10 = true;
 					break;
 				}
-			if ( !hasActionAtIteration10 )
+			if ( actionsAtIteration5Count > 10 || !hasActionAtIteration10 )
 				hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_AUTOGATHER_AUTOTRAIN, 5 ) );
 		}
 		
@@ -77,7 +78,7 @@ public class ReplayScanner {
 		// This is only an approximate solution! Exceptions:
 		//    -if "hotkey add,xx" was used, this case it's only a subset of the real selection
 		//    -if unit(s)/building included in the selection was/were taken out => we get a superior/greater set
-		final Action[] lastSelectActionSetAsHotkeys         = new Action[ 11 ]; // We might have 11 hotkeys (0..11)
+		final Action[] lastSelectActionSetAsHotkeys         = new Action[ 11 ]; // We might have 11 hotkeys (0..10)
 		
 		// Actions ahead local variables for multicommand unit control detection
 		Action actionAhead1, actionAhead2, actionAhead3;
