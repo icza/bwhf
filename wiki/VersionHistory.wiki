@@ -10,6 +10,7 @@
  * *Now available for Linux too!*
  * New setting on the general settings tab: "Start folder when selecting replay files". This folder will be the start location when you want to select replay files on any tab.
  * Extracting game chat now contains more info about players: their in-game colors and the number of their actions (along with their races and APMs).
+ * Updated the scan engine to detect a new variation of autogather/multicommand hack.
  * Fixed a bug which caused the agent's window to "blink" or resized when some button was pressed ("Check key" example).
 
 ----
