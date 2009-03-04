@@ -2,6 +2,8 @@ package hu.belicza.andras.bwhfagent;
 
 import java.util.Properties;
 
+import swingwtx.swing.SwingWTUtils;
+
 /**
  * Application wide constants.
  * 
@@ -28,7 +30,7 @@ public class Consts {
 	public static final String ABOUT_TEMLATE_RESOURCE_NAME      = "about_template.html";
 	
 	/** Default Starcraft directory.                                           */
-	public static final String DEFAULT_STARCRAFT_DIRECTORY      = "C:/Program Files/Starcraft";
+	public static final String DEFAULT_STARCRAFT_DIRECTORY      = SwingWTUtils.isWindows() ? "C:/Program Files/Starcraft" : "/mnt/c/Program Files/Starcraft";
 	/** Starcraft replay folder relative to the Starcraft folder.              */
 	public static final String STARCRAFT_REPLAY_FOLDER          = "maps/replays";
 	/** Name of the last replay file relative to the starcraft folder.         */
@@ -121,12 +123,12 @@ public class Consts {
 	/** Properties holding the default settings. */
 	public static final Properties DEFAULT_SETTINGS_PROPERTIES = new Properties();
 	static {
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_STARCRAFT_FOLDER              , "C:/Program Files/Starcraft" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_STARCRAFT_FOLDER              , DEFAULT_STARCRAFT_DIRECTORY );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTOSCAN_ENABLED              , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SAVE_HACKER_REPS              , "true" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HACKER_REPS_DESTINATION       , "c:/replays/hackerreps" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HACKER_REPS_DESTINATION       , SwingWTUtils.isWindows() ? "c:/replays/hackerreps" : System.getProperty( "user.home" ) + "/replays/hackerreps" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SAVE_ALL_REPS                 , "true" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_REPS_DESTINATION          , "c:/replays/allreps" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_REPS_DESTINATION          , SwingWTUtils.isWindows() ? "c:/replays/allreps" : System.getProperty( "user.home" ) + "/replays/allreps" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_CONVERT_PCX_ENABLED      , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PCX_OUTPUT_FORMAT             , "JPG" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_INCLUDE_REPLAY_HEADER         , "true" );
