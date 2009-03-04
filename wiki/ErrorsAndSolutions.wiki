@@ -13,6 +13,8 @@ You can start the program with any of the following programs/scripts:
  * `BWHFAgent.exe` (preferred)
  * `BWHFAgent.cmd`
  * `BWHFAgent-console.cmd` (opens a console window for detailed error messages; good for debugging)
+Or on linux platform:
+ * `BWHFAgent.sh`
 
 ==I have Java installed, still can't start==
 BWHF Agent requires the 32 bit version of java. If you installed the 64 version, please install the 32 bit version too, and edit the starter scripts to use the 32 bit version's java.exe and javaw.exe.
@@ -32,6 +34,6 @@ You have to set Starcraft directory to let BWHF Agent know where to look for !La
 You have to select your gateway corresponding to where you play in order to report hackers. Moreover you need a valid autorization key. You can read about these keys here: AuthorizationKeys
 
 ==I think BWHF Agent misbehaving, but I don't see any errors==
-Try to start the program with the `BWHFAgent-console.cmd` script. That way you get a console where you might see some errors and details.
+Try to start the program with the `BWHFAgent-console.cmd` script on windows platform. That way you get a console where you might see some errors and details.
 
 In a case when error or exception occurs, you are welcome to report it by creating an issue here in the *Issues* tab.
