@@ -3,6 +3,7 @@ package hu.belicza.andras.bwhfagent.view;
 import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.hackerdb.ServerApiConsts;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,6 +34,7 @@ import swingwtx.swing.JComponent;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JTextField;
+import swingwtx.swing.SwingWTUtils;
 import swingwtx.swing.filechooser.FileFilter;
 
 /**
@@ -127,16 +129,34 @@ public class Utils {
 	 */
 	public static void showURLInBrowser( final String url ) {
 		try {
-			final String osName = System.getProperty( "os.name" );
+			boolean useOwnMethod = true;
+			if ( Desktop.isDesktopSupported() )
+				try {
+					Desktop.getDesktop().browse( new URL( url ).toURI() );
+					useOwnMethod = false;
+				}
+				catch ( final Exception e ) {
+				}
 			
-			String[] cmdArray = null;
-			if ( osName != null && osName.startsWith( "Windows" ) )
-				cmdArray = new String[] { "rundll32", "url.dll,FileProtocolHandler", url };
-			else
-				cmdArray = new String[] { "netscape", "-remote", "openURL", url };
-			
-			Runtime.getRuntime().exec( cmdArray );
-		} catch ( final IOException ie ) {
+			if ( useOwnMethod ) {
+				String[] cmdArray = null;
+				if ( SwingWTUtils.isWindows() ) {
+					cmdArray = new String[] { "rundll32", "url.dll,FileProtocolHandler", url };
+				}
+				else {
+					// Linux
+					final String[] browsers = { "firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape" };
+					for ( final String browser : browsers )
+						if ( Runtime.getRuntime().exec( new String[] { "which", browser } ).waitFor() == 0 ) {
+							cmdArray = new String[] { browser, url };
+							break;
+						}
+				}
+				
+				if ( cmdArray != null )
+					Runtime.getRuntime().exec( cmdArray );
+			}
+		} catch ( final Exception e ) {
 		}
 	}
 	
