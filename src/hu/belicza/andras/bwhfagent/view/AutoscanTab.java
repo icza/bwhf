@@ -290,14 +290,16 @@ public class AutoscanTab extends LoggedTab {
 								List< HackDescription > hackDescriptionList = null; 
 								final Replay replay = BinRepParser.parseReplay( lastReplayFile, false );
 								if ( replay != null )
-									hackDescriptionList = ReplayScanner.scanReplayForHacks( replay.replayActions, skipLatterActionsOfHackersCheckBox.isSelected() );
+									hackDescriptionList = ReplayScanner.scanReplayForHacks( replay, skipLatterActionsOfHackersCheckBox.isSelected() );
 								
 								if ( hackDescriptionList == null )
 									logMessage( "Could not scan LastReplay.rep!" );
 								else
 									if ( !hackDescriptionList.isEmpty() ) {
-										if ( bringToFrontCheckBox.isSelected() )
+										if ( bringToFrontCheckBox.isSelected() ) {
+											MainFrame.getInstance().selectTab( AutoscanTab.this );
 											MainFrame.getInstance().toFront();
+										}
 										if ( playSoundCheckBox.isSelected() )
 											Utils.playWavFile( foundHacksWavFileTextField.getText() );
 										

@@ -56,6 +56,11 @@ public class MainFrame extends JFrame {
 	/** Label to display if starcraft folder is set correctly. */
 	private final JLabel     starcraftFolderStatusLabel = new JLabel();
 	
+	/** The tabbed pane holding the tabs. */
+	private final JTabbedPane tabbedPane = new JTabbedPane();
+	
+	/** Reference to the charts tab.           */
+	public final ChartsTab          chartsTab;
 	/** Reference to the general settings tab. */
 	public final GeneralSettingsTab generalSettingsTab;
 	
@@ -64,8 +69,10 @@ public class MainFrame extends JFrame {
 	
 	/**
 	 * Creates a new MainFrame.
+	 * @param applicationVersion the application version string
+	 * @param arguments          arguments taken from the running environment
 	 */
-	public MainFrame( final String applicationVersion ) {
+	public MainFrame( final String applicationVersion, final String[] arguments ) {
 		if ( MainFrame.mainFrame != null )
 			throw new RuntimeException( "Only one main frame is allowed per Java Virtual Machine!" );
 		
@@ -76,8 +83,9 @@ public class MainFrame extends JFrame {
 		setTitle( Consts.APPLICATION_NAME );
 		setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
 		
+		chartsTab          = new ChartsTab();
 		generalSettingsTab = new GeneralSettingsTab();
-		tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), new ChartsTab(), new GameChatTab(), new PcxConverterTab(), generalSettingsTab, new AboutTab() };
+		tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), chartsTab, new GameChatTab(), new PcxConverterTab(), generalSettingsTab, new AboutTab() };
 		buildGUI();
 		checkStarcraftFolder();
 		
@@ -96,6 +104,14 @@ public class MainFrame extends JFrame {
 		
 		setBounds( 50, 20, 950, 700 );
 		setVisible( true );
+		
+		if ( arguments.length > 0 ) {
+			final File argumentFile = new File( arguments[ 0 ] );
+			if ( argumentFile.isFile() ) {
+				chartsTab.setReplayFile( new File( arguments[ 0 ] ) );
+				selectTab( chartsTab );
+			}
+		}
 	}
 	
 	/**
@@ -138,8 +154,6 @@ public class MainFrame extends JFrame {
 		} ), BorderLayout.EAST );
 		getContentPane().add( Utils.wrapInPanel( northPanel ), BorderLayout.NORTH );
 		
-		final JTabbedPane tabbedPane = new JTabbedPane();
-		
 		for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ ) {
 			final Tab tab = tabs[ tabIndex ];
 			final char mnemonicChar = Integer.toString( tabIndex + 1 ).charAt( 0 );
@@ -157,6 +171,14 @@ public class MainFrame extends JFrame {
 		getContentPane().add( tabbedPane, BorderLayout.CENTER );
 		
 		tabbedPane.setSelectedIndex( 0 );
+	}
+	
+	/**
+	 * Selects the specified tab.
+	 * @param tab tab to be selected
+	 */
+	public void selectTab( final Tab tab ) {
+		tabbedPane.setSelectedIndex( tabbedPane.indexOfComponent( tab.getContent() ) );
 	}
 	
 	/**

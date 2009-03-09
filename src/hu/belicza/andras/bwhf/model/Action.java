@@ -23,6 +23,8 @@ public class Action {
 	public static final int ACTION_NAME_INDEX_ATTACK_MOVE  =  8;
 	public static final int ACTION_NAME_INDEX_GATHER       =  9;
 	public static final int ACTION_NAME_INDEX_BUILD        = 10;
+	public static final int ACTION_NAME_INDEX_ALLY         = 11;
+	public static final int ACTION_NAME_INDEX_VISION       = 12;
 	
 	
 	/** Possible action names. */
@@ -37,7 +39,9 @@ public class Action {
 		"Move",
 		"Attack Move",
 		"Gather",
-		"Build"
+		"Build",
+		"Ally",
+		"Vision"
 	};
 	
 	

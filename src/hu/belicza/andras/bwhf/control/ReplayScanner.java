@@ -3,7 +3,9 @@ package hu.belicza.andras.bwhf.control;
 import hu.belicza.andras.bwhf.model.Action;
 import hu.belicza.andras.bwhf.model.HackDescription;
 import hu.belicza.andras.bwhf.model.PlayerActions;
+import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhf.model.ReplayActions;
+import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,15 +20,15 @@ public class ReplayScanner {
 	/**
 	 * Scans the replay actions for hacks.
 	 * 
-	 * @param replayActions replay actions to be scanned
+	 * @param replay                     replay to be scanned
 	 * @param skipLatterActionsOfHackers tells whether we have to proceed to the next player if one is found hacking
 	 * @return a list of {@link HackDescription}s describing the hacks found in the rep
 	 */
-	public static List< HackDescription > scanReplayForHacks( final ReplayActions replayActions, final boolean skipLatterActionsOfHackers ) {
+	public static List< HackDescription > scanReplayForHacks( final Replay replay, final boolean skipLatterActionsOfHackers ) {
 		final List< HackDescription > hackDescriptionList = new ArrayList< HackDescription >();
 		
-		for ( int playerIndex = 0; playerIndex < replayActions.players.length; playerIndex++ )
-			scanPlayerForHacks( replayActions.players[ playerIndex ], hackDescriptionList, skipLatterActionsOfHackers );
+		for ( final PlayerActions playerActions : replay.replayActions.players )
+			scanPlayerForHacks( replay.replayHeader, playerActions, hackDescriptionList, skipLatterActionsOfHackers );
 		
 		return hackDescriptionList;
 	}
@@ -34,11 +36,12 @@ public class ReplayScanner {
 	/**
 	 * Searches known hack patterns in the actions of a player.
 	 * 
-	 * @param player player to be scanned
+	 * @param replayHeader        header of the replay being scanned
+	 * @param player              player to be scanned
 	 * @param hackDescriptionList reference to a hack description list where to put new hack descriptions
 	 * @param skipLatterActionsOfHackers tells whether we have to proceed to the next player if one is found hacking
 	 */
-	private static void scanPlayerForHacks( final PlayerActions player, final List< HackDescription > hackDescriptionList, final boolean skipLatterActionsOfHackers ) {
+	private static void scanPlayerForHacks( final ReplayHeader replayHeader, final PlayerActions player, final List< HackDescription > hackDescriptionList, final boolean skipLatterActionsOfHackers ) {
 		final Action[] playerActions = player.actions;
 		final int      actionsCount  = playerActions.length;
 		
@@ -85,6 +88,15 @@ public class ReplayScanner {
 		
 		for ( int actionIndex = 0; actionIndex < actionsCount; actionIndex++ ) {
 			final Action action = playerActions[ actionIndex ];
+			
+			// Ally-vision drophack 
+			// TODO: consider to check if game type is UMS
+			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_ALLY )
+				if ( !checkAllyParams( action.parameters ) )
+					hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_ALLY_VISION_DROPHACK, action.iteration ) );
+			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_VISION )
+				if ( !checkVisionParams( action.parameters ) )
+					hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_ALLY_VISION_DROPHACK, action.iteration ) );
 			
 			// Building selection hack: selecting more than one non-zerg building object with one select command
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action.actionNameIndex == Action.ACTION_NAME_INDEX_BWCHART_HACK )
@@ -181,6 +193,60 @@ public class ReplayScanner {
 				if ( initialHackDescriptionListSize != hackDescriptionList.size() )
 					break;
 		}
+	}
+	
+	/**
+	 * Checks the parameters of an ally command.
+	 * @param parameters parameters of an ally command
+	 * @return true if paramameters are correct; false otherwise
+	 */
+	private static boolean checkAllyParams( final String parameters ) {
+		if ( !parameters.endsWith( "0 00" ) )
+			return false;
+		if ( parameters.charAt( 6 ) != '8' && parameters.charAt( 6 ) != '4' )
+			return false;
+		
+		if ( parameters.startsWith( "00 00" ) )
+			return false; // Has to ally at least to himself
+		
+		/*final StringBuilder bitsBuilder = new StringBuilder();
+		for ( final int paramBytePos : new int[] { 0, 1, 3, 4 } ) { // We skip the space
+			final String byteBinary = Integer.toBinaryString( Integer.parseInt( parameters.substring( paramBytePos, paramBytePos+1 ), 16 ) );
+			bitsBuilder.append( "00000000".substring( byteBinary.length(), 8 ) );
+			bitsBuilder.append( byteBinary );
+		}
+		
+		final boolean avOn = parameters.charAt( 6 ) == '4';
+		
+		boolean foundAlliedPlayer = false;
+		for ( int bitPos = bitsBuilder.length() - ( avOn ? 2 : 1 ); bitPos >= 0; bitPos -= 2 )
+			if ( bitsBuilder.charAt( bitPos ) == '1' ) {
+				foundAlliedPlayer = true;
+				break;
+			}
+		if ( !foundAlliedPlayer )
+			return false;
+		
+		for ( int bitPos = bitsBuilder.length() - ( avOn ? 1 : 2 ); bitPos >= 0; bitPos -= 2 )
+			if ( bitsBuilder.charAt( bitPos ) != '0' )
+				return false;*/
+		
+		return true;
+	}
+	
+	/**
+	 * Checks the parameters of a vision command.
+	 * @param parameters parameters of a vision command
+	 * @return true if paramameters are correct; false otherwise
+	 */
+	private static boolean checkVisionParams( final String parameters ) {
+		if ( parameters.charAt( 3 ) != '0' || parameters.charAt( 4 ) != '0' )
+			return false;
+		
+		if ( parameters.charAt( 0 ) == '0' && parameters.charAt( 1 ) == '0' )
+			return false;  // A player must always give vision to himself unless it's an UMS (which might allow "lights off")
+		
+		return true;
 	}
 	
 }

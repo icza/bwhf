@@ -260,7 +260,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 						List< HackDescription > hackDescriptionList = null; 
 						final Replay replay = BinRepParser.parseReplay( replayFile, false );
 						if ( replay != null )
-							hackDescriptionList = ReplayScanner.scanReplayForHacks( replay.replayActions, skipLatterActionsOfHackers );
+							hackDescriptionList = ReplayScanner.scanReplayForHacks( replay, skipLatterActionsOfHackers );
 						
 						if ( hackDescriptionList == null ) {
 							skippedRepsCount++;

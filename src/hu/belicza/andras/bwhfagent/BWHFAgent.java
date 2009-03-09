@@ -47,7 +47,7 @@ public class BWHFAgent extends JFrame {
 		} catch ( final Exception e  ) {
 		}*/
 	    
-		new MainFrame( applicationVersion == null ? "" : applicationVersion );
+		new MainFrame( applicationVersion == null ? "" : applicationVersion, arguments );
 	}
 	
 }
