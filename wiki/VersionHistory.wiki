@@ -2,6 +2,9 @@
 
 =BWHF Agent version history=
 
+====Features and changes in the upcoming new release:====
+ * Components are now centered properly when window is resized.
+
 ====1.40 2009-03-04====
  * A new *Charts* tab. Setting for visalizing all players on separate or on one chart with any chart type (gives the possibility to compare the speed of players on the Build order chart for example). Setting to draw charts using players' in-game colors to easily associate. Setting for auto-disabling players with less than 30 APM.
  * *APM* chart to visualize players' APMs customizable by detail level in pixels. Detected hack actions are marked in the charts.
