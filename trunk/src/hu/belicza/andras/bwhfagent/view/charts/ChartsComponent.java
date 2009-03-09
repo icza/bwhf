@@ -108,9 +108,9 @@ public class ChartsComponent extends JPanel {
 	/** Panel containing the chart canvas and other control elements. */
 	private final JPanel            contentPanel      = new JPanel( new BorderLayout() );
 	/** Panel containing options of the selected chart type.          */
-	private final JPanel            chartOptionsPanel = new JPanel();
+	private final JPanel            chartOptionsPanel = Utils.createWrapperPanel();
 	/** Panel containing checkboxes of players.                       */
-	private final JPanel            playersPanel      = new JPanel();
+	private final JPanel            playersPanel      = Utils.createWrapperPanel();
 	/** Replay whose charts to be visualized.                         */
 	private Replay                  replay;
 	/** List of hack descriptions of the replay.                      */

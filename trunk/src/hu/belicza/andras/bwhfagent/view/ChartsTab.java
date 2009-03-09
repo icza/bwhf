@@ -60,7 +60,7 @@ public class ChartsTab extends Tab {
 	 * Builds the GUI of the tab.
 	 */
 	private void buildGUI() {
-		final JPanel panel = new JPanel();
+		final JPanel panel = Utils.createWrapperPanel();
 		openLastReplayButton.setMnemonic( 'l' );
 		openLastReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
@@ -87,7 +87,7 @@ public class ChartsTab extends Tab {
 		panel.add( selectFileButton );
 		contentBox.add( panel );
 		
-		final JPanel chartsCommonControlPanel = new JPanel();
+		final JPanel chartsCommonControlPanel = Utils.createWrapperPanel();
 		chartsCommonControlPanel.add( new JLabel( "Chart type:" ) );
 		chartTypeComboBox.addChangeListener( new ChangeListener() {
 			public void stateChanged( final ChangeEvent event ) {

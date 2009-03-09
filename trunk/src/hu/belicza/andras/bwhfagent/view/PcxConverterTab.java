@@ -91,7 +91,7 @@ public class PcxConverterTab extends ProgressLoggedTab {
 		
 		contentBox.add( Utils.wrapInPanel( autoConvertEnabledCheckBox ) );
 		
-		panel = new JPanel();
+		panel = Utils.createWrapperPanel();
 		panel.add( new JLabel( "Output image format:" ) );
 		panel.add( outputFormatComboBox );
 		contentBox.add( panel );
