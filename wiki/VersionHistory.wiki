@@ -3,7 +3,7 @@
 =BWHF Agent version history=
 
 ====Features and changes in the upcoming new release:====
- * Replaced `BWHFAgent.exe` because the old one was flagged as a trojan by some minor antivirus programs.
+ * Replaced the starter `BWHFAgent.exe` file because the old one was flagged as a trojan by some minor antivirus programs.
  * Components are now centered properly when window is resized.
 
 ====1.40 2009-03-04====
