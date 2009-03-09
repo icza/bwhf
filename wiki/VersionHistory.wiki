@@ -4,7 +4,7 @@
 
 ====Features and changes in the upcoming new release:====
  * Replaced the starter `BWHFAgent.exe` file because the old one was flagged as a trojan by some minor antivirus programs.
- * If a replay file is passed to any of the starter scripts or exe, it will be opened in the charts tab.
+ * If a replay file is passed to any of the starter scripts or exe, it will be opened in the charts tab. The scripts can be associated to all replay files, and if you double click on a replay file, it will be opened in the charts tab (this only works with the script files).
  * Components are now centered properly when window is resized.
 
 ====1.40 2009-03-04====
