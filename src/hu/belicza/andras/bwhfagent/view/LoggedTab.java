@@ -67,7 +67,7 @@ public abstract class LoggedTab extends Tab {
 		logTextArea.setFont( new Font( "default", Font.PLAIN, 10 ) );
 		logPanel.add( new JScrollPane( logTextArea ), BorderLayout.CENTER );
 		
-		final JPanel controlPanel = new JPanel();
+		final JPanel controlPanel = Utils.createWrapperPanel();
 		controlPanel.add( scrollLockCheckBox );
 		final JButton clearLogButton = new JButton( "Clear" );
 		clearLogButton.addActionListener( new ActionListener() {

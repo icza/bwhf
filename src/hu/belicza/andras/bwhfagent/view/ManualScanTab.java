@@ -153,7 +153,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 			}
 		};
 		
-		final JPanel selectButtonsPanel = new JPanel();
+		final JPanel selectButtonsPanel = Utils.createWrapperPanel();
 		scanLastReplayButton.setMnemonic( 'L' );
 		scanLastReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
@@ -179,7 +179,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 		} );
 		contentBox.add( Utils.wrapInPanel( stopScanButton ) );
 		
-		final JPanel flagHackerRepsPanel = new JPanel();
+		final JPanel flagHackerRepsPanel = Utils.createWrapperPanel();
 		flagHackerRepsPanel.add( flagHackerRepsCheckBox );
 		flagHackerRepsPanel.add( flagHackerRepsPositionComboBox );
 		flagHackerRepsPanel.add( new JLabel( "of their names" ) );

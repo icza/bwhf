@@ -52,7 +52,7 @@ public class AboutTab extends Tab {
 	 * Builds the GUI of the tab.
 	 */
 	private void buildGUI() {
-		final JPanel buttonsPanel = new JPanel();
+		final JPanel buttonsPanel = Utils.createWrapperPanel();
 		final JButton homePageButton = new JButton( "Visit home page" );
 		homePageButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {

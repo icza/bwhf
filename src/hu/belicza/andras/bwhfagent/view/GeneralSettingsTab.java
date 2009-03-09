@@ -55,7 +55,7 @@ public class GeneralSettingsTab extends Tab {
 	 * Builds the GUI of the tab.
 	 */
 	private void buildGUI() {
-		JPanel panel = new JPanel();
+		JPanel panel = Utils.createWrapperPanel();
 		panel.add( checkUpdatesOnStartupCheckBox );
 		// In SwingWT Button text cannot be changed if a mnemonic has been assigned
 		//checkUpdatesButton.setMnemonic( ( checkUpdatesButton.getText().charAt( 0 ) ) );
@@ -69,14 +69,14 @@ public class GeneralSettingsTab extends Tab {
 		
 		contentBox.add( Utils.wrapInPanel( skipLatterActionsOfHackersCheckBox ) );
 		
-		panel = new JPanel(); 
+		panel = Utils.createWrapperPanel(); 
 		panel.add( new JLabel( "Sound volume:" ) );
 		soundVolumeSlider.setLabelTable( soundVolumeSlider.createStandardLabels( 10 ) );
 		soundVolumeSlider.setPreferredSize( new Dimension( 300, 45 ) );
 		panel.add( soundVolumeSlider );
 		contentBox.add( panel );
 		
-		panel = new JPanel();
+		panel = Utils.createWrapperPanel();
 		panel.add( new JLabel( "Start folder when selecting replay files:" ) );
 		panel.add( replayStartFolderTextField );
 		final JButton button = Utils.createFileChooserButton( getContent(), replayStartFolderTextField, JFileChooser.DIRECTORIES_ONLY, null, null, new Runnable() {

@@ -103,7 +103,7 @@ public class MainFrame extends JFrame {
 	 */
 	private void buildGUI() {
 		final JPanel northPanel = new JPanel( new BorderLayout() );
-		final JPanel panel = new JPanel();
+		final JPanel panel = Utils.createWrapperPanel();
 		startScButton.setMnemonic( startScButton.getText().charAt( 0 ) );
 		startScButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
