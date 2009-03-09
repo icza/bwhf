@@ -28,7 +28,7 @@ public class BinRepParser {
 	 * @param arguments
 	 */
 	public static void main( final String[] arguments ) {
-		final String[] replayNames = new String[] { "t:/starcraft/maps/replays/2009-01-27 01-05-21 LastRep.rep" };
+		final String[] replayNames = new String[] { "w:/rep/hacks/00399_icemantis_mc_jiqqa_my.rep" };
 		
 		for ( final String replayName : replayNames ) {
 			final Replay replay = parseReplay( new File( replayName ), false );
@@ -102,6 +102,9 @@ public class BinRepParser {
 			
 			replayHeader.mapWidth    = headerBuffer.getShort( 0x34 );
 			replayHeader.mapHeight   = headerBuffer.getShort( 0x36 );
+			
+			replayHeader.gameSpeed   = headerBuffer.getShort( 0x3a );
+			replayHeader.gameType    = headerBuffer.getShort( 0x3c );
 			
 			replayHeader.creatorName = getZeroPaddedString( headerData, 0x48, 24 );
 			
@@ -272,11 +275,17 @@ public class BinRepParser {
 				break;
 			}
 			case (byte) 0x0d : { // Vision
-				skipBytes = 2;
+				final byte data1 = commandsBuffer.get();
+				final byte data2 = commandsBuffer.get();
+				action = new Action( frame, convertToHexString( data1, data2 ), Action.ACTION_NAME_INDEX_VISION, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x0e : { // Ally
-				skipBytes = 4;
+				final byte data1 = commandsBuffer.get();
+				final byte data2 = commandsBuffer.get();
+				final byte data3 = commandsBuffer.get();
+				final byte data4 = commandsBuffer.get();
+				action = new Action( frame, convertToHexString( data1, data2, data3, data4 ), Action.ACTION_NAME_INDEX_ALLY, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x13 : { // Hotkey
@@ -392,6 +401,24 @@ public class BinRepParser {
 			action = new Action( frame, "", Action.ACTION_NAME_INDEX_UNKNOWN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 		
 		return action;
+	}
+	
+	/**
+	 * Converts bytes to hex string separating bytes with spaces. 
+	 * @return the bytes converted to string separated with spaces
+	 */
+	private static String convertToHexString( final byte... data ) {
+    	final StringBuilder sb = new StringBuilder( data.length * 2 );
+    	
+    	for ( int i = 0; i < data.length; ) {
+    	    sb.append( Integer.toHexString( ( data[ i ] >> 4 ) & 0x0f ).toUpperCase() );
+    	    sb.append( Integer.toHexString( data[ i ] & 0x0f ).toUpperCase() );
+    	    
+    	    if ( ++i < data.length )
+    	    	sb.append( ' ' );
+    	}
+    	
+    	return sb.toString();
 	}
 	
 }

@@ -38,6 +38,8 @@ public class ReplayHeader {
 	public String   gameName;
 	public short    mapWidth;
 	public short    mapHeight;
+	public short    gameSpeed;
+	public short    gameType;
 	public String   creatorName;
 	public String   mapName;
 	public byte[]   playerRecords = new byte[ 432 ]; // 12 player records, 12*36 bytes

@@ -117,7 +117,7 @@ public class ChartsTab extends Tab {
 		contentBox.add( chartsComponent.getContentPanel() );
 	}
 	
-	private void setReplayFile( final File file ) {
+	public void setReplayFile( final File file ) {
 		final Replay replay = BinRepParser.parseReplay( file, false );
 		
 		if ( replay == null ) {

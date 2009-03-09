@@ -227,7 +227,7 @@ public class ChartsComponent extends JPanel {
 			playersPanel.remove( playersPanel.getComponentCount() - 1 );
 		
 		if ( replay != null ) {
-			hackDescriptionList = ReplayScanner.scanReplayForHacks( replay.replayActions, false );
+			hackDescriptionList = ReplayScanner.scanReplayForHacks( replay, false );
 			
 			final PlayerActions[] playerActions = replay.replayActions.players;
 			
