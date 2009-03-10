@@ -2,6 +2,8 @@
 
 =BWHF Agent version history=
 
+<wiki:toc max_depth="3" />
+
 ===Features and changes in the upcoming new release:===
  * Players' action list is now displayed in the charts tab.
  * Replaced the starter `BWHFAgent.exe` file because the old one was flagged as a trojan by some minor antivirus programs.
