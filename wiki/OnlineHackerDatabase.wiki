@@ -2,6 +2,8 @@
 
 =BWHF Online Hacker Database=
 
+<wiki:toc max_depth="2" />
+
 The BWHF online hacker database is available here:
 
 [http://94.199.240.39/hackerdb/hackers]
