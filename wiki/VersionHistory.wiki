@@ -7,7 +7,7 @@
  * Replaced the starter `BWHFAgent.exe` file because the old one was flagged as a trojan by some minor antivirus programs.
  * If a replay file is passed to any of the starter scripts or exe, it will be opened in the charts tab by default. If you associate replay files with one of BWHF Agent's script files, the replay will be opened in the charts tab if you double click on the replay (this only works with the script files).
  * Detection of invalid ally and vision commands which can be used to drop players.
- * Components are now centered properly when window is resized.
+ * Components are now centered properly when window is enlarged.
 
 ----
 ===1.40 2009-03-04===
