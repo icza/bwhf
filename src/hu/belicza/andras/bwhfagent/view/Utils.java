@@ -25,6 +25,7 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.SourceDataLine;
 
+import swingwt.awt.BorderLayout;
 import swingwt.awt.Component;
 import swingwt.awt.Dimension;
 import swingwt.awt.FlowLayout;
@@ -72,6 +73,10 @@ public class Utils {
 		}
 	}
 	
+	public static Dimension getMaxDimension() {
+		return new Dimension( 10000, 10000 );
+	}
+	
 	/**
 	 * Creates a panel with FlowLayout, and sets its maximum to a relatively high value
 	 * to be big enough for all screen resolution.<br>
@@ -80,7 +85,7 @@ public class Utils {
 	 */
 	public static JPanel createWrapperPanel() {
 		final JPanel panel = new JPanel();
-		panel.setMaximumSize( new Dimension( 10000, 10000 ) );
+		panel.setMaximumSize( getMaxDimension() );
 		return panel;
 	}
 	
@@ -92,6 +97,17 @@ public class Utils {
 	public static JPanel wrapInPanel( final JComponent component ) {
 		final JPanel panel = createWrapperPanel();
 		panel.add( component );
+		return panel;
+	}
+	
+	/**
+	 * Wraps a component into a {@link JPanel} with a {@link BorderLayout}.
+	 * @param component component to be wrapped
+	 * @return the panel wrapping the component
+	 */
+	public static JPanel wrapInBorderLayoutPanel( final JComponent component ) {
+		final JPanel panel = new JPanel( new BorderLayout() );
+		panel.add( component, BorderLayout.CENTER );
 		return panel;
 	}
 	

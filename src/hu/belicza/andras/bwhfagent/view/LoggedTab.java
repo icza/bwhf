@@ -59,6 +59,7 @@ public abstract class LoggedTab extends Tab {
 	 */
 	protected void buildGUI() {
 		final JPanel logPanel = new JPanel( new BorderLayout() );
+		logPanel.setMaximumSize( Utils.getMaxDimension() );
 		
 		logTextArea.setEditable( false );
 		logTextArea.setLineWrap( true );

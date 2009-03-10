@@ -86,6 +86,7 @@ public class MainFrame extends JFrame {
 		chartsTab          = new ChartsTab();
 		generalSettingsTab = new GeneralSettingsTab();
 		tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), chartsTab, new GameChatTab(), new PcxConverterTab(), generalSettingsTab, new AboutTab() };
+		setBounds( 50, 20, 950, 700 );
 		buildGUI();
 		checkStarcraftFolder();
 		
@@ -104,6 +105,9 @@ public class MainFrame extends JFrame {
 		
 		setBounds( 50, 20, 950, 700 );
 		setVisible( true );
+		
+		for ( final Tab tab : tabs )
+			tab.initializationEnded();
 		
 		if ( arguments.length > 0 ) {
 			final File argumentFile = new File( arguments[ 0 ] );

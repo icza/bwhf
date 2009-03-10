@@ -52,4 +52,11 @@ public abstract class Tab {
 	public void onSelected() {
 	}
 	
+	/**
+	 * Receives a notification of the end of initialization.
+	 * Main frame is now visible.
+	 */
+	public void initializationEnded() {
+	}
+	
 }
