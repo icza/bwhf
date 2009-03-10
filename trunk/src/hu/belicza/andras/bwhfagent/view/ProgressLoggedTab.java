@@ -1,6 +1,5 @@
 package hu.belicza.andras.bwhfagent.view;
 
-import swingwt.awt.Dimension;
 import swingwtx.swing.JProgressBar;
 
 
@@ -27,7 +26,7 @@ public abstract class ProgressLoggedTab extends LoggedTab {
 	 * Builds the GUI of the panel.
 	 */
 	protected void buildGUI() {
-		progressBar.setMaximumSize( new Dimension( 10000, 10000 ) );
+		progressBar.setMaximumSize( Utils.getMaxDimension() );
 		contentBox.add( progressBar );
 		
 		super.buildGUI();
