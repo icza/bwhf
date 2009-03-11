@@ -1,5 +1,6 @@
 package hu.belicza.andras.bwhf.model;
 
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -173,7 +174,7 @@ public class Action {
 	/** Iteration when this action was given. */
 	public final int     iteration;
 	/** Name of the action.                   */
-	public final String  name;
+	public String        name;
 	/** Parameter string of the action.       */
 	public final String  parameters;
 	/** Unit ids string of the action.        */
@@ -249,7 +250,11 @@ public class Action {
 	
 	@Override
 	public String toString() {
-		return iteration + "\t" + ( name == null ? actionNameIndex : name ) + "\t" + parameters;
+		return iteration + "    " + ( name == null && actionNameIndex == ACTION_NAME_INDEX_UNKNOWN ? "<not parsed>" : ACTION_NAMES[ actionNameIndex ] ) + "    " + parameters;
+	}
+	
+	public String toString( final String playerName ) {
+		return new Formatter().format( "%5d %-25s %-13s %s", iteration, playerName, name == null && actionNameIndex == ACTION_NAME_INDEX_UNKNOWN ? "<not parsed>" : ACTION_NAMES[ actionNameIndex ], parameters ).toString();
 	}
 	
 }
