@@ -266,12 +266,12 @@ public class BinRepParser {
 				break;
 			}
 			case (byte) 0x0c : { // Build
-				final byte  type   = commandsBuffer.get();
+				/*final byte  type   = */commandsBuffer.get();
 				final short posX   = commandsBuffer.getShort();
 				final short posY   = commandsBuffer.getShort();
 				final short unitId = commandsBuffer.getShort();
 				
-				action = new Action( frame, "Build,(" + posX + "," + posY + ")," + Action.UNIT_ID_NAME_MAP.get( type ), Action.ACTION_NAME_INDEX_BUILD, Action.UNIT_NAME_INDEX_UNKNOWN, unitId );
+				action = new Action( frame, "Build,(" + posX + "," + posY + ")," + Action.UNIT_ID_NAME_MAP.get( unitId ), Action.ACTION_NAME_INDEX_BUILD, Action.UNIT_NAME_INDEX_UNKNOWN, unitId );
 				break;
 			}
 			case (byte) 0x0d : { // Vision

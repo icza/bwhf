@@ -7,7 +7,6 @@ import hu.belicza.andras.bwhfagent.view.charts.ChartsComponent;
 import hu.belicza.andras.bwhfagent.view.charts.ChartsComponent.ChartType;
 
 import java.io.File;
-import java.util.Vector;
 
 import swingwt.awt.Color;
 import swingwt.awt.event.ActionEvent;
@@ -17,9 +16,7 @@ import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JLabel;
-import swingwtx.swing.JList;
 import swingwtx.swing.JPanel;
-import swingwtx.swing.JSplitPane;
 import swingwtx.swing.event.ChangeEvent;
 import swingwtx.swing.event.ChangeListener;
 
@@ -46,13 +43,8 @@ public class ChartsTab extends Tab {
 	/** Checkbox to auto-disable inactive players.                           */
 	public final JCheckBox autoDisableInactivePlayersCheckBox = new JCheckBox( "Auto-disable players with less than 30 APM", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS ) ) );
 	
-	/** Split pane to display the charts component and the players' action list. */
-	private final JSplitPane splitPane = new JSplitPane( JSplitPane.VERTICAL_SPLIT, true );
-	
 	/** The component visualizing the charts. */
 	private final ChartsComponent chartsComponent = new ChartsComponent( this );
-	/** List to show the players' actions.    */
-	private final JList           actionsList     = new JList( new Vector<Object>( System.getProperties().entrySet() ) );
 	
 	public ChartsTab() {
 		super( "Charts" );
@@ -124,15 +116,12 @@ public class ChartsTab extends Tab {
 		
 		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
 		
-		splitPane.setTopComponent( chartsComponent.getContentPanel() );
-		splitPane.setBottomComponent( Utils.wrapInBorderLayoutPanel( actionsList ) );
-		splitPane.setDividerLocation( 0.8 );
-		contentBox.add( Utils.wrapInBorderLayoutPanel( splitPane ) );
+		contentBox.add( chartsComponent.getContentPanel() );
 	}
 	
 	@Override
 	public void initializationEnded() {
-		splitPane.setDividerLocation( 0.8 );
+		chartsComponent.initializationEnded();
 	}
 	
 	public void setReplayFile( final File file ) {

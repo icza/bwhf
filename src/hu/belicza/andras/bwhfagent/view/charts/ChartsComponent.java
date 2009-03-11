@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import swingwt.awt.BasicStroke;
 import swingwt.awt.BorderLayout;
@@ -25,12 +26,19 @@ import swingwt.awt.Graphics2D;
 import swingwt.awt.Stroke;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwt.awt.event.MouseAdapter;
+import swingwt.awt.event.MouseEvent;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
 import swingwtx.swing.JLabel;
+import swingwtx.swing.JList;
 import swingwtx.swing.JPanel;
+import swingwtx.swing.JScrollPane;
+import swingwtx.swing.JSplitPane;
 import swingwtx.swing.event.ChangeEvent;
 import swingwtx.swing.event.ChangeListener;
+import swingwtx.swing.event.ListSelectionEvent;
+import swingwtx.swing.event.ListSelectionListener;
 
 /**
  * Component to visialize charts.
@@ -61,6 +69,8 @@ public class ChartsComponent extends JPanel {
 	private static final Color  CHART_HACK_COLOR               = Color.RED;
 	/** 2nd color to use for indicating hacks.                   */
 	private static final Color  CHART_HACK_COLOR2              = Color.YELLOW;
+	/** 2nd color to use for indicating hacks.                   */
+	private static final Color  CHART_MARKER_COLOR             = new Color( 150, 150, 255 );
 	/** Font to use to draw descriptions and titles.             */
 	private static final Font   CHART_MAIN_FONT                = new Font( "Times", Font.BOLD, 10 );
 	/** Font to use to draw axis labels.                         */
@@ -128,6 +138,14 @@ public class ChartsComponent extends JPanel {
 	/** Hide worker units checkbox.                 */
 	private final JCheckBox hideWorkerUnitsCheckBox        = new JCheckBox( "Hide worker units", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_WORKER_UNITS ) ) );
 	
+	/** Split pane to display the charts component and the players' action list. */
+	private final JSplitPane splitPane   = new JSplitPane( JSplitPane.VERTICAL_SPLIT, true );
+	/** List to show the players' actions.    */
+	private final JList      actionsList = new JList();
+	
+	/** Position of the marker. */
+	private int markerPosition = -1;
+	
 	/**
 	 * Creates a new ChartsComponent.
 	 */
@@ -151,7 +169,54 @@ public class ChartsComponent extends JPanel {
 		controlPanel.add( playersPanel, BorderLayout.CENTER );
 		contentPanel.add( controlPanel, BorderLayout.NORTH );
 		
-		contentPanel.add( this, BorderLayout.CENTER );
+		addMouseListener( new MouseAdapter() {
+			@Override
+			public void mouseClicked( final MouseEvent event ) {
+				if ( replay == null || playerIndexToShowList.isEmpty() )
+					return;
+				
+				final int iteration = ChartsParams.getIterationForX( event.getX(), replay.replayHeader.gameFrames, ChartsComponent.this );
+				if ( iteration >= 0 ) {
+					markerPosition = event.getX();
+					
+					// Find an action for that iteration
+					int minIndex = 0, maxIndex = actionsList.getItemCount() - 1;
+					int lastItemIndex = -1;
+					while ( true ) {
+						int itemIndex = ( minIndex + maxIndex ) / 2;
+						final String actionString = (String) actionsList.getItemAt( itemIndex );
+						final int    iteration2   = Integer.parseInt( new StringTokenizer( actionString ).nextToken() );
+						final int    position     = ChartsParams.getXForIteration( iteration2, replay.replayHeader.gameFrames, ChartsComponent.this );
+						
+						if ( markerPosition == position || lastItemIndex == itemIndex ) {
+							actionsList.setSelectedIndex( itemIndex );
+							actionsList.ensureIndexIsVisible( itemIndex );
+							break;
+						}
+						else if ( markerPosition < position )
+							maxIndex = itemIndex;
+						else
+							minIndex = itemIndex;
+						lastItemIndex = itemIndex;
+					}
+					
+					repaint();
+				}
+			}
+		} );
+		splitPane.setTopComponent( Utils.wrapInBorderLayoutPanel( this ) );
+		actionsList.setFont( new Font( "Courier New", Font.PLAIN, 8 ) );
+		actionsList.addListSelectionListener( new ListSelectionListener() {
+			public void valueChanged( final ListSelectionEvent event ) {
+				final String actionString = (String) actionsList.getSelectedValue();
+				final int    iteration    = Integer.parseInt( new StringTokenizer( actionString ).nextToken() );
+				markerPosition = ChartsParams.getXForIteration( iteration, replay.replayHeader.gameFrames, ChartsComponent.this );
+				repaint();
+			}
+		} );
+		splitPane.setBottomComponent( new JScrollPane( actionsList ) );
+		splitPane.setDividerLocation( 0.8 );
+		contentPanel.add( splitPane, BorderLayout.CENTER );
 		
 		final ChangeListener repainterChangeListener = new ChangeListener() {
 			public void stateChanged( final ChangeEvent event ) {
@@ -176,6 +241,10 @@ public class ChartsComponent extends JPanel {
 	 */
 	public JPanel getContentPanel() {
 		return contentPanel;
+	}
+	
+	public void initializationEnded() {
+		splitPane.setDividerLocation( 0.8 );
 	}
 	
 	public void setChartType( final ChartType chartType ) {
@@ -221,6 +290,8 @@ public class ChartsComponent extends JPanel {
 	public void setReplay( final Replay replay ) {
 		this.replay = replay;
 		
+		markerPosition = -1;
+		
 		// removeAll() does not work properly in SwingWT, we remove previous checkboxes manually!
 		while ( playersPanel.getComponentCount() > 1 )
 			playersPanel.remove( playersPanel.getComponentCount() - 1 );
@@ -242,6 +313,8 @@ public class ChartsComponent extends JPanel {
 					for ( int i = 0; i < players.length; i++ )
 						if ( ( (JCheckBox) players[ i ][ 0 ] ).isSelected() )
 							playerIndexToShowList.add( (Integer) players[ i ][ 1 ] );
+					
+					loadPlayerActionsIntoList();
 					repaint();
 				}
 			};
@@ -273,6 +346,43 @@ public class ChartsComponent extends JPanel {
 		repaint();
 	}
 	
+	private void loadPlayerActionsIntoList() {
+		final PlayerActions[] playerActionss = replay.replayActions.players;
+		
+		final int[] actionIndices = new int[ playerActionss.length ];
+		int actionsCount = 0;
+		for ( final int playerIndex : playerIndexToShowList )
+			actionsCount += playerActionss[ playerIndex ].actions.length;
+		
+		final String[] actionStrings = new String[ actionsCount ];
+		
+		int iteration;
+		int nextIteration = Integer.MAX_VALUE;
+		for ( final int playerIndex : playerIndexToShowList )
+			if ( playerActionss[ playerIndex ].actions.length > 0 )
+				nextIteration = Math.min( nextIteration, playerActionss[ playerIndex ].actions[ 0 ].iteration );
+		
+		int actionCounter = 0;
+		Action action = null;
+		while ( actionCounter < actionsCount ) {
+			iteration     = nextIteration;
+			nextIteration = Integer.MAX_VALUE;
+			
+			for ( final int playerIndex : playerIndexToShowList ) {
+				final PlayerActions player = playerActionss[ playerIndex ];
+				while ( actionIndices[ playerIndex ] < player.actions.length && ( action = player.actions[ actionIndices[ playerIndex ] ] ).iteration == iteration ) {
+					actionStrings[ actionCounter++ ] = action.toString( player.playerName );
+					actionIndices[ playerIndex ]++;
+				}
+				if ( actionIndices[ playerIndex ] < player.actions.length )
+					nextIteration = Math.min( nextIteration, action.iteration );
+			}
+			
+		}
+		
+		actionsList.setListData( actionStrings );
+	}
+	
 	@Override
 	public void paintComponent( final Graphics graphics ) {
 		( (Graphics2D) graphics ).setBackground( CHART_BACKGROUND_COLOR );
@@ -290,6 +400,11 @@ public class ChartsComponent extends JPanel {
 				case BUILD_ORDER :
 					paintBuildOrderCharts( graphics, chartsParams );
 					break;
+			}
+			
+			if ( markerPosition >= 0 ) {
+				graphics.setColor( CHART_MARKER_COLOR );
+				graphics.drawLine( markerPosition, 0, markerPosition, getHeight() - 1 );
 			}
 		}
 	}

@@ -64,4 +64,28 @@ public class ChartsParams {
 		return x1 + iteration * maxXInChart / frames;
 	}
 	
+	/**
+	 * Returns the x coordinate calculated for the given iteration.
+	 * @param iteration       iteration whose x coordinate to be returned
+	 * @param frames          frames count
+	 * @param chartsComponent reference to the charts component
+	 * @return the x coordinate calculated for the given iteration
+	 */
+	public static int getXForIteration( final int iteration, final int frames, final JComponent chartsComponent ) {
+		return AXIS_SPACE_X + iteration * ( chartsComponent.getWidth() - AXIS_SPACE_X  - 1 ) / frames;
+	}
+	
+	/**
+	 * Returns the iteration denoted by the x coordinate on the charts component.
+	 * @param x               x coordinate whose iteration is to be returned
+	 * @param frames          frames count
+	 * @param chartsComponent reference to the charts component
+	 * @return the iteration denoted by the x coordinate on the charts component or -1 if it is outside the game iteration domain
+	 */
+	public static int getIterationForX( final int x, final int frames, final JComponent chartsComponent ) {
+		if ( x < AXIS_SPACE_X )
+			return -1;
+		return ( x - AXIS_SPACE_X ) * frames / ( chartsComponent.getWidth() - AXIS_SPACE_X  - 1 );
+	}
+	
 }
