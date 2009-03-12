@@ -12,6 +12,7 @@ import hu.belicza.andras.bwhfagent.view.Utils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
@@ -26,19 +27,19 @@ import swingwt.awt.Graphics2D;
 import swingwt.awt.Stroke;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwt.awt.event.KeyAdapter;
+import swingwt.awt.event.KeyEvent;
 import swingwt.awt.event.MouseAdapter;
 import swingwt.awt.event.MouseEvent;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
 import swingwtx.swing.JLabel;
-import swingwtx.swing.JList;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JScrollPane;
 import swingwtx.swing.JSplitPane;
+import swingwtx.swing.JTextArea;
 import swingwtx.swing.event.ChangeEvent;
 import swingwtx.swing.event.ChangeListener;
-import swingwtx.swing.event.ListSelectionEvent;
-import swingwtx.swing.event.ListSelectionListener;
 
 /**
  * Component to visialize charts.
@@ -139,9 +140,13 @@ public class ChartsComponent extends JPanel {
 	private final JCheckBox hideWorkerUnitsCheckBox        = new JCheckBox( "Hide worker units", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_WORKER_UNITS ) ) );
 	
 	/** Split pane to display the charts component and the players' action list. */
-	private final JSplitPane splitPane   = new JSplitPane( JSplitPane.VERTICAL_SPLIT, true );
-	/** List to show the players' actions.    */
-	private final JList      actionsList = new JList();
+	private final JSplitPane            splitPane              = new JSplitPane( JSplitPane.VERTICAL_SPLIT, true );
+	/** List of the displayable actions, pairs of action+palyer name.            */
+	private final ArrayList< Object[] > actionList             = new ArrayList< Object[] >();
+	/** This is where we first construct actionsListTextArea's content.          */
+	private final StringBuilder         actionsListTextBuilder = new StringBuilder();
+	/** Text area to show the players' actions.                                  */
+	private final JTextArea             actionsListTextArea    = new JTextArea();
 	
 	/** Position of the marker. */
 	private int markerPosition = -1;
@@ -171,50 +176,30 @@ public class ChartsComponent extends JPanel {
 		
 		addMouseListener( new MouseAdapter() {
 			@Override
-			public void mouseClicked( final MouseEvent event ) {
-				if ( replay == null || playerIndexToShowList.isEmpty() )
-					return;
-				
-				final int iteration = ChartsParams.getIterationForX( event.getX(), replay.replayHeader.gameFrames, ChartsComponent.this );
-				if ( iteration >= 0 ) {
-					markerPosition = event.getX();
-					
-					// Find an action for that iteration
-					int minIndex = 0, maxIndex = actionsList.getItemCount() - 1;
-					int lastItemIndex = -1;
-					while ( true ) {
-						int itemIndex = ( minIndex + maxIndex ) / 2;
-						final String actionString = (String) actionsList.getItemAt( itemIndex );
-						final int    iteration2   = Integer.parseInt( new StringTokenizer( actionString ).nextToken() );
-						final int    position     = ChartsParams.getXForIteration( iteration2, replay.replayHeader.gameFrames, ChartsComponent.this );
-						
-						if ( markerPosition == position || lastItemIndex == itemIndex ) {
-							actionsList.setSelectedIndex( itemIndex );
-							actionsList.ensureIndexIsVisible( itemIndex );
-							break;
-						}
-						else if ( markerPosition < position )
-							maxIndex = itemIndex;
-						else
-							minIndex = itemIndex;
-						lastItemIndex = itemIndex;
-					}
-					
-					repaint();
-				}
+			public void mousePressed( final MouseEvent event ) {
+				syncMarkerFromChartToActionList( event.getX() );
 			}
 		} );
 		splitPane.setTopComponent( Utils.wrapInBorderLayoutPanel( this ) );
-		actionsList.setFont( new Font( "Courier New", Font.PLAIN, 8 ) );
-		actionsList.addListSelectionListener( new ListSelectionListener() {
-			public void valueChanged( final ListSelectionEvent event ) {
-				final String actionString = (String) actionsList.getSelectedValue();
-				final int    iteration    = Integer.parseInt( new StringTokenizer( actionString ).nextToken() );
-				markerPosition = ChartsParams.getXForIteration( iteration, replay.replayHeader.gameFrames, ChartsComponent.this );
-				repaint();
+		actionsListTextArea.setFont( new Font( "Courier New", Font.PLAIN, 8 ) );
+		actionsListTextArea.addKeyListener( new KeyAdapter() {
+			@Override
+			public void keyReleased( final KeyEvent event ) {
+				if ( !event.isShiftDown() && !event.isControlDown() )
+					syncMarkerFromActionListToChart();
 			}
 		} );
-		splitPane.setBottomComponent( new JScrollPane( actionsList ) );
+		actionsListTextArea.addMouseListener( new MouseAdapter() {
+			@Override
+			public void mousePressed( final MouseEvent event ) {
+				if ( event.getButton() == MouseEvent.BUTTON1 )
+					syncMarkerFromActionListToChart();
+			}
+		} );
+ 		actionsListTextArea.setEditable( false );
+		actionsListTextArea.setBackground( Color.WHITE );
+		actionsListTextArea.setForeground( Color.BLACK );
+		splitPane.setBottomComponent( new JScrollPane( actionsListTextArea ) );
 		splitPane.setDividerLocation( 0.8 );
 		contentPanel.add( splitPane, BorderLayout.CENTER );
 		
@@ -234,6 +219,90 @@ public class ChartsComponent extends JPanel {
 		showUnitsOnBuildOrderCheckBox.addChangeListener( repainterChangeListener );
 		hideWorkerUnitsCheckBox.addChangeListener( repainterChangeListener );
 		hideWorkerUnitsCheckBox.setEnabled( showUnitsOnBuildOrderCheckBox.isSelected() );
+	}
+	
+	/**
+	 * Synchronizes the marker from the chart to the action list text area.
+	 * @param x x coordinate on the chart
+	 */
+	private void syncMarkerFromChartToActionList( final int x ) {
+		if ( replay == null || playerIndexToShowList.isEmpty() )
+			return;
+		
+		final int iteration = ChartsParams.getIterationForX( x, replay.replayHeader.gameFrames, ChartsComponent.this );
+		if ( iteration >= 0 ) {
+			markerPosition = x;
+			
+			// Find an action for that iteration
+			int minIndex = 0, maxIndex = actionList.size() - 1;
+			int lastItemIndex = -1;
+			while ( true ) {
+				int       itemIndex  = ( minIndex + maxIndex ) / 2;
+				final int iteration2 = ( (Action) actionList.get( itemIndex )[ 0 ] ).iteration;
+				final int position   = ChartsParams.getXForIteration( iteration2, replay.replayHeader.gameFrames, ChartsComponent.this );
+				
+				if ( markerPosition == position || lastItemIndex == itemIndex ) {
+					final String actionString = ( (Action) actionList.get( itemIndex )[ 0 ] ).toString( (String) actionList.get( itemIndex )[ 1 ] );
+					// We get position in the textarea's text, because this might differ from the position in acitonsListTextBuilder
+					final int actionCaretPosition = actionsListTextArea.getText().indexOf( actionString );
+					actionsListTextArea.setCaretPosition( actionCaretPosition );
+					// First clear previous selection:
+					actionsListTextArea.setSelectionStart( -1 );
+					actionsListTextArea.setSelectionEnd( -1 );
+					actionsListTextArea.setSelectionStart( actionCaretPosition );
+					actionsListTextArea.setSelectionEnd( actionCaretPosition + actionString.length() );
+					break;
+				}
+				else if ( markerPosition < position )
+					maxIndex = itemIndex;
+				else
+					minIndex = itemIndex;
+				lastItemIndex = itemIndex;
+			}
+			
+			repaint();
+		}
+	}
+	
+	/**
+	 * Synchronizes the marker from the chart to the action list text area.
+	 */
+	private void syncMarkerFromActionListToChart() {
+		final String actionListContentText = actionsListTextArea.getText();
+		if ( actionsListTextArea.getText().length() == 0 )
+			return;
+		
+		int caretPosition = actionsListTextArea.getCaretPosition();
+		
+		if ( caretPosition < 0 )
+			caretPosition = 0;
+		if ( caretPosition >= actionListContentText.length() )
+			caretPosition = actionListContentText.length() - 1;
+		if ( actionListContentText.charAt( caretPosition ) == '\n' )
+			caretPosition--;
+		
+		int actionFirstPosition = caretPosition;
+		// Backward search
+		while ( actionFirstPosition > 0 && actionListContentText.charAt( actionFirstPosition ) != '\n' )
+			actionFirstPosition--;
+		if ( actionListContentText.charAt( actionFirstPosition ) == '\n' )
+			actionFirstPosition++;
+		
+		int actionLastPosition = actionListContentText.indexOf( '\n', caretPosition );
+		if ( actionLastPosition < 0 )
+			actionLastPosition = actionListContentText.length();
+		
+		// First clear previous selection:
+		actionsListTextArea.setSelectionStart( -1 );
+		actionsListTextArea.setSelectionEnd( -1 );
+		actionsListTextArea.setSelectionStart( actionFirstPosition );
+		actionsListTextArea.setSelectionEnd( actionLastPosition );
+		
+		final String actionString = (String) actionListContentText.substring( actionFirstPosition, actionLastPosition );
+		final int    iteration    = Integer.parseInt( new StringTokenizer( actionString ).nextToken() );
+		markerPosition = ChartsParams.getXForIteration( iteration, replay.replayHeader.gameFrames, ChartsComponent.this );
+		
+		repaint();
 	}
 	
 	/**
@@ -349,38 +418,29 @@ public class ChartsComponent extends JPanel {
 	private void loadPlayerActionsIntoList() {
 		final PlayerActions[] playerActionss = replay.replayActions.players;
 		
-		final int[] actionIndices = new int[ playerActionss.length ];
 		int actionsCount = 0;
 		for ( final int playerIndex : playerIndexToShowList )
 			actionsCount += playerActionss[ playerIndex ].actions.length;
 		
-		final String[] actionStrings = new String[ actionsCount ];
-		
-		int iteration;
-		int nextIteration = Integer.MAX_VALUE;
-		for ( final int playerIndex : playerIndexToShowList )
-			if ( playerActionss[ playerIndex ].actions.length > 0 )
-				nextIteration = Math.min( nextIteration, playerActionss[ playerIndex ].actions[ 0 ].iteration );
-		
-		int actionCounter = 0;
-		Action action = null;
-		while ( actionCounter < actionsCount ) {
-			iteration     = nextIteration;
-			nextIteration = Integer.MAX_VALUE;
-			
-			for ( final int playerIndex : playerIndexToShowList ) {
-				final PlayerActions player = playerActionss[ playerIndex ];
-				while ( actionIndices[ playerIndex ] < player.actions.length && ( action = player.actions[ actionIndices[ playerIndex ] ] ).iteration == iteration ) {
-					actionStrings[ actionCounter++ ] = action.toString( player.playerName );
-					actionIndices[ playerIndex ]++;
-				}
-				if ( actionIndices[ playerIndex ] < player.actions.length )
-					nextIteration = Math.min( nextIteration, action.iteration );
-			}
-			
+		actionList.clear();
+		actionList.ensureCapacity( actionsCount );
+		for ( final int playerIndex : playerIndexToShowList ) {
+			final String playerName = playerActionss[ playerIndex ].playerName;
+			for ( final Action action : playerActionss[ playerIndex ].actions )
+				actionList.add( new Object[] { action, playerName } );
 		}
 		
-		actionsList.setListData( actionStrings );
+		Collections.sort( actionList, new Comparator< Object[] >() {
+			public int compare( Object[] action1, Object[] action2 ) {
+				return ( (Action) action1[ 0 ] ).compareTo( (Action) action2[ 0 ] );
+			}
+		} );
+		
+		actionsListTextBuilder.setLength( 0 );
+		for ( final Object[] action : actionList )
+			actionsListTextBuilder.append( ( (Action) action[ 0 ] ).toString( (String) action[ 1 ] ) ).append( '\n' );
+		actionsListTextBuilder.setLength( actionsListTextBuilder.length() - 1 ); // remove the last '\n'
+		actionsListTextArea.setText( actionsListTextBuilder.toString() );
 	}
 	
 	@Override
