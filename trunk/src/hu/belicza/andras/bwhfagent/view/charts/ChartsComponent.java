@@ -249,8 +249,9 @@ public class ChartsComponent extends JPanel {
 					// First clear previous selection:
 					actionsListTextArea.setSelectionStart( -1 );
 					actionsListTextArea.setSelectionEnd( -1 );
-					actionsListTextArea.setSelectionStart( actionCaretPosition );
+					// Selection end has to be set first, or else it doesn't work for the first line (doesn't select it).
 					actionsListTextArea.setSelectionEnd( actionCaretPosition + actionString.length() );
+					actionsListTextArea.setSelectionStart( actionCaretPosition );
 					break;
 				}
 				else if ( markerPosition < position )
@@ -268,7 +269,7 @@ public class ChartsComponent extends JPanel {
 	 * Synchronizes the marker from the chart to the action list text area.
 	 */
 	private void syncMarkerFromActionListToChart() {
-		final String actionListContentText = actionsListTextArea.getText();
+		final String actionListText = actionsListTextArea.getText();
 		if ( actionsListTextArea.getText().length() == 0 )
 			return;
 		
@@ -276,29 +277,30 @@ public class ChartsComponent extends JPanel {
 		
 		if ( caretPosition < 0 )
 			caretPosition = 0;
-		if ( caretPosition >= actionListContentText.length() )
-			caretPosition = actionListContentText.length() - 1;
-		if ( actionListContentText.charAt( caretPosition ) == '\n' )
+		if ( caretPosition >= actionListText.length() )
+			caretPosition = actionListText.length() - 1;
+		if ( actionListText.charAt( caretPosition ) == '\n' )
 			caretPosition--;
 		
 		int actionFirstPosition = caretPosition;
 		// Backward search
-		while ( actionFirstPosition > 0 && actionListContentText.charAt( actionFirstPosition ) != '\n' )
+		while ( actionFirstPosition > 0 && actionListText.charAt( actionFirstPosition ) != '\n' )
 			actionFirstPosition--;
-		if ( actionListContentText.charAt( actionFirstPosition ) == '\n' )
+		if ( actionListText.charAt( actionFirstPosition ) == '\n' )
 			actionFirstPosition++;
 		
-		int actionLastPosition = actionListContentText.indexOf( '\n', caretPosition );
+		int actionLastPosition = actionListText.indexOf( '\n', caretPosition );
 		if ( actionLastPosition < 0 )
-			actionLastPosition = actionListContentText.length();
+			actionLastPosition = actionListText.length();
 		
 		// First clear previous selection:
 		actionsListTextArea.setSelectionStart( -1 );
 		actionsListTextArea.setSelectionEnd( -1 );
-		actionsListTextArea.setSelectionStart( actionFirstPosition );
+		// Selection end has to be set first, or else it doesn't work for the first line (doesn't select it).
 		actionsListTextArea.setSelectionEnd( actionLastPosition );
+		actionsListTextArea.setSelectionStart( actionFirstPosition );
 		
-		final String actionString = (String) actionListContentText.substring( actionFirstPosition, actionLastPosition );
+		final String actionString = (String) actionListText.substring( actionFirstPosition, actionLastPosition );
 		final int    iteration    = Integer.parseInt( new StringTokenizer( actionString ).nextToken() );
 		markerPosition = ChartsParams.getXForIteration( iteration, replay.replayHeader.gameFrames, ChartsComponent.this );
 		
@@ -439,7 +441,8 @@ public class ChartsComponent extends JPanel {
 		actionsListTextBuilder.setLength( 0 );
 		for ( final Object[] action : actionList )
 			actionsListTextBuilder.append( ( (Action) action[ 0 ] ).toString( (String) action[ 1 ] ) ).append( '\n' );
-		actionsListTextBuilder.setLength( actionsListTextBuilder.length() - 1 ); // remove the last '\n'
+		if ( actionsListTextBuilder.length() > 0 ) // remove the last '\n'
+			actionsListTextBuilder.setLength( actionsListTextBuilder.length() - 1 );
 		actionsListTextArea.setText( actionsListTextBuilder.toString() );
 	}
 	
