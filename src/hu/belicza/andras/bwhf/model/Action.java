@@ -10,7 +10,7 @@ import java.util.Map.Entry;
  * 
  * @author Andras Belicza
  */
-public class Action {
+public class Action implements Comparable< Action > {
 	
 	public static final int ACTION_NAME_INDEX_UNKNOWN      = -1;
 	public static final int ACTION_NAME_INDEX_BWCHART_HACK =  0;
@@ -254,7 +254,11 @@ public class Action {
 	}
 	
 	public String toString( final String playerName ) {
-		return new Formatter().format( "%5d %-25s %-13s %s", iteration, playerName, name == null && actionNameIndex == ACTION_NAME_INDEX_UNKNOWN ? "<not parsed>" : ACTION_NAMES[ actionNameIndex ], parameters ).toString();
+		return new Formatter().format( "%6d %-25s %-13s %s", iteration, playerName, name == null && actionNameIndex == ACTION_NAME_INDEX_UNKNOWN ? "<not parsed>" : ACTION_NAMES[ actionNameIndex ], parameters ).toString();
+	}
+	
+	public int compareTo( final Action anotherAction ) {
+		return iteration < anotherAction.iteration ? -1 : ( iteration > anotherAction.iteration ? 1 : 0 );
 	}
 	
 }
