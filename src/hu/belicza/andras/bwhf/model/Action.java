@@ -45,23 +45,6 @@ public class Action implements Comparable< Action > {
 		ACTION_NAME_INDEX_VISION
 	};
 	
-	/** Possible action names. */
-	public static final String[] ACTION_NAMES2 = {
-		"HACK",
-		"Cancel Train",
-		"!0x33",
-		"Hatch",
-		"Train",
-		"Hotkey",
-		"Select",
-		"Move",
-		"Attack Move",
-		"Gather",
-		"Build",
-		"Ally",
-		"Vision"
-	};
-	
 	/** Map of unit IDs and their names. */
 	public static final Map< Byte, String > ACTION_ID_NAME_MAP = new HashMap< Byte, String >();
 	static {
@@ -106,6 +89,10 @@ public class Action implements Comparable< Action > {
 		ACTION_ID_NAME_MAP.put( ACTION_NAME_INDEX_ATTACK_MOVE, "Attack Move" );
 		ACTION_ID_NAME_MAP.put( ACTION_NAME_INDEX_GATHER, "Gather" );
 	}
+	
+	
+	public static final byte SUBACTION_NAME_INDEX_UNKNOWN = (byte) 0xff;
+	
 	/** Subactions of action 0x15 */
 	public static final Map< Byte, String > SUBACTION_ID_NAME_MAP = new HashMap< Byte, String >();
 	static {
@@ -370,6 +357,8 @@ public class Action implements Comparable< Action > {
 	
 	/** Constant for identifying the action name.       */
 	public final byte    actionNameIndex;
+	/** Constant for identifying the subaction name.    */
+	public final byte    subactionNameIndex;
 	/** Constant for identifying the action's unit.     */
 	public final short   parameterUnitNameIndex;
 	/** Constant for identifying the action's building. */
@@ -396,6 +385,8 @@ public class Action implements Comparable< Action > {
 				break;
 			}
 		actionNameIndex = actionNameIndex_;
+		// Warning! This is not parsed since I don't initialize from BWChart anymore!
+		subactionNameIndex = SUBACTION_NAME_INDEX_UNKNOWN;
 		
 		short parameterBuildingNameIndex_ = BUILDING_NAME_INDEX_NON_BUILDING;
 		if ( actionNameIndex == ACTION_NAME_INDEX_SELECT || actionNameIndex == ACTION_NAME_INDEX_BWCHART_HACK || actionNameIndex == ACTION_NAME_INDEX_TRAIN )
@@ -425,13 +416,28 @@ public class Action implements Comparable< Action > {
 	 * @param parameterUnitNameIndex     index determining the unit name
 	 * @param parameterBuildingNameIndex index determining the building name
 	 */
-	public Action( final int iteration, final String parameters, final byte actionNameIndex, final short parameterUnitNameIndex, final short parameterBuildingNameIndex ) { 
+	public Action( final int iteration, final String parameters, final byte actionNameIndex, final short parameterUnitNameIndex, final short parameterBuildingNameIndex ) {
+		this( iteration, parameters, actionNameIndex, SUBACTION_NAME_INDEX_UNKNOWN, parameterUnitNameIndex, parameterBuildingNameIndex );
+	}
+	
+	/**
+	 * Creates a new Action with pre-identified indices.
+	 * 
+	 * @param iteration                  iteration of the action
+	 * @param parameters                 parameter string of the atcion
+	 * @param actionNameIndex            index determining the action name
+	 * @param subactionNameIndex         index determining the subaction name
+	 * @param parameterUnitNameIndex     index determining the unit name
+	 * @param parameterBuildingNameIndex index determining the building name
+	 */
+	public Action( final int iteration, final String parameters, final byte actionNameIndex, final byte subactionNameIndex, final short parameterUnitNameIndex, final short parameterBuildingNameIndex ) { 
 		this.iteration  = iteration;
 		this.name       = null;
 		this.parameters = parameters;
 		this.unitIds    = null;
 		
 		this.actionNameIndex            = actionNameIndex;
+		this.subactionNameIndex         = subactionNameIndex;
 		this.parameterUnitNameIndex     = parameterUnitNameIndex;
 		this.parameterBuildingNameIndex = parameterBuildingNameIndex;
 	}
@@ -442,9 +448,17 @@ public class Action implements Comparable< Action > {
 	}
 	
 	public String toString( final String playerName ) {
-		String actionName = name != null ? name : ( actionNameIndex != ACTION_NAME_INDEX_UNKNOWN ? ACTION_ID_NAME_MAP.get( actionNameIndex ) : "<not parsed>" );
+		String actionName = null;
+		
+		if ( subactionNameIndex != SUBACTION_NAME_INDEX_UNKNOWN )
+			actionName = SUBACTION_ID_NAME_MAP.get( subactionNameIndex );
+		if ( actionName == null && actionNameIndex != ACTION_NAME_INDEX_UNKNOWN ) {
+			actionName = ACTION_ID_NAME_MAP.get( actionNameIndex );
+			if ( actionName == null )
+				actionName = "0x" + Integer.toHexString( actionNameIndex & 0xff );
+		}
 		if ( actionName == null )
-			actionName = "0x" + Integer.toHexString( actionNameIndex & 0xff );
+			actionName = "<not parsed>";
 		
 		if ( playerName == null )
 			return new Formatter().format( "%6d %-13s %s", iteration, actionName, parameters ).toString();

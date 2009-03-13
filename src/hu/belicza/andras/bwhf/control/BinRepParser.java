@@ -271,13 +271,13 @@ public class BinRepParser {
 				final short posY   = commandsBuffer.getShort();
 				final short unitId = commandsBuffer.getShort();
 				
-				action = new Action( frame, "Build,(" + posX + "," + posY + ")," + Action.UNIT_ID_NAME_MAP.get( unitId ), Action.ACTION_NAME_INDEX_BUILD, Action.UNIT_NAME_INDEX_UNKNOWN, unitId );
+				action = new Action( frame, "Build,(" + posX + "," + posY + ")," + Action.UNIT_ID_NAME_MAP.get( unitId ), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, unitId );
 				break;
 			}
 			case (byte) 0x0d : { // Vision
 				final byte data1 = commandsBuffer.get();
 				final byte data2 = commandsBuffer.get();
-				action = new Action( frame, convertToHexString( data1, data2 ), Action.ACTION_NAME_INDEX_VISION, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, convertToHexString( data1, data2 ), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x0e : { // Ally
@@ -285,12 +285,12 @@ public class BinRepParser {
 				final byte data2 = commandsBuffer.get();
 				final byte data3 = commandsBuffer.get();
 				final byte data4 = commandsBuffer.get();
-				action = new Action( frame, convertToHexString( data1, data2, data3, data4 ), Action.ACTION_NAME_INDEX_ALLY, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, convertToHexString( data1, data2, data3, data4 ), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x13 : { // Hotkey
 				final byte type = commandsBuffer.get();
-				action = new Action( frame, ( type == (byte) 0x00 ? Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN : Action.HOTKEY_ACTION_PARAM_NAME_SELECT ) + "," + commandsBuffer.get(), Action.ACTION_NAME_INDEX_HOTKEY, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, ( type == (byte) 0x00 ? Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN : Action.HOTKEY_ACTION_PARAM_NAME_SELECT ) + "," + commandsBuffer.get(), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x14 : { // Move
@@ -316,23 +316,23 @@ public class BinRepParser {
 				else if ( type == (byte) 0x0e ) // Attack move
 					actionNameIndex = Action.ACTION_NAME_INDEX_ATTACK_MOVE;
 				
-				commandsBuffer.get(); // Type2: 0x00 for normal attack, 0x01 for shift attack
-				action = new Action( frame, posX + "," + posY, actionNameIndex, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				/*final byte type2 = */commandsBuffer.get(); // Type2: 0x00 for normal attack, 0x01 for shift attack
+				action = new Action( frame, posX + "," + posY, actionNameIndex, type, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x1f : { // Train
 				final short unitId = commandsBuffer.getShort();
-				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( unitId ), Action.ACTION_NAME_INDEX_TRAIN, unitId, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( unitId ), blockId, unitId, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x20 : { // Cancel train
 				skipBytes = 2;
-				action = new Action( frame, "", Action.ACTION_NAME_INDEX_CANCEL_TRAIN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, "", blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x23 : { // Hatch
 				final short unitId = commandsBuffer.getShort();
-				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( unitId ), Action.ACTION_NAME_INDEX_HATCH, unitId, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( unitId ), blockId, unitId, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x30 : { // Research
