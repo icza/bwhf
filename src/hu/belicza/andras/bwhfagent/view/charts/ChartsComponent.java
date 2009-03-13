@@ -235,8 +235,10 @@ public class ChartsComponent extends JPanel {
 			@Override
 			public void keyPressed( final KeyEvent event ) {
 				if ( replay != null && event.getKeyCode() == KeyEvent.VK_ENTER && searchTextField.getText().length() > 0 ) {
-					final String actionsListText = actionsListTextArea.getText();
-					final int foundIndex = actionsListText.indexOf( searchTextField.getText(), indexOfLineEnd( actionsListText, actionsListTextArea.getCaretPosition() ) );
+					if ( actionsListTextBuilder.length() == 0 )
+						actionsListTextBuilder.append( actionsListTextArea.getText().toLowerCase() );
+					
+					final int foundIndex = actionsListTextBuilder.indexOf( searchTextField.getText().toLowerCase(), indexOfLineEnd( actionsListTextBuilder, actionsListTextArea.getCaretPosition() ) );
 					if ( foundIndex >= 0 ) {
 						actionsListTextArea.setCaretPosition( foundIndex );
 						syncMarkerFromActionListToChart();
@@ -379,12 +381,18 @@ public class ChartsComponent extends JPanel {
 	
 	/**
 	 * Returns the index of the end of the line specified by pos.
-	 * @param text text in which to search
+	 * @param text text in which to search; must be a {@link String} or {@link StringBuilder} 
 	 * @param pos  pos pointing somewhere in the line
 	 * @return the index of the start of the line specified by pos
 	 */
-	private static int indexOfLineEnd( final String text, int pos ) {
-		pos = text.indexOf( '\n', pos );
+	private static int indexOfLineEnd( final CharSequence text, int pos ) {
+		if ( text instanceof String )
+			pos = ( (String) text ).indexOf( '\n', pos );
+		else if ( text instanceof StringBuilder )
+			pos = ( (StringBuilder) text ).indexOf( "\n", pos );
+		else
+			throw new IllegalArgumentException( "Illegal text parameter, only String and StringBuilder are supported!" );
+		
 		if ( pos < 0 )
 			pos = text.length();
 		
@@ -493,8 +501,8 @@ public class ChartsComponent extends JPanel {
 			
 			playerIndexToShowList = new ArrayList< Integer >( players.length );
 			// Set the initially visible players:
-			contentPanel.doLayout();
 			playerCheckBoxActionListener.actionPerformed( null ); // This also repaints.
+			contentPanel.doLayout();
 		}
 		else {
 			hackDescriptionList = null;
@@ -532,6 +540,7 @@ public class ChartsComponent extends JPanel {
 				actionsListTextBuilder.setLength( actionsListTextBuilder.length() - 1 );
 		}
 		actionsListTextArea.setText( actionsListTextBuilder.toString() );
+		actionsListTextBuilder.setLength( 0 ); // To indicate that this does not yet contain the lowercased version for searching
 	}
 	
 	@Override

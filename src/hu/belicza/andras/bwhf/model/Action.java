@@ -12,24 +12,41 @@ import java.util.Map.Entry;
  */
 public class Action implements Comparable< Action > {
 	
-	public static final int ACTION_NAME_INDEX_UNKNOWN      = -1;
-	public static final int ACTION_NAME_INDEX_BWCHART_HACK =  0;
-	public static final int ACTION_NAME_INDEX_CANCEL_TRAIN =  1;
-	public static final int ACTION_NAME_INDEX_0X33         =  2;
-	public static final int ACTION_NAME_INDEX_HATCH        =  3;
-	public static final int ACTION_NAME_INDEX_TRAIN        =  4;
-	public static final int ACTION_NAME_INDEX_HOTKEY       =  5;
-	public static final int ACTION_NAME_INDEX_SELECT       =  6;
-	public static final int ACTION_NAME_INDEX_MOVE         =  7;
-	public static final int ACTION_NAME_INDEX_ATTACK_MOVE  =  8;
-	public static final int ACTION_NAME_INDEX_GATHER       =  9;
-	public static final int ACTION_NAME_INDEX_BUILD        = 10;
-	public static final int ACTION_NAME_INDEX_ALLY         = 11;
-	public static final int ACTION_NAME_INDEX_VISION       = 12;
+	public static final byte ACTION_NAME_INDEX_UNKNOWN      = (byte) 0xff;
+	public static final byte ACTION_NAME_INDEX_BWCHART_HACK = (byte) 0xfe;
+	public static final byte ACTION_NAME_INDEX_ATTACK_MOVE  = (byte) 0xfd;
+	public static final byte ACTION_NAME_INDEX_GATHER       = (byte) 0xfc;
 	
+	public static final byte ACTION_NAME_INDEX_CANCEL_TRAIN = (byte) 0x20;
+	public static final byte ACTION_NAME_INDEX_0X33         = (byte) 0x33;
+	public static final byte ACTION_NAME_INDEX_HATCH        = (byte) 0x23;
+	public static final byte ACTION_NAME_INDEX_TRAIN        = (byte) 0x1f;
+	public static final byte ACTION_NAME_INDEX_HOTKEY       = (byte) 0x13;
+	public static final byte ACTION_NAME_INDEX_SELECT       = (byte) 0x09;
+	public static final byte ACTION_NAME_INDEX_MOVE         = (byte) 0x14;
+	public static final byte ACTION_NAME_INDEX_BUILD        = (byte) 0x0c;
+	public static final byte ACTION_NAME_INDEX_ALLY         = (byte) 0x0e;
+	public static final byte ACTION_NAME_INDEX_VISION       = (byte) 0x0d;
+	
+	/** Action IDs we're interested in when parsing exported text by BWChart. */
+	public static final byte[] ACTION_IDS = {
+		ACTION_NAME_INDEX_BWCHART_HACK,
+		ACTION_NAME_INDEX_CANCEL_TRAIN,
+		ACTION_NAME_INDEX_0X33,
+		ACTION_NAME_INDEX_HATCH,
+		ACTION_NAME_INDEX_TRAIN,
+		ACTION_NAME_INDEX_HOTKEY,
+		ACTION_NAME_INDEX_SELECT,
+		ACTION_NAME_INDEX_MOVE,
+		ACTION_NAME_INDEX_ATTACK_MOVE,
+		ACTION_NAME_INDEX_GATHER,
+		ACTION_NAME_INDEX_BUILD,
+		ACTION_NAME_INDEX_ALLY,
+		ACTION_NAME_INDEX_VISION
+	};
 	
 	/** Possible action names. */
-	public static final String[] ACTION_NAMES = {
+	public static final String[] ACTION_NAMES2 = {
 		"HACK",
 		"Cancel Train",
 		"!0x33",
@@ -45,13 +62,184 @@ public class Action implements Comparable< Action > {
 		"Vision"
 	};
 	
+	/** Map of unit IDs and their names. */
+	public static final Map< Byte, String > ACTION_ID_NAME_MAP = new HashMap< Byte, String >();
+	static {
+		ACTION_ID_NAME_MAP.put( (byte) 0x09, "Select" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x0a, "Shift Select" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x0b, "Shift Deselect" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x0c, "Build" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x0d, "Vision" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x0e, "Ally" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x13, "Hotkey" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x14, "Move" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x18, "Cancel" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x19, "Cancel Hatch" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x1a, "Stop" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x1e, "Return Chargo" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x1f, "Train" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x20, "Cancel Train" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x21, "Cloack" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x22, "Decloack" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x23, "Hatch" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x25, "Unsiege" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x27, "Build Interceptor/Scarab" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x28, "Unload All" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x29, "Unload" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x2a, "Merge Archon" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x2b, "Hold Position" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x2c, "Burrow" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x2d, "Unborrow" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x2e, "Cancel Nuke" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x2f, "Lift" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x30, "Research" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x31, "Cancel Research" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x32, "Upgrade" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x33, "!0x33" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x35, "Morph" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x36, "Stim" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x57, "Leave Game" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x58, "Minimap Ping" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x5a, "Merge Dark Archon" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x5c, "Game Chat" );
+		
+		ACTION_ID_NAME_MAP.put( ACTION_NAME_INDEX_ATTACK_MOVE, "Attack Move" );
+		ACTION_ID_NAME_MAP.put( ACTION_NAME_INDEX_GATHER, "Gather" );
+	}
+	/** Subactions of action 0x15 */
+	public static final Map< Byte, String > SUBACTION_ID_NAME_MAP = new HashMap< Byte, String >();
+	static {
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x00, "Move" ); // Move with right click
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x06, "Move" ); // Move by click move icon
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x08, "Attack" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x09, "Gather" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x0e, "Attack Move" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x13, "Failed Casting" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x1b, "Infest CC" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x22, "Repair" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x27, "Clear Rally" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x28, "Set Rally" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x4f, "Gather" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x50, "Gather" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x70, "Unload" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x71, "Yamato" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x73, "Lockdown" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x77, "Dark Swarm" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x78, "Parasite" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x79, "Spawn Broodling" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x7a, "EMP" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x7e, "Launch Nuke" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x84, "Lay Mine" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x8b, "Comsat Scan" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x8d, "Defense Matrix" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x8e, "Psionic Storm" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x8f, "Recall" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x90, "Plague" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x91, "Consume" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x92, "Ensnare" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x93, "Statis" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x94, "Hallucination" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0x98, "Patrol" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0xb1, "Heal" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0xb4, "Restore" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0xb5, "Distruption Web" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0xb6, "Mind Control" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0xb8, "Feedback" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0xb9, "Optic Flare" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0xba, "Maelstorm" );
+		SUBACTION_ID_NAME_MAP.put( (byte) 0xc0, "Irradiate" );
+	}
+	
+	/** Researches (parameters of action 0x30). */
+	public static final Map< Byte, String > RESEARCH_ID_NAME_MAP = new HashMap< Byte, String >();
+	static {
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x00, "Stim Pack" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x01, "Lockdown" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x02, "EMP Shockwave" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x03, "Spider Mines" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x05, "Siege Tank" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x07, "Irradiate" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x08, "Yamato Gun" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x09, "Cloacking Field (Wraith)" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x0a, "Personal Cloacking (Ghost)" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x0b, "Burrow" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x0d, "Spawn Broodling" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x0f, "Plague" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x10, "Consume" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x11, "Ensnare" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x13, "Psionic Storm" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x14, "Hallucination" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x15, "Recall" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x16, "Statis Field" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x18, "Restoration" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x19, "Distruption Web" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x1b, "Mind control" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x1e, "Optical Flare" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x1f, "Maelstorm" );
+		RESEARCH_ID_NAME_MAP.put( (byte) 0x20, "Lurker Aspect" );
+	}
+	
+	/** Upgrades (parameters of action 0x32). */
+	public static final Map< Byte, String > UPGRADE_ID_NAME_MAP = new HashMap< Byte, String >();
+	static {
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x00, "Terran Infantry Armor" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x01, "Terran Vehicle Plating" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x02, "Terran Ship Plating" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x03, "Zerg Carapace" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x04, "Zerg Flyer Carapace" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x05, "Protoss Ground Armor" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x06, "Protoss Air Armor" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x07, "Terran Infantry Weapons" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x08, "Terran Vehicle Weapons" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x09, "Terran Ship Weapons" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x0A, "Zerg Melee Attacks" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x0B, "Zerg Missile Attacks" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x0C, "Zerg Flyer Attacks" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x0D, "Protoss Ground Weapons" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x0E, "Protoss Air Weapons" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x0F, "Protoss Plasma Shields" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x10, "U-238 Shells (Marine Range)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x11, "Ion Thrusters (Vulture Speed)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x13, "Titan Reactor (Science Vessel Energy)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x14, "Ocular Implants (Ghost Sight)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x15, "Moebius Reactor (Ghost Energy)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x16, "Apollo Reactor (Wraith Energy)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x17, "Colossus Reactor (Battle Cruiser Energy)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x18, "Ventral Sacs (Overlord Transport)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x19, "Antennae (Overlord Sight)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x1A, "Pneumatized Carapace (Overlord Speed)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x1B, "Metabolic Boost (Zergling Speed)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x1C, "Adrenal Glands (Zergling Attack)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x1D, "Muscular Augments (Hydralisk Speed)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x1E, "Grooved Spines (Hydralisk Range)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x1F, "Gamete Meiosis (Queen Energy)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x20, "Defiler Energy" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x21, "Singularity Charge (Dragoon Range)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x22, "Leg Enhancement (Zealot Speed)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x23, "Scarab Damage" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x24, "Reaver Capacity" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x25, "Gravitic Drive (Shuttle Speed)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x26, "Sensor Array (Observer Sight)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x27, "Gravitic Booster (Observer Speed)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x28, "Khaydarin Amulet (Templar Energy)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x29, "Apial Sensors (Scout Sight)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x2A, "Gravitic Thrusters (Scout Speed)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x2B, "Carrier Capacity" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x2C, "Khaydarin Core (Arbiter Energy)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x2F, "Argus Jewel (Corsair Energy)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x31, "Argus Talisman (Dark Archon Energy)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x33, "Caduceus Reactor (Medic Energy)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x34, "Chitinous Plating (Ultralisk Armor)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x35, "Anabolic Synthesis (Ultralisk Speed)" );
+		UPGRADE_ID_NAME_MAP.put( (byte) 0x36, "Charon Boosters (Goliath Range)" );
+	}
 	
 	public static final short UNIT_NAME_INDEX_UNKNOWN = (short) -1;
 	public static final short UNIT_NAME_INDEX_SCV     = (short) 0x07;
 	public static final short UNIT_NAME_INDEX_DRONE   = (short) 0x29;
 	public static final short UNIT_NAME_INDEX_PROBE   = (short) 0x40;
 	
-	/** Unit IDs we're interested in. */
+	/** Unit IDs we're interested in when parsing exported text by BWChart. */
 	public static final short[] UNIT_IDS = {
 		UNIT_NAME_INDEX_SCV,
 		UNIT_NAME_INDEX_DRONE,
@@ -181,7 +369,7 @@ public class Action implements Comparable< Action > {
 	public final String  unitIds;
 	
 	/** Constant for identifying the action name.       */
-	public final int     actionNameIndex;
+	public final byte    actionNameIndex;
 	/** Constant for identifying the action's unit.     */
 	public final short   parameterUnitNameIndex;
 	/** Constant for identifying the action's building. */
@@ -201,10 +389,10 @@ public class Action implements Comparable< Action > {
 		this.parameters = parameters;
 		this.unitIds    = unitIds;
 		
-		int actionNameIndex_ = ACTION_NAME_INDEX_UNKNOWN;
-		for ( int i = ACTION_NAMES.length - 1; i >= 0; i-- )
-			if ( ACTION_NAMES[ i ].equals( name ) ) {
-				actionNameIndex_ = i;
+		byte actionNameIndex_ = ACTION_NAME_INDEX_UNKNOWN;
+		for ( final byte actionId : ACTION_IDS )
+			if ( name.equals( ACTION_ID_NAME_MAP.get( actionId ) ) ) {
+				actionNameIndex_ = actionId;
 				break;
 			}
 		actionNameIndex = actionNameIndex_;
@@ -237,7 +425,7 @@ public class Action implements Comparable< Action > {
 	 * @param parameterUnitNameIndex     index determining the unit name
 	 * @param parameterBuildingNameIndex index determining the building name
 	 */
-	public Action( final int iteration, final String parameters, final int actionNameIndex, final short parameterUnitNameIndex, final short parameterBuildingNameIndex ) { 
+	public Action( final int iteration, final String parameters, final byte actionNameIndex, final short parameterUnitNameIndex, final short parameterBuildingNameIndex ) { 
 		this.iteration  = iteration;
 		this.name       = null;
 		this.parameters = parameters;
@@ -250,11 +438,18 @@ public class Action implements Comparable< Action > {
 	
 	@Override
 	public String toString() {
-		return iteration + "    " + ( name == null && actionNameIndex == ACTION_NAME_INDEX_UNKNOWN ? "<not parsed>" : ACTION_NAMES[ actionNameIndex ] ) + "    " + parameters;
+		return toString( null );
 	}
 	
 	public String toString( final String playerName ) {
-		return new Formatter().format( "%6d %-25s %-13s %s", iteration, playerName, name == null && actionNameIndex == ACTION_NAME_INDEX_UNKNOWN ? "<not parsed>" : ACTION_NAMES[ actionNameIndex ], parameters ).toString();
+		String actionName = name != null ? name : ( actionNameIndex != ACTION_NAME_INDEX_UNKNOWN ? ACTION_ID_NAME_MAP.get( actionNameIndex ) : "<not parsed>" );
+		if ( actionName == null )
+			actionName = "0x" + Integer.toHexString( actionNameIndex & 0xff );
+		
+		if ( playerName == null )
+			return new Formatter().format( "%6d %-13s %s", iteration, actionName, parameters ).toString();
+		else
+			return new Formatter().format( "%6d %-25s %-15s %s", iteration, playerName, actionName, parameters ).toString();
 	}
 	
 	public int compareTo( final Action anotherAction ) {
