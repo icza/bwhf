@@ -24,6 +24,7 @@ import swingwt.awt.Font;
 import swingwt.awt.FontMetrics;
 import swingwt.awt.Graphics;
 import swingwt.awt.Graphics2D;
+import swingwt.awt.GridLayout;
 import swingwt.awt.Stroke;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
@@ -31,6 +32,7 @@ import swingwt.awt.event.KeyAdapter;
 import swingwt.awt.event.KeyEvent;
 import swingwt.awt.event.MouseAdapter;
 import swingwt.awt.event.MouseEvent;
+import swingwtx.swing.Box;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
 import swingwtx.swing.JLabel;
@@ -38,6 +40,7 @@ import swingwtx.swing.JPanel;
 import swingwtx.swing.JScrollPane;
 import swingwtx.swing.JSplitPane;
 import swingwtx.swing.JTextArea;
+import swingwtx.swing.JTextField;
 import swingwtx.swing.event.ChangeEvent;
 import swingwtx.swing.event.ChangeListener;
 
@@ -148,6 +151,11 @@ public class ChartsComponent extends JPanel {
 	/** Text area to show the players' actions.                                  */
 	private final JTextArea             actionsListTextArea    = new JTextArea();
 	
+	/** To jump to a specific iteration.                                         */
+	private final JTextField            jumpToIterationTextField = new JTextField( 1 );
+	/** To search a specific text.                                               */
+	private final JTextField            searchTextField          = new JTextField( 1 );
+	
 	/** Position of the marker. */
 	private int markerPosition = -1;
 	
@@ -181,6 +189,8 @@ public class ChartsComponent extends JPanel {
 			}
 		} );
 		splitPane.setTopComponent( Utils.wrapInBorderLayoutPanel( this ) );
+		
+		final Box actionListBox = Box.createHorizontalBox();
 		actionsListTextArea.setFont( new Font( "Courier New", Font.PLAIN, 8 ) );
 		actionsListTextArea.addKeyListener( new KeyAdapter() {
 			@Override
@@ -196,11 +206,48 @@ public class ChartsComponent extends JPanel {
 					syncMarkerFromActionListToChart();
 			}
 		} );
- 		actionsListTextArea.setEditable( false );
+		actionsListTextArea.setEditable( false );
 		actionsListTextArea.setBackground( Color.WHITE );
 		actionsListTextArea.setForeground( Color.BLACK );
-		splitPane.setBottomComponent( new JScrollPane( actionsListTextArea ) );
-		splitPane.setDividerLocation( 0.8 );
+		actionListBox.add( new JScrollPane( actionsListTextArea ) );
+		
+		final JPanel actionListOptionsPanel = new JPanel( new GridLayout( 2, 2 ) );
+		actionListOptionsPanel.add( new JLabel( "Jump to iteration:" ) );
+		jumpToIterationTextField.addKeyListener( new KeyAdapter() {
+			@Override
+			public void keyPressed( final KeyEvent event ) {
+				if ( replay != null && event.getKeyCode() == KeyEvent.VK_ENTER ) {
+					try {
+						int iteration = Integer.parseInt( jumpToIterationTextField.getText() );
+						final int index = searchActionForIteration( iteration );
+						actionsListTextArea.setCaretPosition( actionsListTextArea.getText().indexOf( ( (Action) actionList.get( index )[ 0 ] ).toString( (String) actionList.get( index )[ 1 ] ) ) + 1 );
+						syncMarkerFromActionListToChart();
+					}
+					catch ( final Exception e ) {
+					}
+				}
+			}
+		} );
+		actionListOptionsPanel.add( jumpToIterationTextField );
+		actionListOptionsPanel.add( new JLabel( "Search text:" ) );
+		searchTextField.addKeyListener( new KeyAdapter() {
+			@Override
+			public void keyPressed( final KeyEvent event ) {
+				if ( replay != null && event.getKeyCode() == KeyEvent.VK_ENTER && searchTextField.getText().length() > 0 ) {
+					final String actionsListText = actionsListTextArea.getText();
+					final int foundIndex = actionsListText.indexOf( searchTextField.getText(), indexOfLineEnd( actionsListText, actionsListTextArea.getCaretPosition() ) );
+					if ( foundIndex >= 0 ) {
+						actionsListTextArea.setCaretPosition( foundIndex );
+						syncMarkerFromActionListToChart();
+					}
+				}
+			}
+		} );
+		actionListOptionsPanel.add( searchTextField );
+		actionListBox.add( Utils.wrapInPanel( actionListOptionsPanel ) );
+		
+		splitPane.setBottomComponent( actionListBox );
+		splitPane.setDividerLocation( 0.75 );
 		contentPanel.add( splitPane, BorderLayout.CENTER );
 		
 		final ChangeListener repainterChangeListener = new ChangeListener() {
@@ -234,34 +281,50 @@ public class ChartsComponent extends JPanel {
 			markerPosition = x;
 			
 			// Find an action for that iteration
-			int minIndex = 0, maxIndex = actionList.size() - 1;
-			int lastItemIndex = -1;
-			while ( true ) {
-				int       itemIndex  = ( minIndex + maxIndex ) / 2;
-				final int iteration2 = ( (Action) actionList.get( itemIndex )[ 0 ] ).iteration;
-				final int position   = ChartsParams.getXForIteration( iteration2, replay.replayHeader.gameFrames, ChartsComponent.this );
-				
-				if ( markerPosition == position || lastItemIndex == itemIndex ) {
-					final String actionString = ( (Action) actionList.get( itemIndex )[ 0 ] ).toString( (String) actionList.get( itemIndex )[ 1 ] );
-					// We get position in the textarea's text, because this might differ from the position in acitonsListTextBuilder
-					final int actionCaretPosition = actionsListTextArea.getText().indexOf( actionString );
-					actionsListTextArea.setCaretPosition( actionCaretPosition );
-					// First clear previous selection:
-					actionsListTextArea.setSelectionStart( -1 );
-					actionsListTextArea.setSelectionEnd( -1 );
-					// Selection end has to be set first, or else it doesn't work for the first line (doesn't select it).
-					actionsListTextArea.setSelectionEnd( actionCaretPosition + actionString.length() );
-					actionsListTextArea.setSelectionStart( actionCaretPosition );
-					break;
-				}
-				else if ( markerPosition < position )
-					maxIndex = itemIndex;
-				else
-					minIndex = itemIndex;
-				lastItemIndex = itemIndex;
-			}
+			final int index = searchActionForIteration( iteration );
+			
+			final String actionString = ( (Action) actionList.get( index )[ 0 ] ).toString( (String) actionList.get( index )[ 1 ] );
+			// We get position in the textarea's text, because this might differ from the position in acitonsListTextBuilder
+			final int actionCaretPosition = actionsListTextArea.getText().indexOf( actionString );
+			actionsListTextArea.setCaretPosition( actionCaretPosition );
+			// First clear previous selection:
+			actionsListTextArea.setSelectionStart( -1 );
+			actionsListTextArea.setSelectionEnd  ( -1 );
+			// Selection end has to be set first, or else it doesn't work for the first line (doesn't select it).
+			actionsListTextArea.setSelectionEnd( actionCaretPosition + actionString.length() );
+			actionsListTextArea.setSelectionStart( actionCaretPosition );
 			
 			repaint();
+		}
+	}
+	
+	/**
+	 * Searches an action for the given iteration.<br>
+	 * If no such action exists, returns the one that preceeds it. If no such iteration preceeds it,
+	 * returns the first iteration.<br>
+	 * Uses binary search algorithm.
+	 * @param iteration iteration to be searched for
+	 * @return a preceeding action for the given iteration or the first action if no preceeding iteration exists
+	 */
+	private int searchActionForIteration( final int iteration ) {
+		// Binary search
+		int minIndex = 0, maxIndex = actionList.size() - 1;
+		if ( iteration >= ( (Action) actionList.get( maxIndex )[ 0 ] ).iteration)
+			return maxIndex;
+		
+		int lastIndex = -1;
+		while ( true ) {
+			int       index  = ( minIndex + maxIndex ) / 2;
+			final int iteration2 = ( (Action) actionList.get( index )[ 0 ] ).iteration;
+			
+			if ( iteration2 == iteration || lastIndex == index )
+				return index;
+			else if ( iteration < iteration2 )
+				maxIndex = index;
+			else
+				minIndex = index;
+			
+			lastIndex = index;
 		}
 	}
 	
@@ -282,20 +345,12 @@ public class ChartsComponent extends JPanel {
 		if ( actionListText.charAt( caretPosition ) == '\n' )
 			caretPosition--;
 		
-		int actionFirstPosition = caretPosition;
-		// Backward search
-		while ( actionFirstPosition > 0 && actionListText.charAt( actionFirstPosition ) != '\n' )
-			actionFirstPosition--;
-		if ( actionListText.charAt( actionFirstPosition ) == '\n' )
-			actionFirstPosition++;
-		
-		int actionLastPosition = actionListText.indexOf( '\n', caretPosition );
-		if ( actionLastPosition < 0 )
-			actionLastPosition = actionListText.length();
+		final int actionFirstPosition = indexOfLineStart( actionListText, caretPosition );
+		final int actionLastPosition  = indexOfLineEnd( actionListText, caretPosition  );
 		
 		// First clear previous selection:
 		actionsListTextArea.setSelectionStart( -1 );
-		actionsListTextArea.setSelectionEnd( -1 );
+		actionsListTextArea.setSelectionEnd  ( -1 );
 		// Selection end has to be set first, or else it doesn't work for the first line (doesn't select it).
 		actionsListTextArea.setSelectionEnd( actionLastPosition );
 		actionsListTextArea.setSelectionStart( actionFirstPosition );
@@ -305,6 +360,36 @@ public class ChartsComponent extends JPanel {
 		markerPosition = ChartsParams.getXForIteration( iteration, replay.replayHeader.gameFrames, ChartsComponent.this );
 		
 		repaint();
+	}
+	
+	/**
+	 * Returns the index of the start of the line specified by pos.
+	 * @param text text in which to search
+	 * @param pos  pos pointing somewhere in the line
+	 * @return the index of the start of the line specified by pos
+	 */
+	private static int indexOfLineStart( final String text, int pos ) {
+		// Backward search
+		while ( pos > 0 && text.charAt( pos ) != '\n' )
+			pos--;
+		if ( text.charAt( pos ) == '\n' )
+			pos++;
+		
+		return pos;
+	}
+	
+	/**
+	 * Returns the index of the end of the line specified by pos.
+	 * @param text text in which to search
+	 * @param pos  pos pointing somewhere in the line
+	 * @return the index of the start of the line specified by pos
+	 */
+	private static int indexOfLineEnd( final String text, int pos ) {
+		pos = text.indexOf( '\n', pos );
+		if ( pos < 0 )
+			pos = text.length();
+		
+		return pos;
 	}
 	
 	/**
@@ -385,8 +470,9 @@ public class ChartsComponent extends JPanel {
 						if ( ( (JCheckBox) players[ i ][ 0 ] ).isSelected() )
 							playerIndexToShowList.add( (Integer) players[ i ][ 1 ] );
 					
-					loadPlayerActionsIntoList();
 					repaint();
+					loadPlayerActionsIntoList();
+					syncMarkerFromChartToActionList( markerPosition );
 				}
 			};
 			final int autoDisablingActionsCountLimit = AUTO_DISABLING_APM_LIMIT * replay.replayHeader.getDurationSeconds() / 60;
