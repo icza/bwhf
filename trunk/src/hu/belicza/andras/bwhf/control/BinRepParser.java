@@ -262,7 +262,7 @@ public class BinRepParser {
 						parametersBuilder.append( ',' );
 				}
 				// TODO: determine unit name indices
-				action = new Action( frame, parametersBuilder.toString(), blockId == (byte) 0x09 ? Action.ACTION_NAME_INDEX_SELECT : Action.ACTION_NAME_INDEX_UNKNOWN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, parametersBuilder.toString(), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x0c : { // Build
@@ -308,7 +308,7 @@ public class BinRepParser {
 				commandsBuffer.getShort(); // Unknown
 				final byte type    = commandsBuffer.get();
 				
-				int actionNameIndex = Action.ACTION_NAME_INDEX_UNKNOWN;
+				byte actionNameIndex = Action.ACTION_NAME_INDEX_UNKNOWN;
 				if ( type == (byte) 0x00 || type == (byte) 0x06 ) // Move with right click or Move by click move icon
 					actionNameIndex = Action.ACTION_NAME_INDEX_MOVE;
 				else if ( type == (byte) 0x09 || type == (byte) 0x4f || type == (byte) 0x50 ) // Gather
@@ -335,6 +335,16 @@ public class BinRepParser {
 				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( unitId ), Action.ACTION_NAME_INDEX_HATCH, unitId, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
+			case (byte) 0x30 : { // Research
+				final byte researchId = commandsBuffer.get();
+				action = new Action( frame, Action.RESEARCH_ID_NAME_MAP.get( researchId ), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				break;
+			}
+			case (byte) 0x32 : { // Upgrade
+				final byte upgradeId = commandsBuffer.get();
+				action = new Action( frame, Action.UPGRADE_ID_NAME_MAP.get( upgradeId ), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				break;
+			}
 			case (byte) 0x1e :   // Return chargo
 			case (byte) 0x21 :   // Cloack
 			case (byte) 0x22 :   // Decloack
@@ -344,8 +354,6 @@ public class BinRepParser {
 			case (byte) 0x2b :   // Hold position
 			case (byte) 0x2c :   // Burrow
 			case (byte) 0x2d :   // Unburrow
-			case (byte) 0x30 :   // Research
-			case (byte) 0x32 :   // Upgrade
 			case (byte) 0x57 :   // Leave game
 			case (byte) 0x1a : { // Stop
 				skipBytes = 1;
