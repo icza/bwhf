@@ -6,7 +6,7 @@
 
 ===Features and changes in the upcoming new release:===
  * Players' action list is now displayed in the charts tab. Action list or any part of it *can be exported* simply by selecting and coping to the cliboard just in like any other text area.
- * Added a `Jump to iteration` and a `Search text` options to the action list.
+ * Added *Jump to iteration* and *Search text* options to the action list.
  * Replaced the starter `BWHFAgent.exe` file because the old one was flagged as a trojan by some minor antivirus programs.
  * If a replay file is passed to any of the starter scripts or exe, it will be opened in the charts tab by default. If you associate replay files with one of BWHF Agent's script files, the replay will be opened in the charts tab if you double click on the replay (this only works with the script files).
  * Detection of invalid ally and vision commands which can be used to drop players.
