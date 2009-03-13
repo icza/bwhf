@@ -186,6 +186,7 @@ public class ChartsComponent extends JPanel {
 			@Override
 			public void mousePressed( final MouseEvent event ) {
 				syncMarkerFromChartToActionList( event.getX() );
+				repaint();
 			}
 		} );
 		splitPane.setTopComponent( Utils.wrapInBorderLayoutPanel( this ) );
@@ -293,8 +294,6 @@ public class ChartsComponent extends JPanel {
 			// Selection end has to be set first, or else it doesn't work for the first line (doesn't select it).
 			actionsListTextArea.setSelectionEnd( actionCaretPosition + actionString.length() );
 			actionsListTextArea.setSelectionStart( actionCaretPosition );
-			
-			repaint();
 		}
 	}
 	
@@ -494,41 +493,44 @@ public class ChartsComponent extends JPanel {
 			
 			playerIndexToShowList = new ArrayList< Integer >( players.length );
 			// Set the initially visible players:
-			playerCheckBoxActionListener.actionPerformed( null );
+			contentPanel.doLayout();
+			playerCheckBoxActionListener.actionPerformed( null ); // This also repaints.
 		}
-		else
+		else {
 			hackDescriptionList = null;
-		
-		contentPanel.doLayout();
-		repaint();
+			repaint();
+			loadPlayerActionsIntoList();
+		}
 	}
 	
 	private void loadPlayerActionsIntoList() {
-		final PlayerActions[] playerActionss = replay.replayActions.players;
-		
-		int actionsCount = 0;
-		for ( final int playerIndex : playerIndexToShowList )
-			actionsCount += playerActionss[ playerIndex ].actions.length;
-		
 		actionList.clear();
-		actionList.ensureCapacity( actionsCount );
-		for ( final int playerIndex : playerIndexToShowList ) {
-			final String playerName = playerActionss[ playerIndex ].playerName;
-			for ( final Action action : playerActionss[ playerIndex ].actions )
-				actionList.add( new Object[] { action, playerName } );
-		}
-		
-		Collections.sort( actionList, new Comparator< Object[] >() {
-			public int compare( Object[] action1, Object[] action2 ) {
-				return ( (Action) action1[ 0 ] ).compareTo( (Action) action2[ 0 ] );
-			}
-		} );
-		
 		actionsListTextBuilder.setLength( 0 );
-		for ( final Object[] action : actionList )
-			actionsListTextBuilder.append( ( (Action) action[ 0 ] ).toString( (String) action[ 1 ] ) ).append( '\n' );
-		if ( actionsListTextBuilder.length() > 0 ) // remove the last '\n'
-			actionsListTextBuilder.setLength( actionsListTextBuilder.length() - 1 );
+		if ( replay != null ) {
+			final PlayerActions[] playerActionss = replay.replayActions.players;
+			
+			int actionsCount = 0;
+			for ( final int playerIndex : playerIndexToShowList )
+				actionsCount += playerActionss[ playerIndex ].actions.length;
+			
+			actionList.ensureCapacity( actionsCount );
+			for ( final int playerIndex : playerIndexToShowList ) {
+				final String playerName = playerActionss[ playerIndex ].playerName;
+				for ( final Action action : playerActionss[ playerIndex ].actions )
+					actionList.add( new Object[] { action, playerName } );
+			}
+			
+			Collections.sort( actionList, new Comparator< Object[] >() {
+				public int compare( Object[] action1, Object[] action2 ) {
+					return ( (Action) action1[ 0 ] ).compareTo( (Action) action2[ 0 ] );
+				}
+			} );
+			
+			for ( final Object[] action : actionList )
+				actionsListTextBuilder.append( ( (Action) action[ 0 ] ).toString( (String) action[ 1 ] ) ).append( '\n' );
+			if ( actionsListTextBuilder.length() > 0 ) // remove the last '\n'
+				actionsListTextBuilder.setLength( actionsListTextBuilder.length() - 1 );
+		}
 		actionsListTextArea.setText( actionsListTextBuilder.toString() );
 	}
 	
