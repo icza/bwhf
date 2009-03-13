@@ -40,7 +40,8 @@ public class ChartsParams {
 		this.playersCount    = playersCount;
 		chartsCount          = allPlayersOnOneChart ? 1 : playersCount;
 		chartWidth           = chartsComponent.getWidth() - AXIS_SPACE_X;
-		chartHeight          = ( chartsComponent.getHeight() - AXIS_SPACE_Y ) / chartsCount - AXIS_SPACE_Y;
+		final int chartHeight_ = ( chartsComponent.getHeight() - AXIS_SPACE_Y ) / chartsCount - AXIS_SPACE_Y;
+		chartHeight          = chartHeight_ < 1 ? 1 : chartHeight_;
 		x1                   = AXIS_SPACE_X;
 		maxXInChart          = chartWidth  - 1;
 		maxYInChart          = chartHeight - 1;
