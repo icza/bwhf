@@ -155,6 +155,8 @@ public class ChartsComponent extends JPanel {
 	private final JTextField            jumpToIterationTextField = new JTextField( 1 );
 	/** To search a specific text.                                               */
 	private final JTextField            searchTextField          = new JTextField( 1 );
+	/** To filter actions.                                                       */
+	private final JTextField            filterTextField          = new JTextField( 1 );
 	
 	/** Position of the marker. */
 	private int markerPosition = -1;
@@ -212,7 +214,7 @@ public class ChartsComponent extends JPanel {
 		actionsListTextArea.setForeground( Color.BLACK );
 		actionListBox.add( new JScrollPane( actionsListTextArea ) );
 		
-		final JPanel actionListOptionsPanel = new JPanel( new GridLayout( 2, 2 ) );
+		final JPanel actionListOptionsPanel = new JPanel( new GridLayout( 3, 2 ) );
 		actionListOptionsPanel.add( new JLabel( "Jump to iteration:" ) );
 		jumpToIterationTextField.addKeyListener( new KeyAdapter() {
 			@Override
@@ -238,7 +240,9 @@ public class ChartsComponent extends JPanel {
 					if ( actionsListTextBuilder.length() == 0 )
 						actionsListTextBuilder.append( actionsListTextArea.getText().toLowerCase() );
 					
-					final int foundIndex = actionsListTextBuilder.indexOf( searchTextField.getText().toLowerCase(), indexOfLineEnd( actionsListTextBuilder, actionsListTextArea.getCaretPosition() ) );
+					int foundIndex = actionsListTextBuilder.indexOf( searchTextField.getText().toLowerCase(), indexOfLineEnd( actionsListTextBuilder, actionsListTextArea.getCaretPosition() ) );
+					if ( foundIndex < 0 ) // Repeat search from beginning
+						foundIndex = actionsListTextBuilder.indexOf( searchTextField.getText().toLowerCase(), indexOfLineEnd( actionsListTextBuilder, 0 ) );
 					if ( foundIndex >= 0 ) {
 						actionsListTextArea.setCaretPosition( foundIndex );
 						syncMarkerFromActionListToChart();
@@ -247,6 +251,18 @@ public class ChartsComponent extends JPanel {
 			}
 		} );
 		actionListOptionsPanel.add( searchTextField );
+		actionListOptionsPanel.add( new JLabel( "Filter actions:" ) );
+		filterTextField.addKeyListener( new KeyAdapter() {
+			@Override
+			public void keyPressed( final KeyEvent event ) {
+				if ( replay != null && event.getKeyCode() == KeyEvent.VK_ENTER )
+					loadPlayerActionsIntoList();
+			}
+		} );
+		actionListOptionsPanel.add( filterTextField );
+		/*actionListOptionsPanel.add( new JLabel() );
+		actionListOptionsPanel.add( clearfilterButton );*/
+		
 		actionListBox.add( Utils.wrapInPanel( actionListOptionsPanel ) );
 		
 		splitPane.setBottomComponent( actionListBox );
@@ -512,6 +528,8 @@ public class ChartsComponent extends JPanel {
 	}
 	
 	private void loadPlayerActionsIntoList() {
+		final String[][] filterGroups = createFilterGroups();
+		
 		actionList.clear();
 		actionsListTextBuilder.setLength( 0 );
 		if ( replay != null ) {
@@ -524,8 +542,25 @@ public class ChartsComponent extends JPanel {
 			actionList.ensureCapacity( actionsCount );
 			for ( final int playerIndex : playerIndexToShowList ) {
 				final String playerName = playerActionss[ playerIndex ].playerName;
-				for ( final Action action : playerActionss[ playerIndex ].actions )
-					actionList.add( new Object[] { action, playerName } );
+				for ( final Action action : playerActionss[ playerIndex ].actions ) {
+					if ( filterGroups != null ) {
+						final String actionString = action.toString( playerName ).toLowerCase();
+						for ( final String[] filterGroup : filterGroups ) {
+							boolean filterApplies = true;
+							for ( final String filter : filterGroup )
+								if ( !actionString.contains( filter ) ) {
+									filterApplies = false;
+									break;
+								}
+							if ( filterApplies ) {
+								actionList.add( new Object[] { action, playerName } );
+								break;
+							}
+						}
+					}
+					else
+						actionList.add( new Object[] { action, playerName } );
+				}
 			}
 			
 			Collections.sort( actionList, new Comparator< Object[] >() {
@@ -541,6 +576,46 @@ public class ChartsComponent extends JPanel {
 		}
 		actionsListTextArea.setText( actionsListTextBuilder.toString() );
 		actionsListTextBuilder.setLength( 0 ); // To indicate that this does not yet contain the lowercased version for searching
+	}
+	
+	/**
+	 * Creates the filter groups from the <code>filterTextField</code>.<br>
+	 * Filters in a group are connected with logical AND condition, and the groups are connected
+	 * with logical OR condition.
+	 * @return the filter group created from <code>filterTextField</code>; or null if no filter was specified
+	 */
+	private String[][] createFilterGroups() {
+		if ( filterTextField.getText().length() == 0 )
+			return null;
+		
+		final List< List< String > > filterGroupList = new ArrayList< List< String > >();
+		
+		final StringTokenizer filterTokenizer = new StringTokenizer( filterTextField.getText().toLowerCase() );
+		
+		List< String > filterGroup = null;
+		while ( filterTokenizer.hasMoreTokens() ) {
+			final String filterToken = filterTokenizer.nextToken();
+			if ( filterToken.equals( "or" ) ) {
+				// Next token is in a new filter group
+				filterGroup = null;
+			}
+			else if ( filterToken.equals( "and" ) ) {
+				// Do nothing, next token is in the same group
+			}
+			else {
+				if ( filterGroup == null ) {
+					filterGroup = new ArrayList< String >( 2 );
+					filterGroupList.add( filterGroup );
+				}
+				filterGroup.add( filterToken );
+			}
+		}
+		
+		final String[][] filterGroups = new String[ filterGroupList.size() ][];
+		for ( int i = 0; i < filterGroups.length; i++ )
+			filterGroups[ i ] = filterGroupList.get( i ).toArray( new String[ 0 ] );
+		
+		return filterGroups;
 	}
 	
 	@Override

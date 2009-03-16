@@ -262,7 +262,7 @@ public class BinRepParser {
 						parametersBuilder.append( ',' );
 				}
 				// TODO: determine unit name indices
-				action = new Action( frame, parametersBuilder.toString(), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, parametersBuilder.toString(), blockId );
 				break;
 			}
 			case (byte) 0x0c : { // Build
@@ -271,13 +271,13 @@ public class BinRepParser {
 				final short posY   = commandsBuffer.getShort();
 				final short unitId = commandsBuffer.getShort();
 				
-				action = new Action( frame, "Build,(" + posX + "," + posY + ")," + Action.UNIT_ID_NAME_MAP.get( unitId ), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, unitId );
+				action = new Action( frame, "(" + posX + "," + posY + ")," + Action.UNIT_ID_NAME_MAP.get( unitId ), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, unitId );
 				break;
 			}
 			case (byte) 0x0d : { // Vision
 				final byte data1 = commandsBuffer.get();
 				final byte data2 = commandsBuffer.get();
-				action = new Action( frame, convertToHexString( data1, data2 ), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, convertToHexString( data1, data2 ), blockId );
 				break;
 			}
 			case (byte) 0x0e : { // Ally
@@ -285,12 +285,12 @@ public class BinRepParser {
 				final byte data2 = commandsBuffer.get();
 				final byte data3 = commandsBuffer.get();
 				final byte data4 = commandsBuffer.get();
-				action = new Action( frame, convertToHexString( data1, data2, data3, data4 ), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, convertToHexString( data1, data2, data3, data4 ), blockId );
 				break;
 			}
 			case (byte) 0x13 : { // Hotkey
 				final byte type = commandsBuffer.get();
-				action = new Action( frame, ( type == (byte) 0x00 ? Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN : Action.HOTKEY_ACTION_PARAM_NAME_SELECT ) + "," + commandsBuffer.get(), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, ( type == (byte) 0x00 ? Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN : Action.HOTKEY_ACTION_PARAM_NAME_SELECT ) + "," + commandsBuffer.get(), blockId );
 				break;
 			}
 			case (byte) 0x14 : { // Move
@@ -298,7 +298,7 @@ public class BinRepParser {
 				final short posY   = commandsBuffer.getShort();
 				/*final short unitId = */commandsBuffer.getShort(); // Move to (posX;posY) if this is 0xffff, or move to this unit if it's a valid unit id (if it's not 0xffff)
 				skipBytes = 3;
-				action = new Action( frame, posX + "," + posY, Action.ACTION_NAME_INDEX_MOVE, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, posX + "," + posY, Action.ACTION_NAME_INDEX_MOVE );
 				break;
 			}
 			case (byte) 0x15 : { // Attack/Right Click/Cast Magic/Use ability
@@ -327,7 +327,7 @@ public class BinRepParser {
 			}
 			case (byte) 0x20 : { // Cancel train
 				skipBytes = 2;
-				action = new Action( frame, "", blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, "", blockId );
 				break;
 			}
 			case (byte) 0x23 : { // Hatch
@@ -337,12 +337,12 @@ public class BinRepParser {
 			}
 			case (byte) 0x30 : { // Research
 				final byte researchId = commandsBuffer.get();
-				action = new Action( frame, Action.RESEARCH_ID_NAME_MAP.get( researchId ), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, Action.RESEARCH_ID_NAME_MAP.get( researchId ), blockId );
 				break;
 			}
 			case (byte) 0x32 : { // Upgrade
 				final byte upgradeId = commandsBuffer.get();
-				action = new Action( frame, Action.UPGRADE_ID_NAME_MAP.get( upgradeId ), blockId, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, Action.UPGRADE_ID_NAME_MAP.get( upgradeId ), blockId );
 				break;
 			}
 			case (byte) 0x1e :   // Return chargo
@@ -354,9 +354,14 @@ public class BinRepParser {
 			case (byte) 0x2b :   // Hold position
 			case (byte) 0x2c :   // Burrow
 			case (byte) 0x2d :   // Unburrow
-			case (byte) 0x57 :   // Leave game
 			case (byte) 0x1a : { // Stop
 				skipBytes = 1;
+				action = new Action( frame, "", blockId );
+				break;
+			}
+			case (byte) 0x57 : {  // Leave game
+				final byte reason = commandsBuffer.get();
+				action = new Action( frame, reason == (byte) 0x01 ? "Quit" : ( reason == (byte) 0x06 ? "Dropped" : "" ), blockId );
 				break;
 			}
 			case (byte) 0x35 :   // Morph
@@ -364,7 +369,12 @@ public class BinRepParser {
 				skipBytes = 2;
 				break;
 			}
-			case (byte) 0x58 :   // Minimap ping (?)
+			case (byte) 0x58 : { // Minimap ping
+				final short posX   = commandsBuffer.getShort();
+				final short posY   = commandsBuffer.getShort();
+				action = new Action( frame, "(" + posX + "," + posY + ")", blockId );
+				break;
+			}
 			case (byte) 0x2f : { // Lift
 				skipBytes = 4;
 				break;
@@ -378,6 +388,7 @@ public class BinRepParser {
 			case (byte) 0x36 :   // Stim
 			case (byte) 0x5a : { // Merge dark archon
 				// No additional data
+				action = new Action( frame, "", blockId );
 				break;
 			}
 			case (byte) 0x5c : { // Game Chat (as of 1.16)
