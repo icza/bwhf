@@ -480,8 +480,10 @@ public class Action implements Comparable< Action > {
 				if ( actionName == null )
 					actionName = "0x" + Integer.toHexString( actionNameIndex & 0xff );
 			}
-			if ( actionName == null )
+			if ( actionName == null ) {
+				System.out.println( subactionNameIndex + " " + actionNameIndex );
 				actionName = "<not parsed>";
+			}
 			
 			if ( playerName == null )
 				toStringValue = new Formatter().format( "%6d %-13s %s", iteration, actionName, parameters ).toString();

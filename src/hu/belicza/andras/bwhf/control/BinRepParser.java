@@ -355,8 +355,14 @@ public class BinRepParser {
 			case (byte) 0x2c :   // Burrow
 			case (byte) 0x2d :   // Unburrow
 			case (byte) 0x1a : { // Stop
-				skipBytes = 1;
-				action = new Action( frame, "", blockId );
+				final byte data = commandsBuffer.get();
+				final String params = blockId == 0x1a || blockId == (byte) 0x1e || blockId == (byte) 0x28  || blockId == (byte) 0x2b ? ( data == 0x00 ? "Instant" : "Queued" ) : "";
+				action = new Action( frame, params, blockId );
+				break;
+			}
+			case (byte) 0x35 : {  // Morph
+				final short unitId = commandsBuffer.getShort();
+				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( unitId ), blockId, unitId, Action.BUILDING_NAME_INDEX_NON_BUILDING );
 				break;
 			}
 			case (byte) 0x57 : {  // Leave game
@@ -364,19 +370,23 @@ public class BinRepParser {
 				action = new Action( frame, reason == (byte) 0x01 ? "Quit" : ( reason == (byte) 0x06 ? "Dropped" : "" ), blockId );
 				break;
 			}
-			case (byte) 0x35 :   // Morph
 			case (byte) 0x29 : { // Unload
 				skipBytes = 2;
+				action = new Action( frame, "", blockId );
 				break;
 			}
 			case (byte) 0x58 : { // Minimap ping
-				final short posX   = commandsBuffer.getShort();
-				final short posY   = commandsBuffer.getShort();
+				final short posX = commandsBuffer.getShort();
+				final short posY = commandsBuffer.getShort();
 				action = new Action( frame, "(" + posX + "," + posY + ")", blockId );
 				break;
 			}
 			case (byte) 0x2f : { // Lift
-				skipBytes = 4;
+				final byte data1 = commandsBuffer.get();
+				final byte data2 = commandsBuffer.get();
+				final byte data3 = commandsBuffer.get();
+				final byte data4 = commandsBuffer.get();
+				action = new Action( frame, convertToHexString( data1, data2, data3, data4 ), blockId );
 				break;
 			}
 			case (byte) 0x18 :   // Cancel
@@ -413,11 +423,11 @@ public class BinRepParser {
 		if ( skipBytes > 0 )
 			commandsBuffer.position( commandsBuffer.position() + skipBytes );
 		
-		if ( blockId == 0x5c ) // Game chat is not a "real" action
+		if ( blockId == (byte) 0x5c ) // Game chat is not a "real" action
 			return null;
 		
 		if ( action == null )
-			action = new Action( frame, "", Action.ACTION_NAME_INDEX_UNKNOWN, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+			action = new Action( frame, "", Action.ACTION_NAME_INDEX_UNKNOWN );
 		
 		return action;
 	}
