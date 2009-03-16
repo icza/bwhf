@@ -66,6 +66,7 @@ public class Action implements Comparable< Action > {
 		ACTION_ID_NAME_MAP.put( (byte) 0x22, "Decloack" );
 		ACTION_ID_NAME_MAP.put( (byte) 0x23, "Hatch" );
 		ACTION_ID_NAME_MAP.put( (byte) 0x25, "Unsiege" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x26, "Siege" );
 		ACTION_ID_NAME_MAP.put( (byte) 0x27, "Build Interceptor/Scarab" );
 		ACTION_ID_NAME_MAP.put( (byte) 0x28, "Unload All" );
 		ACTION_ID_NAME_MAP.put( (byte) 0x29, "Unload" );
@@ -408,6 +409,18 @@ public class Action implements Comparable< Action > {
 	}
 	
 	/**
+	 * Creates a new Action with pre-identified indices.<br>
+	 * Subaction, unit and building name indices are unknown.
+	 * 
+	 * @param iteration                  iteration of the action
+	 * @param parameters                 parameter string of the atcion
+	 * @param actionNameIndex            index determining the action name
+	 */
+	public Action( final int iteration, final String parameters, final byte actionNameIndex ) {
+		this( iteration, parameters, actionNameIndex, SUBACTION_NAME_INDEX_UNKNOWN, UNIT_NAME_INDEX_UNKNOWN, BUILDING_NAME_INDEX_NON_BUILDING );
+	}
+	
+	/**
 	 * Creates a new Action with pre-identified indices.
 	 * 
 	 * @param iteration                  iteration of the action
@@ -447,25 +460,43 @@ public class Action implements Comparable< Action > {
 		return toString( null );
 	}
 	
+	
+	/** Attribute to cache the value returned by the <code>toString()</code> method. */
+	private String toStringValue;
+	
+	/**
+	 * Returns the string representation of this action owned by the specified player.
+	 * @param playerName name of player owning this action
+	 * @return the string representation of this action owned by the specified player
+	 */
 	public String toString( final String playerName ) {
-		String actionName = null;
-		
-		if ( subactionNameIndex != SUBACTION_NAME_INDEX_UNKNOWN )
-			actionName = SUBACTION_ID_NAME_MAP.get( subactionNameIndex );
-		if ( actionName == null && actionNameIndex != ACTION_NAME_INDEX_UNKNOWN ) {
-			actionName = ACTION_ID_NAME_MAP.get( actionNameIndex );
+		if ( toStringValue == null ) {
+			String actionName = null;
+			
+			if ( subactionNameIndex != SUBACTION_NAME_INDEX_UNKNOWN )
+				actionName = SUBACTION_ID_NAME_MAP.get( subactionNameIndex );
+			if ( actionName == null && actionNameIndex != ACTION_NAME_INDEX_UNKNOWN ) {
+				actionName = ACTION_ID_NAME_MAP.get( actionNameIndex );
+				if ( actionName == null )
+					actionName = "0x" + Integer.toHexString( actionNameIndex & 0xff );
+			}
 			if ( actionName == null )
-				actionName = "0x" + Integer.toHexString( actionNameIndex & 0xff );
+				actionName = "<not parsed>";
+			
+			if ( playerName == null )
+				toStringValue = new Formatter().format( "%6d %-13s %s", iteration, actionName, parameters ).toString();
+			else
+				toStringValue = new Formatter().format( "%6d %-25s %-15s %s", iteration, playerName, actionName, parameters ).toString();
 		}
-		if ( actionName == null )
-			actionName = "<not parsed>";
 		
-		if ( playerName == null )
-			return new Formatter().format( "%6d %-13s %s", iteration, actionName, parameters ).toString();
-		else
-			return new Formatter().format( "%6d %-25s %-15s %s", iteration, playerName, actionName, parameters ).toString();
+		return toStringValue;
 	}
 	
+	/**
+	 * Compares this action to another based on their iteration.
+	 * @param anotherAction another action to compare to
+	 * @return 1 if this action has greater iteration than the other; 0 if both have the same iteration; -1 if this action has smaller iteration than the other
+	 */
 	public int compareTo( final Action anotherAction ) {
 		return iteration < anotherAction.iteration ? -1 : ( iteration > anotherAction.iteration ? 1 : 0 );
 	}
