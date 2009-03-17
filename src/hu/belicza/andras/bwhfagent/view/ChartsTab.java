@@ -121,6 +121,7 @@ public class ChartsTab extends Tab {
 	
 	@Override
 	public void initializationEnded() {
+		super.initializationEnded();
 		chartsComponent.initializationEnded();
 	}
 	

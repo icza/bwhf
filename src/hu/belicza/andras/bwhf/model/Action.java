@@ -481,7 +481,6 @@ public class Action implements Comparable< Action > {
 					actionName = "0x" + Integer.toHexString( actionNameIndex & 0xff );
 			}
 			if ( actionName == null ) {
-				System.out.println( subactionNameIndex + " " + actionNameIndex );
 				actionName = "<not parsed>";
 			}
 			
