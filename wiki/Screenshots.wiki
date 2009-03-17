@@ -5,16 +5,19 @@
 <wiki:toc max_depth="3" />
 
 ===APM chart:===
-http://lh3.ggpht.com/_jDMClHrENz8/Sa6BQC30JsI/AAAAAAAAME0/q1fQhJ5sHkI/s800/charts_apm.PNG.jpg
+http://lh3.ggpht.com/_jDMClHrENz8/Sb9mvPv30tI/AAAAAAAAMqE/UcM485Xk5O0/s800/apm_chart.PNG.jpg
+
+===APM chart #2:===
+http://lh3.ggpht.com/_jDMClHrENz8/Sb9mw9uA_BI/AAAAAAAAMqk/puiXaufsuq8/s800/apm2_chart.PNG.jpg
 
 ===Hotkeys chart:===
-http://lh4.ggpht.com/_jDMClHrENz8/Sa6BQt2rgEI/AAAAAAAAME8/r7j7ulxXPAo/s800/charts_hotkeys.PNG.jpg
+http://lh4.ggpht.com/_jDMClHrENz8/Sb9mvf2DnZI/AAAAAAAAMqM/IHm27LVoX3A/s800/hotkeys_chart.PNG.jpg
 
 ===Build orders chart:===
-http://lh3.ggpht.com/_jDMClHrENz8/Sa6BRFYQNKI/AAAAAAAAMFE/tB2SAtHrT0I/s800/charts_build_order.PNG.jpg
+http://lh5.ggpht.com/_jDMClHrENz8/Sb9mv16KggI/AAAAAAAAMqU/4lFYFJCEr1I/s800/build_orders_chart.PNG.jpg
 
 ===Build orders chart #2:===
-http://lh6.ggpht.com/_jDMClHrENz8/Sa6BRZYerpI/AAAAAAAAMFM/eMicTcpF6u4/s800/charts_build_order2.PNG.jpg
+http://lh5.ggpht.com/_jDMClHrENz8/Sb9mwe_EVmI/AAAAAAAAMqc/BkzBZj3h5OA/s800/build_orders2_chart.PNG.jpg
 
 ===Autoscan tab:===
 http://lh3.ggpht.com/_jDMClHrENz8/Sa6BN3s5EtI/AAAAAAAAMEE/KmIPvbJhl_c/s800/autoscan.PNG.jpg
@@ -32,4 +35,4 @@ http://lh5.ggpht.com/_jDMClHrENz8/Sa6BPEnOu9I/AAAAAAAAMEc/yOVImCdDWDg/s800/pcx_c
 http://lh3.ggpht.com/_jDMClHrENz8/Sa6BPaCDuMI/AAAAAAAAMEk/WuFwWsw27Ls/s800/general_settings.PNG.jpg
 
 ===About tab:===
-http://lh6.ggpht.com/_jDMClHrENz8/Sa6BPtL9_RI/AAAAAAAAMEs/QoVqK48u0J4/s800/about.PNG.jpg
+http://lh3.ggpht.com/_jDMClHrENz8/Sb9muvbFJFI/AAAAAAAAMp8/IvKmORj9bxs/s800/about.PNG.jpg
