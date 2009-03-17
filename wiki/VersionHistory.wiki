@@ -4,7 +4,7 @@
 
 <wiki:toc max_depth="3" />
 
-===Features and changes in the upcoming new release:===
+===1.50 2009-03-17===
  * Players' action list is now displayed in the charts tab. Action list or any part of it *can be exported* simply by selecting and coping it to the cliboard.
  * Added a *Jump to iteration* option to jump to any iteration or one being _close_ to it.
  * Added a universal *Search text* option to the action list. The search text can be multiple words or a fraction of a word and can aim anything that is visible in the action list: player name, action name, unit name, upgrade etc.
