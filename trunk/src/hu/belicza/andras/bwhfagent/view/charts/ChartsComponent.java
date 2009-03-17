@@ -20,6 +20,7 @@ import java.util.StringTokenizer;
 import swingwt.awt.BasicStroke;
 import swingwt.awt.BorderLayout;
 import swingwt.awt.Color;
+import swingwt.awt.Dimension;
 import swingwt.awt.Font;
 import swingwt.awt.FontMetrics;
 import swingwt.awt.Graphics;
@@ -33,8 +34,10 @@ import swingwt.awt.event.KeyEvent;
 import swingwt.awt.event.MouseAdapter;
 import swingwt.awt.event.MouseEvent;
 import swingwtx.swing.Box;
+import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
+import swingwtx.swing.JComponent;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JScrollPane;
@@ -214,6 +217,7 @@ public class ChartsComponent extends JPanel {
 		actionsListTextArea.setForeground( Color.BLACK );
 		actionListBox.add( new JScrollPane( actionsListTextArea ) );
 		
+		final Box optionsBox = Box.createVerticalBox();
 		final JPanel actionListOptionsPanel = new JPanel( new GridLayout( 3, 2 ) );
 		actionListOptionsPanel.add( new JLabel( "Jump to iteration:" ) );
 		jumpToIterationTextField.addKeyListener( new KeyAdapter() {
@@ -255,18 +259,31 @@ public class ChartsComponent extends JPanel {
 		filterTextField.addKeyListener( new KeyAdapter() {
 			@Override
 			public void keyPressed( final KeyEvent event ) {
-				if ( replay != null && event.getKeyCode() == KeyEvent.VK_ENTER )
+				if ( event.getKeyCode() == KeyEvent.VK_ENTER )
 					loadPlayerActionsIntoList();
 			}
 		} );
 		actionListOptionsPanel.add( filterTextField );
-		/*actionListOptionsPanel.add( new JLabel() );
-		actionListOptionsPanel.add( clearfilterButton );*/
 		
-		actionListBox.add( Utils.wrapInPanel( actionListOptionsPanel ) );
+		optionsBox.add( Utils.wrapInPanel( actionListOptionsPanel ) );
+		// I put clear filter button in a different grid panel, because button's height is significantly greater than texfields'.
+		final JPanel clearFilterButtonPanel = new JPanel( new GridLayout( 1, 2 ) );
+		clearFilterButtonPanel.add( new JLabel() );
+		final JButton clearFilterButton = new JButton( "Clear filter" );
+		clearFilterButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				filterTextField.setText( "" );
+				loadPlayerActionsIntoList();
+			}
+		} );
+		clearFilterButtonPanel.add( clearFilterButton );
+		optionsBox.add( clearFilterButtonPanel );
+		final JComponent verticalFillerComponent = new JLabel();
+		verticalFillerComponent.setMaximumSize( new Dimension( 1, Integer.MAX_VALUE ) );
+		optionsBox.add( verticalFillerComponent );
+		actionListBox.add( optionsBox );
 		
 		splitPane.setBottomComponent( actionListBox );
-		splitPane.setDividerLocation( 0.75 );
 		contentPanel.add( splitPane, BorderLayout.CENTER );
 		
 		final ChangeListener repainterChangeListener = new ChangeListener() {
@@ -302,16 +319,18 @@ public class ChartsComponent extends JPanel {
 			// Find an action for that iteration
 			final int index = searchActionForIteration( iteration );
 			
-			final String actionString = ( (Action) actionList.get( index )[ 0 ] ).toString( (String) actionList.get( index )[ 1 ] );
-			// We get position in the textarea's text, because this might differ from the position in acitonsListTextBuilder
-			final int actionCaretPosition = actionsListTextArea.getText().indexOf( actionString );
-			actionsListTextArea.setCaretPosition( actionCaretPosition );
-			// First clear previous selection:
-			actionsListTextArea.setSelectionStart( -1 );
-			actionsListTextArea.setSelectionEnd  ( -1 );
-			// Selection end has to be set first, or else it doesn't work for the first line (doesn't select it).
-			actionsListTextArea.setSelectionEnd( actionCaretPosition + actionString.length() );
-			actionsListTextArea.setSelectionStart( actionCaretPosition );
+			if ( iteration >= 0 && index >= 0 ) {
+				final String actionString = ( (Action) actionList.get( index )[ 0 ] ).toString( (String) actionList.get( index )[ 1 ] );
+				// We get position in the textarea's text, because this might differ from the position in acitonsListTextBuilder
+				final int actionCaretPosition = actionsListTextArea.getText().indexOf( actionString );
+				actionsListTextArea.setCaretPosition( actionCaretPosition );
+				// First clear previous selection:
+				actionsListTextArea.setSelectionStart( -1 );
+				actionsListTextArea.setSelectionEnd  ( -1 );
+				// Selection end has to be set first, or else it doesn't work for the first line (doesn't select it).
+				actionsListTextArea.setSelectionEnd( actionCaretPosition + actionString.length() );
+				actionsListTextArea.setSelectionStart( actionCaretPosition );
+			}
 		}
 	}
 	
@@ -321,9 +340,12 @@ public class ChartsComponent extends JPanel {
 	 * returns the first iteration.<br>
 	 * Uses binary search algorithm.
 	 * @param iteration iteration to be searched for
-	 * @return a preceeding action for the given iteration or the first action if no preceeding iteration exists
+	 * @return a preceeding action for the given iteration or the first action if no preceeding iteration exists; or -1 if action list is empty
 	 */
 	private int searchActionForIteration( final int iteration ) {
+		if ( actionList.isEmpty() )
+			return -1;
+		
 		// Binary search
 		int minIndex = 0, maxIndex = actionList.size() - 1;
 		if ( iteration >= ( (Action) actionList.get( maxIndex )[ 0 ] ).iteration)
@@ -331,7 +353,7 @@ public class ChartsComponent extends JPanel {
 		
 		int lastIndex = -1;
 		while ( true ) {
-			int       index  = ( minIndex + maxIndex ) / 2;
+			int       index      = ( minIndex + maxIndex ) / 2;
 			final int iteration2 = ( (Action) actionList.get( index )[ 0 ] ).iteration;
 			
 			if ( iteration2 == iteration || lastIndex == index )
@@ -422,8 +444,11 @@ public class ChartsComponent extends JPanel {
 		return contentPanel;
 	}
 	
+	/**
+	 * Receives a notification of the end of initialization.
+	 */
 	public void initializationEnded() {
-		splitPane.setDividerLocation( 0.8 );
+		splitPane.setDividerLocation( 0.78 );
 	}
 	
 	public void setChartType( final ChartType chartType ) {
@@ -847,7 +872,7 @@ public class ChartsComponent extends JPanel {
 			
 			graphics.setFont( CHART_PART_TEXT_FONT );
 			
-			int buildOrderLevel = chartsParams.allPlayersOnOneChart ? playerIndex % ( buildOrderDisplayLevels + 1 ) : buildOrderDisplayLevels;
+			int buildOrderLevel = chartsParams.allPlayersOnOneChart ? ( buildOrderDisplayLevels - i * 2 ) % ( buildOrderDisplayLevels + 1 ) : buildOrderDisplayLevels;
 			for ( final Action action : playerActions.actions ) {
 				graphics.setColor( chartColor );
 				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD
