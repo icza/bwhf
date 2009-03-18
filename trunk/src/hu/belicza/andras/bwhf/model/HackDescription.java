@@ -8,25 +8,27 @@ package hu.belicza.andras.bwhf.model;
 public class HackDescription {
 	
 	/** Autogather/autotrain hack.      */
-	public static final int HACK_TYPE_AUTOGATHER_AUTOTRAIN      = 0;
+	public static final int HACK_TYPE_AUTOGATHER_AUTOTRAIN      =  0;
 	/** Building selection hack.        */
-	public static final int HACK_TYPE_BUILDING_SELECTION        = 1;
+	public static final int HACK_TYPE_BUILDING_SELECTION        =  1;
 	/** Protoss moneyhack.              */
-	public static final int HACK_TYPE_PROTOSS_MONEYHACK         = 2;
+	public static final int HACK_TYPE_PROTOSS_MONEYHACK         =  2;
 	/** Zerg moneyhack.                 */
-	public static final int HACK_TYPE_ZERG_MONEYHACK            = 3;
+	public static final int HACK_TYPE_ZERG_MONEYHACK            =  3;
 	/** General money hack.             */
-	public static final int HACK_TYPE_MONEYHACK                 = 4;
+	public static final int HACK_TYPE_MONEYHACK                 =  4;
 	/** Terran moneyhack.               */
-	public static final int HACK_TYPE_TERRAN_MONEYHACK          = 5;
+	public static final int HACK_TYPE_TERRAN_MONEYHACK          =  5;
 	/** Multicommand unit control hack. */
-	public static final int HACK_TYPE_MULTICOMMAND_UNIT_CONTROL = 6;
+	public static final int HACK_TYPE_MULTICOMMAND_UNIT_CONTROL =  6;
 	/** Multicommand rally set hack.    */
-	public static final int HACK_TYPE_MULTICOMMAND_RALLY_SET    = 7;
+	public static final int HACK_TYPE_MULTICOMMAND_RALLY_SET    =  7;
 	/** General multicommand hack.      */
-	public static final int HACK_TYPE_MULTICOMMAND              = 8;
+	public static final int HACK_TYPE_MULTICOMMAND              =  8;
 	/** Ally-vision drophack.           */
-	public static final int HACK_TYPE_ALLY_VISION_DROPHACK      = 9;
+	public static final int HACK_TYPE_ALLY_VISION_DROPHACK      =  9;
+	/** Build anywhere hack.            */
+	public static final int HACK_TYPE_BUILD_ANYWHERE            = 10;
 	
 	/** Human readably names of the different types of hacks. */
 	public static final String[] HACK_TYPE_NAMES = {
@@ -39,7 +41,8 @@ public class HackDescription {
 		"multicommand unit control ",
 		"multicommand rally set ",
 		"multicommand ",
-		"ally-vision drop"
+		"ally-vision drop",
+		"build anywhere "
 	};
 	
 	/** Name of the player who was hacking.   */
