@@ -99,6 +99,22 @@ public class ReplayScanner {
 						hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_ALLY_VISION_DROPHACK, action.iteration ) );
 			}
 			
+			// Build anywhere hack
+			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD && action.parameters != null && action.parameters.length() > 0 && action.parameterBuildingNameIndex != Action.BUILDING_NAME_INDEX_NON_BUILDING ) {
+				final Action.Size buildingSize = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
+				if ( buildingSize != null ) {
+					try {
+						final int commaIndex = action.parameters.indexOf( ',' );
+						final int x = Integer.parseInt( action.parameters.substring( action.parameters.indexOf( '(' ) + 1, commaIndex ) );
+						final int y = Integer.parseInt( action.parameters.substring( commaIndex + 1, action.parameters.indexOf( commaIndex, ')' ) ) );
+						if ( x > replayHeader.mapWidth - buildingSize.width || y > replayHeader.mapHeight - buildingSize.height )
+							hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_BUILD_ANYWHERE, action.iteration ) );
+					}
+					catch ( final Exception e ) {
+					}
+				}
+			}
+			
 			// Building selection hack: selecting more than one non-zerg building object with one select command
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action.actionNameIndex == Action.ACTION_NAME_INDEX_BWCHART_HACK )
 				if ( action.parameterBuildingNameIndex != Action.BUILDING_NAME_INDEX_NON_BUILDING )

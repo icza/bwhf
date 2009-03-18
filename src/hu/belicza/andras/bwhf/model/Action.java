@@ -12,6 +12,35 @@ import java.util.Map.Entry;
  */
 public class Action implements Comparable< Action > {
 	
+	/**
+	 * Class to describe the size of a building.
+	 * @author Andras Belicza
+	 */
+	public static class Size {
+		/** Width of the building.  */
+		public final int width;
+		/** Height of the building. */
+		public final int height;
+		/**
+		 * Creates a new Size.<br>
+		 * Private because no need to create different size than the supplied constant ones.
+		 * @param width  width of the building
+		 * @param height height of the building
+		 */
+		private Size( final int width, final int height ) {
+			this.width  = width;
+			this.height = height;
+		}
+		/** Constant for size of 4x3. */
+		public static final Size SIZE4X3 = new Size( 4, 3 );
+		/** Constant for size of 4x2. */
+		public static final Size SIZE4X2 = new Size( 4, 2 );
+		/** Constant for size of 3x2. */
+		public static final Size SIZE3X2 = new Size( 3, 2 );
+		/** Constant for size of 2x2. */
+		public static final Size SIZE2X2 = new Size( 2, 2 );
+	}
+	
 	public static final byte ACTION_NAME_INDEX_UNKNOWN      = (byte) 0xff;
 	public static final byte ACTION_NAME_INDEX_BWCHART_HACK = (byte) 0xfe;
 	public static final byte ACTION_NAME_INDEX_ATTACK_MOVE  = (byte) 0xfd;
@@ -341,6 +370,62 @@ public class Action implements Comparable< Action > {
 		UNIT_ID_NAME_MAP.put( (short) 0xC4, "Scarab" );
 		UNIT_ID_NAME_MAP.put( (short) 0xC5, "Interceptor" );
 		UNIT_ID_NAME_MAP.put( (short) 0xC6, "Interceptor/Scarab" );		
+	}
+	
+	/** Map of building IDs and their sizes in matrices. */
+	public static final Map< Short, Size > BUILDING_ID_SIZE_MAP = new HashMap< Short, Size >();
+	static {
+		BUILDING_ID_SIZE_MAP.put( (short) 0x6A, Size.SIZE4X3 ); // Command Center
+		BUILDING_ID_SIZE_MAP.put( (short) 0x6B, Size.SIZE2X2 ); // ComSat
+		BUILDING_ID_SIZE_MAP.put( (short) 0x6C, Size.SIZE2X2 ); // Nuclear Silo
+		BUILDING_ID_SIZE_MAP.put( (short) 0x6D, Size.SIZE3X2 ); // Supply Depot
+		BUILDING_ID_SIZE_MAP.put( (short) 0x6E, Size.SIZE4X2 ); // Refinery
+		BUILDING_ID_SIZE_MAP.put( (short) 0x6F, Size.SIZE4X3 ); // Barracks
+		BUILDING_ID_SIZE_MAP.put( (short) 0x70, Size.SIZE3X2 ); // Academy
+		BUILDING_ID_SIZE_MAP.put( (short) 0x71, Size.SIZE4X3 ); // Factory
+		BUILDING_ID_SIZE_MAP.put( (short) 0x72, Size.SIZE4X3 ); // Starport
+		BUILDING_ID_SIZE_MAP.put( (short) 0x73, Size.SIZE2X2 ); // Control Tower
+		BUILDING_ID_SIZE_MAP.put( (short) 0x74, Size.SIZE4X3 ); // Science Facility
+		BUILDING_ID_SIZE_MAP.put( (short) 0x75, Size.SIZE2X2 ); // Covert Ops
+		BUILDING_ID_SIZE_MAP.put( (short) 0x76, Size.SIZE2X2 ); // Physics Lab
+		BUILDING_ID_SIZE_MAP.put( (short) 0x78, Size.SIZE2X2 ); // Machine Shop
+		BUILDING_ID_SIZE_MAP.put( (short) 0x7A, Size.SIZE4X3 ); // Engineering Bay
+		BUILDING_ID_SIZE_MAP.put( (short) 0x7B, Size.SIZE3X2 ); // Armory
+		BUILDING_ID_SIZE_MAP.put( (short) 0x7C, Size.SIZE2X2 ); // Missile Turret
+		BUILDING_ID_SIZE_MAP.put( (short) 0x7D, Size.SIZE3X2 ); // Bunker
+		BUILDING_ID_SIZE_MAP.put( (short) 0x82, Size.SIZE4X3 ); // Infested CC
+		BUILDING_ID_SIZE_MAP.put( (short) 0x83, Size.SIZE4X3 ); // Hatchery
+		BUILDING_ID_SIZE_MAP.put( (short) 0x84, Size.SIZE4X3 ); // Lair
+		BUILDING_ID_SIZE_MAP.put( (short) 0x85, Size.SIZE4X3 ); // Hive
+		BUILDING_ID_SIZE_MAP.put( (short) 0x86, Size.SIZE2X2 ); // Nydus Canal
+		BUILDING_ID_SIZE_MAP.put( (short) 0x87, Size.SIZE3X2 ); // Hydralisk Den
+		BUILDING_ID_SIZE_MAP.put( (short) 0x88, Size.SIZE4X2 ); // Defiler Mound
+		BUILDING_ID_SIZE_MAP.put( (short) 0x89, Size.SIZE2X2 ); // Greater Spire
+		BUILDING_ID_SIZE_MAP.put( (short) 0x8A, Size.SIZE3X2 ); // Queens Nest
+		BUILDING_ID_SIZE_MAP.put( (short) 0x8B, Size.SIZE3X2 ); // Evolution Chamber
+		BUILDING_ID_SIZE_MAP.put( (short) 0x8C, Size.SIZE3X2 ); // Ultralisk Cavern
+		BUILDING_ID_SIZE_MAP.put( (short) 0x8D, Size.SIZE2X2 ); // Spire
+		BUILDING_ID_SIZE_MAP.put( (short) 0x8E, Size.SIZE3X2 ); // Spawning Pool
+		BUILDING_ID_SIZE_MAP.put( (short) 0x8F, Size.SIZE2X2 ); // Creep Colony
+		BUILDING_ID_SIZE_MAP.put( (short) 0x90, Size.SIZE2X2 ); // Spore Colony
+		BUILDING_ID_SIZE_MAP.put( (short) 0x92, Size.SIZE2X2 ); // Sunken Colony
+		BUILDING_ID_SIZE_MAP.put( (short) 0x95, Size.SIZE4X2 ); // Extractor
+		BUILDING_ID_SIZE_MAP.put( (short) 0x9A, Size.SIZE4X3 ); // Nexus
+		BUILDING_ID_SIZE_MAP.put( (short) 0x9B, Size.SIZE3X2 ); // Robotics Facility
+		BUILDING_ID_SIZE_MAP.put( (short) 0x9C, Size.SIZE2X2 ); // Pylon
+		BUILDING_ID_SIZE_MAP.put( (short) 0x9D, Size.SIZE4X2 ); // Assimilator
+		BUILDING_ID_SIZE_MAP.put( (short) 0x9F, Size.SIZE3X2 ); // Observatory
+		BUILDING_ID_SIZE_MAP.put( (short) 0xA0, Size.SIZE4X3 ); // Gateway
+		BUILDING_ID_SIZE_MAP.put( (short) 0xA2, Size.SIZE2X2 ); // Photon Cannon
+		BUILDING_ID_SIZE_MAP.put( (short) 0xA3, Size.SIZE3X2 ); // Citadel of Adun
+		BUILDING_ID_SIZE_MAP.put( (short) 0xA4, Size.SIZE3X2 ); // Cybernetics Core
+		BUILDING_ID_SIZE_MAP.put( (short) 0xA5, Size.SIZE3X2 ); // Templar Archives
+		BUILDING_ID_SIZE_MAP.put( (short) 0xA6, Size.SIZE3X2 ); // Forge
+		BUILDING_ID_SIZE_MAP.put( (short) 0xA7, Size.SIZE4X3 ); // Stargate
+		BUILDING_ID_SIZE_MAP.put( (short) 0xA9, Size.SIZE3X2 ); // Fleet Beacon
+		BUILDING_ID_SIZE_MAP.put( (short) 0xAA, Size.SIZE3X2 ); // Arbiter Tribunal
+		BUILDING_ID_SIZE_MAP.put( (short) 0xAB, Size.SIZE3X2 ); // Robotics Support Bay
+		BUILDING_ID_SIZE_MAP.put( (short) 0xAC, Size.SIZE3X2 ); // Shield Battery
 	}
 	
 	public static final String HOTKEY_ACTION_PARAM_NAME_SELECT = "Select";
