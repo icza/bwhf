@@ -89,14 +89,15 @@ public class ReplayScanner {
 		for ( int actionIndex = 0; actionIndex < actionsCount; actionIndex++ ) {
 			final Action action = playerActions[ actionIndex ];
 			
-			// Ally-vision drophack 
-			// TODO: consider to check if game type is UMS
-			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_ALLY )
-				if ( !checkAllyParams( action.parameters ) )
-					hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_ALLY_VISION_DROPHACK, action.iteration ) );
-			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_VISION )
-				if ( !checkVisionParams( action.parameters ) )
-					hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_ALLY_VISION_DROPHACK, action.iteration ) );
+			// Ally-vision drophack
+			if ( replayHeader.gameType != ReplayHeader.GAME_TYPE_UMS ) {
+				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_ALLY )
+					if ( !checkAllyParams( action.parameters ) )
+						hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_ALLY_VISION_DROPHACK, action.iteration ) );
+				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_VISION )
+					if ( !checkVisionParams( action.parameters ) )
+						hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_ALLY_VISION_DROPHACK, action.iteration ) );
+			}
 			
 			// Building selection hack: selecting more than one non-zerg building object with one select command
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action.actionNameIndex == Action.ACTION_NAME_INDEX_BWCHART_HACK )
