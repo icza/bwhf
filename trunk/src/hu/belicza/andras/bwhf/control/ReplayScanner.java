@@ -106,7 +106,7 @@ public class ReplayScanner {
 					try {
 						final int commaIndex = action.parameters.indexOf( ',' );
 						final int x = Integer.parseInt( action.parameters.substring( action.parameters.indexOf( '(' ) + 1, commaIndex ) );
-						final int y = Integer.parseInt( action.parameters.substring( commaIndex + 1, action.parameters.indexOf( commaIndex, ')' ) ) );
+						final int y = Integer.parseInt( action.parameters.substring( commaIndex + 1, action.parameters.indexOf( ')', commaIndex ) ) );
 						if ( x > replayHeader.mapWidth - buildingSize.width || y > replayHeader.mapHeight - buildingSize.height )
 							hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_BUILD_ANYWHERE, action.iteration ) );
 					}
