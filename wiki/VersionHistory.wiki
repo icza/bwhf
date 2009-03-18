@@ -5,6 +5,10 @@
 <wiki:toc max_depth="3" />
 
 ----
+===Features and changes in the upcoming new release:===
+ * Detection of build anywhere hack.
+
+----
 ===1.51 2009-03-18===
  * Bugfix: added UMS game type check for invalid ally and vision commands (invalid ally-vision commands are possible in UMS-type games).
 
