@@ -6,7 +6,7 @@
 
 ----
 ===1.51 2009-03-18===
- * Added UMS game type check for invalid ally and vision commands (invalid ally-vision commands are possible in UMS type games).
+ * Added UMS game type check for invalid ally and vision commands (invalid ally-vision commands are possible in UMS-type games).
 
 ----
 ===1.50 2009-03-17===
