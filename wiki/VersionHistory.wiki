@@ -7,6 +7,7 @@
 ===1.51 2009-03-18===
  * Added UMS game type check for invalid ally and vision commands (invalid ally-vision commands are possible in UMS type games).
 
+----
 ===1.50 2009-03-17===
  * Players' action list is now displayed in the charts tab. Action list or any part of it *can be exported* simply by selecting and coping it to the clipboard.
  * Added a *Jump to iteration* option to jump to any iteration or one being _close_ to it.
