@@ -6,7 +6,7 @@
 
 ----
 ===Features and changes in the upcoming new release:===
- * Detection of build anywhere hack.
+ * Detection of some build anywhere hack.
 
 ----
 ===1.51 2009-03-18===
