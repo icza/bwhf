@@ -51,13 +51,15 @@ public class Action implements Comparable< Action > {
 	public static final byte ACTION_NAME_INDEX_HATCH        = (byte) 0x23;
 	public static final byte ACTION_NAME_INDEX_TRAIN        = (byte) 0x1f;
 	public static final byte ACTION_NAME_INDEX_HOTKEY       = (byte) 0x13;
+	public static final byte ACTION_NAME_INDEX_USE_CHEAT    = (byte) 0x12;
 	public static final byte ACTION_NAME_INDEX_SELECT       = (byte) 0x09;
 	public static final byte ACTION_NAME_INDEX_MOVE         = (byte) 0x14;
 	public static final byte ACTION_NAME_INDEX_BUILD        = (byte) 0x0c;
 	public static final byte ACTION_NAME_INDEX_ALLY         = (byte) 0x0e;
 	public static final byte ACTION_NAME_INDEX_VISION       = (byte) 0x0d;
 	
-	/** Action IDs we're interested in when parsing exported text by BWChart. */
+	/** Action IDs we're interested in when parsing exported text by BWChart.<br>
+	 *  Parsing from exported BWChart text is no longer a goal. This might be inaccurate. */
 	public static final byte[] ACTION_IDS = {
 		ACTION_NAME_INDEX_BWCHART_HACK,
 		ACTION_NAME_INDEX_CANCEL_TRAIN,
@@ -65,6 +67,7 @@ public class Action implements Comparable< Action > {
 		ACTION_NAME_INDEX_HATCH,
 		ACTION_NAME_INDEX_TRAIN,
 		ACTION_NAME_INDEX_HOTKEY,
+		ACTION_NAME_INDEX_USE_CHEAT, // BWChart uses different name for this, this won't be parsed from BWChart
 		ACTION_NAME_INDEX_SELECT,
 		ACTION_NAME_INDEX_MOVE,
 		ACTION_NAME_INDEX_ATTACK_MOVE,
@@ -83,6 +86,8 @@ public class Action implements Comparable< Action > {
 		ACTION_ID_NAME_MAP.put( (byte) 0x0c, "Build" );
 		ACTION_ID_NAME_MAP.put( (byte) 0x0d, "Vision" );
 		ACTION_ID_NAME_MAP.put( (byte) 0x0e, "Ally" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x0f, "Change Game Speed" );
+		ACTION_ID_NAME_MAP.put( (byte) 0x12, "Use Cheat" );
 		ACTION_ID_NAME_MAP.put( (byte) 0x13, "Hotkey" );
 		ACTION_ID_NAME_MAP.put( (byte) 0x14, "Move" );
 		ACTION_ID_NAME_MAP.put( (byte) 0x18, "Cancel" );
@@ -428,6 +433,18 @@ public class Action implements Comparable< Action > {
 		BUILDING_ID_SIZE_MAP.put( (short) 0xAC, Size.SIZE3X2 ); // Shield Battery
 	}
 	
+	/** Map of building IDs and their sizes in matrices. */
+	public static final Map< Byte, String > GAME_SPEED_MAP = new HashMap< Byte, String >();
+	static {
+		GAME_SPEED_MAP.put( (byte) 0x00, "Slowest" );
+		GAME_SPEED_MAP.put( (byte) 0x01, "Slower" );
+		GAME_SPEED_MAP.put( (byte) 0x02, "Slow" );
+		GAME_SPEED_MAP.put( (byte) 0x03, "Normal" );
+		GAME_SPEED_MAP.put( (byte) 0x04, "Fast" );
+		GAME_SPEED_MAP.put( (byte) 0x05, "Faster" );
+		GAME_SPEED_MAP.put( (byte) 0x06, "Fastest" );
+	}
+	
 	public static final String HOTKEY_ACTION_PARAM_NAME_SELECT = "Select";
 	public static final String HOTKEY_ACTION_PARAM_NAME_ADD    = "Add";
 	public static final String HOTKEY_ACTION_PARAM_NAME_ASSIGN = "Assign";
@@ -572,7 +589,7 @@ public class Action implements Comparable< Action > {
 			if ( playerName == null )
 				toStringValue = new Formatter().format( "%6d %-13s %s", iteration, actionName, parameters ).toString();
 			else
-				toStringValue = new Formatter().format( "%6d %-25s %-15s %s", iteration, playerName, actionName, parameters ).toString();
+				toStringValue = new Formatter().format( "%6d %-25s %-17s %s", iteration, playerName, actionName, parameters ).toString();
 		}
 		
 		return toStringValue;

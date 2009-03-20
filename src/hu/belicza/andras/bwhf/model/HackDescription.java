@@ -29,6 +29,8 @@ public class HackDescription {
 	public static final int HACK_TYPE_ALLY_VISION_DROPHACK      =  9;
 	/** Build anywhere hack.            */
 	public static final int HACK_TYPE_BUILD_ANYWHERE            = 10;
+	/** Use cheat drophack.             */
+	public static final int HACK_TYPE_USE_CHEAT_DROPHACK        = 11;
 	
 	/** Human readably names of the different types of hacks. */
 	public static final String[] HACK_TYPE_NAMES = {
@@ -42,7 +44,8 @@ public class HackDescription {
 		"multicommand rally set ",
 		"multicommand ",
 		"ally-vision drop",
-		"build anywhere "
+		"build anywhere ",
+		"use cheat drop"
 	};
 	
 	/** Name of the player who was hacking.   */

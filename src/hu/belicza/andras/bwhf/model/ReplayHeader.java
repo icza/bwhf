@@ -30,8 +30,9 @@ public class ReplayHeader {
 		"green", "pale yellow", "tan", "aqua", "pale green", "blueish gray", "pale yellow", "cyan"
 	};
 	
-	public static final short GAME_TYPE_UMS = 0x0a;
-	public static final short GAME_TYPE_TVB = 0x0f;
+	public static final short GAME_TYPE_SINGLE_PLAYER = 0x02;
+	public static final short GAME_TYPE_UMS           = 0x0a;
+	public static final short GAME_TYPE_TVB           = 0x0f;
 	
 	// Header fields
 	

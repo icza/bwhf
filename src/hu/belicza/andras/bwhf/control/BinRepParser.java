@@ -105,6 +105,7 @@ public class BinRepParser {
 			
 			replayHeader.gameSpeed   = headerBuffer.getShort( 0x3a );
 			replayHeader.gameType    = headerBuffer.getShort( 0x3c );
+			System.out.println( replayHeader.gameType );
 			
 			replayHeader.creatorName = getZeroPaddedString( headerData, 0x48, 24 );
 			
@@ -288,6 +289,11 @@ public class BinRepParser {
 				action = new Action( frame, convertToHexString( data1, data2, data3, data4 ), blockId );
 				break;
 			}
+			case (byte) 0x0f : { // Change game speed
+				final byte speed = commandsBuffer.get();
+				action = new Action( frame, Action.GAME_SPEED_MAP.get( speed ), blockId );
+				break;
+			}
 			case (byte) 0x13 : { // Hotkey
 				final byte type = commandsBuffer.get();
 				action = new Action( frame, ( type == (byte) 0x00 ? Action.HOTKEY_ACTION_PARAM_NAME_ASSIGN : Action.HOTKEY_ACTION_PARAM_NAME_SELECT ) + "," + commandsBuffer.get(), blockId );
@@ -381,6 +387,7 @@ public class BinRepParser {
 				action = new Action( frame, "(" + posX + "," + posY + ")", blockId );
 				break;
 			}
+			case (byte) 0x12 :   // Use Cheat
 			case (byte) 0x2f : { // Lift
 				final byte data1 = commandsBuffer.get();
 				final byte data2 = commandsBuffer.get();
@@ -415,6 +422,7 @@ public class BinRepParser {
 				break;
 			}
 			default: { // We don't know how to handle actions, we have to skip the whole time frame which means we might lose some actions!
+				System.out.println( blockId );
 				skipBytes = commandBlocksEndPos - commandsBuffer.position();
 				break;
 			}

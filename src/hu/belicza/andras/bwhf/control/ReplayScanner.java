@@ -89,6 +89,10 @@ public class ReplayScanner {
 		for ( int actionIndex = 0; actionIndex < actionsCount; actionIndex++ ) {
 			final Action action = playerActions[ actionIndex ];
 			
+			// Use Cheat drophack
+			if ( replayHeader.gameType != ReplayHeader.GAME_TYPE_SINGLE_PLAYER && action.actionNameIndex == Action.ACTION_NAME_INDEX_USE_CHEAT )
+				hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_USE_CHEAT_DROPHACK, action.iteration ) );
+			
 			// Ally-vision drophack
 			if ( replayHeader.gameType != ReplayHeader.GAME_TYPE_UMS ) {
 				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_ALLY )
