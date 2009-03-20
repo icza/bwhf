@@ -209,7 +209,7 @@ public class AutoscanTab extends LoggedTab {
 			public void actionPerformed( final ActionEvent event ) {
 				final Object newAuthorizationKeyObject = JOptionPane.showInputDialog( getContent(), "Enter your authorization key:", "Changing key", JOptionPane.QUESTION_MESSAGE, null, null, authorizationKey );
 				if ( newAuthorizationKeyObject != null ) {
-					authorizationKey = (String) newAuthorizationKeyObject;
+					authorizationKey = ( (String) newAuthorizationKeyObject ).trim();
 					checkKeyButton.doClick();
 				}
 			}
