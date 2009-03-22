@@ -8,7 +8,14 @@ The BWHF online hacker database is available here:
 
 [http://94.199.240.39/hackerdb/hackers]
 
-On that page you can list, search, filter, sort existing hackers.
+On that page you can list, search, filter, sort existing hackers. The hackers are listed in colors to easily associate with their gateways. The following colors are used for gateways:
+||*Gateway:*||*Color:*||
+||USEast||Red||
+||USWest||Aqua||
+||Europe||Green||
+||Asia||Yellow||
+||iCCup||Black||
+||Other||White||
 
 ==Filtering==
 
