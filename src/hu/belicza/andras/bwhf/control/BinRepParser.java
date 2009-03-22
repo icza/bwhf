@@ -422,7 +422,6 @@ public class BinRepParser {
 				break;
 			}
 			default: { // We don't know how to handle actions, we have to skip the whole time frame which means we might lose some actions!
-				System.out.println( blockId );
 				skipBytes = commandBlocksEndPos - commandsBuffer.position();
 				break;
 			}

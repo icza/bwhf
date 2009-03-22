@@ -48,7 +48,7 @@ import swingwtx.swing.event.ChangeEvent;
 import swingwtx.swing.event.ChangeListener;
 
 /**
- * Component to visialize charts.
+ * Component to visualize charts.
  * 
  * @author Andras Belicza
  */
@@ -92,7 +92,7 @@ public class ChartsComponent extends JPanel {
 	private static final Stroke CHART_REST_STROKE              = new BasicStroke( 1.0f );
 	/** Number of assist lines to be painted in each chart.      */
 	private static final int    ASSIST_LINES_COUNT             = 5;
-	/** Number of time lables to be painted in each chart.       */
+	/** Number of time labels to be painted in each chart.       */
 	private static final int    TIME_LABELS_COUNT              = 8;
 	/** Auto disabling APM limit.                                */
 	private static final int    AUTO_DISABLING_APM_LIMIT       = 30;

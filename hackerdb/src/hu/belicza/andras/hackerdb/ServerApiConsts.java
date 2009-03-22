@@ -34,9 +34,9 @@ public class ServerApiConsts {
 	/** Message to be sent back to the client if his/her report was accepted and processed. */
 	public static final String REPORT_ACCEPTED_MESSAGE = "OK";
 	
-	/** String representations of gateways. Only the index should is sent over. */
+	/** String representations of gateways. Only the index is sent over.     */
 	public static final String[] GATEWAYS     = new String[] { "USEast", "USWest", "Europe", "Asia", "iCCup", "Other" };
-	/** String representations of game engines. Only the index is be sent over. */
+	/** String representations of game engines. Only the index is sent over. */
 	public static final String[] GAME_ENGINES = new String[] { "Starcraft", "Broodwar" };
 	
 	/** Filter name for name.              */
