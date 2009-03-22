@@ -669,7 +669,7 @@ public class HackerDbServlet extends HttpServlet {
 	private void setNoCache( final HttpServletResponse response ) {
 		response.setHeader( "Cache-Control", "no-cache" ); // For HTTP 1.1
 		response.setHeader( "Pragma"       , "no-cache" ); // For HTTP 1.0
-		response.setDateHeader ( "Expires", -0 );          // For proxies
+		response.setDateHeader( "Expires", -0 );           // For proxies
 	}
 	
 }
