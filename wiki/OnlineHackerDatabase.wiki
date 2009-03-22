@@ -9,13 +9,13 @@ The BWHF online hacker database is available here:
 [http://94.199.240.39/hackerdb/hackers]
 
 On that page you can list, search, filter, sort existing hackers. The hackers are listed in colors to easily associate with their gateways (which is also displayed). The following colors are used for gateways:
-||<b>Gateway:</b>||<b>Color:</b>||
+|| *Gateway:* || *Color:* ||
 ||USEast||Red <font color="#ff2020">Red</font>||
 ||USWest||Aqua <font color="#00ffff">Aqua</font>||
 ||Europe||Green <font color="#00ff00">Green</font>||
 ||Asia||Yellow <font color="#ffff00">Yellow</font>||
 ||iCCup||Black <font color="#000000">Black</font>||
-||Other||Whte <font color="#ffffff">White</font>||
+||Other||White <font color="#ffffff">White</font>||
 
 ==Filtering==
 
