@@ -23,7 +23,7 @@ You can filter the hackers with various properties. Only reports matching all th
 
 A report/hacker will be counted if:
  * *Hacker name:* the hacker name contains this lowercased text
- * *Gateways:* the report is assigned to one of the selected gateways
+ * *Gateways:* the hacker belongs to one of the selected gateways
  * *Game engines:* the replay of the report has been played with one of the selected game engines
  * *Map name:* the map of the replay of the report contains this lowercased text
  * *Min report count:* the hacker has received at least reports of this count
