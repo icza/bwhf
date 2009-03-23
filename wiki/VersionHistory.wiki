@@ -6,7 +6,7 @@
 
 ----
 ===Features and changes in the upcoming new release:===
- * New *System Tray* icon for BWHF Agent. You can control BWHF Agent through the system tray: hide/restore the main window, start Starcraft, close the agent, change gatway.
+ * New *System Tray* icon for BWHF Agent. You can control BWHF Agent through the system tray: start Starcraft, change gatway, hide/restore the main window, close the agent.
  * New option on the general settings tab to enable/disable the system tray.
  * New option on the general settings tab to enable/disable minimizing window always to system tray.
  * Detection of use cheat drophack.
