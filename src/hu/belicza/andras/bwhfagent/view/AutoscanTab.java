@@ -43,25 +43,25 @@ public class AutoscanTab extends LoggedTab {
 	private static final String CHECK_KEY_BUTTON_TEXT                 = "Check key";
 	
 	/** Checkbox to enable/disable the autoscan.                                */
-	private final JCheckBox  autoscanEnabledCheckBox        = new JCheckBox( "Autoscan enabled", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTOSCAN_ENABLED ) ) );
+	private   final JCheckBox  autoscanEnabledCheckBox        = new JCheckBox( "Autoscan enabled", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTOSCAN_ENABLED ) ) );
 	/** Checkbox to enable/disable autosaving hacker reps.                      */
-	private final JCheckBox  saveHackerRepsCheckBox         = new JCheckBox( "Save hacker replays to folder:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAVE_HACKER_REPS ) ) );
+	private   final JCheckBox  saveHackerRepsCheckBox         = new JCheckBox( "Save hacker replays to folder:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAVE_HACKER_REPS ) ) );
 	/** Save hacker replays to this folder.                                     */
-	private final JTextField hackerRepsDestinationTextField = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_HACKER_REPS_DESTINATION ) );
+	private   final JTextField hackerRepsDestinationTextField = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_HACKER_REPS_DESTINATION ) );
 	/** Checkbox to enable/disable autosaving all reps.                         */
-	private final JCheckBox  saveAllRepsCheckBox            = new JCheckBox( "Save all replays to folder:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAVE_ALL_REPS ) ) );
+	private   final JCheckBox  saveAllRepsCheckBox            = new JCheckBox( "Save all replays to folder:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAVE_ALL_REPS ) ) );
 	/** Save hacker replays to this folder.                                     */
-	private final JTextField allRepsDestinationTextField    = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_REPS_DESTINATION ) );
+	private   final JTextField allRepsDestinationTextField    = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_REPS_DESTINATION ) );
 	/** Checkbox to enable/disable playing sound if found hacks.                */
-	private final JCheckBox  playSoundCheckBox              = new JCheckBox( "Play wav file if found hacks:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_PLAY_SOUND ) ) );
+	private   final JCheckBox  playSoundCheckBox              = new JCheckBox( "Play wav file if found hacks:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_PLAY_SOUND ) ) );
 	/** Wav file to play when found hacks.                                      */
-	private final JTextField foundHacksWavFileTextField     = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_FOUND_HACKS_WAV_FILE ) );
+	private   final JTextField foundHacksWavFileTextField     = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_FOUND_HACKS_WAV_FILE ) );
 	/** Checkbox to enable/disable bringing main frame to front if found hacks. */
-	private final JCheckBox  bringToFrontCheckBox           = new JCheckBox( "Bring agent to front if found hacks", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_BRING_TO_FRONT ) ) );
+	private   final JCheckBox  bringToFrontCheckBox           = new JCheckBox( "Bring agent to front if found hacks", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_BRING_TO_FRONT ) ) );
 	/** Checkbox to enable/disable reporting hackers.                           */
-	private final JCheckBox  reportHackersCheckBox          = new JCheckBox( "Report hackers to a central hacker database with Battle.net gateway:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPORT_HACKERS ) ) );
+	private   final JCheckBox  reportHackersCheckBox          = new JCheckBox( "Report hackers to a central hacker database with Battle.net gateway:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPORT_HACKERS ) ) );
 	/** Combobox to select the gateway of the user.                             */
-	private final JComboBox gatewayComboBox                 = new JComboBox();
+	protected final JComboBox gatewayComboBox                 = new JComboBox();
 	
 	/** Authorization key to report hackers.      */
 	private String           authorizationKey = Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTHORIZATION_KEY );

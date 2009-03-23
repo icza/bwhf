@@ -29,15 +29,19 @@ public class GeneralSettingsTab extends Tab {
 	private static final String CHECK_UPDATES_BUTTON_TEXT = "Check now";
 	
 	/** Checkbox to tell whether check for updates automatically on startup. */
-	private final JCheckBox checkUpdatesOnStartupCheckBox      = new JCheckBox( "Check for updates on startup", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHECK_UPDATES_ON_STARTUP ) ) );
+	private   final JCheckBox  checkUpdatesOnStartupCheckBox      = new JCheckBox( "Check for updates on startup", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHECK_UPDATES_ON_STARTUP ) ) );
 	/** Check for updates button.                                            */
-	private final JButton   checkUpdatesButton                 = new JButton( CHECK_UPDATES_BUTTON_TEXT );
+	private   final JButton    checkUpdatesButton                 = new JButton( CHECK_UPDATES_BUTTON_TEXT );
 	/** Checkbox to tell whether check for updates automatically on startup. */
-	public  final JCheckBox skipLatterActionsOfHackersCheckBox = new JCheckBox( "During a replay scan if a player is found hacking, skip scanning his latter actions", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS ) ) );
+	protected final JCheckBox  skipLatterActionsOfHackersCheckBox = new JCheckBox( "During a replay scan if a player is found hacking, skip scanning his latter actions", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS ) ) );
 	/** Slider to set the sound volume.                                      */
-	public  final JSlider   soundVolumeSlider                  = new JSlider( 0, 100, Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_SOUND_VOLUME ) ) );
+	protected final JSlider    soundVolumeSlider                  = new JSlider( 0, 100, Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_SOUND_VOLUME ) ) );
 	/** Start folder when selecting replay flies.                            */
-	public final JTextField replayStartFolderTextField         = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPLAY_START_FOLDER ) );
+	protected final JTextField replayStartFolderTextField         = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPLAY_START_FOLDER ) );
+	/** Checkbox to enable system tray icon.                                 */
+	protected final JCheckBox  enableSystemTrayIconCheckBox       = new JCheckBox( "Enable system tray icon", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ENABLE_SYSTEM_TRAY_ICON ) ) );
+	/** Checkbox to always minimize to tray.                                 */
+	protected final JCheckBox  alwaysMinimizeToTrayCheckBox       = new JCheckBox( "Always minimize to tray", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALWAYS_MINIMIZE_TO_TRAY ) ) );
 	
 	/**
 	 * Creates a new GeneralSettings.
@@ -93,6 +97,19 @@ public class GeneralSettingsTab extends Tab {
 		panel.add( button );
 		contentBox.add( panel );
 		
+		enableSystemTrayIconCheckBox.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				if ( enableSystemTrayIconCheckBox.isSelected() )
+					MainFrame.getInstance().installSystemTrayIcon();
+				else
+					MainFrame.getInstance().removeSystemTrayIcon();
+				alwaysMinimizeToTrayCheckBox.setEnabled( enableSystemTrayIconCheckBox.isSelected() );
+			}
+		} );
+		contentBox.add( Utils.wrapInPanel( enableSystemTrayIconCheckBox ) );
+		
+		contentBox.add( Utils.wrapInPanel( alwaysMinimizeToTrayCheckBox ) );
+		
 		// To consume the remaining space:
 		contentBox.add( new JPanel( new BorderLayout() ) );
 	}
@@ -147,6 +164,8 @@ public class GeneralSettingsTab extends Tab {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, Boolean.toString( skipLatterActionsOfHackersCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SOUND_VOLUME                  , Integer.toString( soundVolumeSlider.getValue() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_REPLAY_START_FOLDER           , replayStartFolderTextField.getText() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_ENABLE_SYSTEM_TRAY_ICON       , Boolean.toString( enableSystemTrayIconCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_ALWAYS_MINIMIZE_TO_TRAY       , Boolean.toString( alwaysMinimizeToTrayCheckBox.isSelected() ) );
 	}
 	
 }
