@@ -1,7 +1,16 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhfagent.Consts;
+import hu.belicza.andras.hackerdb.ServerApiConsts;
 
+import java.awt.AWTException;
+import java.awt.CheckboxMenuItem;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import java.awt.SystemTray;
+import java.awt.TrayIcon;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 
@@ -59,6 +68,8 @@ public class MainFrame extends JFrame {
 	/** The tabbed pane holding the tabs. */
 	private final JTabbedPane tabbedPane = new JTabbedPane();
 	
+	/** Reference to the autoscan tab.         */
+	public final AutoscanTab        autoscanTab;
 	/** Reference to the charts tab.           */
 	public final ChartsTab          chartsTab;
 	/** Reference to the general settings tab. */
@@ -66,6 +77,13 @@ public class MainFrame extends JFrame {
 	
 	/** Tabs in the main frame. */
 	private final Tab[] tabs;
+	
+	/** Reference to the tray icon of BWHF Agent. */
+	private TrayIcon trayIcon;
+	/** Reference to the restore main window menu item in the popup menu in the tray icon. */
+	private MenuItem restoreMainWindowMenuItem;
+	/** Reference to the hide main window menu item in the popup menu in the tray icon.    */
+	private MenuItem hideMainWindowMenuItem; 
 	
 	/**
 	 * Creates a new MainFrame.
@@ -83,9 +101,10 @@ public class MainFrame extends JFrame {
 		setTitle( Consts.APPLICATION_NAME );
 		setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
 		
+		generalSettingsTab = new GeneralSettingsTab(); // This has to be created fist, autoscan tab uses this.
+		autoscanTab        = new AutoscanTab();
 		chartsTab          = new ChartsTab();
-		generalSettingsTab = new GeneralSettingsTab();
-		tabs = new Tab[] { new AutoscanTab(), new ManualScanTab(), chartsTab, new GameChatTab(), new PcxConverterTab(), generalSettingsTab, new AboutTab() };
+		tabs = new Tab[] { autoscanTab, new ManualScanTab(), chartsTab, new GameChatTab(), new PcxConverterTab(), generalSettingsTab, new AboutTab() };
 		setBounds( 50, 20, 950, 700 );
 		buildGUI();
 		checkStarcraftFolder();
@@ -94,12 +113,12 @@ public class MainFrame extends JFrame {
 		addWindowListener( new WindowAdapter() {
 			@Override
 			public void windowClosing( final WindowEvent we ) {
-				Utils.settingsProperties.setProperty( Consts.PROPERTY_STARCRAFT_FOLDER, starcraftFolderTextField.getText() );
-				for ( final Tab tab : tabs )
-					tab.assignUsedProperties();
-				
-				Utils.saveSettingsProperties();
-				System.exit( 0 );
+				closeAgent();
+			}
+			@Override
+			public void windowIconified(WindowEvent e) {
+				if ( generalSettingsTab.enableSystemTrayIconCheckBox.isSelected() && trayIcon != null && generalSettingsTab.alwaysMinimizeToTrayCheckBox.isSelected() )
+					setVisible( false );
 			}
 		} );
 		
@@ -108,6 +127,9 @@ public class MainFrame extends JFrame {
 		
 		for ( final Tab tab : tabs )
 			tab.initializationEnded();
+		
+		if ( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ENABLE_SYSTEM_TRAY_ICON ) ) )
+			installSystemTrayIcon();
 		
 		if ( arguments.length > 0 ) {
 			final File argumentFile = new File( arguments[ 0 ] );
@@ -127,11 +149,7 @@ public class MainFrame extends JFrame {
 		startScButton.setMnemonic( startScButton.getText().charAt( 0 ) );
 		startScButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				try {
-					Runtime.getRuntime().exec( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).getCanonicalPath(), null, new File( starcraftFolderTextField.getText() ) );
-				} catch ( final IOException ie ) {
-					JOptionPane.showMessageDialog( MainFrame.this, "Cannot start " + Consts.STARCRAFT_EXECUTABLE_FILE_NAME + "!\nIs Starcraft directory properly set?", "Error", JOptionPane.ERROR_MESSAGE );
-				}
+				startOrSwitchToStarcraft();
 			}
 		} );
 		panel.add( startScButton );
@@ -174,7 +192,110 @@ public class MainFrame extends JFrame {
 		
 		getContentPane().add( tabbedPane, BorderLayout.CENTER );
 		
-		tabbedPane.setSelectedIndex( 0 );
+		if ( SystemTray.isSupported() ) {
+			trayIcon = new TrayIcon( new javax.swing.ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
+			trayIcon.setImageAutoSize( true );
+			
+			final PopupMenu popupMenu = new PopupMenu();
+			final MenuItem startStarcraftMenuItem = new MenuItem( "Start / Switch to Starcraft" );
+			startStarcraftMenuItem.addActionListener( new java.awt.event.ActionListener() {
+				public void actionPerformed( final java.awt.event.ActionEvent event ) {
+					startOrSwitchToStarcraft();
+				}
+			} );
+			popupMenu.add( startStarcraftMenuItem );
+			final PopupMenu gatewayChangerPopupMenu = new PopupMenu( "Change gateway" );
+			final Runnable setGatewayMenuItemStatesTask = new Runnable() {
+				public void run() {
+					final String selectedGateway = (String) autoscanTab.gatewayComboBox.getSelectedItem();
+					for ( int i = gatewayChangerPopupMenu.getItemCount() - 1; i >= 0; i-- ) {
+						final CheckboxMenuItem gatewayMenuItem = (CheckboxMenuItem) gatewayChangerPopupMenu.getItem( i );
+						gatewayMenuItem.setState( gatewayMenuItem.getLabel().equals( selectedGateway ) );
+					}
+				}
+			};
+			for ( final String gateway : ServerApiConsts.GATEWAYS ) {
+				final CheckboxMenuItem gatewayMenuItem = new CheckboxMenuItem( gateway );
+				gatewayMenuItem.addItemListener( new ItemListener() {
+					public void itemStateChanged( final ItemEvent event ) {
+						autoscanTab.gatewayComboBox.setSelectedItem( gateway );
+						setGatewayMenuItemStatesTask.run();
+					}
+				} );
+				gatewayChangerPopupMenu.add( gatewayMenuItem );
+			}
+			setGatewayMenuItemStatesTask.run(); // To select the initial gateway
+			popupMenu.add( gatewayChangerPopupMenu );
+			autoscanTab.gatewayComboBox.addChangeListener( new ChangeListener() {
+				public void stateChanged( final ChangeEvent event ) {
+					setGatewayMenuItemStatesTask.run();
+				}
+			} );
+			popupMenu.addSeparator();
+			restoreMainWindowMenuItem = new MenuItem( "Restore main window" );
+			restoreMainWindowMenuItem.addActionListener( new java.awt.event.ActionListener() {
+				public void actionPerformed( final java.awt.event.ActionEvent event ) {
+					setVisible( true );
+				}
+			} );
+			popupMenu.add( restoreMainWindowMenuItem );
+			hideMainWindowMenuItem = new MenuItem( "Hide main window" );
+			hideMainWindowMenuItem.addActionListener( new java.awt.event.ActionListener() {
+				public void actionPerformed( final java.awt.event.ActionEvent event ) {
+					setVisible( false );
+				}
+			} );
+			hideMainWindowMenuItem.setEnabled( false );
+			popupMenu.add( hideMainWindowMenuItem );
+			popupMenu.addSeparator();
+			final MenuItem closeMenuItem = new MenuItem( "Close BWHF Agent" );
+			closeMenuItem.addActionListener( new java.awt.event.ActionListener() {
+				public void actionPerformed( final java.awt.event.ActionEvent event ) {
+					closeAgent();
+				}
+			} );
+			popupMenu.add( closeMenuItem );
+			
+			trayIcon.setPopupMenu( popupMenu );
+		}
+	}
+	
+	@Override
+	public void setVisible( final boolean visible ) {
+		if ( restoreMainWindowMenuItem != null )
+			restoreMainWindowMenuItem.setEnabled( !visible );
+		if ( hideMainWindowMenuItem != null )
+			hideMainWindowMenuItem.setEnabled( visible );
+		
+		super.setVisible( visible );
+		
+		if ( visible ) {
+			setExtendedState( NORMAL );
+			toFront();
+		}
+	}
+	
+	/**
+	 * Saves the properties and closes the agent.
+	 */
+	private void closeAgent() {
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_STARCRAFT_FOLDER, starcraftFolderTextField.getText() );
+		for ( final Tab tab : tabs )
+			tab.assignUsedProperties();
+		
+		Utils.saveSettingsProperties();
+		System.exit( 0 );
+	}
+	
+	/**
+	 * Starts or switches to Starcraft.
+	 */
+	private void startOrSwitchToStarcraft() {
+		try {
+			Runtime.getRuntime().exec( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).getCanonicalPath(), null, new File( starcraftFolderTextField.getText() ) );
+		} catch ( final IOException ie ) {
+			JOptionPane.showMessageDialog( null, "Cannot start " + Consts.STARCRAFT_EXECUTABLE_FILE_NAME + "!\nIs Starcraft directory properly set?", "Error", JOptionPane.ERROR_MESSAGE );
+		}
 	}
 	
 	/**
@@ -183,6 +304,28 @@ public class MainFrame extends JFrame {
 	 */
 	public void selectTab( final Tab tab ) {
 		tabbedPane.setSelectedIndex( tabbedPane.indexOfComponent( tab.getContent() ) );
+	}
+	
+	/**
+	 * Installs a system tray icon for BWHF Agent.
+	 */
+	public void installSystemTrayIcon() {
+		if ( trayIcon != null ) {
+			final SystemTray systemTray = SystemTray.getSystemTray();
+			if ( systemTray.getTrayIcons().length == 0 )
+				try {
+					systemTray.add( trayIcon );
+				} catch ( final AWTException ae ) {
+				}
+		}
+	}
+	
+	/**
+	 * Removes the installed system tray icon of BWHF Agent.
+	 */
+	public void removeSystemTrayIcon() {
+		if ( trayIcon != null )
+			SystemTray.getSystemTray().remove( trayIcon );
 	}
 	
 	/**
