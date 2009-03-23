@@ -42,6 +42,8 @@ public class GeneralSettingsTab extends Tab {
 	protected final JCheckBox  enableSystemTrayIconCheckBox       = new JCheckBox( "Enable system tray icon", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ENABLE_SYSTEM_TRAY_ICON ) ) );
 	/** Checkbox to always minimize to tray.                                 */
 	protected final JCheckBox  alwaysMinimizeToTrayCheckBox       = new JCheckBox( "Always minimize to tray", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALWAYS_MINIMIZE_TO_TRAY ) ) );
+	/** Checkbox to always minimize to tray.                                 */
+	protected final JCheckBox  startAgentMinimizedToTrayCheckBox  = new JCheckBox( "Start agent minimized to tray", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_START_AGENT_MINIMIZED_TO_TRAY ) ) );
 	
 	/**
 	 * Creates a new GeneralSettings.
@@ -97,18 +99,26 @@ public class GeneralSettingsTab extends Tab {
 		panel.add( button );
 		contentBox.add( panel );
 		
-		enableSystemTrayIconCheckBox.addActionListener( new ActionListener() {
+		final ActionListener systemTrayIconEnablerCheckBoxActionListener = new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				if ( enableSystemTrayIconCheckBox.isSelected() )
 					MainFrame.getInstance().installSystemTrayIcon();
 				else
 					MainFrame.getInstance().removeSystemTrayIcon();
 				alwaysMinimizeToTrayCheckBox.setEnabled( enableSystemTrayIconCheckBox.isSelected() );
+				startAgentMinimizedToTrayCheckBox.setEnabled( enableSystemTrayIconCheckBox.isSelected() );
+				MainFrame.getInstance().minimizeToTrayButton.setEnabled( enableSystemTrayIconCheckBox.isSelected() );
 			}
-		} );
+		};
+		enableSystemTrayIconCheckBox.addActionListener( systemTrayIconEnablerCheckBoxActionListener );
 		contentBox.add( Utils.wrapInPanel( enableSystemTrayIconCheckBox ) );
 		
 		contentBox.add( Utils.wrapInPanel( alwaysMinimizeToTrayCheckBox ) );
+		
+		contentBox.add( Utils.wrapInPanel( startAgentMinimizedToTrayCheckBox ) );
+		
+		// Initialize system tray related checkboxes
+		systemTrayIconEnablerCheckBoxActionListener.actionPerformed( null );
 		
 		// To consume the remaining space:
 		contentBox.add( new JPanel( new BorderLayout() ) );
@@ -166,6 +176,7 @@ public class GeneralSettingsTab extends Tab {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_REPLAY_START_FOLDER           , replayStartFolderTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_ENABLE_SYSTEM_TRAY_ICON       , Boolean.toString( enableSystemTrayIconCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_ALWAYS_MINIMIZE_TO_TRAY       , Boolean.toString( alwaysMinimizeToTrayCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_START_AGENT_MINIMIZED_TO_TRAY , Boolean.toString( startAgentMinimizedToTrayCheckBox.isSelected() ) );
 	}
 	
 }
