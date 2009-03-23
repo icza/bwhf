@@ -87,6 +87,9 @@ public class MainFrame extends JFrame {
 	/** Reference to the hide main window menu item in the popup menu in the tray icon.    */
 	private MenuItem hideMainWindowMenuItem; 
 	
+	/** To know when we first make window visible. */
+	private boolean windowHasBeenShown = false;
+	
 	/**
 	 * Creates a new MainFrame.
 	 * @param applicationVersion the application version string
@@ -125,9 +128,6 @@ public class MainFrame extends JFrame {
 		} );
 		
 		setBounds( 50, 20, 950, 700 );
-		
-		for ( final Tab tab : tabs )
-			tab.initializationEnded();
 		
 		if ( generalSettingsTab.enableSystemTrayIconCheckBox.isSelected() )
 			installSystemTrayIcon();
@@ -289,6 +289,13 @@ public class MainFrame extends JFrame {
 		
 		if ( visible ) {
 			setExtendedState( NORMAL );
+			
+			if ( !windowHasBeenShown ) {
+				for ( final Tab tab : tabs )
+					tab.initializationEnded();
+				windowHasBeenShown = true;
+			}
+			
 			toFront();
 		}
 	}
