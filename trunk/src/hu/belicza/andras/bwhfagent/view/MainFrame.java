@@ -59,11 +59,13 @@ public class MainFrame extends JFrame {
 	public final String applicationVersion;
 	
 	/** Button to start/switch to Starcraft.                   */
-	private final JButton    startScButton              = new JButton( "Start/Switch to Starcraft" );
+	private   final JButton    startScButton              = new JButton( "Start/Switch to Starcraft" );
+	/** Button to minimize to tray.                            */
+	protected final JButton    minimizeToTrayButton       = new JButton( "Minimize to tray" );
 	/** Starcraft directory.                                   */
-	public final  JTextField starcraftFolderTextField   = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ) );
+	protected final JTextField starcraftFolderTextField   = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ) );
 	/** Label to display if starcraft folder is set correctly. */
-	private final JLabel     starcraftFolderStatusLabel = new JLabel();
+	private   final JLabel     starcraftFolderStatusLabel = new JLabel();
 	
 	/** The tabbed pane holding the tabs. */
 	private final JTabbedPane tabbedPane = new JTabbedPane();
@@ -123,20 +125,25 @@ public class MainFrame extends JFrame {
 		} );
 		
 		setBounds( 50, 20, 950, 700 );
-		setVisible( true );
 		
 		for ( final Tab tab : tabs )
 			tab.initializationEnded();
 		
-		if ( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ENABLE_SYSTEM_TRAY_ICON ) ) )
+		if ( generalSettingsTab.enableSystemTrayIconCheckBox.isSelected() )
 			installSystemTrayIcon();
 		
-		if ( arguments.length > 0 ) {
-			final File argumentFile = new File( arguments[ 0 ] );
-			if ( argumentFile.isFile() ) {
-				selectTab( chartsTab );
-				chartsTab.setReplayFile( new File( arguments[ 0 ] ) );
-			}
+		File argumentFile = null;
+		if ( arguments.length > 0 )
+			argumentFile = new File( arguments[ 0 ] );
+		
+		if ( argumentFile.isFile() ) {
+			setVisible( true );
+			selectTab( chartsTab );
+			chartsTab.setReplayFile( new File( arguments[ 0 ] ) );
+		}
+		else {
+			if ( !generalSettingsTab.enableSystemTrayIconCheckBox.isSelected() || trayIcon == null || !generalSettingsTab.startAgentMinimizedToTrayCheckBox.isSelected() )
+				setVisible( true );
 		}
 	}
 	
@@ -144,18 +151,28 @@ public class MainFrame extends JFrame {
 	 * Builds the graphical user interface.
 	 */
 	private void buildGUI() {
-		final JPanel northPanel = new JPanel( new BorderLayout() );
-		final JPanel panel = Utils.createWrapperPanel();
+		final JPanel northBox = new JPanel( new BorderLayout() );
+		JPanel panel = new JPanel( new BorderLayout() );
+		final JPanel startStarcraftPanel = Utils.createWrapperPanel();
 		startScButton.setMnemonic( startScButton.getText().charAt( 0 ) );
 		startScButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				startOrSwitchToStarcraft();
 			}
 		} );
-		panel.add( startScButton );
-		panel.add( starcraftFolderStatusLabel );
-		northPanel.add( panel, BorderLayout.NORTH );
-		northPanel.add( new JLabel( "Starcraft directory:" ), BorderLayout.WEST );
+		startStarcraftPanel.add( startScButton );
+		startStarcraftPanel.add( starcraftFolderStatusLabel );
+		panel.add( startStarcraftPanel, BorderLayout.CENTER );
+		minimizeToTrayButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				setVisible( false );
+			}
+		} );
+		panel.add( Utils.wrapInPanel( minimizeToTrayButton ), BorderLayout.EAST );
+		northBox.add( panel, BorderLayout.CENTER );
+		
+		panel = Utils.createWrapperPanel();
+		panel.add( new JLabel( "Starcraft directory:" ) );
 		// This is a workaround becase SwingWT does not implement DocumentListener correctly :S
 		starcraftFolderTextField.addKeyListener( new KeyListener() {
 			public void keyPressed( final KeyEvent event ) {
@@ -168,13 +185,14 @@ public class MainFrame extends JFrame {
 				checkStarcraftFolder();
 			}
 		} );
-		northPanel.add( starcraftFolderTextField, BorderLayout.CENTER );
-		northPanel.add( Utils.createFileChooserButton( this, starcraftFolderTextField, JFileChooser.DIRECTORIES_ONLY, null, null, new Runnable() {
+		panel.add( starcraftFolderTextField );
+		panel.add( Utils.createFileChooserButton( this, starcraftFolderTextField, JFileChooser.DIRECTORIES_ONLY, null, null, new Runnable() {
 			public void run() {
 				checkStarcraftFolder();
 			}
-		} ), BorderLayout.EAST );
-		getContentPane().add( Utils.wrapInPanel( northPanel ), BorderLayout.NORTH );
+		} ) );
+		northBox.add( panel, BorderLayout.SOUTH );
+		getContentPane().add( northBox, BorderLayout.NORTH );
 		
 		for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ ) {
 			final Tab tab = tabs[ tabIndex ];
@@ -294,7 +312,7 @@ public class MainFrame extends JFrame {
 		try {
 			Runtime.getRuntime().exec( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).getCanonicalPath(), null, new File( starcraftFolderTextField.getText() ) );
 		} catch ( final IOException ie ) {
-			JOptionPane.showMessageDialog( null, "Cannot start " + Consts.STARCRAFT_EXECUTABLE_FILE_NAME + "!\nIs Starcraft directory properly set?", "Error", JOptionPane.ERROR_MESSAGE );
+			JOptionPane.showMessageDialog( this, "Cannot start " + Consts.STARCRAFT_EXECUTABLE_FILE_NAME + "!\nIs Starcraft directory properly set?", "Error", JOptionPane.ERROR_MESSAGE );
 		}
 	}
 	

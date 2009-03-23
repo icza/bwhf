@@ -105,6 +105,8 @@ public class Consts {
 	public static final String PROPERTY_ENABLE_SYSTEM_TRAY_ICON        = "enableSystemTrayIcon";
 	/** Enable system tray icon property.        */
 	public static final String PROPERTY_ALWAYS_MINIMIZE_TO_TRAY        = "alwaysMinimizeToTray";
+	/** Start agent minimized to tray property.  */
+	public static final String PROPERTY_START_AGENT_MINIMIZED_TO_TRAY  = "startAgentMinimizedToTray";
 	/** Chart type property.                     */
 	public static final String PROPERTY_CHART_TYPE                     = "chartType";
 	/** All players on one chart property.       */
@@ -152,6 +154,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPLAY_START_FOLDER           , STARCRAFT_REPLAY_FOLDER );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ENABLE_SYSTEM_TRAY_ICON       , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALWAYS_MINIMIZE_TO_TRAY       , "false" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_START_AGENT_MINIMIZED_TO_TRAY , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHART_TYPE                    , "0" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_PLAYERS_ON_ONE_CHART      , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_USE_PLAYERS_IN_GAME_COLORS    , "true" );
