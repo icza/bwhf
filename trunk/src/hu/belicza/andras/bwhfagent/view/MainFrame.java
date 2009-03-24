@@ -13,9 +13,11 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.StringTokenizer;
 
 import swingwt.awt.BorderLayout;
 import swingwt.awt.Color;
+import swingwt.awt.Rectangle;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwt.awt.event.KeyEvent;
@@ -110,7 +112,7 @@ public class MainFrame extends JFrame {
 		autoscanTab        = new AutoscanTab();
 		chartsTab          = new ChartsTab();
 		tabs = new Tab[] { autoscanTab, new ManualScanTab(), chartsTab, new GameChatTab(), new PcxConverterTab(), generalSettingsTab, new AboutTab() };
-		setBounds( 50, 20, 950, 700 );
+		
 		buildGUI();
 		checkStarcraftFolder();
 		
@@ -126,8 +128,6 @@ public class MainFrame extends JFrame {
 					setVisible( false );
 			}
 		} );
-		
-		setBounds( 50, 20, 950, 700 );
 		
 		if ( generalSettingsTab.enableSystemTrayIconCheckBox.isSelected() )
 			installSystemTrayIcon();
@@ -285,12 +285,30 @@ public class MainFrame extends JFrame {
 		if ( hideMainWindowMenuItem != null )
 			hideMainWindowMenuItem.setEnabled( visible );
 		
+		boolean windowMaximized = false;
+		if ( !windowHasBeenShown ) {
+			// First time
+			final StringTokenizer boundsTokenizer = new StringTokenizer( generalSettingsTab.saveWindowPositionCheckBox.isSelected() ? Utils.settingsProperties.getProperty( Consts.PROPERTY_WINDOW_POSITION ) : Consts.DEFAULT_SETTINGS_PROPERTIES.getProperty( Consts.PROPERTY_WINDOW_POSITION ), "," );
+			windowMaximized = boundsTokenizer.countTokens() != 4;
+			if ( !windowMaximized ) {
+				final int x      = Integer.parseInt( boundsTokenizer.nextToken() );
+				final int y      = Integer.parseInt( boundsTokenizer.nextToken() );
+				final int width  = Integer.parseInt( boundsTokenizer.nextToken() );
+				final int height = Integer.parseInt( boundsTokenizer.nextToken() );
+				setBounds( x, y, width, height );
+			}
+		}
+		
 		super.setVisible( visible );
 		
 		if ( visible ) {
-			setExtendedState( NORMAL );
+			if ( getExtendedState() == ICONIFIED )
+				setExtendedState( NORMAL ); // This restores maximized if window was maximized
 			
 			if ( !windowHasBeenShown ) {
+				if ( windowMaximized )
+					setExtendedState( MAXIMIZED_BOTH );
+				
 				for ( final Tab tab : tabs )
 					tab.initializationEnded();
 				windowHasBeenShown = true;
@@ -305,6 +323,14 @@ public class MainFrame extends JFrame {
 	 */
 	private void closeAgent() {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_STARCRAFT_FOLDER, starcraftFolderTextField.getText() );
+		if ( generalSettingsTab.saveWindowPositionCheckBox.isSelected() )
+			if ( getExtendedState() == MAXIMIZED_BOTH )
+				Utils.settingsProperties.setProperty( Consts.PROPERTY_WINDOW_POSITION, "maximized" );
+			else {
+				final Rectangle bounds = getBounds();
+				Utils.settingsProperties.setProperty( Consts.PROPERTY_WINDOW_POSITION, bounds.x + "," + bounds.y + "," + bounds.width + "," + bounds.height );
+			}
+		
 		for ( final Tab tab : tabs )
 			tab.assignUsedProperties();
 		
@@ -316,6 +342,7 @@ public class MainFrame extends JFrame {
 	 * Starts or switches to Starcraft.
 	 */
 	private void startOrSwitchToStarcraft() {
+		System.out.println( getBounds() );
 		try {
 			Runtime.getRuntime().exec( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).getCanonicalPath(), null, new File( starcraftFolderTextField.getText() ) );
 		} catch ( final IOException ie ) {
