@@ -44,8 +44,10 @@ import swingwtx.swing.event.ChangeListener;
  */
 public class MainFrame extends JFrame {
 	
-	/** Name of the image resource file to be used as icon image. */
-	private static final String ICON_IMAGE_RESOURCE_NAME = "redpill.gif";
+	/** Name of the image resource file to be used as icon image.     */
+	private static final String ICON_IMAGE_RESOURCE_NAME  = "red-pill.gif";
+	/** Name of the 2nd image resource file to be used as icon image. */
+	private static final String ICON_IMAGE_RESOURCE_NAME2 = "blue-pill.gif";
 	
 	/** Stores the reference of the main frame. */
 	private static MainFrame mainFrame;
