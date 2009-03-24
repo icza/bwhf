@@ -47,7 +47,7 @@ public class MainFrame extends JFrame {
 	/** Name of the image resource file to be used as icon image.     */
 	private static final String ICON_IMAGE_RESOURCE_NAME  = "red-pill.gif";
 	/** Name of the 2nd image resource file to be used as icon image. */
-	private static final String ICON_IMAGE_RESOURCE_NAME2 = "blue-pill.gif";
+	//private static final String ICON_IMAGE_RESOURCE_NAME2 = "blue-pill.gif";
 	
 	/** Stores the reference of the main frame. */
 	private static MainFrame mainFrame;
@@ -120,7 +120,7 @@ public class MainFrame extends JFrame {
 		manualScanTab      = new ManualScanTab();
 		chartsTab          = new ChartsTab();
 		gameChatTab        = new GameChatTab();
-		tabs = new Tab[] { autoscanTab, manualScanTab, chartsTab, gameChatTab, new PcxConverterTab(), generalSettingsTab, new AboutTab() };
+		tabs = new Tab[] { autoscanTab, manualScanTab, chartsTab, gameChatTab, new ReplaySearchTab(), new PcxConverterTab(), generalSettingsTab, new AboutTab() };
 		
 		buildGUI();
 		checkStarcraftFolder();
@@ -343,7 +343,7 @@ public class MainFrame extends JFrame {
 		
 		if ( visible ) {
 			if ( getExtendedState() == ICONIFIED )
-				setExtendedState( NORMAL ); // This restores maximized if window was maximized
+				setExtendedState( NORMAL ); // This restores state maximized if window was maximized
 			
 			if ( !windowHasBeenShown ) {
 				if ( windowMaximized )
