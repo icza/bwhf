@@ -11,7 +11,7 @@
  * Added a button to minimize to tray below the window state changer buttons.
  * Added a button on the game chat tab to display game chat from any replay file (not just  '!LastReplay.rep'). Extracting game chat from replays to text files is still available.
  * Setting to save and remember window position.
- * Added new icon to the window and to the starter `BWHFAgent.exe` file.
+ * Added a new icon to the window and to the starter `BWHFAgent.exe` file.
  * *Detection of use cheat drophack.*
  * *Detection of some build anywhere hack*.
 
