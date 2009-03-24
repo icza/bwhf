@@ -10,7 +10,7 @@
  * Settings on the general settings tab to enable/disable the system tray, to minimize window always to system tray and to start the agent minimized to tray. This can be useful if you want to autostart the agent when you log in to windows (linking BWHF Agent into your Startup menu for example). That way you can be sure the agent will be running and will scan your replays even if you start Starcraft with another launcher. But starting Starcraft will be available with just 2 clicks from your tray icon.
  * Added a button to minimize to tray below the window state changer buttons.
  * Added a button on the game chat tab to display game chat from any replay file (not just  '!LastReplay.rep'). Extracting game chat from replays to text files is still available.
- * Setting to save and remember window position.
+ * Setting to enable/disable saving and remembering window position.
  * Added a new icon to the window and to the starter `BWHFAgent.exe` file.
  * *Detection of use cheat drophack.*
  * *Detection of some build anywhere hack*.
