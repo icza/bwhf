@@ -17,7 +17,9 @@ import java.util.StringTokenizer;
 
 import swingwt.awt.BorderLayout;
 import swingwt.awt.Color;
+import swingwt.awt.Dimension;
 import swingwt.awt.Rectangle;
+import swingwt.awt.Toolkit;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwt.awt.event.KeyEvent;
@@ -29,7 +31,6 @@ import swingwtx.swing.JButton;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JFrame;
 import swingwtx.swing.JLabel;
-import swingwtx.swing.JOptionPane;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JTabbedPane;
 import swingwtx.swing.JTextField;
@@ -382,7 +383,27 @@ public class MainFrame extends JFrame {
 		try {
 			Runtime.getRuntime().exec( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).getCanonicalPath(), null, new File( starcraftFolderTextField.getText() ) );
 		} catch ( final IOException ie ) {
-			JOptionPane.showMessageDialog( this, "Cannot start " + Consts.STARCRAFT_EXECUTABLE_FILE_NAME + "!\nIs Starcraft directory properly set?", "Error", JOptionPane.ERROR_MESSAGE );
+			final JFrame errorFrame = new JFrame( "BWHF Agent error" );
+			errorFrame.setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
+			errorFrame.getContentPane().add( Utils.wrapInPanel( new JLabel( "Cannot start " + Consts.STARCRAFT_EXECUTABLE_FILE_NAME + "!" ) ), BorderLayout.NORTH );
+			errorFrame.getContentPane().add( Utils.wrapInPanel( new JLabel( "Is Starcraft directory properly set?" ) ), BorderLayout.CENTER );
+			final JButton closeButton = new JButton( "Close" );
+			closeButton.setMnemonic( closeButton.getText().charAt( 0 ) );
+			closeButton.addActionListener( new ActionListener() {
+				public void actionPerformed( final ActionEvent event ) {
+					errorFrame.dispose();
+				}
+			} );
+			errorFrame.add( Utils.wrapInPanel( closeButton ), BorderLayout.SOUTH );
+			errorFrame.setResizable( false );
+			errorFrame.setDefaultCloseOperation( DISPOSE_ON_CLOSE );
+			errorFrame.pack();
+			
+			final Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+			errorFrame.setLocation( ( screenSize.width - 220 ) / 2, ( screenSize.height - 120 ) / 2 );
+			
+			errorFrame.setVisible( true );
+			closeButton.requestFocusInWindow();
 		}
 	}
 	
