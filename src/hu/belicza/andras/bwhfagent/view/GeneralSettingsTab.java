@@ -44,6 +44,8 @@ public class GeneralSettingsTab extends Tab {
 	protected final JCheckBox  alwaysMinimizeToTrayCheckBox       = new JCheckBox( "Always minimize to tray", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALWAYS_MINIMIZE_TO_TRAY ) ) );
 	/** Checkbox to always minimize to tray.                                 */
 	protected final JCheckBox  startAgentMinimizedToTrayCheckBox  = new JCheckBox( "Start agent minimized to tray", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_START_AGENT_MINIMIZED_TO_TRAY ) ) );
+	/** Checkbox to save window position.                                    */
+	protected final JCheckBox  saveWindowPositionCheckBox         = new JCheckBox( "Save window position", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAVE_WINDOW_POSITION ) ) );
 	
 	/**
 	 * Creates a new GeneralSettings.
@@ -120,6 +122,8 @@ public class GeneralSettingsTab extends Tab {
 		// Initialize system tray related checkboxes
 		systemTrayIconEnablerCheckBoxActionListener.actionPerformed( null );
 		
+		contentBox.add( Utils.wrapInPanel( saveWindowPositionCheckBox ) );
+		
 		// To consume the remaining space:
 		contentBox.add( new JPanel( new BorderLayout() ) );
 	}
@@ -177,6 +181,7 @@ public class GeneralSettingsTab extends Tab {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_ENABLE_SYSTEM_TRAY_ICON       , Boolean.toString( enableSystemTrayIconCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_ALWAYS_MINIMIZE_TO_TRAY       , Boolean.toString( alwaysMinimizeToTrayCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_START_AGENT_MINIMIZED_TO_TRAY , Boolean.toString( startAgentMinimizedToTrayCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SAVE_WINDOW_POSITION          , Boolean.toString( saveWindowPositionCheckBox.isSelected() ) );
 	}
 	
 }
