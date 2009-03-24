@@ -14,6 +14,7 @@ import swingwt.awt.event.ActionListener;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JFileChooser;
+import swingwtx.swing.JPanel;
 
 
 /**
@@ -27,11 +28,13 @@ public class GameChatTab extends ProgressLoggedTab {
 	private static final String LOG_FILE_NAME = "game_chat.log";
 	
 	/** Button to display game chat from the last replay.  */
-	private final JButton   displayFromLastReplayButton = new JButton( "Display game chat from 'LastReplay.rep'" );
-	/** Button to select files to extract game chat.       */
-	private final JButton   selectFilesButton           = new JButton( "Select files to extract game chat from" );
+	protected final JButton   displayFromLastReplayButton    = new JButton( "Display game chat from 'LastReplay.rep'" );
+	/** Button to select a file to display game chat from. */
+	private   final JButton   selectFileToDisplayFromButton  = new JButton( "Select file to display game chat from" );
+	/** Button to select files to extract game chat from.  */
+	private   final JButton   selectFilesToExtractFromButton = new JButton( "Select files to extract game chat" );
 	/** Checkbox to tell whether to include replay header. */
-	private final JCheckBox includeReplayHeaderCheckBox = new JCheckBox( "Also include replay header information", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_INCLUDE_REPLAY_HEADER ) ) );
+	private   final JCheckBox includeReplayHeaderCheckBox    = new JCheckBox( "Also include replay header information", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_INCLUDE_REPLAY_HEADER ) ) );
 	
 	/**
 	 * Creates a new PcxConverterTab.
@@ -46,34 +49,36 @@ public class GameChatTab extends ProgressLoggedTab {
 	 * Builds the GUI of the tab.
 	 */
 	protected void buildGUI() {
+		final JPanel panel = Utils.createWrapperPanel();
 		displayFromLastReplayButton.setMnemonic( 'l' );
 		displayFromLastReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				progressBar.setValue( 0 );
-				progressBar.setMaximum( 1 );
-				final Replay replay = BinRepParser.parseReplay( new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ), true );
-				logMessage( "\n", false ); // Prints 2 empty lines
-				if ( replay == null )
-					logMessage( "Could not extract game chat from '" + Consts.LAST_REPLAY_FILE_NAME + "'!" );
-				else {
-					if ( includeReplayHeaderCheckBox.isSelected() ) {
-						logMessage( "Replay header information of '" + Consts.LAST_REPLAY_FILE_NAME + "':" );
-						final StringWriter headerInfoWriter = new StringWriter();
-						replay.replayHeader.printHeaderInformation( new PrintWriter( headerInfoWriter ) );
-						logMessage( headerInfoWriter.toString(), false );
-						logMessage( "", false ); // Prints an empty line
-					}
-					logMessage( "Game chat of '" + Consts.LAST_REPLAY_FILE_NAME + "':" );
-					logMessage( replay.gameChat, false );
-					logMessage( "End of game chat of '" + Consts.LAST_REPLAY_FILE_NAME + "'." );
-				}
-				progressBar.setValue( 1 );
+				showGameChatFromReplay( new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) );
 			}
 		} );
-		contentBox.add( Utils.wrapInPanel( displayFromLastReplayButton ) );
+		panel.add( displayFromLastReplayButton );
+		selectFileToDisplayFromButton.setMnemonic( 'd' );
+		selectFileToDisplayFromButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.getReplayStartFolder() );
+				
+				// This is for SwingWT:
+				fileChooser.setExtensionFilters( new String[] { "*.rep", "*.*" }, new String[] { "Replay Files (*.rep)", "All files (*.*)" } );
+				// This is for Swing:
+				fileChooser.addChoosableFileFilter( ManualScanTab.SWING_REPLAY_FILE_FILTER ); 
+				
+				fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
+				fileChooser.setMultiSelectionEnabled( false );
+				
+				if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION )
+					showGameChatFromReplay( fileChooser.getSelectedFile() );
+			}
+		} );
+		panel.add( selectFileToDisplayFromButton );
+		contentBox.add( Utils.wrapInPanel( panel ) );
 		
-		selectFilesButton.setMnemonic( 'f' );
-		selectFilesButton.addActionListener( new ActionListener() {
+		selectFilesToExtractFromButton.setMnemonic( 'f' );
+		selectFilesToExtractFromButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.getReplayStartFolder() );
 				
@@ -89,7 +94,7 @@ public class GameChatTab extends ProgressLoggedTab {
 					extractGameChatFromFiles( fileChooser.getSelectedFiles() );
 			}
 		} );
-		contentBox.add( Utils.wrapInPanel( selectFilesButton ) );
+		contentBox.add( Utils.wrapInPanel( selectFilesToExtractFromButton ) );
 		
 		contentBox.add( Utils.wrapInPanel( includeReplayHeaderCheckBox ) );
 		
@@ -97,11 +102,48 @@ public class GameChatTab extends ProgressLoggedTab {
 	}
 	
 	/**
+	 * Shows the game chat from a replay file.
+	 * @param replayFile replay file to be show game chat from
+	 */
+	private void showGameChatFromReplay( final File replayFile ) {
+		selectFilesToExtractFromButton.setEnabled( false );
+		selectFileToDisplayFromButton.setEnabled( false );
+		displayFromLastReplayButton.setEnabled( false );
+		try {
+			progressBar.setValue( 0 );
+			progressBar.setMaximum( 1 );
+			final Replay replay = BinRepParser.parseReplay( replayFile, true );
+			logMessage( "\n", false ); // Prints 2 empty lines
+			if ( replay == null )
+				logMessage( "Could not extract game chat from '" + Consts.LAST_REPLAY_FILE_NAME + "'!" );
+			else {
+				if ( includeReplayHeaderCheckBox.isSelected() ) {
+					logMessage( "Replay header information of '" + Consts.LAST_REPLAY_FILE_NAME + "':" );
+					final StringWriter headerInfoWriter = new StringWriter();
+					replay.replayHeader.printHeaderInformation( new PrintWriter( headerInfoWriter ) );
+					logMessage( headerInfoWriter.toString(), false );
+					logMessage( "", false ); // Prints an empty line
+				}
+				logMessage( "Game chat of '" + Consts.LAST_REPLAY_FILE_NAME + "':" );
+				logMessage( replay.gameChat, false );
+				logMessage( "End of game chat of '" + Consts.LAST_REPLAY_FILE_NAME + "'." );
+			}
+			progressBar.setValue( 1 );
+		}
+		finally {
+			selectFilesToExtractFromButton.setEnabled( true );
+			selectFileToDisplayFromButton.setEnabled( true );
+			displayFromLastReplayButton.setEnabled( true );
+		}
+	}
+	
+	/**
 	 * Extracts game chat from the specified files and writes them to text files.
 	 * @param replayFiles replay files to extract game chat from
 	 */
 	private void extractGameChatFromFiles( final File[] replayFiles ) {
-		selectFilesButton.setEnabled( false );
+		selectFilesToExtractFromButton.setEnabled( false );
+		selectFileToDisplayFromButton.setEnabled( false );
 		displayFromLastReplayButton.setEnabled( false );
 		new NormalThread() {
 			@Override
@@ -152,7 +194,8 @@ public class GameChatTab extends ProgressLoggedTab {
 					logMessage( extractingMessage + " done in " + Utils.formatNanoTimeAmount( endTimeNanons - startTimeNanons ) );
 				}
 				finally {
-					selectFilesButton.setEnabled( true );
+					selectFilesToExtractFromButton.setEnabled( true );
+					selectFileToDisplayFromButton.setEnabled( true );
 					displayFromLastReplayButton.setEnabled( true );
 				}
 			}

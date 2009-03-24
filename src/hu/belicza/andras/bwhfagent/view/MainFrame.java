@@ -73,11 +73,15 @@ public class MainFrame extends JFrame {
 	private final JTabbedPane tabbedPane = new JTabbedPane();
 	
 	/** Reference to the autoscan tab.         */
-	public final AutoscanTab        autoscanTab;
+	private   final AutoscanTab        autoscanTab;
+	/** Reference to the manual scan tab.      */
+	private   final ManualScanTab      manualScanTab;
 	/** Reference to the charts tab.           */
-	public final ChartsTab          chartsTab;
+	private   final ChartsTab          chartsTab;
+	/** Reference to the game chat tab.        */
+	private   final GameChatTab        gameChatTab;
 	/** Reference to the general settings tab. */
-	public final GeneralSettingsTab generalSettingsTab;
+	protected final GeneralSettingsTab generalSettingsTab;
 	
 	/** Tabs in the main frame. */
 	private final Tab[] tabs;
@@ -110,8 +114,10 @@ public class MainFrame extends JFrame {
 		
 		generalSettingsTab = new GeneralSettingsTab(); // This has to be created fist, autoscan tab uses this.
 		autoscanTab        = new AutoscanTab();
+		manualScanTab      = new ManualScanTab();
 		chartsTab          = new ChartsTab();
-		tabs = new Tab[] { autoscanTab, new ManualScanTab(), chartsTab, new GameChatTab(), new PcxConverterTab(), generalSettingsTab, new AboutTab() };
+		gameChatTab        = new GameChatTab();
+		tabs = new Tab[] { autoscanTab, manualScanTab, chartsTab, gameChatTab, new PcxConverterTab(), generalSettingsTab, new AboutTab() };
 		
 		buildGUI();
 		checkStarcraftFolder();
@@ -243,24 +249,55 @@ public class MainFrame extends JFrame {
 				gatewayChangerPopupMenu.add( gatewayMenuItem );
 			}
 			setGatewayMenuItemStatesTask.run(); // To select the initial gateway
-			popupMenu.add( gatewayChangerPopupMenu );
 			autoscanTab.gatewayComboBox.addChangeListener( new ChangeListener() {
 				public void stateChanged( final ChangeEvent event ) {
 					setGatewayMenuItemStatesTask.run();
 				}
 			} );
+			popupMenu.add( gatewayChangerPopupMenu );
+			final PopupMenu lastReplayPopupMenu = new PopupMenu( "LastReplay" );
+			final MenuItem showOnChartsMenuItem = new MenuItem( "Show on charts" );
+			showOnChartsMenuItem.addActionListener( new java.awt.event.ActionListener() {
+				public void actionPerformed( final java.awt.event.ActionEvent event ) {
+					MainFrame.this.setVisible( true );
+					selectTab( chartsTab );
+					chartsTab.setReplayFile( new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) );
+				}
+			} );
+			lastReplayPopupMenu.add( showOnChartsMenuItem );
+			final MenuItem displayGameChatMenuItem = new MenuItem( "Display game chat" );
+			displayGameChatMenuItem.addActionListener( new java.awt.event.ActionListener() {
+				public void actionPerformed( final java.awt.event.ActionEvent event ) {
+					MainFrame.this.setVisible( true );
+					selectTab( gameChatTab );
+					if ( gameChatTab.displayFromLastReplayButton.isEnabled() )
+						gameChatTab.displayFromLastReplayButton.doClick();
+				}
+			} );
+			lastReplayPopupMenu.add( displayGameChatMenuItem );
+			final MenuItem scanMenuItem = new MenuItem( "Scan for hacks" );
+			scanMenuItem.addActionListener( new java.awt.event.ActionListener() {
+				public void actionPerformed( final java.awt.event.ActionEvent event ) {
+					MainFrame.this.setVisible( true );
+					selectTab( manualScanTab );
+					if ( manualScanTab.scanLastReplayButton.isEnabled() )
+						manualScanTab.scanLastReplayButton.doClick();
+				}
+			} );
+			lastReplayPopupMenu.add( scanMenuItem );
+			popupMenu.add( lastReplayPopupMenu );
 			popupMenu.addSeparator();
 			restoreMainWindowMenuItem = new MenuItem( "Restore main window" );
 			restoreMainWindowMenuItem.addActionListener( new java.awt.event.ActionListener() {
 				public void actionPerformed( final java.awt.event.ActionEvent event ) {
-					setVisible( true );
+					MainFrame.this.setVisible( true );
 				}
 			} );
 			popupMenu.add( restoreMainWindowMenuItem );
 			hideMainWindowMenuItem = new MenuItem( "Hide main window" );
 			hideMainWindowMenuItem.addActionListener( new java.awt.event.ActionListener() {
 				public void actionPerformed( final java.awt.event.ActionEvent event ) {
-					setVisible( false );
+					MainFrame.this.setVisible( false );
 				}
 			} );
 			hideMainWindowMenuItem.setEnabled( false );
@@ -342,7 +379,6 @@ public class MainFrame extends JFrame {
 	 * Starts or switches to Starcraft.
 	 */
 	private void startOrSwitchToStarcraft() {
-		System.out.println( getBounds() );
 		try {
 			Runtime.getRuntime().exec( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).getCanonicalPath(), null, new File( starcraftFolderTextField.getText() ) );
 		} catch ( final IOException ie ) {
