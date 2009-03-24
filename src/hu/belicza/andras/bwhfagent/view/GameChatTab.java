@@ -32,7 +32,7 @@ public class GameChatTab extends ProgressLoggedTab {
 	/** Button to select a file to display game chat from. */
 	private   final JButton   selectFileToDisplayFromButton  = new JButton( "Select file to display game chat from" );
 	/** Button to select files to extract game chat from.  */
-	private   final JButton   selectFilesToExtractFromButton = new JButton( "Select files to extract game chat" );
+	private   final JButton   selectFilesToExtractFromButton = new JButton( "Select files to extract game chat from" );
 	/** Checkbox to tell whether to include replay header. */
 	private   final JCheckBox includeReplayHeaderCheckBox    = new JCheckBox( "Also include replay header information", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_INCLUDE_REPLAY_HEADER ) ) );
 	
