@@ -75,21 +75,21 @@ public class ManualScanTab extends ProgressLoggedTab {
 	};
 	
 	/** Button to scan the last replay.                  */
-	private final JButton   scanLastReplayButton            = new JButton( "Scan 'LastReplay.rep'" );
+	protected final JButton   scanLastReplayButton            = new JButton( "Scan 'LastReplay.rep'" );
 	/** Button to select folders to scan.                */
-	private final JButton   selectFoldersButton             = new JButton( "Select folders to scan recursively" );
+	private   final JButton   selectFoldersButton             = new JButton( "Select folders to scan recursively" );
 	/** Button to select files to scan.                  */
-	private final JButton   selectFilesButton               = new JButton( "Select files to scan" );
+	private   final JButton   selectFilesButton               = new JButton( "Select files to scan" );
 	/** Button to stop the current scan.                 */
-	private final JButton   stopScanButton                  = new JButton( "Stop current scan" );
+	private   final JButton   stopScanButton                  = new JButton( "Stop current scan" );
 	/** Flag hacker reps checkbox.                       */
-	private final JCheckBox flagHackerRepsCheckBox          = new JCheckBox( "Flag hacker replays by appending '" + HACKER_REPS_FLAG + "' to the", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS ) ) );
+	private   final JCheckBox flagHackerRepsCheckBox          = new JCheckBox( "Flag hacker replays by appending '" + HACKER_REPS_FLAG + "' to the", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS ) ) );
 	/** Position where to flag hacker replays combo box. */
-	private final JComboBox flagHackerRepsPositionComboBox  = new JComboBox( Consts.FLAG_HACKER_REPS_POSITION_LABELS );
+	private   final JComboBox flagHackerRepsPositionComboBox  = new JComboBox( Consts.FLAG_HACKER_REPS_POSITION_LABELS );
 	/** Clean hack flag checkbox.                        */
-	private final JCheckBox cleanHackFlagCheckBox           = new JCheckBox( "Clean the '" + HACKER_REPS_FLAG + "' flag from replays where no hackers were found during the scan", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CLEAN_HACK_FLAG ) ) );
+	private   final JCheckBox cleanHackFlagCheckBox           = new JCheckBox( "Clean the '" + HACKER_REPS_FLAG + "' flag from replays where no hackers were found during the scan", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CLEAN_HACK_FLAG ) ) );
 	/** Create HTML report summary checkbox.             */
-	private final JCheckBox createHtmlSummaryReportCheckBox = new JCheckBox( "Create and open a detailed HTML summary report at the end of scan", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CREATE_HTML_SUMMARY_REPORT ) ) );
+	private   final JCheckBox createHtmlSummaryReportCheckBox = new JCheckBox( "Create and open a detailed HTML summary report at the end of scan", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CREATE_HTML_SUMMARY_REPORT ) ) );
 	
 	/** Variable to store stop requests of scan.    */
 	private volatile boolean requestedToStop;
