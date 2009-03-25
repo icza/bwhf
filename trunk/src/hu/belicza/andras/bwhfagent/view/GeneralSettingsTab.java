@@ -96,6 +96,7 @@ public class GeneralSettingsTab extends Tab {
 		final GridBagLayout      gridBagLayout = new GridBagLayout();
 		final GridBagConstraints constraints   = new GridBagConstraints();
 		panel = new JPanel( gridBagLayout );
+		panel.setBorder( BorderFactory.createTitledBorder( "Folder settings:" ) );
 		JLabel  label;
 		JButton button;
 		
@@ -148,9 +149,8 @@ public class GeneralSettingsTab extends Tab {
 		} );
 		gridBagLayout.setConstraints( button, constraints );
 		panel.add( button );
-		titledPanel = Utils.wrapInPanel( panel );
-		titledPanel.setBorder( BorderFactory.createTitledBorder( "Folder settings:" ) );
-		contentBox.add( titledPanel );
+		final Box contentBox2 = Box.createVerticalBox();
+		contentBox2.add( panel );
 		
 		panel = new JPanel( new GridLayout( 3, 1 ) );
 		final ActionListener systemTrayIconEnablerCheckBoxActionListener = new ActionListener() {
@@ -172,7 +172,7 @@ public class GeneralSettingsTab extends Tab {
 		systemTrayIconEnablerCheckBoxActionListener.actionPerformed( null );
 		titledPanel = Utils.wrapInPanel( panel );
 		titledPanel.setBorder( BorderFactory.createTitledBorder( "Tray icon settings:" ) );
-		contentBox.add( titledPanel );
+		contentBox2.add( titledPanel );
 		
 		final Box miscBox = Box.createVerticalBox();
 		panel = Utils.createWrapperPanel(); 
@@ -185,7 +185,9 @@ public class GeneralSettingsTab extends Tab {
 		miscBox.add( skipLatterActionsOfHackersCheckBox );
 		titledPanel = Utils.wrapInPanel( miscBox );
 		titledPanel.setBorder( BorderFactory.createTitledBorder( "Miscellaneous settings:" ) );
-		contentBox.add( titledPanel );
+		contentBox2.add( titledPanel );
+		
+		contentBox.add( Utils.wrapInPanel( contentBox2 ) );
 		
 		// To consume the remaining space:
 		contentBox.add( new JPanel( new BorderLayout() ) );
