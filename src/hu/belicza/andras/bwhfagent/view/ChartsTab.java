@@ -11,6 +11,7 @@ import java.io.File;
 import swingwt.awt.Color;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwtx.swing.BorderFactory;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
@@ -32,7 +33,7 @@ public class ChartsTab extends Tab {
 	/** Button to select files to extract game chat.       */
 	private final JButton   selectFileButton     = new JButton( "Select file to open" );
 	/** Label to display the loaded replay.                */
-	private final JLabel    loadedReplayLabel    = new JLabel( "No replays loaded." );
+	private final JLabel    loadedReplayLabel    = new JLabel( "No replay loaded." );
 	
 	/** Combobox to select the chart type.                                   */
 	public final JComboBox chartTypeComboBox                  = new JComboBox( ChartsComponent.ChartType.values() );
@@ -59,11 +60,13 @@ public class ChartsTab extends Tab {
 	 * Builds the GUI of the tab.
 	 */
 	private void buildGUI() {
+		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
+		
 		final JPanel panel = Utils.createWrapperPanel();
 		openLastReplayButton.setMnemonic( 'l' );
 		openLastReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				setReplayFile( new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) );
+				setReplayFile( new File( MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) );
 			}
 		} );
 		panel.add( openLastReplayButton );
@@ -90,6 +93,7 @@ public class ChartsTab extends Tab {
 		contentBox.add( Utils.wrapInPanel( panel ) );
 		
 		final JPanel chartsCommonControlPanel = Utils.createWrapperPanel();
+		chartsCommonControlPanel.setBorder( BorderFactory.createTitledBorder( "General chart settings:" ) );
 		chartsCommonControlPanel.add( new JLabel( "Chart type:" ) );
 		chartTypeComboBox.addChangeListener( new ChangeListener() {
 			public void stateChanged( final ChangeEvent event ) {
@@ -113,8 +117,6 @@ public class ChartsTab extends Tab {
 		chartsCommonControlPanel.add( usePlayersColorsCheckBox );
 		chartsCommonControlPanel.add( autoDisableInactivePlayersCheckBox );
 		contentBox.add( chartsCommonControlPanel );
-		
-		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
 		
 		contentBox.add( chartsComponent.getContentPanel() );
 	}

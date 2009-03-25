@@ -99,7 +99,7 @@ public class PcxConverterTab extends ProgressLoggedTab {
 		selectFilesButton.setMnemonic( 'f' );
 		selectFilesButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				final JFileChooser fileChooser = new JFileChooser( new File( MainFrame.getInstance().starcraftFolderTextField.getText() ) );
+				final JFileChooser fileChooser = new JFileChooser( new File( MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField.getText() ) );
 				
 				// This is for SwingWT:
 				fileChooser.setExtensionFilters( new String[] { "*.pcx", "*.*" }, new String[] { "PCX image files (*.pcx)", "All files (*.*)" } );
@@ -185,7 +185,7 @@ public class PcxConverterTab extends ProgressLoggedTab {
 			
 			@Override
 			public void run() {
-				final JTextField starcraftFolderTextField = MainFrame.getInstance().starcraftFolderTextField;
+				final JTextField starcraftFolderTextField = MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField;
 				
 				final Date[] autoscanEnabledTimeHolder = new Date[ 1 ];
 				while ( true ) {

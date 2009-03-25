@@ -24,6 +24,7 @@ import java.util.Map.Entry;
 
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
@@ -157,7 +158,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 		scanLastReplayButton.setMnemonic( 'L' );
 		scanLastReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				scanFilesAndFolders( new File[] { new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) }, true );
+				scanFilesAndFolders( new File[] { new File( MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) }, true );
 			}
 		} );
 		selectButtonsPanel.add( scanLastReplayButton );
@@ -179,15 +180,15 @@ public class ManualScanTab extends ProgressLoggedTab {
 		} );
 		contentBox.add( Utils.wrapInPanel( stopScanButton ) );
 		
-		final JPanel flagHackerRepsPanel = Utils.createWrapperPanel();
-		flagHackerRepsPanel.add( flagHackerRepsCheckBox );
-		flagHackerRepsPanel.add( flagHackerRepsPositionComboBox );
-		flagHackerRepsPanel.add( new JLabel( "of their names" ) );
-		contentBox.add( flagHackerRepsPanel );
-		
-		contentBox.add( Utils.wrapInPanel( cleanHackFlagCheckBox ) );
-		
-		contentBox.add( Utils.wrapInPanel( createHtmlSummaryReportCheckBox ) );
+		final Box settingsBox = Box.createVerticalBox();
+		final Box flagHackerRepsBox = Box.createHorizontalBox();
+		flagHackerRepsBox.add( flagHackerRepsCheckBox );
+		flagHackerRepsBox.add( flagHackerRepsPositionComboBox );
+		flagHackerRepsBox.add( Utils.wrapInPanel( new JLabel( "of their names" ) ) );
+		settingsBox.add( flagHackerRepsBox );
+		settingsBox.add( cleanHackFlagCheckBox );
+		settingsBox.add( createHtmlSummaryReportCheckBox );
+		contentBox.add( Utils.wrapInPanel( settingsBox ) );
 		
 		super.buildGUI();
 	}

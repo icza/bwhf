@@ -7,6 +7,7 @@ import java.util.List;
 import swingwt.awt.BorderLayout;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwtx.swing.BorderFactory;
 import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JFileChooser;
@@ -52,9 +53,10 @@ public class ReplaySearchTab extends Tab {
 	 * Builds the GUI of the panel.
 	 */
 	private void buildGUI() {
-		final JPanel filtersPanel = new JPanel();
-		filtersPanel.add( new JLabel( "Filter fields come here..." ) );
-		contentBox.add( Utils.wrapInPanel( filtersPanel ) );
+		final JPanel headerFiltersPanel = new JPanel();
+		headerFiltersPanel.setBorder( BorderFactory.createTitledBorder( "Replay header fields" ) );
+		headerFiltersPanel.add( new JLabel( "Filter fields come here..." ) );
+		contentBox.add( Utils.wrapInPanel( headerFiltersPanel ) );
 		
 		final JPanel selectButtonsPanel = Utils.createWrapperPanel();
 		final ActionListener selectFilesAndFoldersActionListener = new ActionListener() {
