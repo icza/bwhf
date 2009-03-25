@@ -16,24 +16,18 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 
 import swingwt.awt.BorderLayout;
-import swingwt.awt.Color;
 import swingwt.awt.Dimension;
-import swingwt.awt.Rectangle;
 import swingwt.awt.Toolkit;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
-import swingwt.awt.event.KeyEvent;
-import swingwt.awt.event.KeyListener;
 import swingwt.awt.event.WindowAdapter;
 import swingwt.awt.event.WindowEvent;
 import swingwtx.swing.ImageIcon;
 import swingwtx.swing.JButton;
-import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JFrame;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JTabbedPane;
-import swingwtx.swing.JTextField;
 import swingwtx.swing.event.ChangeEvent;
 import swingwtx.swing.event.ChangeListener;
 
@@ -64,13 +58,11 @@ public class MainFrame extends JFrame {
 	public final String applicationVersion;
 	
 	/** Button to start/switch to Starcraft.                   */
-	private   final JButton    startScButton              = new JButton( "Start/Switch to Starcraft" );
+	protected final JButton    startScButton              = new JButton( "Start/Switch to Starcraft" );
 	/** Button to minimize to tray.                            */
 	protected final JButton    minimizeToTrayButton       = new JButton( "Minimize to tray" );
-	/** Starcraft directory.                                   */
-	protected final JTextField starcraftFolderTextField   = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ) );
 	/** Label to display if starcraft folder is set correctly. */
-	private   final JLabel     starcraftFolderStatusLabel = new JLabel();
+	protected final JLabel     starcraftFolderStatusLabel = new JLabel();
 	
 	/** The tabbed pane holding the tabs. */
 	private final JTabbedPane tabbedPane = new JTabbedPane();
@@ -123,7 +115,6 @@ public class MainFrame extends JFrame {
 		tabs = new Tab[] { autoscanTab, manualScanTab, chartsTab, gameChatTab, new ReplaySearchTab(), new PcxConverterTab(), generalSettingsTab, new AboutTab() };
 		
 		buildGUI();
-		checkStarcraftFolder();
 		
 		setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
 		addWindowListener( new WindowAdapter() {
@@ -180,27 +171,6 @@ public class MainFrame extends JFrame {
 		panel.add( Utils.wrapInPanel( minimizeToTrayButton ), BorderLayout.EAST );
 		northBox.add( panel, BorderLayout.CENTER );
 		
-		panel = Utils.createWrapperPanel();
-		panel.add( new JLabel( "Starcraft directory:" ) );
-		// This is a workaround becase SwingWT does not implement DocumentListener correctly :S
-		starcraftFolderTextField.addKeyListener( new KeyListener() {
-			public void keyPressed( final KeyEvent event ) {
-				checkStarcraftFolder();
-			}
-			public void keyReleased( final KeyEvent event ) {
-				checkStarcraftFolder();
-			}
-			public void keyTyped( final KeyEvent event ) {
-				checkStarcraftFolder();
-			}
-		} );
-		panel.add( starcraftFolderTextField );
-		panel.add( Utils.createFileChooserButton( this, starcraftFolderTextField, JFileChooser.DIRECTORIES_ONLY, null, null, new Runnable() {
-			public void run() {
-				checkStarcraftFolder();
-			}
-		} ) );
-		northBox.add( panel, BorderLayout.SOUTH );
 		getContentPane().add( northBox, BorderLayout.NORTH );
 		
 		for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ ) {
@@ -264,7 +234,7 @@ public class MainFrame extends JFrame {
 				public void actionPerformed( final java.awt.event.ActionEvent event ) {
 					MainFrame.this.setVisible( true );
 					selectTab( chartsTab );
-					chartsTab.setReplayFile( new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) );
+					chartsTab.setReplayFile( new File( generalSettingsTab.starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) );
 				}
 			} );
 			lastReplayPopupMenu.add( showOnChartsMenuItem );
@@ -362,15 +332,6 @@ public class MainFrame extends JFrame {
 	 * Saves the properties and closes the agent.
 	 */
 	private void closeAgent() {
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_STARCRAFT_FOLDER, starcraftFolderTextField.getText() );
-		if ( generalSettingsTab.saveWindowPositionCheckBox.isSelected() )
-			if ( getExtendedState() == MAXIMIZED_BOTH )
-				Utils.settingsProperties.setProperty( Consts.PROPERTY_WINDOW_POSITION, "maximized" );
-			else {
-				final Rectangle bounds = getBounds();
-				Utils.settingsProperties.setProperty( Consts.PROPERTY_WINDOW_POSITION, bounds.x + "," + bounds.y + "," + bounds.width + "," + bounds.height );
-			}
-		
 		for ( final Tab tab : tabs )
 			tab.assignUsedProperties();
 		
@@ -383,7 +344,7 @@ public class MainFrame extends JFrame {
 	 */
 	private void startOrSwitchToStarcraft() {
 		try {
-			Runtime.getRuntime().exec( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).getCanonicalPath(), null, new File( starcraftFolderTextField.getText() ) );
+			Runtime.getRuntime().exec( new File( generalSettingsTab.starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).getCanonicalPath(), null, new File( generalSettingsTab.starcraftFolderTextField.getText() ) );
 		} catch ( final IOException ie ) {
 			final JFrame errorFrame = new JFrame( "BWHF Agent error" );
 			errorFrame.setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
@@ -439,19 +400,4 @@ public class MainFrame extends JFrame {
 			SystemTray.getSystemTray().remove( trayIcon );
 	}
 	
-	/**
-	 * Checks if starcraft folder is set correctly.
-	 */
-	private void checkStarcraftFolder() {
-		if ( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).exists() ) {
-			startScButton.setEnabled( true );
-			starcraftFolderStatusLabel.setText( "Starcraft directory is set correctly." );
-			starcraftFolderStatusLabel.setForeground( Color.GREEN.darker() );
-		}
-		else {
-			startScButton.setEnabled( false );
-			starcraftFolderStatusLabel.setText( "Cannot find 'StarCraft.exe'!" );
-			starcraftFolderStatusLabel.setForeground( Color.RED );
-		}
-	}
 }

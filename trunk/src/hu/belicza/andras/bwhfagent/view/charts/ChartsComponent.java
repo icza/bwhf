@@ -33,6 +33,7 @@ import swingwt.awt.event.KeyAdapter;
 import swingwt.awt.event.KeyEvent;
 import swingwt.awt.event.MouseAdapter;
 import swingwt.awt.event.MouseEvent;
+import swingwtx.swing.BorderFactory;
 import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
@@ -183,6 +184,7 @@ public class ChartsComponent extends JPanel {
 	 */
 	private void buildConentGUI() {
 		final JPanel controlPanel = new JPanel( new BorderLayout() );
+		chartOptionsPanel.setBorder( BorderFactory.createTitledBorder( "Selected chart's settings:" ) );
 		controlPanel.add( chartOptionsPanel, BorderLayout.NORTH );
 		controlPanel.add( playersPanel, BorderLayout.CENTER );
 		contentPanel.add( controlPanel, BorderLayout.NORTH );

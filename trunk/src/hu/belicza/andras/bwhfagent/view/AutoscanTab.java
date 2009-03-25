@@ -239,7 +239,7 @@ public class AutoscanTab extends LoggedTab {
 		settingsPanel.add( panel );
 		
 		wrapperPanel = Utils.wrapInPanel( settingsPanel );
-		settingsPanel.setBorder( BorderFactory.createTitledBorder( "Settings" ) );
+		settingsPanel.setBorder( BorderFactory.createTitledBorder( "Settings:" ) );
 		contentBox.add( wrapperPanel );
 		
 		super.buildGUI();
@@ -260,7 +260,7 @@ public class AutoscanTab extends LoggedTab {
 			
 			@Override
 			public void run() {
-				final JTextField starcraftFolderTextField           = MainFrame.getInstance().starcraftFolderTextField;
+				final JTextField starcraftFolderTextField           = MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField;
 				final JCheckBox  skipLatterActionsOfHackersCheckBox = MainFrame.getInstance().generalSettingsTab.skipLatterActionsOfHackersCheckBox;
 				
 				Date autoscanEnabledTime       = null;

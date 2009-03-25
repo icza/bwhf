@@ -53,7 +53,7 @@ public class GameChatTab extends ProgressLoggedTab {
 		displayFromLastReplayButton.setMnemonic( 'l' );
 		displayFromLastReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				showGameChatFromReplay( new File( MainFrame.getInstance().starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) );
+				showGameChatFromReplay( new File( MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) );
 			}
 		} );
 		panel.add( displayFromLastReplayButton );
