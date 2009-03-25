@@ -2,7 +2,6 @@ package hu.belicza.andras.bwhfagent;
 
 import hu.belicza.andras.bwhfagent.view.MainFrame;
 import hu.belicza.andras.bwhfagent.view.Utils;
-import swingwtx.swing.JFrame;
 import swingwtx.swing.SwingWTUtils;
 
 /**
@@ -10,7 +9,7 @@ import swingwtx.swing.SwingWTUtils;
  * 
  * @author Andras Belicza
  */
-public class BWHFAgent extends JFrame {
+public class BWHFAgent {
 	
 	/**
 	 * Entry point of the program.<br>
