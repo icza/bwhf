@@ -153,23 +153,22 @@ public class GeneralSettingsTab extends Tab {
 		contentBox2.add( panel );
 		
 		panel = new JPanel( new GridLayout( 3, 1 ) );
-		final ActionListener systemTrayIconEnablerCheckBoxActionListener = new ActionListener() {
+		enableSystemTrayIconCheckBox.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				if ( enableSystemTrayIconCheckBox.isSelected() )
-					MainFrame.getInstance().installSystemTrayIcon();
+					mainFrame.installSystemTrayIcon();
 				else
-					MainFrame.getInstance().removeSystemTrayIcon();
+					mainFrame.removeSystemTrayIcon();
 				alwaysMinimizeToTrayCheckBox.setEnabled( enableSystemTrayIconCheckBox.isSelected() );
 				startAgentMinimizedToTrayCheckBox.setEnabled( enableSystemTrayIconCheckBox.isSelected() );
-				MainFrame.getInstance().minimizeToTrayButton.setEnabled( enableSystemTrayIconCheckBox.isSelected() );
+				mainFrame.minimizeToTrayButton.setEnabled( enableSystemTrayIconCheckBox.isSelected() );
 			}
-		};
-		enableSystemTrayIconCheckBox.addActionListener( systemTrayIconEnablerCheckBoxActionListener );
+		} );
 		panel.add( enableSystemTrayIconCheckBox );
 		panel.add( alwaysMinimizeToTrayCheckBox );
 		panel.add( startAgentMinimizedToTrayCheckBox );
 		// Initialize system tray related checkboxes
-		systemTrayIconEnablerCheckBoxActionListener.actionPerformed( null );
+		enableSystemTrayIconCheckBox.doClick(); // This does not change the state of the checkbox
 		titledPanel = Utils.wrapInPanel( panel );
 		titledPanel.setBorder( BorderFactory.createTitledBorder( "Tray icon settings:" ) );
 		contentBox2.add( titledPanel );

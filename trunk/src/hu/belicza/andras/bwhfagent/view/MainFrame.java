@@ -9,6 +9,7 @@ import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
+import java.awt.TrayIcon.MessageType;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
@@ -83,13 +84,17 @@ public class MainFrame extends JFrame {
 	
 	/** Reference to the tray icon of BWHF Agent. */
 	private TrayIcon trayIcon;
-	/** Reference to the restore main window menu item in the popup menu in the tray icon. */
+	/** Reference to the restore main window menu item in the popup menu of the tray icon. */
 	private MenuItem restoreMainWindowMenuItem;
-	/** Reference to the hide main window menu item in the popup menu in the tray icon.    */
-	private MenuItem hideMainWindowMenuItem; 
+	/** Reference to the hide main window menu item in the popup menu of the tray icon.    */
+	private MenuItem hideMainWindowMenuItem;
+	/** Reference to the disable tray icon menu item in the popup menu of the tray icon.   */
+	private MenuItem disableTrayIconMenuItem;
+	/** Tells if the tray icon has been successfully added to the system tray.             */
+	private boolean  trayIconInstalled;
 	
 	/** To know when we first make window visible. */
-	private boolean windowHasBeenShown = false;
+	private boolean windowHasBeenShown;
 	
 	/**
 	 * Creates a new MainFrame.
@@ -119,12 +124,12 @@ public class MainFrame extends JFrame {
 		setDefaultCloseOperation( DO_NOTHING_ON_CLOSE );
 		addWindowListener( new WindowAdapter() {
 			@Override
-			public void windowClosing( final WindowEvent we ) {
+			public void windowClosing( final WindowEvent event ) {
 				closeAgent();
 			}
 			@Override
-			public void windowIconified(WindowEvent e) {
-				if ( generalSettingsTab.enableSystemTrayIconCheckBox.isSelected() && trayIcon != null && generalSettingsTab.alwaysMinimizeToTrayCheckBox.isSelected() )
+			public void windowIconified( final WindowEvent event ) {
+				if ( trayIconInstalled && generalSettingsTab.alwaysMinimizeToTrayCheckBox.isSelected() )
 					setVisible( false );
 			}
 		} );
@@ -141,9 +146,14 @@ public class MainFrame extends JFrame {
 			selectTab( chartsTab );
 			chartsTab.setReplayFile( new File( arguments[ 0 ] ) );
 		}
-		else {
-			if ( !generalSettingsTab.enableSystemTrayIconCheckBox.isSelected() || trayIcon == null || !generalSettingsTab.startAgentMinimizedToTrayCheckBox.isSelected() )
-				setVisible( true );
+		else
+			// We have to call setVisible() even if we start minimized to tray, because menu items have to be initialized. 
+			setVisible( !trayIconInstalled || !generalSettingsTab.startAgentMinimizedToTrayCheckBox.isSelected() );
+		
+		if ( !new File( Consts.SETTINGS_PROPERTIES_FILE ).exists() ) {
+			// First run of BWHF Agent
+			if ( trayIconInstalled )
+				trayIcon.displayMessage( "Welcome!", "This is the first run of BWHF Agent.\nPlease set the Starcraft directory in the General settings tab.\n\nThank you for choosing BWHF Agent.", MessageType.INFO );
 		}
 	}
 	
@@ -192,6 +202,13 @@ public class MainFrame extends JFrame {
 		if ( SystemTray.isSupported() ) {
 			trayIcon = new TrayIcon( new javax.swing.ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
 			trayIcon.setImageAutoSize( true );
+			
+			trayIcon.setToolTip( "BWHF Agent is running." );
+			trayIcon.addActionListener( new java.awt.event.ActionListener() {
+				public void actionPerformed( java.awt.event.ActionEvent event ) {
+					setVisible( true );
+				}
+			} );
 			
 			final PopupMenu popupMenu = new PopupMenu();
 			final MenuItem startStarcraftMenuItem = new MenuItem( "Start / Switch to Starcraft" );
@@ -273,9 +290,17 @@ public class MainFrame extends JFrame {
 					MainFrame.this.setVisible( false );
 				}
 			} );
-			hideMainWindowMenuItem.setEnabled( false );
+			//hideMainWindowMenuItem.setEnabled( false );
 			popupMenu.add( hideMainWindowMenuItem );
 			popupMenu.addSeparator();
+			disableTrayIconMenuItem = new MenuItem( "Disable tray icon" );
+			disableTrayIconMenuItem.addActionListener( new java.awt.event.ActionListener() {
+				public void actionPerformed( final java.awt.event.ActionEvent event ) {
+					generalSettingsTab.enableSystemTrayIconCheckBox.setSelected( false );
+					generalSettingsTab.enableSystemTrayIconCheckBox.doClick(); // This does not change the state of the checkbox
+				}
+			} );
+			popupMenu.add( disableTrayIconMenuItem );
 			final MenuItem closeMenuItem = new MenuItem( "Close BWHF Agent" );
 			closeMenuItem.addActionListener( new java.awt.event.ActionListener() {
 				public void actionPerformed( final java.awt.event.ActionEvent event ) {
@@ -294,9 +319,11 @@ public class MainFrame extends JFrame {
 			restoreMainWindowMenuItem.setEnabled( !visible );
 		if ( hideMainWindowMenuItem != null )
 			hideMainWindowMenuItem.setEnabled( visible );
+		if ( disableTrayIconMenuItem != null )
+			disableTrayIconMenuItem.setEnabled( visible );
 		
 		boolean windowMaximized = false;
-		if ( !windowHasBeenShown ) {
+		if ( visible && !windowHasBeenShown ) {
 			// First time
 			final StringTokenizer boundsTokenizer = new StringTokenizer( generalSettingsTab.saveWindowPositionCheckBox.isSelected() ? Utils.settingsProperties.getProperty( Consts.PROPERTY_WINDOW_POSITION ) : Consts.DEFAULT_SETTINGS_PROPERTIES.getProperty( Consts.PROPERTY_WINDOW_POSITION ), "," );
 			windowMaximized = boundsTokenizer.countTokens() != 4;
@@ -387,6 +414,7 @@ public class MainFrame extends JFrame {
 			if ( systemTray.getTrayIcons().length == 0 )
 				try {
 					systemTray.add( trayIcon );
+					trayIconInstalled = true;
 				} catch ( final AWTException ae ) {
 				}
 		}
@@ -396,8 +424,10 @@ public class MainFrame extends JFrame {
 	 * Removes the installed system tray icon of BWHF Agent.
 	 */
 	public void removeSystemTrayIcon() {
-		if ( trayIcon != null )
+		if ( trayIcon != null ) {
 			SystemTray.getSystemTray().remove( trayIcon );
+			trayIconInstalled = false;
+		}
 	}
 	
 }
