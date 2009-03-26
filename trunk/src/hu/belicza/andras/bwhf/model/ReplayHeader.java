@@ -19,9 +19,17 @@ public class ReplayHeader {
 	public static final byte GAME_ENGINE_STARCRAFT = (byte) 0x00;
 	public static final byte GAME_ENGINE_BROODWAR  = (byte) 0x01;
 	
+	public static final String[] GAME_ENGINE_NAMES = {
+		"Starcraft", "Broodwar"
+	};
+	
 	public static final byte RACE_ZERG    = (byte) 0x00;
 	public static final byte RACE_TERRAN  = (byte) 0x01;
 	public static final byte RACE_PROTOSS = (byte) 0x02;
+	
+	public static final String[] RACE_NAMES = {
+		"Zerg", "Terran", "Protoss"
+	};
 	
 	public static final char[] RACE_CHARACTERS = { 'Z', 'T', 'P' };
 	

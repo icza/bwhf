@@ -90,12 +90,35 @@ public class Utils {
 	}
 	
 	/**
+	 * Creates a panel with FlowLayout aligning to left, and sets its maximum to a relatively high value
+	 * to be big enough for all screen resolution.<br>
+	 * This is required, because SwingWT does not size "floating" panels to take all the remaining space.
+	 * @return a panel to be used to wrap other elements
+	 */
+	public static JPanel createWrapperPanelLeftAligned() {
+		final JPanel panel = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
+		panel.setMaximumSize( getMaxDimension() );
+		return panel;
+	}
+	
+	/**
 	 * Wraps a component into a {@link JPanel} with a {@link FlowLayout}.
 	 * @param component component to be wrapped
 	 * @return the panel wrapping the component
 	 */
 	public static JPanel wrapInPanel( final JComponent component ) {
 		final JPanel panel = createWrapperPanel();
+		panel.add( component );
+		return panel;
+	}
+	
+	/**
+	 * Wraps a component into a {@link JPanel} with a {@link FlowLayout} aligning components to left.
+	 * @param component component to be wrapped
+	 * @return the panel wrapping the component
+	 */
+	public static JPanel wrapInPanelLeftAligned( final JComponent component ) {
+		final JPanel panel = createWrapperPanelLeftAligned();
 		panel.add( component );
 		return panel;
 	}

@@ -375,7 +375,7 @@ public class MainFrame extends JFrame {
 		} catch ( final IOException ie ) {
 			final JFrame errorFrame = new JFrame( "BWHF Agent error" );
 			errorFrame.setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
-			errorFrame.getContentPane().add( Utils.wrapInPanel( new JLabel( "Cannot start " + Consts.STARCRAFT_EXECUTABLE_FILE_NAME + "!" ) ), BorderLayout.NORTH );
+			errorFrame.getContentPane().add( Utils.wrapInPanel( new JLabel( "Could not start " + Consts.STARCRAFT_EXECUTABLE_FILE_NAME + "!" ) ), BorderLayout.NORTH );
 			errorFrame.getContentPane().add( Utils.wrapInPanel( new JLabel( "Is Starcraft directory properly set?" ) ), BorderLayout.CENTER );
 			final JButton closeButton = new JButton( "Close" );
 			closeButton.setMnemonic( closeButton.getText().charAt( 0 ) );

@@ -1,21 +1,28 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhf.model.ReplayHeader;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
 import swingwt.awt.BorderLayout;
+import swingwt.awt.GridBagConstraints;
+import swingwt.awt.GridBagLayout;
+import swingwt.awt.Insets;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.BorderFactory;
 import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
+import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JList;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JProgressBar;
 import swingwtx.swing.JScrollPane;
+import swingwtx.swing.JTextField;
 
 /**
  * Replay search tab.
@@ -24,12 +31,16 @@ import swingwtx.swing.JScrollPane;
  */
 public class ReplaySearchTab extends Tab {
 	
-	/** Button to select folders to scan.  */
-	private final JButton selectFoldersButton = new JButton( "Select folders to search recursively" );
-	/** Button to select files to scan.    */
-	private final JButton selectFilesButton   = new JButton( "Select files to search" );
+	/** Button to select folders to search.  */
+	private final JButton selectFoldersButton        = new JButton( "Select folders to search recursively" );
+	/** Button to select files to search.    */
+	private final JButton selectFilesButton          = new JButton( "Select files to search" );
 	/** Button to stop the current search. */
-	private final JButton stopSearchButton    = new JButton( "Stop current search" );
+	private final JButton stopSearchButton           = new JButton( "Stop current search" );
+	/** Button to repeat search on the same files. */
+	private final JButton repeatSearch               = new JButton( "Repeat search" );
+	/** Button to run search on the same files. */
+	private final JButton searchPreviousResultButton = new JButton( "Search previous result (narrow search)" );
 	
 	/** The progress bar component. */
 	private final JProgressBar progressBar = new JProgressBar();
@@ -39,6 +50,37 @@ public class ReplaySearchTab extends Tab {
 	
 	/** Variable to store stop requests of search. */
 	private volatile boolean requestedToStop;
+	
+	/** Game engine filter checkboxes.          */
+	private final JCheckBox[] gameEngineCheckBoxes      = new JCheckBox[ ReplayHeader.GAME_ENGINE_NAMES.length ];
+	/** Game name filter text field.            */
+	private final JTextField  gameNameTextField         = new JTextField();
+	/** Game name filter is regexp checkbox.    */
+	private final JCheckBox   gameNameRegexpCheckBox    = new JCheckBox( "Regexp" );
+	/** Creator name filter text field.         */
+	private final JTextField  creatorNameTextField      = new JTextField();
+	/** Creator name filter is regexp checkbox. */
+	private final JCheckBox   creatorNameRegexpCheckBox = new JCheckBox( "Regexp" );
+	/** Map name filter text field.            */
+	private final JTextField  mapNameTextField          = new JTextField();
+	/** Map name filter is regexp checkbox.    */
+	private final JCheckBox   mapNameRegexpCheckBox     = new JCheckBox( "Regexp" );
+	/** Player name filter text field.          */
+	private final JTextField  playerNameTextField       = new JTextField();
+	/** Player name filter is regexp checkbox.  */
+	private final JCheckBox   playerNameRegexpCheckBox  = new JCheckBox( "Regexp" );
+	/** Race filter checkboxes.                 */
+	private final JCheckBox[] raceCheckBoxes            = new JCheckBox[ ReplayHeader.RACE_NAMES.length ];
+	/** In-game player color filter checkboxes. */
+	private final JCheckBox[] inGameColorCheckBoxes     = new JCheckBox[ Math.min( 16, ReplayHeader.IN_GAME_COLOR_NAMES.length ) ];
+	/** Min duration filter text field.         */
+	private final JTextField  durationMinTextField      = new JTextField();
+	/** Max duration filter text field.         */
+	private final JTextField  durationMaxTextField      = new JTextField();
+	/** Earliest save time filter text field.   */
+	private final JTextField  saveTimeEarliestTextField = new JTextField();
+	/** Latest save time filter text field.     */
+	private final JTextField  saveTimeLatestTextField   = new JTextField();
 	
 	/**
 	 * Creates a new ReplaySearchTab.
@@ -53,12 +95,128 @@ public class ReplaySearchTab extends Tab {
 	 * Builds the GUI of the panel.
 	 */
 	private void buildGUI() {
-		final JPanel headerFiltersPanel = new JPanel();
-		headerFiltersPanel.setBorder( BorderFactory.createTitledBorder( "Replay header fields" ) );
-		headerFiltersPanel.add( new JLabel( "Filter fields come here..." ) );
+		final GridBagLayout      gridBagLayout      = new GridBagLayout();
+		final GridBagConstraints constraints        = new GridBagConstraints();
+		final JPanel             headerFiltersPanel = new JPanel( gridBagLayout );
+		headerFiltersPanel.setBorder( BorderFactory.createTitledBorder( "Replay header fields:" ) );
+		
+		JLabel label;
+		JPanel wrapperPanel;
+		
+		constraints.fill = GridBagConstraints.BOTH;
+		constraints.insets = new Insets( 1, 1, 0, 0 );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Game engines:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		wrapperPanel = Utils.createWrapperPanelLeftAligned();
+		for ( int i = 0; i < gameEngineCheckBoxes.length; i++ )
+			wrapperPanel.add( gameEngineCheckBoxes[ i ] = new JCheckBox( ReplayHeader.GAME_ENGINE_NAMES[ i ] ) );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( wrapperPanel, constraints );
+		headerFiltersPanel.add( wrapperPanel );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Game name:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		gridBagLayout.setConstraints( gameNameTextField, constraints );
+		headerFiltersPanel.add( gameNameTextField );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( gameNameRegexpCheckBox, constraints );
+		headerFiltersPanel.add( gameNameRegexpCheckBox );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Creator name:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		gridBagLayout.setConstraints( creatorNameTextField, constraints );
+		headerFiltersPanel.add( creatorNameTextField );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( creatorNameRegexpCheckBox, constraints );
+		headerFiltersPanel.add( creatorNameRegexpCheckBox );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Map name:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		gridBagLayout.setConstraints( mapNameTextField, constraints );
+		headerFiltersPanel.add( mapNameTextField );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( mapNameRegexpCheckBox, constraints );
+		headerFiltersPanel.add( mapNameRegexpCheckBox );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Player name:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		gridBagLayout.setConstraints( playerNameTextField, constraints );
+		headerFiltersPanel.add( playerNameTextField );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( playerNameRegexpCheckBox, constraints );
+		headerFiltersPanel.add( playerNameRegexpCheckBox );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Player race:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		wrapperPanel = Utils.createWrapperPanelLeftAligned();
+		for ( int i = 0; i < raceCheckBoxes.length; i++ )
+			wrapperPanel.add( raceCheckBoxes[ i ] = new JCheckBox( ReplayHeader.RACE_NAMES[ i ] ) );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( wrapperPanel, constraints );
+		headerFiltersPanel.add( wrapperPanel );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Player color:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		final GridBagLayout      gridBagLayout2 = new GridBagLayout();
+		final GridBagConstraints constraints2   = new GridBagConstraints();
+		wrapperPanel = new JPanel( gridBagLayout2 );
+		constraints2.fill = GridBagConstraints.BOTH;
+		constraints2.gridwidth = 1;
+		for ( int i = 0; i < inGameColorCheckBoxes.length; i++ ) {
+			constraints2.gridwidth = i == ( inGameColorCheckBoxes.length - 1 ) / 2 || i == inGameColorCheckBoxes.length - 1 ? GridBagConstraints.REMAINDER : 1;
+			inGameColorCheckBoxes[ i ] = new JCheckBox( ReplayHeader.IN_GAME_COLOR_NAMES[ i ] );
+			gridBagLayout2.setConstraints( inGameColorCheckBoxes[ i ], constraints2 );
+			wrapperPanel.add( inGameColorCheckBoxes[ i ] );
+		}
+		wrapperPanel = Utils.wrapInPanelLeftAligned( wrapperPanel );
+		gridBagLayout.setConstraints( wrapperPanel, constraints );
+		headerFiltersPanel.add( wrapperPanel );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Duration min (sec):" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		gridBagLayout.setConstraints( durationMinTextField, constraints );
+		headerFiltersPanel.add( durationMinTextField );
+		label = new JLabel( "Duration max (sec):" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( durationMaxTextField, constraints );
+		headerFiltersPanel.add( durationMaxTextField );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Save time earliest:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		gridBagLayout.setConstraints( saveTimeEarliestTextField, constraints );
+		headerFiltersPanel.add( saveTimeEarliestTextField );
+		label = new JLabel( "Save time latest:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( saveTimeLatestTextField, constraints );
+		headerFiltersPanel.add( saveTimeLatestTextField );
+		
 		contentBox.add( Utils.wrapInPanel( headerFiltersPanel ) );
 		
-		final JPanel selectButtonsPanel = Utils.createWrapperPanel();
+		JPanel selectButtonsPanel = Utils.createWrapperPanel();
 		final ActionListener selectFilesAndFoldersActionListener = new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.getReplayStartFolder() );
@@ -90,6 +248,15 @@ public class ReplaySearchTab extends Tab {
 			}
 		} );
 		selectButtonsPanel.add( stopSearchButton );
+		contentBox.add( selectButtonsPanel );
+		
+		selectButtonsPanel = Utils.createWrapperPanel();
+		repeatSearch.setEnabled( false );
+		repeatSearch.setMnemonic( 'r' );
+		selectButtonsPanel.add( repeatSearch );
+		searchPreviousResultButton.setEnabled( false );
+		searchPreviousResultButton.setMnemonic( 'p' );
+		selectButtonsPanel.add( searchPreviousResultButton );
 		contentBox.add( selectButtonsPanel );
 		
 		progressBar.setMaximumSize( Utils.getMaxDimension() );
