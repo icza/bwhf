@@ -16,6 +16,7 @@ import swingwtx.swing.BorderFactory;
 import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
+import swingwtx.swing.JComboBox;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JList;
@@ -78,17 +79,28 @@ public class ReplaySearchTab extends Tab {
 	/** Max duration filter text field.         */
 	private final JTextField  durationMaxTextField      = new JTextField();
 	/** Earliest save time filter text field.   */
-	private final JTextField  saveTimeEarliestTextField = new JTextField();
+	private final JTextField  saveDateEarliestTextField = new JTextField();
 	/** Latest save time filter text field.     */
-	private final JTextField  saveTimeLatestTextField   = new JTextField();
+	private final JTextField  saveDateLatestTextField   = new JTextField();
+	/** Min version combo box.                  */
+	private final JComboBox   versionMinComboBox        = new JComboBox();
+	/** Max version combo box.                  */
+	private final JComboBox   versionMaxComboBox        = new JComboBox();
 	
-	// TODO: missing fields: map size (standard width and height values are 64, 96, 128, 192, 256), starcraft version
+	// TODO: missing fields: map size (standard width and height values are 64, 96, 128, 192, 256), game type
 	
 	/**
 	 * Creates a new ReplaySearchTab.
 	 */
 	public ReplaySearchTab() {
 		super( "Replay search" );
+		
+		versionMinComboBox.addItem( "<any>" );
+		versionMaxComboBox.addItem( "<any>" );
+		for ( final String version : ReplayHeader.VERSION_NAMES ) {
+			versionMinComboBox.addItem( version );
+			versionMaxComboBox.addItem( version );
+		}
 		
 		buildGUI();
 	}
@@ -204,17 +216,30 @@ public class ReplaySearchTab extends Tab {
 		headerFiltersPanel.add( durationMaxTextField );
 		
 		constraints.gridwidth = 1;
-		label = new JLabel( "Save time earliest:" );
+		label = new JLabel( "Save date earliest:" );
 		gridBagLayout.setConstraints( label, constraints );
 		headerFiltersPanel.add( label );
-		gridBagLayout.setConstraints( saveTimeEarliestTextField, constraints );
-		headerFiltersPanel.add( saveTimeEarliestTextField );
-		label = new JLabel( "Save time latest:" );
+		gridBagLayout.setConstraints( saveDateEarliestTextField, constraints );
+		headerFiltersPanel.add( saveDateEarliestTextField );
+		label = new JLabel( "Save date latest:" );
 		gridBagLayout.setConstraints( label, constraints );
 		headerFiltersPanel.add( label );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		gridBagLayout.setConstraints( saveTimeLatestTextField, constraints );
-		headerFiltersPanel.add( saveTimeLatestTextField );
+		gridBagLayout.setConstraints( saveDateLatestTextField, constraints );
+		headerFiltersPanel.add( saveDateLatestTextField );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Version min:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		gridBagLayout.setConstraints( versionMinComboBox, constraints );
+		headerFiltersPanel.add( versionMinComboBox );
+		label = new JLabel( "Version max:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( versionMaxComboBox, constraints );
+		headerFiltersPanel.add( versionMaxComboBox );
 		
 		contentBox.add( Utils.wrapInPanel( headerFiltersPanel ) );
 		

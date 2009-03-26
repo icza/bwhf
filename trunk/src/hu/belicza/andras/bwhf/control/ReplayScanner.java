@@ -90,6 +90,7 @@ public class ReplayScanner {
 			final Action action = playerActions[ actionIndex ];
 			
 			// Use Cheat drophack
+			// TODO: gameType is not correctly parsed yet...
 			if ( replayHeader.gameType != ReplayHeader.GAME_TYPE_SINGLE_PLAYER && action.actionNameIndex == Action.ACTION_NAME_INDEX_USE_CHEAT )
 				hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_USE_CHEAT_DROPHACK, action.iteration ) );
 			
