@@ -1,6 +1,9 @@
 package hu.belicza.andras.bwhf.model;
 
 import java.io.PrintWriter;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -233,34 +236,31 @@ public class ReplayHeader {
 		output.flush();
 	}
 	
-	// TODO: determine these, help: http://starcraft.wikia.com/wiki/StarCraft_version_history
-	/** Starcraft release dates and version names. */
-	private static Object[][] VERSION_RELEASE_DATES = {
-		{          0l, "1.0"    },
-		{  941497200l, "1.7"    },
-		{  990150540l, "1.8"    },
-		{  990400320l, "1.8b"   },
-		{ 1012960860l, "1.9"    },
-		{ 1014666240l, "1.9b"   },
-		{ 1049234400l, "1.10"   },
-		{ 1083197460l, "1.11"   },
-		{ 1086115140l, "1.11b"  },
-		{ 1108601100l, "1.12"   },
-		{ 1109265420l, "1.12b"  },
-		{ 1120082400l, "1.13"   },
-		{ 1123884000l, "1.13b"  },
-		{ 1124748000l, "1.13c"  },
-		{ 1126044000l, "1.13d"  },
-		{ 1126562400l, "1.13e"  },
-		{ 1137625200l, "1.13f"  },
-		{ 1154383200l, "1.14"   },
-		{ 1179223200l, "1.15"   },
-		{ 1187647200l, "1.15.1" },
-		{ 1200438000l, "1.15.2" },
-		{ 1221148800l, "1.15.3" },
-		{ 1227567600l, "1.16"   },
-		{ 1227567600l, "1.16.1 or higher" }
+	/** Names of the public Starcraft Broodwar versions. */
+	public static final String[] VERSION_NAMES = {
+		"1.0", "1.07", "1.08", "1.08b", "1.09", "1.09b", "1.10", "1.11", "1.11b",
+		"1.12", "1.12b", "1.13", "1.13b", "1.13c", "1.13d", "1.13e", "1.13f", "1.14",
+		"1.15", "1.15.1", "1.15.2", "1.15.3", "1.16", "1.16.1 or higher"
 	};
+	
+	/** Starcraft release dates and version names. Source: ftp.blizzard.com/pub/broodwar/patches/PC */
+	public static final long[] VERSION_RELEASE_DATES = new long[ VERSION_NAMES.length ];
+	static {
+		final String[] versionReleaseDateStrings = {
+			"1998-01-01", "1999-11-02", "2001-05-18", "2001-05-20", "2002-02-06", "2002-02-25",
+			"2003-10-14", "2004-04-29", "2004-06-01", "2005-02-17", "2005-02-24", "2005-06-30",
+			"2005-08-12", "2005-08-22", "2005-09-06", "2005-09-12", "2006-04-21", "2006-08-01",
+			"2007-05-15", "2007-08-20", "2008-01-16", "2008-09-11", "2008-11-25", "2009-01-21" 
+		};
+		try {
+			final DateFormat SDF = new SimpleDateFormat( "yyyy-MM-dd" );
+			for ( int i = 0; i < versionReleaseDateStrings.length; i++ )
+				VERSION_RELEASE_DATES[ i ] = SDF.parse( versionReleaseDateStrings[ i ] ).getTime();
+		}
+		catch ( final ParseException pe ) {
+			pe.printStackTrace();
+		}
+	}
 	
 	/**
 	 * Guesses the replay Starcraft version from the save date.
@@ -270,8 +270,8 @@ public class ReplayHeader {
 		final long saveTime_ = saveTime.getTime();
 		
 		for ( int i = VERSION_RELEASE_DATES.length - 1; i >= 0; i-- )
-			if ( saveTime_ > (Long) VERSION_RELEASE_DATES[ i ][ 0 ] )
-				return (String) VERSION_RELEASE_DATES[ i ][ 1 ];
+			if ( saveTime_ > VERSION_RELEASE_DATES[ i ] )
+				return VERSION_NAMES[ i ];
 		
 		return "<unknown>";
 	}
