@@ -94,6 +94,7 @@ public class AutoscanTab extends LoggedTab {
 		final GridBagLayout      gridBagLayout = new GridBagLayout();
 		final GridBagConstraints constraints   = new GridBagConstraints();
 		final JPanel             settingsPanel = new JPanel( gridBagLayout );
+		settingsPanel.setBorder( BorderFactory.createTitledBorder( "Settings:" ) );
 		
 		JButton button;
 		
@@ -238,9 +239,7 @@ public class AutoscanTab extends LoggedTab {
 		gridBagLayout.setConstraints( panel, constraints );
 		settingsPanel.add( panel );
 		
-		wrapperPanel = Utils.wrapInPanel( settingsPanel );
-		settingsPanel.setBorder( BorderFactory.createTitledBorder( "Settings:" ) );
-		contentBox.add( wrapperPanel );
+		contentBox.add( Utils.wrapInPanel( settingsPanel ) );
 		
 		super.buildGUI();
 	}
