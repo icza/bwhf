@@ -38,8 +38,18 @@ public class ReplayHeader {
 		"green", "pale yellow", "tan", "aqua", "pale green", "blueish gray", "pale yellow", "cyan"
 	};
 	
-	public static final short GAME_TYPE_SINGLE_PLAYER = 0x02;
-	public static final short GAME_TYPE_UMS           = 0x0a;
+	public static final short GAME_TYPE_SINGLE_PLAYER = 0x02; // or MELEE?
+	//public static final short GAME_TYPE_MELEE         = 0x02;
+	public static final short GAME_TYPE_FFA           = 0x03; // Free for all
+	public static final short GAME_TYPE_ONE_ON_ONE    = 0x04;
+	public static final short GAME_TYPE_CTF           = 0x05; // Capture the flag
+	public static final short GAME_TYPE_GREED         = 0x06;
+	public static final short GAME_TYPE_SLAUGHTER     = 0x07;
+	public static final short GAME_TYPE_SUDDEN_DEATH  = 0x08;
+	public static final short GAME_TYPE_UMS           = 0x0a; // Use map settings
+	public static final short GAME_TYPE_TEAM_MELEE    = 0x0b;
+	public static final short GAME_TYPE_TEAM_FFA      = 0x0c;
+	public static final short GAME_TYPE_TEAM_CTF      = 0x0d;
 	public static final short GAME_TYPE_TVB           = 0x0f;
 	
 	// Header fields
@@ -186,6 +196,7 @@ public class ReplayHeader {
 		output.println( "Game engine: " + getGameEngineString() );
 		output.println( "Duration: " + getDurationString() );
 		output.println( "Saved on: " + saveTime );
+		output.println( "Version: " + guessVersionFromDate() );
 		output.println( "Game name: " + gameName );
 		output.println( "Map size: " + getMapSize() );
 		output.println( "Creator name: " + creatorName );
@@ -220,6 +231,49 @@ public class ReplayHeader {
 			output.println( (String) playerDescription[ 1 ] );
 		
 		output.flush();
+	}
+	
+	// TODO: determine these, help: http://starcraft.wikia.com/wiki/StarCraft_version_history
+	/** Starcraft release dates and version names. */
+	private static Object[][] VERSION_RELEASE_DATES = {
+		{          0l, "1.0"    },
+		{  941497200l, "1.7"    },
+		{  990150540l, "1.8"    },
+		{  990400320l, "1.8b"   },
+		{ 1012960860l, "1.9"    },
+		{ 1014666240l, "1.9b"   },
+		{ 1049234400l, "1.10"   },
+		{ 1083197460l, "1.11"   },
+		{ 1086115140l, "1.11b"  },
+		{ 1108601100l, "1.12"   },
+		{ 1109265420l, "1.12b"  },
+		{ 1120082400l, "1.13"   },
+		{ 1123884000l, "1.13b"  },
+		{ 1124748000l, "1.13c"  },
+		{ 1126044000l, "1.13d"  },
+		{ 1126562400l, "1.13e"  },
+		{ 1137625200l, "1.13f"  },
+		{ 1154383200l, "1.14"   },
+		{ 1179223200l, "1.15"   },
+		{ 1187647200l, "1.15.1" },
+		{ 1200438000l, "1.15.2" },
+		{ 1221148800l, "1.15.3" },
+		{ 1227567600l, "1.16"   },
+		{ 1227567600l, "1.16.1 or higher" }
+	};
+	
+	/**
+	 * Guesses the replay Starcraft version from the save date.
+	 * @return the guessed version string
+	 */
+	public String guessVersionFromDate() {
+		final long saveTime_ = saveTime.getTime();
+		
+		for ( int i = VERSION_RELEASE_DATES.length - 1; i >= 0; i-- )
+			if ( saveTime_ > (Long) VERSION_RELEASE_DATES[ i ][ 0 ] )
+				return (String) VERSION_RELEASE_DATES[ i ][ 1 ];
+		
+		return "<unknown>";
 	}
 	
 }

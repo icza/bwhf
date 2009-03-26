@@ -82,6 +82,8 @@ public class ReplaySearchTab extends Tab {
 	/** Latest save time filter text field.     */
 	private final JTextField  saveTimeLatestTextField   = new JTextField();
 	
+	// TODO: missing fields: map size (standard width and height values are 64, 96, 128, 192, 256), starcraft version
+	
 	/**
 	 * Creates a new ReplaySearchTab.
 	 */
