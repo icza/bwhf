@@ -312,6 +312,8 @@ public class ChartsComponent extends JPanel {
 		showUnitsOnBuildOrderCheckBox.addChangeListener( repainterChangeListener );
 		hideWorkerUnitsCheckBox.addChangeListener( repainterChangeListener );
 		hideWorkerUnitsCheckBox.setEnabled( showUnitsOnBuildOrderCheckBox.isSelected() );
+		
+		strategyDisplayLevelComboBox.addChangeListener( repainterChangeListener );
 	}
 	
 	/**
