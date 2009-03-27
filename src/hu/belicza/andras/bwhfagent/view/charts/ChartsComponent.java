@@ -108,7 +108,9 @@ public class ChartsComponent extends JPanel {
 		/** Hotkeys charts of the players of the replay.     */
 		HOTKEYS( "Hotkeys" ),
 		/** Build order charts of the players of the replay. */
-		BUILD_ORDER( "Build order" );
+		BUILD_ORDER( "Build order" ),
+		/** Strategy charts of the players of the replay.    */
+		STRATEGY( "Strategy" );
 		
 		private final String name;
 		private ChartType( final String name ) {
@@ -135,25 +137,30 @@ public class ChartsComponent extends JPanel {
 	/** List of player indices to be shown.                           */
 	private List< Integer >         playerIndexToShowList;
 	
+	/** Display levels. */
+	private static final Object[] DISPLAY_LEVELS = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 }; 
+	
 	/** APM chart detail level in pixels combo box. */
 	private final JComboBox apmChartDetailLevelComboBox    = new JComboBox( new Object[] { 1, 2, 3, 4, 5, 10, 15, 20, 30, 50, 100 } );
 	/** Show select hotkeys checkbox.               */
 	private final JCheckBox showSelectHotkeysCheckBox      = new JCheckBox( "Show select hotkeys", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS ) ) );
 	/** Build order display levels combo box.       */
-	private final JComboBox buildOrderDisplayLevelComboBox = new JComboBox( new Object[] { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 } );
+	private final JComboBox buildOrderDisplayLevelComboBox = new JComboBox( DISPLAY_LEVELS );
 	/** Show units on build order checkbox.         */
 	private final JCheckBox showUnitsOnBuildOrderCheckBox  = new JCheckBox( "Show units", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_UNITS_ON_BUILD_ORDER ) ) );
 	/** Hide worker units checkbox.                 */
 	private final JCheckBox hideWorkerUnitsCheckBox        = new JCheckBox( "Hide worker units", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_WORKER_UNITS ) ) );
+	/** Build order display levels combo box.       */
+	private final JComboBox strategyDisplayLevelComboBox   = new JComboBox( DISPLAY_LEVELS );
 	
 	/** Split pane to display the charts component and the players' action list. */
-	private final JSplitPane            splitPane              = new JSplitPane( JSplitPane.VERTICAL_SPLIT, true );
+	private final JSplitPane            splitPane                = new JSplitPane( JSplitPane.VERTICAL_SPLIT, true );
 	/** List of the displayable actions, pairs of action+palyer name.            */
-	private final ArrayList< Object[] > actionList             = new ArrayList< Object[] >();
+	private final ArrayList< Object[] > actionList               = new ArrayList< Object[] >();
 	/** This is where we first construct actionsListTextArea's content.          */
-	private final StringBuilder         actionsListTextBuilder = new StringBuilder();
+	private final StringBuilder         actionsListTextBuilder   = new StringBuilder();
 	/** Text area to show the players' actions.                                  */
-	private final JTextArea             actionsListTextArea    = new JTextArea();
+	private final JTextArea             actionsListTextArea      = new JTextArea();
 	
 	/** To jump to a specific iteration.                                         */
 	private final JTextField            jumpToIterationTextField = new JTextField( 1 );
@@ -177,6 +184,7 @@ public class ChartsComponent extends JPanel {
 		
 		apmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL ) ) );
 		buildOrderDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_BUILD_ORDER_DISPLAY_LEVELS ) ) );
+		strategyDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_STRATEGY_DISPLAY_LEVELS ) ) );
 	}
 	
 	/**
@@ -476,6 +484,10 @@ public class ChartsComponent extends JPanel {
 				chartOptionsPanel.add( showUnitsOnBuildOrderCheckBox );
 				chartOptionsPanel.add( hideWorkerUnitsCheckBox );
 				break;
+			case STRATEGY :
+				chartOptionsPanel.add( new JLabel( "Display levels: " ) );
+				chartOptionsPanel.add( strategyDisplayLevelComboBox );
+				break;
 		}
 		
 		// We restore the values
@@ -484,6 +496,7 @@ public class ChartsComponent extends JPanel {
 		showUnitsOnBuildOrderCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_UNITS_ON_BUILD_ORDER ) ) );
 		buildOrderDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_BUILD_ORDER_DISPLAY_LEVELS ) ) );
 		hideWorkerUnitsCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_WORKER_UNITS ) ) );
+		buildOrderDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_STRATEGY_DISPLAY_LEVELS ) ) );
 		
 		contentPanel.doLayout();
 		repaint();
@@ -661,6 +674,9 @@ public class ChartsComponent extends JPanel {
 					break;
 				case BUILD_ORDER :
 					paintBuildOrderCharts( graphics, chartsParams );
+					break;
+				case STRATEGY :
+					paintStrategyCharts( graphics, chartsParams );
 					break;
 			}
 			
@@ -874,7 +890,9 @@ public class ChartsComponent extends JPanel {
 			
 			graphics.setFont( CHART_PART_TEXT_FONT );
 			
-			int buildOrderLevel = chartsParams.allPlayersOnOneChart ? ( buildOrderDisplayLevels - i * 2 ) % ( buildOrderDisplayLevels + 1 ) : buildOrderDisplayLevels;
+			int buildOrderLevel = chartsParams.allPlayersOnOneChart ? buildOrderDisplayLevels - i * 2 : buildOrderDisplayLevels;
+			while ( buildOrderLevel < 0 )
+				buildOrderLevel += buildOrderDisplayLevels;
 			for ( final Action action : playerActions.actions ) {
 				graphics.setColor( chartColor );
 				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD
@@ -893,6 +911,60 @@ public class ChartsComponent extends JPanel {
 						if ( --buildOrderLevel < 0 )
 							buildOrderLevel = buildOrderDisplayLevels;
 					}
+				}
+			}
+			
+			drawPlayerDescription( graphics, chartsParams, i, inGameColor );
+		}
+	}
+	
+	/**
+	 * Paints the strategy charts of the players.
+	 * @param graphics     graphics to be used for painting
+	 * @param chartsParams parameters of the charts to be drawn
+	 */
+	private void paintStrategyCharts( final Graphics graphics, final ChartsParams chartsParams ) {
+		final int         strategyDisplayLevels = (Integer) strategyDisplayLevelComboBox.getSelectedItem() - 1;
+		final FontMetrics fontMetrics           = graphics.getFontMetrics( CHART_PART_TEXT_FONT );
+		
+		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
+			final int           playerIndex   = playerIndexToShowList.get( i );
+			final PlayerActions playerActions = replay.replayActions.players[ playerIndex ];
+			final int           y1            = chartsParams.getY1ForChart( i );
+			final int           y2            = y1 + chartsParams.maxYInChart - 1;
+			final Color         inGameColor   = getPlayerInGameColor( playerActions );
+			final Color         chartColor    = inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor;
+			
+			drawAxisAndTimeLabels( graphics, chartsParams, i );
+			
+			graphics.setFont( CHART_PART_TEXT_FONT );
+			
+			int strategyLevel = chartsParams.allPlayersOnOneChart ? strategyDisplayLevels - i * 2 : strategyDisplayLevels;
+			while ( strategyLevel < 0 )
+				strategyLevel += strategyDisplayLevels + 1;
+			for ( final Action action : playerActions.actions ) {
+				graphics.setColor( chartColor );
+				String strategyName = null;
+				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_UNLOAD_ALL || action.actionNameIndex == Action.ACTION_NAME_INDEX_UNLOAD || action.subactionNameIndex == Action.SUBACTION_NAME_INDEX_UNLOAD )
+					strategyName = "Drop";
+				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
+					if ( action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_HATCHERY || action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_NEXUS || action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_COMMAND_CENTER )
+						strategyName = "Expand";
+					if ( action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_BUNKER || action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_PHOTON_CANNON )
+						strategyName = "Defense";
+				}
+				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_MORPH && action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_SUNKEN_COLONY )
+					strategyName = "Defense";
+				
+				if ( strategyName != null ) {
+					final int x = chartsParams.getXForIteration( action.iteration );
+					final int y = y1 + 14 + strategyLevel * ( chartsParams.maxYInChart - 23 ) / strategyDisplayLevels;
+					
+					graphics.drawLine( x, y, x, y2 );
+					graphics.drawString( strategyName, x - fontMetrics.stringWidth( strategyName ) / 2 - 4, y - 14, true );
+					
+					if ( --strategyLevel < 0 )
+						strategyLevel = strategyDisplayLevels;
 				}
 			}
 			
@@ -972,6 +1044,7 @@ public class ChartsComponent extends JPanel {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_BUILD_ORDER_DISPLAY_LEVELS, Integer.toString( buildOrderDisplayLevelComboBox.getSelectedIndex() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_UNITS_ON_BUILD_ORDER , Boolean.toString( showUnitsOnBuildOrderCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_HIDE_WORKER_UNITS         , Boolean.toString( hideWorkerUnitsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_STRATEGY_DISPLAY_LEVELS   , Integer.toString( strategyDisplayLevelComboBox.getSelectedIndex() ) );
 	}
 	
 }

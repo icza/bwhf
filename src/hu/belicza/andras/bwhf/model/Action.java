@@ -57,6 +57,9 @@ public class Action implements Comparable< Action > {
 	public static final byte ACTION_NAME_INDEX_BUILD        = (byte) 0x0c;
 	public static final byte ACTION_NAME_INDEX_ALLY         = (byte) 0x0e;
 	public static final byte ACTION_NAME_INDEX_VISION       = (byte) 0x0d;
+	public static final byte ACTION_NAME_INDEX_UNLOAD_ALL   = (byte) 0x28;
+	public static final byte ACTION_NAME_INDEX_UNLOAD       = (byte) 0x29;
+	public static final byte ACTION_NAME_INDEX_MORPH        = (byte) 0x35;
 	
 	/** Action IDs we're interested in when parsing exported text by BWChart.<br>
 	 *  Parsing from exported BWChart text is no longer a goal. This might be inaccurate. */
@@ -77,7 +80,7 @@ public class Action implements Comparable< Action > {
 		ACTION_NAME_INDEX_VISION
 	};
 	
-	/** Map of unit IDs and their names. */
+	/** Map of action IDs and their names. */
 	public static final Map< Byte, String > ACTION_ID_NAME_MAP = new HashMap< Byte, String >();
 	static {
 		ACTION_ID_NAME_MAP.put( (byte) 0x09, "Select" );
@@ -127,6 +130,7 @@ public class Action implements Comparable< Action > {
 	
 	
 	public static final byte SUBACTION_NAME_INDEX_UNKNOWN = (byte) 0xff;
+	public static final byte SUBACTION_NAME_INDEX_UNLOAD  = (byte) 0x70;
 	
 	/** Subactions of action 0x15 */
 	public static final Map< Byte, String > SUBACTION_ID_NAME_MAP = new HashMap< Byte, String >();
@@ -269,9 +273,15 @@ public class Action implements Comparable< Action > {
 	};
 	
 	
-	public static final short BUILDING_NAME_INDEX_NON_BUILDING  = (short) -1;
-	public static final short BUILDING_NAME_INDEX_COMSAT        = (short) 0x6b;
-	public static final short BUILDING_NAME_INDEX_CONTROL_TOWER = (short) 0x73;
+	public static final short BUILDING_NAME_INDEX_NON_BUILDING        = (short) -1;
+	public static final short BUILDING_NAME_INDEX_COMSAT              = (short) 0x6b;
+	public static final short BUILDING_NAME_INDEX_CONTROL_TOWER       = (short) 0x73;
+	public static final short BUILDING_NAME_INDEX_NEXUS               = (short) 0x9A;
+	public static final short BUILDING_NAME_INDEX_COMMAND_CENTER      = (short) 0x6A;
+	public static final short BUILDING_NAME_INDEX_HATCHERY            = (short) 0x83;
+	public static final short BUILDING_NAME_INDEX_BUNKER              = (short) 0x7D;
+	public static final short BUILDING_NAME_INDEX_PHOTON_CANNON       = (short) 0xA2;
+	public static final short BUILDING_NAME_INDEX_SUNKEN_COLONY       = (short) 0x92;
 	public static final short BUILDING_NAME_INDEX_FIRST_ZERG_BUILDING = (short) 0x83;
 	public static final short BUILDING_NAME_INDEX_LAST_ZERG_BUILDING  = (short) 0x95;
 	
