@@ -32,6 +32,46 @@ import swingwtx.swing.JTextField;
  */
 public class ReplaySearchTab extends Tab {
 	
+	/**
+	 * Class to specify a map size.
+	 * @author Andras Belicza
+	 */
+	private static class MapSize {
+		/** Standard map lengths (applies both to widht and height). */
+		private static final int[] STANDARD_MAP_LENGTHS = { 64, 96, 128, 192, 256 };
+		
+		/** Map size indicating any map size. */
+		public static final MapSize MAP_SIZE_ANY = new MapSize( 0, 0 );
+		/** Standard map sizes. */
+		public static final MapSize[] STANDARD_MAP_SIZES = new MapSize[ 1 + STANDARD_MAP_LENGTHS.length * STANDARD_MAP_LENGTHS.length ];
+		static {
+			int counter = 0;
+			STANDARD_MAP_SIZES[ counter++ ] = MAP_SIZE_ANY;
+			for ( final int height : STANDARD_MAP_LENGTHS )
+				for ( final int width: STANDARD_MAP_LENGTHS )
+					STANDARD_MAP_SIZES[ counter++ ] = new MapSize( height, width );
+		}
+		
+		/** Height of the map. */
+		public final int height;
+		/** Width of the map.  */
+		public final int width;
+		/**
+		 * Creates a new MapSize.
+		 * @param width  width of the map
+		 * @param height height of the map
+		 */
+		private MapSize( final int height, final int width ) {
+			this.height = height;
+			this.width  = width;
+		}
+		
+		@Override
+		public String toString() {
+			return this == MAP_SIZE_ANY ? "<any>" : height + " x " + width;
+		}
+	}
+	
 	/** Button to select folders to search.  */
 	private final JButton selectFoldersButton        = new JButton( "Select folders to search recursively" );
 	/** Button to select files to search.    */
@@ -41,7 +81,7 @@ public class ReplaySearchTab extends Tab {
 	/** Button to repeat search on the same files. */
 	private final JButton repeatSearch               = new JButton( "Repeat search" );
 	/** Button to run search on the same files. */
-	private final JButton searchPreviousResultButton = new JButton( "Search previous result (narrow search)" );
+	private final JButton searchPreviousResultButton = new JButton( "Search in previous result (narrows previous result)" );
 	
 	/** The progress bar component. */
 	private final JProgressBar progressBar = new JProgressBar();
@@ -86,6 +126,10 @@ public class ReplaySearchTab extends Tab {
 	private final JComboBox   versionMinComboBox        = new JComboBox();
 	/** Max version combo box.                  */
 	private final JComboBox   versionMaxComboBox        = new JComboBox();
+	/** Min map size combo box.                 */
+	private final JComboBox   mapSizeMinComboBox        = new JComboBox( MapSize.STANDARD_MAP_SIZES );
+	/** Max map size combo box.                 */
+	private final JComboBox   mapSizeMaxComboBox        = new JComboBox( MapSize.STANDARD_MAP_SIZES );
 	
 	// TODO: missing fields: map size (standard width and height values are 64, 96, 128, 192, 256), game type
 	
@@ -97,9 +141,9 @@ public class ReplaySearchTab extends Tab {
 		
 		versionMinComboBox.addItem( "<any>" );
 		versionMaxComboBox.addItem( "<any>" );
-		for ( final String version : ReplayHeader.VERSION_NAMES ) {
-			versionMinComboBox.addItem( version );
-			versionMaxComboBox.addItem( version );
+		for ( int i = ReplayHeader.VERSION_NAMES.length - 1; i >= 0; i-- ) {
+			versionMinComboBox.addItem( ReplayHeader.VERSION_NAMES[ i ] );
+			versionMaxComboBox.addItem( ReplayHeader.VERSION_NAMES[ i ] );
 		}
 		
 		buildGUI();
@@ -240,6 +284,19 @@ public class ReplaySearchTab extends Tab {
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		gridBagLayout.setConstraints( versionMaxComboBox, constraints );
 		headerFiltersPanel.add( versionMaxComboBox );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Map size min:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		gridBagLayout.setConstraints( mapSizeMinComboBox, constraints );
+		headerFiltersPanel.add( mapSizeMinComboBox );
+		label = new JLabel( "Map size max:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( mapSizeMaxComboBox, constraints );
+		headerFiltersPanel.add( mapSizeMaxComboBox );
 		
 		contentBox.add( Utils.wrapInPanel( headerFiltersPanel ) );
 		

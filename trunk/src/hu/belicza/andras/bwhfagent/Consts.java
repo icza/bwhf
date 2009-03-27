@@ -129,6 +129,8 @@ public class Consts {
 	public static final String PROPERTY_SHOW_UNITS_ON_BUILD_ORDER      = "showUnitsOnBuildOrder";
 	/** Hide worker units property.              */
 	public static final String PROPERTY_HIDE_WORKER_UNITS              = "hideWorkerUnits";
+	/** Strategy display levels property.        */
+	public static final String PROPERTY_STRATEGY_DISPLAY_LEVELS        = "strategyDisplayLevels";
 	
 	/** Properties holding the default settings. */
 	public static final Properties DEFAULT_SETTINGS_PROPERTIES = new Properties();
@@ -170,6 +172,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_BUILD_ORDER_DISPLAY_LEVELS    , "4" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SHOW_UNITS_ON_BUILD_ORDER     , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HIDE_WORKER_UNITS             , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_STRATEGY_DISPLAY_LEVELS       , "4" );
 	}
 	
 }

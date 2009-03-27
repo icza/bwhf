@@ -367,7 +367,7 @@ public class BinRepParser {
 			}
 			case (byte) 0x35 : {  // Morph
 				final short unitId = commandsBuffer.getShort();
-				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( unitId ), blockId, unitId, Action.BUILDING_NAME_INDEX_NON_BUILDING );
+				action = new Action( frame, Action.UNIT_ID_NAME_MAP.get( unitId ), blockId, unitId, unitId );
 				break;
 			}
 			case (byte) 0x57 : {  // Leave game
