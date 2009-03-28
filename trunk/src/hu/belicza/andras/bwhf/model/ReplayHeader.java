@@ -67,17 +67,17 @@ public class ReplayHeader {
 	public short    gameType;
 	public String   creatorName;
 	public String   mapName;
-	public byte[]   playerRecords = new byte[ 432 ]; // 12 player records, 12*36 bytes
-	public int[]    playerColors  = new int[ 8 ]; // Player spot color index (ABGR?)
+	public byte[]   playerRecords     = new byte[ 432 ]; // 12 player records, 12*36 bytes
+	public int[]    playerColors      = new int[ 8 ]; // Player spot color index (ABGR?)
 	public byte[]   playerSpotIndices = new byte[ 8 ]; 
 	
 	// Derived data from player records:
-	public String[] playerNames        = new String[ 12 ];
-	public byte[]   playerRaces        = new byte[ 12 ];
-	public int[]    playerIds          = new int[ 12 ];
+	public String[] playerNames       = new String[ 12 ];
+	public byte[]   playerRaces       = new byte[ 12 ];
+	public int[]    playerIds         = new int[ 12 ];
 	
 	// Calculated data when parsing the replay
-	public int[]    playerIdActionsCounts = new int[ 12 ];
+	public int[]     playerIdActionsCounts = new int[ 12 ];
 	
 	/**
 	 * Converts the specified amount of frames to seconds.

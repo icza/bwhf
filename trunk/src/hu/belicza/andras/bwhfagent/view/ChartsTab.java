@@ -128,7 +128,7 @@ public class ChartsTab extends Tab {
 	}
 	
 	public void setReplayFile( final File file ) {
-		final Replay replay = BinRepParser.parseReplay( file, false );
+		final Replay replay = BinRepParser.parseReplay( file, true, false );
 		
 		if ( replay == null ) {
 			loadedReplayLabel.setText( "Failed to load " + file.getAbsolutePath() + "!" );
