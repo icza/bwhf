@@ -129,8 +129,10 @@ public class Action implements Comparable< Action > {
 	}
 	
 	
-	public static final byte SUBACTION_NAME_INDEX_UNKNOWN = (byte) 0xff;
-	public static final byte SUBACTION_NAME_INDEX_UNLOAD  = (byte) 0x70;
+	public static final byte SUBACTION_NAME_INDEX_UNKNOWN     = (byte) 0xff;
+	public static final byte SUBACTION_NAME_INDEX_UNLOAD      = (byte) 0x70;
+	public static final byte SUBACTION_NAME_INDEX_LAUNCH_NUKE = (byte) 0x7e;
+	public static final byte SUBACTION_NAME_INDEX_RECALL      = (byte) 0x8f;
 	
 	/** Subactions of action 0x15 */
 	public static final Map< Byte, String > SUBACTION_ID_NAME_MAP = new HashMap< Byte, String >();
@@ -282,6 +284,7 @@ public class Action implements Comparable< Action > {
 	public static final short BUILDING_NAME_INDEX_BUNKER              = (short) 0x7D;
 	public static final short BUILDING_NAME_INDEX_PHOTON_CANNON       = (short) 0xA2;
 	public static final short BUILDING_NAME_INDEX_SUNKEN_COLONY       = (short) 0x92;
+	public static final short BUILDING_NAME_INDEX_NYDUS_CANAL         = (short) 0x86;
 	public static final short BUILDING_NAME_INDEX_FIRST_ZERG_BUILDING = (short) 0x83;
 	public static final short BUILDING_NAME_INDEX_LAST_ZERG_BUILDING  = (short) 0x95;
 	

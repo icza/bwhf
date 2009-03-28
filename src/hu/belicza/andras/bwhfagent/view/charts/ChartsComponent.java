@@ -110,7 +110,9 @@ public class ChartsComponent extends JPanel {
 		/** Build order charts of the players of the replay. */
 		BUILD_ORDER( "Build order" ),
 		/** Strategy charts of the players of the replay.    */
-		STRATEGY( "Strategy" );
+		STRATEGY( "Strategy" ),
+		/** Overall APM charts of the players of the replay. */
+		OVERALL_APM( "Overall APM" );
 		
 		private final String name;
 		private ChartType( final String name ) {
@@ -137,21 +139,25 @@ public class ChartsComponent extends JPanel {
 	/** List of player indices to be shown.                           */
 	private List< Integer >         playerIndexToShowList;
 	
+	/** Detail levels.  */
+	private static final Object[] DETAIL_LEVELS  = { 1, 2, 3, 4, 5, 10, 15, 20, 30, 50, 100 }; 
 	/** Display levels. */
 	private static final Object[] DISPLAY_LEVELS = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 }; 
 	
-	/** APM chart detail level in pixels combo box. */
-	private final JComboBox apmChartDetailLevelComboBox    = new JComboBox( new Object[] { 1, 2, 3, 4, 5, 10, 15, 20, 30, 50, 100 } );
-	/** Show select hotkeys checkbox.               */
-	private final JCheckBox showSelectHotkeysCheckBox      = new JCheckBox( "Show select hotkeys", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS ) ) );
-	/** Build order display levels combo box.       */
-	private final JComboBox buildOrderDisplayLevelComboBox = new JComboBox( DISPLAY_LEVELS );
-	/** Show units on build order checkbox.         */
-	private final JCheckBox showUnitsOnBuildOrderCheckBox  = new JCheckBox( "Show units", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_UNITS_ON_BUILD_ORDER ) ) );
-	/** Hide worker units checkbox.                 */
-	private final JCheckBox hideWorkerUnitsCheckBox        = new JCheckBox( "Hide worker units", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_WORKER_UNITS ) ) );
-	/** Build order display levels combo box.       */
-	private final JComboBox strategyDisplayLevelComboBox   = new JComboBox( DISPLAY_LEVELS );
+	/** APM chart detail level in pixels combo box.         */
+	private final JComboBox apmChartDetailLevelComboBox          = new JComboBox( DETAIL_LEVELS );
+	/** Show select hotkeys checkbox.                       */
+	private final JCheckBox showSelectHotkeysCheckBox            = new JCheckBox( "Show select hotkeys", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS ) ) );
+	/** Build order display levels combo box.               */
+	private final JComboBox buildOrderDisplayLevelComboBox       = new JComboBox( DISPLAY_LEVELS );
+	/** Show units on build order checkbox.                 */
+	private final JCheckBox showUnitsOnBuildOrderCheckBox        = new JCheckBox( "Show units", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_UNITS_ON_BUILD_ORDER ) ) );
+	/** Hide worker units checkbox.                         */
+	private final JCheckBox hideWorkerUnitsCheckBox              = new JCheckBox( "Hide worker units", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_WORKER_UNITS ) ) );
+	/** Build order display levels combo box.               */
+	private final JComboBox strategyDisplayLevelComboBox         = new JComboBox( DISPLAY_LEVELS );
+	/** Overall APM chart detail level in pixels combo box. */
+	private final JComboBox overallApmChartDetailLevelComboBox   = new JComboBox( DETAIL_LEVELS );
 	
 	/** Split pane to display the charts component and the players' action list. */
 	private final JSplitPane            splitPane                = new JSplitPane( JSplitPane.VERTICAL_SPLIT, true );
@@ -185,6 +191,7 @@ public class ChartsComponent extends JPanel {
 		apmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL ) ) );
 		buildOrderDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_BUILD_ORDER_DISPLAY_LEVELS ) ) );
 		strategyDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_STRATEGY_DISPLAY_LEVELS ) ) );
+		overallApmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL ) ) );
 	}
 	
 	/**
@@ -314,6 +321,8 @@ public class ChartsComponent extends JPanel {
 		hideWorkerUnitsCheckBox.setEnabled( showUnitsOnBuildOrderCheckBox.isSelected() );
 		
 		strategyDisplayLevelComboBox.addChangeListener( repainterChangeListener );
+		
+		overallApmChartDetailLevelComboBox.addChangeListener( repainterChangeListener );
 	}
 	
 	/**
@@ -490,6 +499,11 @@ public class ChartsComponent extends JPanel {
 				chartOptionsPanel.add( new JLabel( "Display levels: " ) );
 				chartOptionsPanel.add( strategyDisplayLevelComboBox );
 				break;
+			case OVERALL_APM :
+				chartOptionsPanel.add( new JLabel( "Detail level: " ) );
+				chartOptionsPanel.add( overallApmChartDetailLevelComboBox );
+				chartOptionsPanel.add( new JLabel( " pixels." ) );
+				break;
 		}
 		
 		// We restore the values
@@ -499,6 +513,7 @@ public class ChartsComponent extends JPanel {
 		buildOrderDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_BUILD_ORDER_DISPLAY_LEVELS ) ) );
 		hideWorkerUnitsCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_WORKER_UNITS ) ) );
 		buildOrderDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_STRATEGY_DISPLAY_LEVELS ) ) );
+		overallApmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL ) ) );
 		
 		contentPanel.doLayout();
 		repaint();
@@ -669,7 +684,7 @@ public class ChartsComponent extends JPanel {
 			final ChartsParams chartsParams = new ChartsParams( chartsTab, replay.replayHeader.gameFrames, playerIndexToShowList.size(), this );
 			switch ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() ) {
 				case APM :
-					paintApmCharts( graphics, chartsParams );
+					paintApmCharts( graphics, chartsParams, false );
 					break;
 				case HOTKEYS :
 					paintHotkeysCharts( graphics, chartsParams );
@@ -679,6 +694,10 @@ public class ChartsComponent extends JPanel {
 					break;
 				case STRATEGY :
 					paintStrategyCharts( graphics, chartsParams );
+					break;
+				case OVERALL_APM :
+					paintApmCharts( graphics, chartsParams, true );
+					//paintOverallApmCharts( graphics, chartsParams );
 					break;
 			}
 			
@@ -693,9 +712,10 @@ public class ChartsComponent extends JPanel {
 	 * Paints the APM charts of the players.
 	 * @param graphics     graphics to be used for painting
 	 * @param chartsParams parameters of the charts to be drawn
+	 * @param overall      tells if we have to paint momentary or overall APM charts
 	 */
-	private void paintApmCharts( final Graphics graphics, final ChartsParams chartsParams ) {
-		final int chartGranularity = (Integer) apmChartDetailLevelComboBox.getSelectedItem();
+	private void paintApmCharts( final Graphics graphics, final ChartsParams chartsParams, final boolean overall ) {
+		final int chartGranularity = (Integer) ( overall? overallApmChartDetailLevelComboBox : apmChartDetailLevelComboBox ).getSelectedItem();
 		if ( getWidth() < chartGranularity )
 			return;
 		
@@ -716,9 +736,16 @@ public class ChartsComponent extends JPanel {
 			final PlayerActions playerActions = replay.replayActions.players[ playerIndexToShowList.get( i ) ];
 			final int[] yPoints = yPointss[ i ];
 			
+			int lastPointIndex = 1;
 			for ( final Action action : playerActions.actions )
 				try {
-					yPoints[ 1 + action.iteration * chartPoints / chartsParams.frames ]++;
+					pointIndex = 1 + action.iteration * chartPoints / chartsParams.frames;
+					if ( overall && lastPointIndex < pointIndex ) {
+						final int actionsCount = yPoints[ lastPointIndex ];
+						while ( lastPointIndex < pointIndex )
+							yPoints[ ++lastPointIndex ] = actionsCount;
+					}
+					yPoints[ pointIndex ]++;
 				} catch ( final ArrayIndexOutOfBoundsException aioobe ) {
 					// The last few actions might be over the last domain, we ignore them.
 				}
@@ -729,9 +756,11 @@ public class ChartsComponent extends JPanel {
 		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
 			final int[] yPoints    = yPointss[ i ];
 			int         maxActions = maxActionss[ i ]; 
-			for ( final int actionsInDomain : yPoints )
+			for ( pointIndex = yPoints.length - 1; pointIndex > 0; pointIndex-- ) {
+				final int actionsInDomain = overall? yPoints[ pointIndex ] /= pointIndex : yPoints[ pointIndex ];
 				if ( maxActions < actionsInDomain )
 					maxActions = actionsInDomain;
+			}
 			
 			if ( chartsParams.allPlayersOnOneChart ) { // If all players on one chart, we have a global maxActions
 				for ( int j = 0; j < maxActionss.length; j++ )
@@ -949,14 +978,20 @@ public class ChartsComponent extends JPanel {
 				String strategyName = null;
 				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_UNLOAD_ALL || action.actionNameIndex == Action.ACTION_NAME_INDEX_UNLOAD || action.subactionNameIndex == Action.SUBACTION_NAME_INDEX_UNLOAD )
 					strategyName = "Drop";
-				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
+				else if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
 					if ( action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_HATCHERY || action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_NEXUS || action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_COMMAND_CENTER )
 						strategyName = "Expand";
-					if ( action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_BUNKER || action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_PHOTON_CANNON )
+					else if ( action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_BUNKER || action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_PHOTON_CANNON )
 						strategyName = "Defense";
+					else if ( action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_NYDUS_CANAL )
+						strategyName = "Nydus";
 				}
-				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_MORPH && action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_SUNKEN_COLONY )
+				else if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_MORPH && action.parameterBuildingNameIndex == Action.BUILDING_NAME_INDEX_SUNKEN_COLONY )
 					strategyName = "Defense";
+				else if ( action.subactionNameIndex == Action.SUBACTION_NAME_INDEX_RECALL )
+					strategyName = "Recall";
+				else if ( action.subactionNameIndex == Action.SUBACTION_NAME_INDEX_LAUNCH_NUKE )
+					strategyName = "Nuke";
 				
 				if ( strategyName != null ) {
 					final int x = chartsParams.getXForIteration( action.iteration );
@@ -1041,12 +1076,13 @@ public class ChartsComponent extends JPanel {
 	 * Assignes the used properties of this component.
 	 */
 	public void assignUsedProperties() {
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL    , Integer.toString( apmChartDetailLevelComboBox.getSelectedIndex() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS       , Boolean.toString( showSelectHotkeysCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_BUILD_ORDER_DISPLAY_LEVELS, Integer.toString( buildOrderDisplayLevelComboBox.getSelectedIndex() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_UNITS_ON_BUILD_ORDER , Boolean.toString( showUnitsOnBuildOrderCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_HIDE_WORKER_UNITS         , Boolean.toString( hideWorkerUnitsCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_STRATEGY_DISPLAY_LEVELS   , Integer.toString( strategyDisplayLevelComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL        , Integer.toString( apmChartDetailLevelComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS           , Boolean.toString( showSelectHotkeysCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_BUILD_ORDER_DISPLAY_LEVELS    , Integer.toString( buildOrderDisplayLevelComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_UNITS_ON_BUILD_ORDER     , Boolean.toString( showUnitsOnBuildOrderCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_HIDE_WORKER_UNITS             , Boolean.toString( hideWorkerUnitsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_STRATEGY_DISPLAY_LEVELS       , Integer.toString( strategyDisplayLevelComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL, Integer.toString( overallApmChartDetailLevelComboBox.getSelectedIndex() ) );
 	}
 	
 }

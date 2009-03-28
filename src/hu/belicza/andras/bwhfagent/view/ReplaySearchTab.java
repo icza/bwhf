@@ -263,12 +263,14 @@ public class ReplaySearchTab extends Tab {
 		label = new JLabel( "Save date earliest:" );
 		gridBagLayout.setConstraints( label, constraints );
 		headerFiltersPanel.add( label );
+		saveDateEarliestTextField.setToolTipText( "Format: 2009-03-28" );
 		gridBagLayout.setConstraints( saveDateEarliestTextField, constraints );
 		headerFiltersPanel.add( saveDateEarliestTextField );
 		label = new JLabel( "Save date latest:" );
 		gridBagLayout.setConstraints( label, constraints );
 		headerFiltersPanel.add( label );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		saveDateLatestTextField.setToolTipText( "Format: 2009-03-28" );
 		gridBagLayout.setConstraints( saveDateLatestTextField, constraints );
 		headerFiltersPanel.add( saveDateLatestTextField );
 		
