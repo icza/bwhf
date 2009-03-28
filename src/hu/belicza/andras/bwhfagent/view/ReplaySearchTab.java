@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import swingwt.awt.BorderLayout;
+import swingwt.awt.Color;
 import swingwt.awt.GridBagConstraints;
 import swingwt.awt.GridBagLayout;
 import swingwt.awt.Insets;
@@ -92,25 +93,33 @@ public class ReplaySearchTab extends Tab {
 	/** Variable to store stop requests of search. */
 	private volatile boolean requestedToStop;
 	
-	/** Game engine filter checkboxes.          */
-	private final JCheckBox[] gameEngineCheckBoxes      = new JCheckBox[ ReplayHeader.GAME_ENGINE_NAMES.length ];
-	/** Game name filter text field.            */
-	private final JTextField  gameNameTextField         = new JTextField();
-	/** Game name filter is regexp checkbox.    */
-	private final JCheckBox   gameNameRegexpCheckBox    = new JCheckBox( "Regexp" );
-	/** Creator name filter text field.         */
-	private final JTextField  creatorNameTextField      = new JTextField();
-	/** Creator name filter is regexp checkbox. */
-	private final JCheckBox   creatorNameRegexpCheckBox = new JCheckBox( "Regexp" );
-	/** Map name filter text field.            */
-	private final JTextField  mapNameTextField          = new JTextField();
-	/** Map name filter is regexp checkbox.    */
-	private final JCheckBox   mapNameRegexpCheckBox     = new JCheckBox( "Regexp" );
-	/** Player name filter text field.          */
-	private final JTextField  playerNameTextField       = new JTextField();
-	/** Player name filter is regexp checkbox.  */
-	private final JCheckBox   playerNameRegexpCheckBox  = new JCheckBox( "Regexp" );
-	/** Race filter checkboxes.                 */
+	/** Game engine filter checkboxes.                    */
+	private final JCheckBox[] gameEngineCheckBoxes          = new JCheckBox[ ReplayHeader.GAME_ENGINE_NAMES.length ];
+	/** Game name filter text field.                      */
+	private final JTextField  gameNameTextField             = new JTextField();
+	/** Game name filter is regexp checkbox.              */
+	private final JCheckBox   gameNameRegexpCheckBox        = new JCheckBox( "Regexp" );
+	/** Game name filter must be exact match checkbox.    */
+	private final JCheckBox   gameNameExactMatchCheckBox    = new JCheckBox( "Exact match" );
+	/** Creator name filter text field.                   */
+	private final JTextField  creatorNameTextField          = new JTextField();
+	/** Creator name filter is regexp checkbox.           */
+	private final JCheckBox   creatorNameRegexpCheckBox     = new JCheckBox( "Regexp" );
+	/** Creator name filter must be exact match checkbox. */
+	private final JCheckBox   creatorNameExactMatchCheckBox = new JCheckBox( "Exact match" );
+	/** Map name filter text field.                       */
+	private final JTextField  mapNameTextField              = new JTextField();
+	/** Map name filter is regexp checkbox.               */
+	private final JCheckBox   mapNameRegexpCheckBox         = new JCheckBox( "Regexp" );
+	/** Map name filter must be exact match checkbox.     */
+	private final JCheckBox   mapNameExactMatchCheckBox     = new JCheckBox( "Exact match" );
+	/** Player name filter text field.                    */
+	private final JTextField  playerNameTextField           = new JTextField();
+	/** Player name filter is regexp checkbox.            */
+	private final JCheckBox   playerNameRegexpCheckBox      = new JCheckBox( "Regexp" );
+	/** Player name filter must be exact match checkbox.  */
+	private final JCheckBox   playerNameExactMatchCheckBox  = new JCheckBox( "Exact match" );
+	/** Race filter checkboxes.                           */
 	private final JCheckBox[] raceCheckBoxes            = new JCheckBox[ ReplayHeader.RACE_NAMES.length ];
 	/** In-game player color filter checkboxes. */
 	private final JCheckBox[] inGameColorCheckBoxes     = new JCheckBox[ Math.min( 16, ReplayHeader.IN_GAME_COLOR_NAMES.length ) ];
@@ -160,6 +169,7 @@ public class ReplaySearchTab extends Tab {
 		
 		JLabel label;
 		JPanel wrapperPanel;
+		Box    wrapperBox; 
 		
 		constraints.fill = GridBagConstraints.BOTH;
 		constraints.insets = new Insets( 1, 1, 0, 0 );
@@ -182,8 +192,13 @@ public class ReplaySearchTab extends Tab {
 		gridBagLayout.setConstraints( gameNameTextField, constraints );
 		headerFiltersPanel.add( gameNameTextField );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		gridBagLayout.setConstraints( gameNameRegexpCheckBox, constraints );
-		headerFiltersPanel.add( gameNameRegexpCheckBox );
+		wrapperBox = Box.createHorizontalBox();
+		wrapperBox.add( gameNameExactMatchCheckBox );
+		wrapperBox.add( gameNameRegexpCheckBox );
+		wrapperBox.add( createListAllowedLabelBox( gameNameRegexpCheckBox ) );
+		wrapperBox.add( new JPanel( new BorderLayout() ) ); // Consume remaining space
+		gridBagLayout.setConstraints( wrapperBox, constraints );
+		headerFiltersPanel.add( wrapperBox );
 		
 		constraints.gridwidth = 1;
 		label = new JLabel( "Creator name:" );
@@ -192,8 +207,13 @@ public class ReplaySearchTab extends Tab {
 		gridBagLayout.setConstraints( creatorNameTextField, constraints );
 		headerFiltersPanel.add( creatorNameTextField );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		gridBagLayout.setConstraints( creatorNameRegexpCheckBox, constraints );
-		headerFiltersPanel.add( creatorNameRegexpCheckBox );
+		wrapperBox = Box.createHorizontalBox();
+		wrapperBox.add( creatorNameExactMatchCheckBox );
+		wrapperBox.add( creatorNameRegexpCheckBox );
+		wrapperBox.add( createListAllowedLabelBox( creatorNameRegexpCheckBox ) );
+		wrapperBox.add( new JPanel( new BorderLayout() ) ); // Consume remaining space
+		gridBagLayout.setConstraints( wrapperBox, constraints );
+		headerFiltersPanel.add( wrapperBox );
 		
 		constraints.gridwidth = 1;
 		label = new JLabel( "Map name:" );
@@ -202,8 +222,13 @@ public class ReplaySearchTab extends Tab {
 		gridBagLayout.setConstraints( mapNameTextField, constraints );
 		headerFiltersPanel.add( mapNameTextField );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		gridBagLayout.setConstraints( mapNameRegexpCheckBox, constraints );
-		headerFiltersPanel.add( mapNameRegexpCheckBox );
+		wrapperBox = Box.createHorizontalBox();
+		wrapperBox.add( mapNameExactMatchCheckBox );
+		wrapperBox.add( mapNameRegexpCheckBox );
+		wrapperBox.add( createListAllowedLabelBox( mapNameRegexpCheckBox ) );
+		wrapperBox.add( new JPanel( new BorderLayout() ) ); // Consume remaining space
+		gridBagLayout.setConstraints( wrapperBox, constraints );
+		headerFiltersPanel.add( wrapperBox );
 		
 		constraints.gridwidth = 1;
 		label = new JLabel( "Player name:" );
@@ -212,8 +237,13 @@ public class ReplaySearchTab extends Tab {
 		gridBagLayout.setConstraints( playerNameTextField, constraints );
 		headerFiltersPanel.add( playerNameTextField );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		gridBagLayout.setConstraints( playerNameRegexpCheckBox, constraints );
-		headerFiltersPanel.add( playerNameRegexpCheckBox );
+		wrapperBox = Box.createHorizontalBox();
+		wrapperBox.add( playerNameExactMatchCheckBox );
+		wrapperBox.add( playerNameRegexpCheckBox );
+		wrapperBox.add( createListAllowedLabelBox( playerNameRegexpCheckBox ) );
+		wrapperBox.add( new JPanel( new BorderLayout() ) ); // Consume remaining space
+		gridBagLayout.setConstraints( wrapperBox, constraints );
+		headerFiltersPanel.add( wrapperBox );
 		
 		constraints.gridwidth = 1;
 		label = new JLabel( "Player race:" );
@@ -352,11 +382,38 @@ public class ReplaySearchTab extends Tab {
 		final JPanel resultsPanel = new JPanel( new BorderLayout() );
 		resultsPanel.add( new JScrollPane( resultList ), BorderLayout.CENTER );
 		final JPanel resultActionsBox = Box.createVerticalBox();
-		resultActionsBox.add( new JButton( "Do this" ) );
-		resultActionsBox.add( new JButton( "Do that" ) );
-		resultActionsBox.add( new JButton( "Do something" ) );
+		resultActionsBox.add( new JButton( "Show on charts" ) );
+		resultActionsBox.add( new JButton( "Scan for hacks" ) );
+		resultActionsBox.add( new JButton( "Display game chat" ) );
+		resultActionsBox.add( new JButton( "Extract game chat" ) );
+		resultActionsBox.add( new JButton( "Remove from list" ) );
+		resultActionsBox.add( new JButton( "Copy replays" ) );
+		resultActionsBox.add( new JButton( "Move replays" ) );
+		resultActionsBox.add( new JButton( "Delete replays" ) );
 		resultsPanel.add( Utils.wrapInPanel( resultActionsBox ), BorderLayout.EAST );
 		contentBox.add( resultsPanel );
+	}
+	
+	/**
+	 * Creates a box with a label saying that list is allowed.
+	 * @return the box containing the label
+	 */
+	private Box createListAllowedLabelBox( final JCheckBox disablerCheckBox ) {
+		final String defaultText =  "You may enter a comma separated list";
+		
+		final Box vbox = Box.createVerticalBox();
+		vbox.add( Box.createVerticalGlue() );
+		final JLabel label = new JLabel( defaultText );
+		label.setForeground( Color.GREEN.darker() );
+		vbox.add( label );
+		
+		disablerCheckBox.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				label.setText( disablerCheckBox.isSelected() ? "" : defaultText );
+			}
+		} );
+		
+		return vbox;
 	}
 	
 	/**

@@ -697,7 +697,6 @@ public class ChartsComponent extends JPanel {
 					break;
 				case OVERALL_APM :
 					paintApmCharts( graphics, chartsParams, true );
-					//paintOverallApmCharts( graphics, chartsParams );
 					break;
 			}
 			
@@ -729,7 +728,7 @@ public class ChartsComponent extends JPanel {
 		
 		graphics.setFont( CHART_MAIN_FONT );
 		graphics.setColor( CHART_AXIS_COLOR );
-		graphics.drawString( "APM", 1, 0 );
+		graphics.drawString( overall ? "Overall APM" : "APM", 1, 0 );
 		
 		// First count the actions
 		for ( int i = 0; i < chartsParams.playersCount; i++ ) {

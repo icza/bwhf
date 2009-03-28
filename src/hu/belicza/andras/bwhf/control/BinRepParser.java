@@ -31,7 +31,7 @@ public class BinRepParser {
 		final String[] replayNames = new String[] { "w:/rep/4 - hack.rep" };
 		
 		for ( final String replayName : replayNames ) {
-			final Replay replay = parseReplay( new File( replayName ), false );
+			final Replay replay = parseReplay( new File( replayName ), true, false );
 			if ( replay != null )
 				replay.replayHeader.printHeaderInformation( new PrintWriter( System.out ) );
 			else
@@ -70,15 +70,15 @@ public class BinRepParser {
 	}
 	
 	/**
-	 * Parses a binary replay file.<br>
-	 * If <code>gameChatOnly</code> is <code>true</code>, only the game chat will be extracted,
-	 * else the game actions important to hack detection will be extracted.
-	 * @param replayFile replay file to be parsed
-	 * @param gameChatOnly tells if only game chat is desired
+	 * Parses a binary replay file.
+	 * 
+	 * @param replayFile           replay file to be parsed
+	 * @param parseCommandsSection tells if player actions have to be parsed from the commands section 
+	 * @param gameChatOnly         tells if only game chat is desired but not other actions
 	 * @return a {@link Replay} object describing the replay; or <code>null</code> if replay cannot be parsed 
 	 */
 	@SuppressWarnings("unchecked")
-	public static Replay parseReplay( final File replayFile, final boolean gameChatOnly ) {
+	public static Replay parseReplay( final File replayFile, final boolean parseCommandsSection, final boolean gameChatOnly ) {
 		BinReplayUnpacker unpacker = null;
 		try {
 			unpacker = new BinReplayUnpacker( replayFile );
@@ -123,6 +123,9 @@ public class BinRepParser {
 				replayHeader.playerRaces[ i ] = replayHeader.playerRecords[ i * 36 + 9 ];
 				replayHeader.playerIds  [ i ] = replayHeader.playerRecords[ i * 36 + 4 ] & 0xff;
 			}
+			
+			if ( !parseCommandsSection )
+				return new Replay( replayHeader, null, null );
 			
 			// Player commands length section
 			final int playerCommandsLength = Integer.reverseBytes( ByteBuffer.wrap( unpacker.unpackSection( 4 ) ).getInt() );
