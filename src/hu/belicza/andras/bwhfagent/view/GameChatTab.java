@@ -105,7 +105,10 @@ public class GameChatTab extends ProgressLoggedTab {
 	 * Shows the game chat from a replay file.
 	 * @param replayFile replay file to be show game chat from
 	 */
-	private void showGameChatFromReplay( final File replayFile ) {
+	public void showGameChatFromReplay( final File replayFile ) {
+		if ( !selectFileToDisplayFromButton.isEnabled() )
+			return;
+		
 		selectFilesToExtractFromButton.setEnabled( false );
 		selectFileToDisplayFromButton.setEnabled( false );
 		displayFromLastReplayButton.setEnabled( false );
@@ -141,7 +144,10 @@ public class GameChatTab extends ProgressLoggedTab {
 	 * Extracts game chat from the specified files and writes them to text files.
 	 * @param replayFiles replay files to extract game chat from
 	 */
-	private void extractGameChatFromFiles( final File[] replayFiles ) {
+	public void extractGameChatFromFiles( final File[] replayFiles ) {
+		if ( !selectFilesToExtractFromButton.isEnabled() )
+			return;
+		
 		selectFilesToExtractFromButton.setEnabled( false );
 		selectFileToDisplayFromButton.setEnabled( false );
 		displayFromLastReplayButton.setEnabled( false );

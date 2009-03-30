@@ -31,7 +31,7 @@ public abstract class RegexpStringReplayFilter extends ReplayFilter {
 	 * @return true if the specified value is valid; false otherwise
 	 */
 	public boolean isValueValid( final String value ) {
-		return exactMatch ? pattern.matcher( value ).matches() : pattern.matcher( value ).find();
+		return exactMatch ? pattern.matcher( value.toLowerCase() ).matches() : pattern.matcher( value.toLowerCase() ).find();
 	}
 	
 }

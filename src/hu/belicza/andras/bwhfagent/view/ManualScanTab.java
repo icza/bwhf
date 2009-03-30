@@ -206,7 +206,10 @@ public class ManualScanTab extends ProgressLoggedTab {
 	 * @param files        files and folders to be scanned
 	 * @param isLastReplay tells if the 'Scan LastReplay.rep' button was activated
 	 */
-	private void scanFilesAndFolders( final File[] files, final boolean isLastReplay ) {
+	public void scanFilesAndFolders( final File[] files, final boolean isLastReplay ) {
+		if ( !selectFilesButton.isEnabled() )
+			return;
+		
 		requestedToStop = false;
 		scanLastReplayButton.setEnabled( false );
 		selectFoldersButton .setEnabled( false );
