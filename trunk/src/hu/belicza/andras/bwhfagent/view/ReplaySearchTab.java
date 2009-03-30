@@ -216,6 +216,45 @@ public class ReplaySearchTab extends Tab {
 	 * Builds the GUI of the panel.
 	 */
 	private void buildGUI() {
+		final JPanel filterFieldsButtonsPanel = Utils.createWrapperPanel();
+		final JButton resetFilterFieldsButton = new JButton( "Reset fields" );
+		resetFilterFieldsButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				for ( final JCheckBox checkBox : gameEngineCheckBoxes )
+					checkBox.setSelected( false );
+				gameNameTextField.setText( "" );
+				gameNameExactMatchCheckBox.setSelected( false );
+				gameNameRegexpCheckBox.setSelected( false );
+				gameNameRegexpCheckBox.doClick();
+				creatorNameTextField.setText( "" );
+				creatorNameExactMatchCheckBox.setSelected( false );
+				creatorNameRegexpCheckBox.setSelected( false );
+				creatorNameRegexpCheckBox.doClick();
+				mapNameTextField.setText( "" );
+				mapNameExactMatchCheckBox.setSelected( false );
+				mapNameRegexpCheckBox.setSelected( false );
+				mapNameRegexpCheckBox.doClick();
+				playerNameTextField.setText( "" );
+				playerNameExactMatchCheckBox.setSelected( false );
+				playerNameRegexpCheckBox.setSelected( false );
+				playerNameRegexpCheckBox.doClick();
+				for ( final JCheckBox checkBox : raceCheckBoxes )
+					checkBox.setSelected( false );
+				for ( final JCheckBox checkBox : inGameColorCheckBoxes )
+					checkBox.setSelected( false );
+				durationMinTextField.setText( "" );
+				durationMaxTextField.setText( "" );
+				saveDateEarliestTextField.setText( "" );
+				saveDateLatestTextField.setText( "" );
+				versionMinComboBox.setSelectedIndex( 0 );
+				versionMaxComboBox.setSelectedIndex( 0 );
+				mapSizeMinComboBox.setSelectedIndex( 0 );
+				mapSizeMaxComboBox.setSelectedIndex( 0 );
+			}
+		} );
+		filterFieldsButtonsPanel.add( resetFilterFieldsButton );
+		contentBox.add( filterFieldsButtonsPanel );
+		
 		final GridBagLayout      gridBagLayout      = new GridBagLayout();
 		final GridBagConstraints constraints        = new GridBagConstraints();
 		final JPanel             headerFiltersPanel = new JPanel( gridBagLayout );
@@ -474,16 +513,7 @@ public class ReplaySearchTab extends Tab {
 		} );
 		removeFromListButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				final int[] selectedIndices = resultList.getSelectedIndices();
-				final DefaultListModel resultListModel = new DefaultListModel();
-				for ( int i = selectedIndices.length - 1; i >= 0; i-- ) { // Downward is a must, indices change when an element is removed!
-					lastSearchResultFileList.remove( selectedIndices[ i ] );
-					lastSearchResultStringList.remove( selectedIndices[ i ] );
-				}
-				for ( final String replayString : lastSearchResultStringList )
-					resultListModel.addElement( replayString );
-				resultList.setModel( resultListModel );
-				updatedResultsCountLabel();
+				removeSelectedFromResultList();
 			}
 		} );
 		final ActionListener copyMoveDeleteReplaysActionListener = new ActionListener() {
@@ -498,6 +528,10 @@ public class ReplaySearchTab extends Tab {
 						final File destinationFolder = fileChooser.getSelectedFile();
 						for ( final File selectedFile : selectedFiles )
 							Utils.copyFile( selectedFile, destinationFolder, selectedFile.getName() );
+						
+						if ( event.getSource() == moveReplaysButton )
+							for ( int index : resultList.getSelectedIndices() )
+								lastSearchResultFileList.set( index, new File( destinationFolder, lastSearchResultFileList.get( index ).getName() ) );
 					}
 					else
 						return;
@@ -512,6 +546,8 @@ public class ReplaySearchTab extends Tab {
 					for ( final File selectedFile : selectedFiles )
 						success &= selectedFile.delete();
 				}
+				if ( event.getSource() == deleteReplaysButton && success )
+					removeSelectedFromResultList();
 				JOptionPane.showMessageDialog( getContent(), selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? " " : "s " ) + ( event.getSource() == copyReplaysButton ? "copied" : ( event.getSource() == moveReplaysButton ? "moved" : "deleted" ) ) + ( success ? " successfully." : " with some errors." ), "Done", success ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE );
 			}
 		};
@@ -595,6 +631,22 @@ public class ReplaySearchTab extends Tab {
 			selectedFiles[ i ] = lastSearchResultFileList.get( selectedIndices[ i ] );
 		
 		return selectedFiles;
+	}
+	
+	/**
+	 * Removes selected lines from result list.
+	 */
+	private void removeSelectedFromResultList() {
+		final int[] selectedIndices = resultList.getSelectedIndices();
+		final DefaultListModel resultListModel = new DefaultListModel();
+		for ( int i = selectedIndices.length - 1; i >= 0; i-- ) { // Downward is a must, indices change when an element is removed!
+			lastSearchResultFileList.remove( selectedIndices[ i ] );
+			lastSearchResultStringList.remove( selectedIndices[ i ] );
+		}
+		for ( final String replayString : lastSearchResultStringList )
+			resultListModel.addElement( replayString );
+		resultList.setModel( resultListModel );
+		updatedResultsCountLabel();
 	}
 	
 	/**
