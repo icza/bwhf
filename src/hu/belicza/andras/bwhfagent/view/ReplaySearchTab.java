@@ -555,6 +555,7 @@ public class ReplaySearchTab extends Tab {
 		moveReplaysButton  .addActionListener( copyMoveDeleteReplaysActionListener );
 		deleteReplaysButton.addActionListener( copyMoveDeleteReplaysActionListener );
 		disableResultHandlerButtons();
+		resultList.setVisibleRowCount( 1 );
 		resultList.setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
 		resultList.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
 			public void valueChanged( final ListSelectionEvent event ) {
