@@ -29,7 +29,7 @@ public class MapSizeReplayFilter extends ReplayFilter {
 				throw new RuntimeException( "This method should not be used!" );
 			}
 		};
-		mapHeightNumberIntervalReplayFilter = new NumberIntervalReplayFilter( minMapSize == null ? null : minMapSize.width, maxMapSize == null ? null : maxMapSize.width ) {
+		mapHeightNumberIntervalReplayFilter = new NumberIntervalReplayFilter( minMapSize == null ? null : minMapSize.height, maxMapSize == null ? null : maxMapSize.height ) {
 			@Override
 			public boolean isReplayIncluded( final Replay replay ) {
 				throw new RuntimeException( "This method should not be used!" );

@@ -35,7 +35,7 @@ public abstract class StringPropertySetReplayFilter extends PropertySetReplayFil
 		final List< String >  validValueList       = new ArrayList< String >( validValuesTokenizer.countTokens() );
 		
 		while ( validValuesTokenizer.hasMoreTokens() )
-			validValueList.add( validValuesTokenizer.nextToken() );
+			validValueList.add( validValuesTokenizer.nextToken().toLowerCase().trim() );
 		
 		return validValueList;
 	}
@@ -43,10 +43,11 @@ public abstract class StringPropertySetReplayFilter extends PropertySetReplayFil
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean isValueValid( final Object value ) {
+		final String stringValue = ( (String) value ).toLowerCase();
+		
 		if ( exactMatch )
-			return super.isValueValid( value );
+			return super.isValueValid( stringValue );
 		else {
-			final String stringValue = (String) value;
 			for ( final String stringValidValue : (Set< String >) validValueSet )
 				if ( stringValue.contains( stringValidValue ) )
 					return true;

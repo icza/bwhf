@@ -1,9 +1,25 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhf.control.BinRepParser;
+import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
+import hu.belicza.andras.bwhfagent.view.replayfilter.CreatorNameReplayFilter;
+import hu.belicza.andras.bwhfagent.view.replayfilter.DurationReplayFilter;
+import hu.belicza.andras.bwhfagent.view.replayfilter.GameEngineReplayFilter;
+import hu.belicza.andras.bwhfagent.view.replayfilter.GameNameReplayFilter;
+import hu.belicza.andras.bwhfagent.view.replayfilter.MapNameReplayFilter;
+import hu.belicza.andras.bwhfagent.view.replayfilter.MapSizeReplayFilter;
+import hu.belicza.andras.bwhfagent.view.replayfilter.PlayerColorReplayFilter;
+import hu.belicza.andras.bwhfagent.view.replayfilter.PlayerNameReplayFilter;
+import hu.belicza.andras.bwhfagent.view.replayfilter.PlayerRaceReplayFilter;
+import hu.belicza.andras.bwhfagent.view.replayfilter.ReplayFilter;
+import hu.belicza.andras.bwhfagent.view.replayfilter.SaveTimeReplayFilter;
 
 import java.io.File;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import swingwt.awt.BorderLayout;
@@ -15,16 +31,21 @@ import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.BorderFactory;
 import swingwtx.swing.Box;
+import swingwtx.swing.DefaultListModel;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JList;
+import swingwtx.swing.JOptionPane;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JProgressBar;
 import swingwtx.swing.JScrollPane;
 import swingwtx.swing.JTextField;
+import swingwtx.swing.ListSelectionModel;
+import swingwtx.swing.event.ListSelectionEvent;
+import swingwtx.swing.event.ListSelectionListener;
 
 /**
  * Replay search tab.
@@ -39,30 +60,30 @@ public class ReplaySearchTab extends Tab {
 	 */
 	public static class MapSize {
 		/** Standard map lengths (applies both to widht and height). */
-		private static final int[] STANDARD_MAP_LENGTHS = { 64, 96, 128, 192, 256 };
+		private static final short[] STANDARD_MAP_LENGTHS = { 64, 96, 128, 192, 256 };
 		
 		/** Map size indicating any map size. */
-		public static final MapSize MAP_SIZE_ANY = new MapSize( 0, 0 );
+		public static final MapSize MAP_SIZE_ANY = new MapSize( (short) 0, (short) 0 );
 		/** Standard map sizes. */
 		public static final MapSize[] STANDARD_MAP_SIZES = new MapSize[ 1 + STANDARD_MAP_LENGTHS.length * STANDARD_MAP_LENGTHS.length ];
 		static {
 			int counter = 0;
 			STANDARD_MAP_SIZES[ counter++ ] = MAP_SIZE_ANY;
-			for ( final int height : STANDARD_MAP_LENGTHS )
-				for ( final int width: STANDARD_MAP_LENGTHS )
+			for ( final short height : STANDARD_MAP_LENGTHS )
+				for ( final short width: STANDARD_MAP_LENGTHS )
 					STANDARD_MAP_SIZES[ counter++ ] = new MapSize( height, width );
 		}
 		
 		/** Height of the map. */
-		public final int height;
+		public final short height;
 		/** Width of the map.  */
-		public final int width;
+		public final short width;
 		/**
 		 * Creates a new MapSize.
 		 * @param width  width of the map
 		 * @param height height of the map
 		 */
-		private MapSize( final int height, final int width ) {
+		private MapSize( final short height, final short width ) {
 			this.height = height;
 			this.width  = width;
 		}
@@ -72,6 +93,9 @@ public class ReplaySearchTab extends Tab {
 			return this == MAP_SIZE_ANY ? "<any>" : height + " x " + width;
 		}
 	}
+	
+	/** Reference to the main frame. */
+	private final MainFrame mainFrame = MainFrame.getInstance();
 	
 	/** Button to select folders to search.  */
 	private final JButton selectFoldersButton        = new JButton( "Select folders to search recursively" );
@@ -88,7 +112,37 @@ public class ReplaySearchTab extends Tab {
 	private final JProgressBar progressBar = new JProgressBar();
 	
 	/** List displaying the results. */
-	private final JList resultList = new JList( new Object[] { "one", "two", "three", "four", "five", "six", "seven", "eight"} );
+	private final JList resultList = new JList();
+	
+	/** Label to display the results count. */
+	private final JLabel resultsCountLabel = new JLabel();
+	
+	/** Button to show selected replay on charts.               */
+	private final JButton showOnChartsButton    = new JButton( "Show on charts"    );
+	/** Button to scan selected replays for hacks.              */
+	private final JButton scanForHacksButton    = new JButton( "Scan for hacks"    );
+	/** Button to display game chat from selected replay.       */
+	private final JButton displayGameChatButton = new JButton( "Display game chat" );
+	/** Button to extract game chat from selected replays.      */
+	private final JButton extractGameChatButton = new JButton( "Extract game chat" );
+	/** Button to remove selected replays from the result list. */
+	private final JButton removeFromListButton  = new JButton( "Remove from list"  );
+	/** Button to copy selected replay files.                   */
+	private final JButton copyReplaysButton     = new JButton( "Copy replays..."   );
+	/** Button to move selected replay files.                   */
+	private final JButton moveReplaysButton     = new JButton( "Move replays..."   );
+	/** Button to delete selected replay files.                 */
+	private final JButton deleteReplaysButton   = new JButton( "Delete replays..." );
+	
+	/** Reference to the source files of the last search.                */
+	private       File[]         lastSearchSourceFiles;
+	/** Reference to the result file file of the last search.            */
+	private final List< File >   lastSearchResultFileList   = new ArrayList< File >();
+	/** Reference to the result file descriptin list of the last search. */
+	private final List< String > lastSearchResultStringList = new ArrayList< String >();
+	/** Number of replay files in the last search.                       */
+	private       int            lastSearchReplayFilesCount;
+	
 	
 	/** Variable to store stop requests of search. */
 	private volatile boolean requestedToStop;
@@ -120,27 +174,27 @@ public class ReplaySearchTab extends Tab {
 	/** Player name filter must be exact match checkbox.  */
 	private final JCheckBox   playerNameExactMatchCheckBox  = new JCheckBox( "Exact match" );
 	/** Race filter checkboxes.                           */
-	private final JCheckBox[] raceCheckBoxes            = new JCheckBox[ ReplayHeader.RACE_NAMES.length ];
-	/** In-game player color filter checkboxes. */
-	private final JCheckBox[] inGameColorCheckBoxes     = new JCheckBox[ Math.min( 16, ReplayHeader.IN_GAME_COLOR_NAMES.length ) ];
-	/** Min duration filter text field.         */
-	private final JTextField  durationMinTextField      = new JTextField();
-	/** Max duration filter text field.         */
-	private final JTextField  durationMaxTextField      = new JTextField();
-	/** Earliest save time filter text field.   */
-	private final JTextField  saveDateEarliestTextField = new JTextField();
-	/** Latest save time filter text field.     */
-	private final JTextField  saveDateLatestTextField   = new JTextField();
-	/** Min version combo box.                  */
-	private final JComboBox   versionMinComboBox        = new JComboBox();
-	/** Max version combo box.                  */
-	private final JComboBox   versionMaxComboBox        = new JComboBox();
-	/** Min map size combo box.                 */
-	private final JComboBox   mapSizeMinComboBox        = new JComboBox( MapSize.STANDARD_MAP_SIZES );
-	/** Max map size combo box.                 */
-	private final JComboBox   mapSizeMaxComboBox        = new JComboBox( MapSize.STANDARD_MAP_SIZES );
+	private final JCheckBox[] raceCheckBoxes                = new JCheckBox[ ReplayHeader.RACE_NAMES.length ];
+	/** In-game player color filter checkboxes.           */
+	private final JCheckBox[] inGameColorCheckBoxes         = new JCheckBox[ Math.min( 16, ReplayHeader.IN_GAME_COLOR_NAMES.length ) ];
+	/** Min duration filter text field.                   */
+	private final JTextField  durationMinTextField          = new JTextField();
+	/** Max duration filter text field.                   */
+	private final JTextField  durationMaxTextField          = new JTextField();
+	/** Earliest save time filter text field.             */
+	private final JTextField  saveDateEarliestTextField     = new JTextField();
+	/** Latest save time filter text field.               */
+	private final JTextField  saveDateLatestTextField       = new JTextField();
+	/** Min version combo box.                            */
+	private final JComboBox   versionMinComboBox            = new JComboBox();
+	/** Max version combo box.                            */
+	private final JComboBox   versionMaxComboBox            = new JComboBox();
+	/** Min map size combo box.                           */
+	private final JComboBox   mapSizeMinComboBox            = new JComboBox( MapSize.STANDARD_MAP_SIZES );
+	/** Max map size combo box.                           */
+	private final JComboBox   mapSizeMaxComboBox            = new JComboBox( MapSize.STANDARD_MAP_SIZES );
 	
-	// TODO: missing fields: map size (standard width and height values are 64, 96, 128, 192, 256), game type
+	// TODO: missing fields: game type
 	
 	/**
 	 * Creates a new ReplaySearchTab.
@@ -369,27 +423,126 @@ public class ReplaySearchTab extends Tab {
 		selectButtonsPanel = Utils.createWrapperPanel();
 		repeatSearch.setEnabled( false );
 		repeatSearch.setMnemonic( 'r' );
+		repeatSearch.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent evnet ) {
+				searchFilesAndFolders( lastSearchSourceFiles );
+			}
+		} );
 		selectButtonsPanel.add( repeatSearch );
 		searchPreviousResultButton.setEnabled( false );
 		searchPreviousResultButton.setMnemonic( 'p' );
+		searchPreviousResultButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent evnet ) {
+				searchFilesAndFolders( lastSearchResultFileList.toArray( new File[ lastSearchResultFileList.size() ] ) );
+			}
+		} );
 		selectButtonsPanel.add( searchPreviousResultButton );
 		contentBox.add( selectButtonsPanel );
 		
 		progressBar.setMaximumSize( Utils.getMaxDimension() );
 		contentBox.add( progressBar );
 		
-		contentBox.add( new JLabel( "Replays matching the filters:" ) );
+		final JPanel panel = Utils.createWrapperPanelLeftAligned();
+		panel.add( new JLabel( "Replays matching the filters:" ) );
+		panel.add( resultsCountLabel );
+		contentBox.add( panel );
+		
 		final JPanel resultsPanel = new JPanel( new BorderLayout() );
+		showOnChartsButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				mainFrame.chartsTab.setReplayFile( lastSearchResultFileList.get( resultList.getSelectedIndex() ) );
+				mainFrame.selectTab( mainFrame.chartsTab );
+			}
+		} );
+		scanForHacksButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				mainFrame.selectTab( mainFrame.manualScanTab );
+				mainFrame.manualScanTab.scanFilesAndFolders( getSelectedResultFiles(), false );
+			}
+		} );
+		displayGameChatButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				mainFrame.selectTab( mainFrame.gameChatTab );
+				mainFrame.gameChatTab.showGameChatFromReplay( lastSearchResultFileList.get( resultList.getSelectedIndex() ) );
+			}
+		} );
+		extractGameChatButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				mainFrame.selectTab( mainFrame.gameChatTab );
+				mainFrame.gameChatTab.extractGameChatFromFiles( getSelectedResultFiles() );
+			}
+		} );
+		removeFromListButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				final int[] selectedIndices = resultList.getSelectedIndices();
+				final DefaultListModel resultListModel = new DefaultListModel();
+				for ( int i = selectedIndices.length - 1; i >= 0; i-- ) { // Downward is a must, indices change when an element is removed!
+					lastSearchResultFileList.remove( selectedIndices[ i ] );
+					lastSearchResultStringList.remove( selectedIndices[ i ] );
+				}
+				for ( final String replayString : lastSearchResultStringList )
+					resultListModel.addElement( replayString );
+				resultList.setModel( resultListModel );
+				updatedResultsCountLabel();
+			}
+		} );
+		final ActionListener copyMoveDeleteReplaysActionListener = new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				final File[] selectedFiles = getSelectedResultFiles();
+				
+				if ( event.getSource() != deleteReplaysButton ) {
+					final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.getReplayStartFolder() );
+					fileChooser.setTitle( ( event.getSource() == copyReplaysButton ? "Copy " : "Move ") + selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? "" : "s" ) + " to" );
+					fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
+					if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION ) {
+						final File destinationFolder = fileChooser.getSelectedFile();
+						for ( final File selectedFile : selectedFiles )
+							Utils.copyFile( selectedFile, destinationFolder, selectedFile.getName() );
+					}
+					else
+						return;
+				}
+				
+				if ( event.getSource() == deleteReplaysButton )
+					if ( JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog( getContent(), "Are you sure that you want to delete " + selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? "?" : "s?" ), "Warning!", JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_OPTION ) )
+						return;
+				
+				boolean success = true;
+				if ( event.getSource() != copyReplaysButton ) {
+					for ( final File selectedFile : selectedFiles )
+						success &= selectedFile.delete();
+				}
+				JOptionPane.showMessageDialog( getContent(), selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? " " : "s " ) + ( event.getSource() == copyReplaysButton ? "copied" : ( event.getSource() == moveReplaysButton ? "moved" : "deleted" ) ) + ( success ? " successfully." : " with some errors." ), "Done", success ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE );
+			}
+		};
+		copyReplaysButton  .addActionListener( copyMoveDeleteReplaysActionListener );
+		moveReplaysButton  .addActionListener( copyMoveDeleteReplaysActionListener );
+		deleteReplaysButton.addActionListener( copyMoveDeleteReplaysActionListener );
+		disableResultHandlerButtons();
+		resultList.setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
+		resultList.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
+			public void valueChanged( final ListSelectionEvent event ) {
+				final int selectedCount = resultList.getSelectedIndices().length;
+				showOnChartsButton   .setEnabled( selectedCount == 1 );
+				scanForHacksButton   .setEnabled( selectedCount >  0 );
+				displayGameChatButton.setEnabled( selectedCount == 1 );
+				extractGameChatButton.setEnabled( selectedCount >  0 );
+				removeFromListButton .setEnabled( selectedCount >  0 );
+				copyReplaysButton    .setEnabled( selectedCount >  0 );
+				moveReplaysButton    .setEnabled( selectedCount >  0 );
+				deleteReplaysButton  .setEnabled( selectedCount >  0 );
+			}
+		} );
 		resultsPanel.add( new JScrollPane( resultList ), BorderLayout.CENTER );
 		final JPanel resultActionsBox = Box.createVerticalBox();
-		resultActionsBox.add( new JButton( "Show on charts" ) );
-		resultActionsBox.add( new JButton( "Scan for hacks" ) );
-		resultActionsBox.add( new JButton( "Display game chat" ) );
-		resultActionsBox.add( new JButton( "Extract game chat" ) );
-		resultActionsBox.add( new JButton( "Remove from list" ) );
-		resultActionsBox.add( new JButton( "Copy replays" ) );
-		resultActionsBox.add( new JButton( "Move replays" ) );
-		resultActionsBox.add( new JButton( "Delete replays" ) );
+		resultActionsBox.add( showOnChartsButton    );
+		resultActionsBox.add( scanForHacksButton    );
+		resultActionsBox.add( displayGameChatButton );
+		resultActionsBox.add( extractGameChatButton );
+		resultActionsBox.add( removeFromListButton  );
+		resultActionsBox.add( copyReplaysButton     );
+		resultActionsBox.add( moveReplaysButton     );
+		resultActionsBox.add( deleteReplaysButton   );
 		resultsPanel.add( Utils.wrapInPanel( resultActionsBox ), BorderLayout.EAST );
 		contentBox.add( resultsPanel );
 	}
@@ -417,6 +570,41 @@ public class ReplaySearchTab extends Tab {
 	}
 	
 	/**
+	 * Disables the result handler buttons.
+	 */
+	private void disableResultHandlerButtons() {
+		showOnChartsButton   .setEnabled( false );
+		scanForHacksButton   .setEnabled( false );
+		displayGameChatButton.setEnabled( false );
+		extractGameChatButton.setEnabled( false );
+		removeFromListButton .setEnabled( false );
+		copyReplaysButton    .setEnabled( false );
+		moveReplaysButton    .setEnabled( false );
+		deleteReplaysButton  .setEnabled( false );
+	}
+	
+	/**
+	 * Returns the selected result files.
+	 * @return the selected result files
+	 */
+	private File[] getSelectedResultFiles() {
+		final int[]  selectedIndices = resultList.getSelectedIndices();
+		final File[] selectedFiles   = new File[ selectedIndices.length ];
+		
+		for ( int i = 0; i < selectedIndices.length; i++ )
+			selectedFiles[ i ] = lastSearchResultFileList.get( selectedIndices[ i ] );
+		
+		return selectedFiles;
+	}
+	
+	/**
+	 * Updates the results count label.
+	 */
+	private void updatedResultsCountLabel() {
+		resultsCountLabel.setText( resultList.getItemCount() + " out of " + lastSearchReplayFilesCount );
+	}
+	
+	/**
 	 * Searches the specified files and folders.
 	 * @param files        files and folders to be searched
 	 */
@@ -426,26 +614,65 @@ public class ReplaySearchTab extends Tab {
 		selectFilesButton  .setEnabled( false );
 		stopSearchButton   .setEnabled( true  );
 		
+		disableResultHandlerButtons();
+		
+		lastSearchSourceFiles = files;
+		lastSearchResultFileList.clear();
+		lastSearchResultStringList.clear();
+		
+		final ReplayFilter[] replayFilters = getReplayFilters();
+		
 		new NormalThread() {
 			/** List of replay files to be scanned. */
 			final List< File > replayFileList = new ArrayList< File >();
 			
 			@Override
 			public void run() {
+				final DefaultListModel resultListModel = new DefaultListModel();
 				try {
+					( (DefaultListModel) resultList.getModel() ).clear();
+					resultsCountLabel.setText( "Counting..." );
+					
 					progressBar.setValue( 0 );
 					
 					chooseReplayFiles( files );
-					progressBar.setMaximum( replayFileList.size() );
+					lastSearchReplayFilesCount = replayFileList.size();
+					progressBar.setMaximum( lastSearchReplayFilesCount );
+					resultsCountLabel.setText( "Searching " + lastSearchReplayFilesCount + " replay file" + ( lastSearchReplayFilesCount == 1 ? "" : "s" ) + "..." );
 					
-					if ( requestedToStop )
-						return;
+					int counter = 0;	
+					for ( final File replayFile : replayFileList ) {
+						if ( requestedToStop )
+							return;
+						
+						final Replay replay = BinRepParser.parseReplay( replayFile, false, false );
+						if ( replay != null ) {
+							boolean replayIncluded = true;
+							for ( final ReplayFilter replayFilter : replayFilters )
+								if ( !replayFilter.isReplayIncluded( replay ) ) {
+									replayIncluded = false;
+									break;
+								}
+							if ( replayIncluded ) {
+								lastSearchResultFileList.add( replayFile );
+								final String replayString = replayFile.getAbsolutePath();
+								lastSearchResultStringList.add( replayString );
+								resultListModel.addElement( replayString );
+							}
+						}
+						
+						progressBar.setValue( ++counter );
+					}
 					
 				}
 				finally {
-					stopSearchButton   .setEnabled( false );
-					selectFilesButton  .setEnabled( true  );
-					selectFoldersButton.setEnabled( true  );
+					resultList.setModel( resultListModel );
+					updatedResultsCountLabel();
+					stopSearchButton          .setEnabled( false );
+					selectFilesButton         .setEnabled( true  );
+					selectFoldersButton       .setEnabled( true  );
+					repeatSearch              .setEnabled( true  );
+					searchPreviousResultButton.setEnabled( true  );
 				}
 			}
 			
@@ -474,6 +701,110 @@ public class ReplaySearchTab extends Tab {
 			}
 			
 		}.start();
+	}
+	
+	/**
+	 * Construct and returns an array of {@link ReplayFilter} from the specified filter fields
+	 * from the UI components.<br>
+	 * The returned array is sorted by replay filter complexity.
+	 * @return an array of {@link ReplayFilter} from the specified filter fields
+	 */
+	private ReplayFilter[] getReplayFilters() {
+		final List< ReplayFilter > replayFilterList = new ArrayList< ReplayFilter >();
+		
+		final List< Byte > selectedByteValueList = new ArrayList< Byte >();
+		for ( int i = gameEngineCheckBoxes.length - 1; i >= 0; i-- )
+			if ( gameEngineCheckBoxes[ i ].isSelected() )
+				selectedByteValueList.add( (byte) i );
+		if ( !selectedByteValueList.isEmpty() )
+			replayFilterList.add( new GameEngineReplayFilter( selectedByteValueList ) );
+		
+		String stringValue = gameNameTextField.getText();
+		if ( stringValue.length() > 0 )
+			replayFilterList.add( new GameNameReplayFilter( stringValue, gameNameExactMatchCheckBox.isSelected(), gameNameRegexpCheckBox.isSelected() ) );
+		
+		stringValue = creatorNameTextField.getText();
+		if ( stringValue.length() > 0 )
+			replayFilterList.add( new CreatorNameReplayFilter( stringValue, creatorNameExactMatchCheckBox.isSelected(), creatorNameRegexpCheckBox.isSelected() ) );
+		
+		stringValue = mapNameTextField.getText();
+		if ( stringValue.length() > 0 )
+			replayFilterList.add( new MapNameReplayFilter( stringValue, mapNameExactMatchCheckBox.isSelected(), mapNameRegexpCheckBox.isSelected() ) );
+		
+		stringValue = playerNameTextField.getText();
+		if ( stringValue.length() > 0 )
+			replayFilterList.add( new PlayerNameReplayFilter( stringValue, playerNameExactMatchCheckBox.isSelected(), playerNameRegexpCheckBox.isSelected() ) );
+		
+		selectedByteValueList.clear();
+		for ( int i = raceCheckBoxes.length - 1; i >= 0; i-- )
+			if ( raceCheckBoxes[ i ].isSelected() )
+				selectedByteValueList.add( (byte) i );
+		if ( !selectedByteValueList.isEmpty() )
+			replayFilterList.add( new PlayerRaceReplayFilter( selectedByteValueList ) );
+		
+		final List< Integer > selectedIntegerValueList = new ArrayList< Integer >();
+		for ( int i = inGameColorCheckBoxes.length - 1; i >= 0; i-- )
+			if ( inGameColorCheckBoxes[ i ].isSelected() )
+				selectedIntegerValueList.add( i );
+		if ( !selectedByteValueList.isEmpty() )
+			replayFilterList.add( new PlayerColorReplayFilter( selectedIntegerValueList ) );
+		
+		Integer minDuration = null;
+		Integer maxDuration = null;
+		try {
+			if ( durationMinTextField.getText().length() > 0 )
+				minDuration = Integer.parseInt( durationMinTextField.getText() );
+		}
+		catch ( final Exception e ) {
+			durationMinTextField.setText( "" );
+		}
+		try {
+			if ( durationMaxTextField.getText().length() > 0 )
+				maxDuration = Integer.parseInt( durationMaxTextField.getText() );
+		}
+		catch ( final Exception e ) {
+			durationMaxTextField.setText( "" );
+		}
+		if ( minDuration != null || maxDuration != null )
+			replayFilterList.add( new DurationReplayFilter( minDuration, maxDuration ) );
+		
+		final DateFormat SDF = new SimpleDateFormat( "yyyy-MM-dd" );
+		Long minSaveDate = null;
+		Long maxSaveDate = null;
+		try {
+			if ( saveDateEarliestTextField.getText().length() > 0 )
+				minSaveDate = SDF.parse( saveDateEarliestTextField.getText() ).getTime();
+		}
+		catch ( final Exception e ) {
+			saveDateEarliestTextField.setText( "" );
+		}
+		try {
+			SDF.parse( saveDateLatestTextField.getText() );
+		}
+		catch ( final Exception e ) {
+			saveDateLatestTextField.setText( "" );
+		}
+		if ( minSaveDate != null || maxSaveDate != null )
+			replayFilterList.add( new SaveTimeReplayFilter( minSaveDate, maxSaveDate ) );
+		
+		minSaveDate = versionMinComboBox.getSelectedIndex() > 0 ? ReplayHeader.VERSION_RELEASE_DATES[ ReplayHeader.VERSION_NAMES.length - versionMinComboBox.getSelectedIndex() ] : null;
+		maxSaveDate = versionMaxComboBox.getSelectedIndex() > 0 ? versionMaxComboBox.getSelectedIndex() == 1 ? Long.MAX_VALUE : ReplayHeader.VERSION_RELEASE_DATES[ 1 + ReplayHeader.VERSION_NAMES.length - versionMaxComboBox.getSelectedIndex() ] : null;
+		if ( minSaveDate != null || maxSaveDate != null )
+			replayFilterList.add( new SaveTimeReplayFilter( minSaveDate, maxSaveDate ) );
+		
+		MapSize minMapSize = (MapSize) mapSizeMinComboBox.getSelectedItem();
+		MapSize maxMapSize = (MapSize) mapSizeMaxComboBox.getSelectedItem();
+		if ( minMapSize == MapSize.MAP_SIZE_ANY )
+			minMapSize = null;
+		if ( maxMapSize == MapSize.MAP_SIZE_ANY )
+			maxMapSize = null;
+		if ( minMapSize != null || maxMapSize != null )
+			replayFilterList.add( new MapSizeReplayFilter( minMapSize, maxMapSize ) );
+		
+		final ReplayFilter[] replayFilters = replayFilterList.toArray( new ReplayFilter[ replayFilterList.size() ] );
+		Arrays.sort( replayFilters );
+		
+		return replayFilters;
 	}
 	
 	@Override
