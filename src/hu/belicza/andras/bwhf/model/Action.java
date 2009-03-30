@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 /**
- * Class modelling an action.
+ * Class modeling an action.
  * 
  * @author Andras Belicza
  */
@@ -484,8 +484,8 @@ public class Action implements Comparable< Action > {
 	/**
 	 * Creates a new Action.
 	 * @param iteration  iteration of the action
-	 * @param name       name of the atcion
-	 * @param parameters parameter string of the atcion
+	 * @param name       name of the action
+	 * @param parameters parameter string of the action
 	 * @param unitIds    unit ids string of the action
 	 */
 	public Action( final int iteration, final String name, final String parameters, final String unitIds ) {
@@ -528,7 +528,7 @@ public class Action implements Comparable< Action > {
 	 * Subaction, unit and building name indices are unknown.
 	 * 
 	 * @param iteration                  iteration of the action
-	 * @param parameters                 parameter string of the atcion
+	 * @param parameters                 parameter string of the action
 	 * @param actionNameIndex            index determining the action name
 	 */
 	public Action( final int iteration, final String parameters, final byte actionNameIndex ) {
@@ -539,7 +539,7 @@ public class Action implements Comparable< Action > {
 	 * Creates a new Action with pre-identified indices.
 	 * 
 	 * @param iteration                  iteration of the action
-	 * @param parameters                 parameter string of the atcion
+	 * @param parameters                 parameter string of the action
 	 * @param actionNameIndex            index determining the action name
 	 * @param parameterUnitNameIndex     index determining the unit name
 	 * @param parameterBuildingNameIndex index determining the building name
@@ -552,7 +552,7 @@ public class Action implements Comparable< Action > {
 	 * Creates a new Action with pre-identified indices.
 	 * 
 	 * @param iteration                  iteration of the action
-	 * @param parameters                 parameter string of the atcion
+	 * @param parameters                 parameter string of the action
 	 * @param actionNameIndex            index determining the action name
 	 * @param subactionNameIndex         index determining the subaction name
 	 * @param parameterUnitNameIndex     index determining the unit name
