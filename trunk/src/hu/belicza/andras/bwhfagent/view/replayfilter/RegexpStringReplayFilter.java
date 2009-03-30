@@ -1,4 +1,4 @@
-package hu.belicza.andras.bwhfagent.view.charts.replayfilter;
+package hu.belicza.andras.bwhfagent.view.replayfilter;
 
 import java.util.regex.Pattern;
 

@@ -1,4 +1,4 @@
-package hu.belicza.andras.bwhfagent.view.charts.replayfilter;
+package hu.belicza.andras.bwhfagent.view.replayfilter;
 
 import hu.belicza.andras.bwhf.model.Replay;
 
@@ -11,10 +11,10 @@ public abstract class ReplayFilter implements Comparable< ReplayFilter > {
 	
 	protected static final Integer COMPLEXITY_NUMBER_INTERVAL =  10;
 	protected static final Integer COMPLEXITY_NUMBER_SET      =  30;
-	protected static final Integer COMPLEXITY_STRING_PROPERTY =  60;
+	protected static final Integer COMPLEXITY_STRING_SET      =  60;
 	protected static final Integer COMPLEXITY_REGEXP          = 100;
 	
-	/** Complexity of the filte.r */
+	/** Complexity of the filter. */
 	private final Integer complexity;
 	
 	/**

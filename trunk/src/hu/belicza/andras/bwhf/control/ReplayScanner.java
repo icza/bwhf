@@ -220,7 +220,7 @@ public class ReplayScanner {
 	/**
 	 * Checks the parameters of an ally command.
 	 * @param parameters parameters of an ally command
-	 * @return true if paramameters are correct; false otherwise
+	 * @return true if parameters are correct; false otherwise
 	 */
 	private static boolean checkAllyParams( final String parameters ) {
 		if ( !parameters.endsWith( "0 00" ) )
@@ -259,7 +259,7 @@ public class ReplayScanner {
 	/**
 	 * Checks the parameters of a vision command.
 	 * @param parameters parameters of a vision command
-	 * @return true if paramameters are correct; false otherwise
+	 * @return true if parameters are correct; false otherwise
 	 */
 	private static boolean checkVisionParams( final String parameters ) {
 		if ( parameters.charAt( 3 ) != '0' || parameters.charAt( 4 ) != '0' )

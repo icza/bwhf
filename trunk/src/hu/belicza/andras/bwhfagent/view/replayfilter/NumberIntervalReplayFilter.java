@@ -1,4 +1,4 @@
-package hu.belicza.andras.bwhfagent.view.charts.replayfilter;
+package hu.belicza.andras.bwhfagent.view.replayfilter;
 
 /**
  * Represents a filter which filters replays by one number property.
