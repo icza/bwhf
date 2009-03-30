@@ -9,14 +9,14 @@ import hu.belicza.andras.bwhf.model.Replay;
  * 
  * @author Andras Belicza
  */
-public class GameEngineReplayFilter extends NumberPropertySetReplayFilter {
+public class GameEngineReplayFilter extends PropertySetReplayFilter {
 	
 	/**
 	 * Creates a new GameEngineReplayFilter.
 	 * @param validGameEngines valid game engines
 	 */
 	public GameEngineReplayFilter( final Collection< Byte > validGameEngines ) {
-		super( validGameEngines );
+		super( COMPLEXITY_NUMBER_SET, validGameEngines );
 	}
 	
 	@Override

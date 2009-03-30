@@ -10,14 +10,14 @@ import hu.belicza.andras.bwhf.model.ReplayHeader;
  * 
  * @author Andras Belicza
  */
-public class PlayerColorReplayFilter extends NumberPropertySetReplayFilter {
+public class PlayerColorReplayFilter extends PropertySetReplayFilter {
 	
 	/**
 	 * Creates a new PlayerColorReplayFilter.
 	 * @param validPlayerColors valid player colors
 	 */
 	public PlayerColorReplayFilter( final Collection< Integer > validPlayerColors ) {
-		super( validPlayerColors );
+		super( COMPLEXITY_NUMBER_SET, validPlayerColors );
 	}
 	
 	@Override

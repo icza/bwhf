@@ -37,7 +37,7 @@ public class ReplaySearchTab extends Tab {
 	 * Class to specify a map size.
 	 * @author Andras Belicza
 	 */
-	private static class MapSize {
+	public static class MapSize {
 		/** Standard map lengths (applies both to widht and height). */
 		private static final int[] STANDARD_MAP_LENGTHS = { 64, 96, 128, 192, 256 };
 		

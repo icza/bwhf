@@ -9,10 +9,12 @@ import hu.belicza.andras.bwhf.model.Replay;
  */
 public abstract class ReplayFilter implements Comparable< ReplayFilter > {
 	
-	protected static final Integer COMPLEXITY_NUMBER_INTERVAL =  10;
-	protected static final Integer COMPLEXITY_NUMBER_SET      =  30;
-	protected static final Integer COMPLEXITY_STRING_SET      =  60;
-	protected static final Integer COMPLEXITY_REGEXP          = 100;
+	protected static final Integer COMPLEXITY_NUMBER_INTERVAL        =  10;
+	protected static final Integer COMPLEXITY_NUMBER_PAIR_INTERVAL   =  20;
+	protected static final Integer COMPLEXITY_NUMBER_SET             =  30;
+	protected static final Integer COMPLEXITY_STRING_SET_EXACT_MATCH =  60;
+	protected static final Integer COMPLEXITY_STRING_SET_SUBSTRING   =  70;
+	protected static final Integer COMPLEXITY_REGEXP                 = 100;
 	
 	/** Complexity of the filter. */
 	private final Integer complexity;

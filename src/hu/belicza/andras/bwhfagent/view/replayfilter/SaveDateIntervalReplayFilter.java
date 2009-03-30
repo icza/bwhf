@@ -11,7 +11,8 @@ public class SaveDateIntervalReplayFilter extends NumberIntervalReplayFilter {
 	
 	/**
 	 * Creates a new SaveDateIntervalReplayFilter.
-	 * @param validPlayerRaces valid player races 
+	 * @param minSaveDate min valid save date 
+	 * @param maxSaveDate max valid save date 
 	 */
 	public SaveDateIntervalReplayFilter( final Long minSaveDate, final Long maxSaveDate ) {
 		super( minSaveDate, maxSaveDate );
