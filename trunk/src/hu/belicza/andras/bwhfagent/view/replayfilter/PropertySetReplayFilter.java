@@ -5,22 +5,22 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Represents a filter which filters replays by one number property.
+ * Represents a filter which filters replays by a property having multiple valid values.
  * 
  * @author Andras Belicza
  */
-public abstract class NumberPropertySetReplayFilter extends ReplayFilter {
+public abstract class PropertySetReplayFilter extends ReplayFilter {
 	
 	/** The valid property byte values. */
-	protected final Set< Number > validValueSet;
+	protected final Set< ? extends Object > validValueSet;
 	
 	/**
 	 * Creates a new BytePropertySetReplayFilter.
 	 * @param validValues the valid property byte values
 	 */
-	public NumberPropertySetReplayFilter( final Collection< ? extends Number > validValueCollection ) {
-		super( COMPLEXITY_NUMBER_SET );
-		validValueSet = new HashSet< Number >( validValueCollection );
+	public PropertySetReplayFilter( final int complexity, final Collection< ? extends Object > validValueCollection ) {
+		super( complexity );
+		validValueSet = new HashSet< Object >( validValueCollection );
 	}
 	
 	/**
@@ -28,7 +28,7 @@ public abstract class NumberPropertySetReplayFilter extends ReplayFilter {
 	 * @param value value to be tested
 	 * @return true if the specified value is valid; false otherwise
 	 */
-	public boolean isValueValid( final Number value ) {
+	public boolean isValueValid( final Object value ) {
 		return validValueSet.contains( value );
 	}
 	

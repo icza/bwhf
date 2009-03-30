@@ -35,6 +35,12 @@ public abstract class NumberIntervalReplayFilter extends ReplayFilter {
 			if ( maxValidValue != null && (Long) value > (Long) maxValidValue )
 				return false;
 		}
+		else if ( value instanceof Integer ) {
+			if ( minValidValue != null && (Integer) value < (Integer) minValidValue )
+				return false;
+			if ( maxValidValue != null && (Integer) value > (Integer) maxValidValue )
+				return false;
+		}
 		else if ( value instanceof Short ) {
 			if ( minValidValue != null && (Short) value < (Short) minValidValue )
 				return false;
