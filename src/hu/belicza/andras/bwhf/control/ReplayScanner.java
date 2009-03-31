@@ -90,8 +90,10 @@ public class ReplayScanner {
 			
 			// Use Cheat drophack
 			// TODO: gameType is not correctly parsed yet...
+			/*
 			if ( replayHeader.gameType != ReplayHeader.GAME_TYPE_SINGLE_PLAYER && action.actionNameIndex == Action.ACTION_NAME_INDEX_USE_CHEAT )
 				hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_USE_CHEAT_DROPHACK, action.iteration ) );
+			*/
 			
 			// Ally-vision drophack
 			if ( replayHeader.gameType != ReplayHeader.GAME_TYPE_UMS ) {
@@ -176,7 +178,7 @@ public class ReplayScanner {
 			
 			// Multicommand hack: giving "several" actions in the same iteration
 			// If actions being next to each other are the same actions (regardless to its parameters),
-			// it can be due to lag and/or "action spam". Don't count and report those
+			// it can be due to lag and/or "action spam". Don't count and report those.
 			// This "same" action checking is not completely correct, since we don't distinguish between a lot of actions,
 			// but this is accurate enough since we parse and use the most common actions for hack detection
 			if ( lastIteration == action.iteration && lastAction.actionNameIndex != action.actionNameIndex && action.actionNameIndex != Action.ACTION_NAME_INDEX_HOTKEY )
