@@ -756,7 +756,7 @@ public class ChartsComponent extends JPanel {
 			final int[] yPoints    = yPointss[ i ];
 			int         maxActions = maxActionss[ i ]; 
 			for ( pointIndex = yPoints.length - 1; pointIndex > 0; pointIndex-- ) {
-				final int actionsInDomain = overall? yPoints[ pointIndex ] /= pointIndex : yPoints[ pointIndex ];
+				final int actionsInDomain = overall ? yPoints[ pointIndex ] /= pointIndex : yPoints[ pointIndex ];
 				if ( maxActions < actionsInDomain )
 					maxActions = actionsInDomain;
 			}

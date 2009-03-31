@@ -45,8 +45,9 @@ public class ReplayHeader {
 		"green", "pale yellow", "tan", "aqua", "pale green", "blueish gray", "pale yellow", "cyan"
 	};
 	
-	public static final short GAME_TYPE_SINGLE_PLAYER = 0x02; // or MELEE?
-	//public static final short GAME_TYPE_MELEE         = 0x02;
+	// Single Player: only melee, ffa and ums is allowed.
+	
+	public static final short GAME_TYPE_MELEE         = 0x02;
 	public static final short GAME_TYPE_FFA           = 0x03; // Free for all
 	public static final short GAME_TYPE_ONE_ON_ONE    = 0x04;
 	public static final short GAME_TYPE_CTF           = 0x05; // Capture the flag
@@ -69,6 +70,7 @@ public class ReplayHeader {
 	public short    mapHeight;
 	public short    gameSpeed;
 	public short    gameType;
+	public short    gameSubType;      // If 3vs5 this is 3, if 7vs1 this is 7
 	public String   creatorName;
 	public String   mapName;
 	public byte[]   playerRecords     = new byte[ 432 ]; // 12 player records, 12*36 bytes

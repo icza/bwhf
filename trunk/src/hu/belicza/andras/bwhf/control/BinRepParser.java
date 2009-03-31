@@ -105,6 +105,7 @@ public class BinRepParser {
 			
 			replayHeader.gameSpeed   = headerBuffer.getShort( 0x3a );
 			replayHeader.gameType    = headerBuffer.getShort( 0x3c );
+			replayHeader.gameSubType = headerBuffer.getShort( 0x3e );
 			
 			replayHeader.creatorName = getZeroPaddedString( headerData, 0x48, 24 );
 			
