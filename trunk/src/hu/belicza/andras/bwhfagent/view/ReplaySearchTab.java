@@ -744,11 +744,7 @@ public class ReplaySearchTab extends Tab {
 							if ( replayIncluded ) {
 								lastSearchResultFileList.add( replayFile );
 								final ReplayHeader replayHeader = replay.replayHeader;
-								String s = "";
-								for ( int i = 0; i < replayHeader.playerSpotIndices.length; i++ )
-									if ( replayHeader.playerNames[ i ] != null )
-										s += ", " + replayHeader.playerSpotIndices[ i ];
-								lastSearchResultRowsData.add( new String[] { SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ), ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate(), replayHeader.mapName, replayHeader.getDurationString(), replayHeader.getPlayerNamesString(), replayHeader.gameName, replayHeader.creatorName, s /*replayFile.getAbsolutePath().toString()*/ } );
+								lastSearchResultRowsData.add( new String[] { SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ), ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate(), replayHeader.mapName, replayHeader.getDurationString(), replayHeader.getPlayerNamesString(), replayHeader.gameName, replayHeader.creatorName, replayFile.getAbsolutePath().toString() } );
 							}
 						}
 						

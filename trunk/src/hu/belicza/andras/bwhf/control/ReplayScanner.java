@@ -4,14 +4,13 @@ import hu.belicza.andras.bwhf.model.Action;
 import hu.belicza.andras.bwhf.model.HackDescription;
 import hu.belicza.andras.bwhf.model.PlayerActions;
 import hu.belicza.andras.bwhf.model.Replay;
-import hu.belicza.andras.bwhf.model.ReplayActions;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Replay scanner which analyzes a {@link ReplayActions} in order to find hacks in it.
+ * Replay scanner which analyzes a {@link Replay} in order to find hacks in it.
  * 
  * @author Andras Belicza
  */
