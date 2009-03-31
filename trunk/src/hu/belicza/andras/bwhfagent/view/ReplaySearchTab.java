@@ -24,6 +24,7 @@ import java.util.List;
 
 import swingwt.awt.BorderLayout;
 import swingwt.awt.Color;
+import swingwt.awt.Dimension;
 import swingwt.awt.GridBagConstraints;
 import swingwt.awt.GridBagLayout;
 import swingwt.awt.Insets;
@@ -31,21 +32,21 @@ import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.BorderFactory;
 import swingwtx.swing.Box;
-import swingwtx.swing.DefaultListModel;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JLabel;
-import swingwtx.swing.JList;
 import swingwtx.swing.JOptionPane;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JProgressBar;
 import swingwtx.swing.JScrollPane;
+import swingwtx.swing.JTable;
 import swingwtx.swing.JTextField;
 import swingwtx.swing.ListSelectionModel;
 import swingwtx.swing.event.ListSelectionEvent;
 import swingwtx.swing.event.ListSelectionListener;
+import swingwtx.swing.table.DefaultTableModel;
 
 /**
  * Replay search tab.
@@ -53,6 +54,11 @@ import swingwtx.swing.event.ListSelectionListener;
  * @author Andras Belicza
  */
 public class ReplaySearchTab extends Tab {
+	
+	/** Simple date format to format and parse replay save time. */
+	private static final DateFormat SIMPLE_DATE_FORMAT        = new SimpleDateFormat( "yyyy-MM-dd" );
+	/** Result table column names. */
+	private static final String[]   RESULT_TABLE_COLUMN_NAMES = new String[] { "Saved on", "Engine", "Map", "Duration", "Players", "Game name", "Creator", "File" }; 
 	
 	/**
 	 * Class to specify a map size.
@@ -111,8 +117,8 @@ public class ReplaySearchTab extends Tab {
 	/** The progress bar component. */
 	private final JProgressBar progressBar = new JProgressBar();
 	
-	/** List displaying the results. */
-	private final JList resultList = new JList();
+	/** Table displaying the results. */
+	private final JTable resultTable = new JTable();
 	
 	/** Label to display the results count. */
 	private final JLabel resultsCountLabel = new JLabel();
@@ -134,14 +140,14 @@ public class ReplaySearchTab extends Tab {
 	/** Button to delete selected replay files.                 */
 	private final JButton deleteReplaysButton   = new JButton( "Delete replays..." );
 	
-	/** Reference to the source files of the last search.                */
-	private       File[]         lastSearchSourceFiles;
-	/** Reference to the result file file of the last search.            */
-	private final List< File >   lastSearchResultFileList   = new ArrayList< File >();
-	/** Reference to the result file descriptin list of the last search. */
-	private final List< String > lastSearchResultStringList = new ArrayList< String >();
-	/** Number of replay files in the last search.                       */
-	private       int            lastSearchReplayFilesCount;
+	/** Reference to the source files of the last search.            */
+	private       File[]           lastSearchSourceFiles;
+	/** Reference to the result file file of the last search.        */
+	private final List< File >     lastSearchResultFileList = new ArrayList< File >();
+	/** Reference to the result description list of the last search. */
+	private final List< String[] > lastSearchResultRowsData = new ArrayList< String[] >();
+	/** Number of replay files in the last search.                   */
+	private       int              lastSearchReplayFilesCount;
 	
 	
 	/** Variable to store stop requests of search. */
@@ -253,6 +259,8 @@ public class ReplaySearchTab extends Tab {
 			}
 		} );
 		filterFieldsButtonsPanel.add( resetFilterFieldsButton );
+		final JButton hideFiltersButton = new JButton( "Hide filters" );
+		filterFieldsButtonsPanel.add( hideFiltersButton );
 		contentBox.add( filterFieldsButtonsPanel );
 		
 		final GridBagLayout      gridBagLayout      = new GridBagLayout();
@@ -425,6 +433,15 @@ public class ReplaySearchTab extends Tab {
 		
 		contentBox.add( Utils.wrapInPanel( headerFiltersPanel ) );
 		
+		hideFiltersButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				headerFiltersPanel.setVisible( !headerFiltersPanel.isVisible() );
+				hideFiltersButton.setText( headerFiltersPanel.isVisible() ? "Hide filters" : "Show filters" );
+				contentBox.doLayout();
+				hideFiltersButton.getParent().doLayout();
+			}
+		} );
+		
 		JPanel selectButtonsPanel = Utils.createWrapperPanel();
 		final ActionListener selectFilesAndFoldersActionListener = new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
@@ -489,7 +506,7 @@ public class ReplaySearchTab extends Tab {
 		final JPanel resultsPanel = new JPanel( new BorderLayout() );
 		showOnChartsButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				mainFrame.chartsTab.setReplayFile( lastSearchResultFileList.get( resultList.getSelectedIndex() ) );
+				mainFrame.chartsTab.setReplayFile( lastSearchResultFileList.get( resultTable.getSelectedRow() ) );
 				mainFrame.selectTab( mainFrame.chartsTab );
 			}
 		} );
@@ -502,7 +519,7 @@ public class ReplaySearchTab extends Tab {
 		displayGameChatButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				mainFrame.selectTab( mainFrame.gameChatTab );
-				mainFrame.gameChatTab.showGameChatFromReplay( lastSearchResultFileList.get( resultList.getSelectedIndex() ) );
+				mainFrame.gameChatTab.showGameChatFromReplay( lastSearchResultFileList.get( resultTable.getSelectedRow() ) );
 			}
 		} );
 		extractGameChatButton.addActionListener( new ActionListener() {
@@ -520,6 +537,7 @@ public class ReplaySearchTab extends Tab {
 			public void actionPerformed( final ActionEvent event ) {
 				final File[] selectedFiles = getSelectedResultFiles();
 				
+				boolean success = true;
 				if ( event.getSource() != deleteReplaysButton ) {
 					final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.getReplayStartFolder() );
 					fileChooser.setTitle( ( event.getSource() == copyReplaysButton ? "Copy " : "Move ") + selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? "" : "s" ) + " to" );
@@ -527,10 +545,10 @@ public class ReplaySearchTab extends Tab {
 					if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION ) {
 						final File destinationFolder = fileChooser.getSelectedFile();
 						for ( final File selectedFile : selectedFiles )
-							Utils.copyFile( selectedFile, destinationFolder, selectedFile.getName() );
+							success &= Utils.copyFile( selectedFile, destinationFolder, selectedFile.getName() );
 						
-						if ( event.getSource() == moveReplaysButton )
-							for ( int index : resultList.getSelectedIndices() )
+						if ( event.getSource() == moveReplaysButton && success )
+							for ( int index : resultTable.getSelectedRows() )
 								lastSearchResultFileList.set( index, new File( destinationFolder, lastSearchResultFileList.get( index ).getName() ) );
 					}
 					else
@@ -541,8 +559,7 @@ public class ReplaySearchTab extends Tab {
 					if ( JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog( getContent(), "Are you sure that you want to delete " + selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? "?" : "s?" ), "Warning!", JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_OPTION ) )
 						return;
 				
-				boolean success = true;
-				if ( event.getSource() != copyReplaysButton ) {
+				if ( success && event.getSource() != copyReplaysButton ) { // If copying failed, we don't delete
 					for ( final File selectedFile : selectedFiles )
 						success &= selectedFile.delete();
 				}
@@ -555,11 +572,12 @@ public class ReplaySearchTab extends Tab {
 		moveReplaysButton  .addActionListener( copyMoveDeleteReplaysActionListener );
 		deleteReplaysButton.addActionListener( copyMoveDeleteReplaysActionListener );
 		disableResultHandlerButtons();
-		resultList.setVisibleRowCount( 1 );
-		resultList.setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
-		resultList.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
+		resultTable.setPreferredSize( new Dimension( 50, 50 ) );
+		resultTable.setRowSelectionAllowed( true );
+		resultTable.getSelectionModel().setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
+		resultTable.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
 			public void valueChanged( final ListSelectionEvent event ) {
-				final int selectedCount = resultList.getSelectedIndices().length;
+				final int selectedCount = resultTable.getSelectedRowCount();
 				showOnChartsButton   .setEnabled( selectedCount == 1 );
 				scanForHacksButton   .setEnabled( selectedCount >  0 );
 				displayGameChatButton.setEnabled( selectedCount == 1 );
@@ -570,7 +588,7 @@ public class ReplaySearchTab extends Tab {
 				deleteReplaysButton  .setEnabled( selectedCount >  0 );
 			}
 		} );
-		resultsPanel.add( new JScrollPane( resultList ), BorderLayout.CENTER );
+		resultsPanel.add( new JScrollPane( resultTable ), BorderLayout.CENTER );
 		final JPanel resultActionsBox = Box.createVerticalBox();
 		resultActionsBox.add( showOnChartsButton    );
 		resultActionsBox.add( scanForHacksButton    );
@@ -621,11 +639,23 @@ public class ReplaySearchTab extends Tab {
 	}
 	
 	/**
+	 * Refreshes the result table from the <code>lastSearchResultRowsData</code> data list.
+	 */
+	private void refreshResultTable() {
+		resultTable.setModel( new DefaultTableModel( lastSearchResultRowsData.toArray( new String[ lastSearchResultRowsData.size() ][] ), RESULT_TABLE_COLUMN_NAMES ) {
+			@Override
+			public boolean isCellEditable( final int row, final int column ) {
+				return false;
+			}
+		} );
+	}
+	
+	/**
 	 * Returns the selected result files.
 	 * @return the selected result files
 	 */
 	private File[] getSelectedResultFiles() {
-		final int[]  selectedIndices = resultList.getSelectedIndices();
+		final int[]  selectedIndices = resultTable.getSelectedRows();
 		final File[] selectedFiles   = new File[ selectedIndices.length ];
 		
 		for ( int i = 0; i < selectedIndices.length; i++ )
@@ -638,15 +668,12 @@ public class ReplaySearchTab extends Tab {
 	 * Removes selected lines from result list.
 	 */
 	private void removeSelectedFromResultList() {
-		final int[] selectedIndices = resultList.getSelectedIndices();
-		final DefaultListModel resultListModel = new DefaultListModel();
+		final int[] selectedIndices = resultTable.getSelectedRows();
 		for ( int i = selectedIndices.length - 1; i >= 0; i-- ) { // Downward is a must, indices change when an element is removed!
 			lastSearchResultFileList.remove( selectedIndices[ i ] );
-			lastSearchResultStringList.remove( selectedIndices[ i ] );
+			lastSearchResultRowsData.remove( selectedIndices[ i ] );
 		}
-		for ( final String replayString : lastSearchResultStringList )
-			resultListModel.addElement( replayString );
-		resultList.setModel( resultListModel );
+		refreshResultTable();
 		updatedResultsCountLabel();
 	}
 	
@@ -654,7 +681,7 @@ public class ReplaySearchTab extends Tab {
 	 * Updates the results count label.
 	 */
 	private void updatedResultsCountLabel() {
-		resultsCountLabel.setText( resultList.getItemCount() + " out of " + lastSearchReplayFilesCount );
+		resultsCountLabel.setText( lastSearchResultFileList.size() + " out of " + lastSearchReplayFilesCount );
 	}
 	
 	/**
@@ -671,7 +698,7 @@ public class ReplaySearchTab extends Tab {
 		
 		lastSearchSourceFiles = files;
 		lastSearchResultFileList.clear();
-		lastSearchResultStringList.clear();
+		lastSearchResultRowsData.clear();
 		
 		final ReplayFilter[] replayFilters = getReplayFilters();
 		
@@ -681,9 +708,7 @@ public class ReplaySearchTab extends Tab {
 			
 			@Override
 			public void run() {
-				final DefaultListModel resultListModel = new DefaultListModel();
 				try {
-					( (DefaultListModel) resultList.getModel() ).clear();
 					resultsCountLabel.setText( "Counting..." );
 					
 					progressBar.setValue( 0 );
@@ -706,11 +731,15 @@ public class ReplaySearchTab extends Tab {
 									replayIncluded = false;
 									break;
 								}
+							
 							if ( replayIncluded ) {
 								lastSearchResultFileList.add( replayFile );
-								final String replayString = replayFile.getAbsolutePath();
-								lastSearchResultStringList.add( replayString );
-								resultListModel.addElement( replayString );
+								final ReplayHeader replayHeader = replay.replayHeader;
+								String s = "";
+								for ( int i = 0; i < replayHeader.playerSpotIndices.length; i++ )
+									if ( replayHeader.playerNames[ i ] != null )
+										s += ", " + replayHeader.playerSpotIndices[ i ];
+								lastSearchResultRowsData.add( new String[] { SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ), ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate(), replayHeader.mapName, replayHeader.getDurationString(), replayHeader.getPlayerNamesString(), replayHeader.gameName, replayHeader.creatorName, s /*replayFile.getAbsolutePath().toString()*/ } );
 							}
 						}
 						
@@ -719,8 +748,8 @@ public class ReplaySearchTab extends Tab {
 					
 				}
 				finally {
-					resultList.setModel( resultListModel );
 					updatedResultsCountLabel();
+					refreshResultTable();
 					stopSearchButton          .setEnabled( false );
 					selectFilesButton         .setEnabled( true  );
 					selectFoldersButton       .setEnabled( true  );
@@ -799,7 +828,7 @@ public class ReplaySearchTab extends Tab {
 		for ( int i = inGameColorCheckBoxes.length - 1; i >= 0; i-- )
 			if ( inGameColorCheckBoxes[ i ].isSelected() )
 				selectedIntegerValueList.add( i );
-		if ( !selectedByteValueList.isEmpty() )
+		if ( !selectedIntegerValueList.isEmpty() )
 			replayFilterList.add( new PlayerColorReplayFilter( selectedIntegerValueList ) );
 		
 		Integer minDuration = null;
@@ -821,18 +850,17 @@ public class ReplaySearchTab extends Tab {
 		if ( minDuration != null || maxDuration != null )
 			replayFilterList.add( new DurationReplayFilter( minDuration, maxDuration ) );
 		
-		final DateFormat SDF = new SimpleDateFormat( "yyyy-MM-dd" );
 		Long minSaveDate = null;
 		Long maxSaveDate = null;
 		try {
 			if ( saveDateEarliestTextField.getText().length() > 0 )
-				minSaveDate = SDF.parse( saveDateEarliestTextField.getText() ).getTime();
+				minSaveDate = SIMPLE_DATE_FORMAT.parse( saveDateEarliestTextField.getText() ).getTime();
 		}
 		catch ( final Exception e ) {
 			saveDateEarliestTextField.setText( "" );
 		}
 		try {
-			SDF.parse( saveDateLatestTextField.getText() );
+			SIMPLE_DATE_FORMAT.parse( saveDateLatestTextField.getText() );
 		}
 		catch ( final Exception e ) {
 			saveDateLatestTextField.setText( "" );

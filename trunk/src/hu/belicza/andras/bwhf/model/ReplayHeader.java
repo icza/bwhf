@@ -26,6 +26,10 @@ public class ReplayHeader {
 		"Starcraft", "Broodwar"
 	};
 	
+	public static final String[] GAME_ENGINE_SHORT_NAMES = {
+		"SC", "BW"
+	};
+	
 	public static final byte RACE_ZERG    = (byte) 0x00;
 	public static final byte RACE_TERRAN  = (byte) 0x01;
 	public static final byte RACE_PROTOSS = (byte) 0x02;
