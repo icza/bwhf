@@ -316,21 +316,24 @@ public class Utils {
 	 * @param sourceFile          source file to be copied
 	 * @param destinationFolder   destination folder to copy to
 	 * @param destinationFileName destination file name to be used for the copied file
+	 * @return true if copying was successful; false otherwise
 	 */
-	public static void copyFile( final File sourceFile, final File destinationFolder, final String destinationFileName ) {
+	public static boolean copyFile( final File sourceFile, final File destinationFolder, final String destinationFileName ) {
 		if ( !destinationFolder.exists() )
 			destinationFolder.mkdirs();
-		if ( destinationFolder.exists() && destinationFolder.isDirectory() ) {
-			Utils.copyFile( sourceFile, new File( destinationFolder, destinationFileName ) );
-		}
+		if ( destinationFolder.exists() && destinationFolder.isDirectory() )
+			return Utils.copyFile( sourceFile, new File( destinationFolder, destinationFileName ) );
+		else
+			return false;
 	}
 	
 	/**
 	 * Copies the source file to the destination file.
 	 * @param sourceFile      source file to be copied
 	 * @param destinationFile destination file to copy to
+	 * @return true if copying was successful; false otherwise
 	 */
-	public static void copyFile( final File sourceFile, final File destinationFile ) {
+	public static boolean copyFile( final File sourceFile, final File destinationFile ) {
 		FileInputStream  inputStream  = null;
 		FileOutputStream outputStream = null;
 		try {
@@ -342,9 +345,12 @@ public class Utils {
 			int bytesRead;
 			while ( ( bytesRead = inputStream.read( buffer ) ) > 0 )
 				outputStream.write( buffer, 0, bytesRead );
+			outputStream.flush();
 			
+			return true;
 		} catch ( final Exception e ) {
 			e.printStackTrace();
+			return false;
 		}
 		finally {
 			if ( outputStream != null )
