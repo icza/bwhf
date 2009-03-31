@@ -30,6 +30,8 @@ import swingwt.awt.GridBagLayout;
 import swingwt.awt.Insets;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwt.awt.event.MouseAdapter;
+import swingwt.awt.event.MouseEvent;
 import swingwtx.swing.BorderFactory;
 import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
@@ -586,6 +588,13 @@ public class ReplaySearchTab extends Tab {
 				copyReplaysButton    .setEnabled( selectedCount >  0 );
 				moveReplaysButton    .setEnabled( selectedCount >  0 );
 				deleteReplaysButton  .setEnabled( selectedCount >  0 );
+			}
+		} );
+		resultTable.addMouseListener( new MouseAdapter() {
+			@Override
+			public void mouseClicked( final MouseEvent event ) {
+				if ( event.getClickCount() == 2 )
+					showOnChartsButton.doClick();
 			}
 		} );
 		resultsPanel.add( new JScrollPane( resultTable ), BorderLayout.CENTER );

@@ -42,6 +42,7 @@ CREATE CACHED TABLE report (
     key           INT,
     ip            VARCHAR,               --IP of the reporter's computer.
     version       TIMESTAMP DEFAULT NOW,
+    comment       VARCHAR,
     FOREIGN KEY (key) REFERENCES key(id) ON DELETE CASCADE,
     FOREIGN KEY (hacker) REFERENCES hacker(id) ON DELETE CASCADE
 );
