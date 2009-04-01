@@ -26,6 +26,7 @@ There are several buttons to define the source replays of search:
 The number of searched replays and the number of replays matching the filters is displayed above the result table. The result table lists every replay matching the filters. You can select any of the replays, and you can perform various operations on them with the buttons being on the right of the table. If you double click on a replay, it will be shown on the Charts tab.
 
 ==Regular expression examples==
-Regular expression is a powerful tool to simplify complex searches. To learn more about regular expression, you can just google it or check out this tutorial page: [http://en.wikipedia.org/wiki/Regular_expression Regular expressions on wikipedia]
+Regular expression is a powerful tool to simplify complex searches. If you want learn more about regular expression, you can google it or check out this tutorial page: [http://en.wikipedia.org/wiki/Regular_expression Regular expressions on wikipedia]
 
 Some examples for regular expressions:
+ * Let's say you don't know exactly what a character is in a player name, because they might look the same in Starcraft (like 'i', 'l', '|'). The word you want to search is window, but you're not sure the 2nd character is really i. The dot ('.') in regexp matches any character: *w.ndow*, or if you only want to allow the following 3 characters: *w[il|]ndow*
