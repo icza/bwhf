@@ -4,20 +4,35 @@
 
 <wiki:toc max_depth="3" />
 
+===Overall APM chart:===
+http://lh3.ggpht.com/_jDMClHrENz8/SdND7SW2vyI/AAAAAAAAM6I/z7Sc7XZr-PA/overall_apm_chart.PNG.jpg
+
+===Strategy chart:===
+http://lh4.ggpht.com/_jDMClHrENz8/SdND71YRzUI/AAAAAAAAM6Q/RJuEehX2pLc/strategy_chart.PNG.jpg
+
+===Strategy chart #2:===
+http://lh5.ggpht.com/_jDMClHrENz8/SdND76IKDQI/AAAAAAAAM6Y/ap9zxZ40jOQ/strategy_2_chart.PNG.jpg
+
+===Replay search:===
+http://lh4.ggpht.com/_jDMClHrENz8/SdND8dOf8hI/AAAAAAAAM6g/Nr-OwQKvhzE/replay_search.PNG.jpg
+
+===Replay search #2:===
+http://lh6.ggpht.com/_jDMClHrENz8/SdND8oloitI/AAAAAAAAM6o/rdy3FFEQ6t0/replay_search_2.PNG.jpg
+
 ===APM chart:===
-http://lh3.ggpht.com/_jDMClHrENz8/Sb9mvPv30tI/AAAAAAAAMqE/UcM485Xk5O0/s800/apm_chart.PNG.jpg
+http://lh3.ggpht.com/_jDMClHrENz8/SdND5uYN3QI/AAAAAAAAM5o/FndKKFydqwM/apm_chart.PNG.jpg
 
 ===APM chart #2:===
 http://lh3.ggpht.com/_jDMClHrENz8/Sb9mw9uA_BI/AAAAAAAAMqk/puiXaufsuq8/s800/apm2_chart.PNG.jpg
 
 ===Hotkeys chart:===
-http://lh4.ggpht.com/_jDMClHrENz8/Sb9mvf2DnZI/AAAAAAAAMqM/IHm27LVoX3A/s800/hotkeys_chart.PNG.jpg
+http://lh3.ggpht.com/_jDMClHrENz8/SdND6ApjVrI/AAAAAAAAM5w/vA0RA4uAkas/hotkeys_chart.PNG.jpg
 
 ===Build orders chart:===
-http://lh5.ggpht.com/_jDMClHrENz8/Sb9mv16KggI/AAAAAAAAMqU/4lFYFJCEr1I/s800/build_orders_chart.PNG.jpg
+http://lh3.ggpht.com/_jDMClHrENz8/SdND6vmBOYI/AAAAAAAAM54/Y_Usg_RQbsg/build_orders_chart.PNG.jpg
 
 ===Build orders chart #2:===
-http://lh5.ggpht.com/_jDMClHrENz8/Sb9mwe_EVmI/AAAAAAAAMqc/BkzBZj3h5OA/s800/build_orders2_chart.PNG.jpg
+http://lh6.ggpht.com/_jDMClHrENz8/SdND7NkqwOI/AAAAAAAAM6A/7d3TjJBEKCc/build_orders_2_chart.PNG.jpg
 
 ===Autoscan tab:===
 http://lh3.ggpht.com/_jDMClHrENz8/SdND3pQZJNI/AAAAAAAAM44/K8QcdezcyLU/autoscan.PNG.jpg
