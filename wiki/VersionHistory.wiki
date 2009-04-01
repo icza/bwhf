@@ -16,7 +16,7 @@
  * Setting to enable/disable saving and remembering window position.
  * Added a new icon to the window and to the starter `BWHFAgent.exe` file.
  * Regrouped user interface components.
- * Extracted game chat now contains version information.
+ * Extracting game chat now contains version information.
  * *Detection of use cheat drophack.*
  * *Detection of some build anywhere hack.*
 
