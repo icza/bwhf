@@ -26,7 +26,10 @@ There are several buttons to define the source replays of search:
 The number of searched replays and the number of replays matching the filters is displayed above the result table. The result table lists every replay matching the filters. You can select any of the replays, and you can perform various operations on them with the buttons being on the right of the table. If you double click on a replay, it will be shown on the Charts tab.
 
 ==Regular expression examples==
-Regular expression is a powerful tool to simplify complex searches. If you want learn more about regular expression, you can google it or check out this tutorial page: [http://en.wikipedia.org/wiki/Regular_expression Regular expressions on wikipedia]
+Regular expression is a powerful tool to simplify complex searches. If you want learn more about regular expression, you can google it or check the following links: [http://en.wikipedia.org/wiki/Regular_expression Regular expressions on wikipedia], [http://java.sun.com/javase/6/docs/api/java/util/regex/Pattern.html#sum Java regexp syntax]
 
 Some examples for regular expressions:
- * Let's say you don't know exactly what a character is in a player name, because they might look the same in Starcraft (like 'i', 'l', '|'). The word you want to search is window, but you're not sure the 2nd character is really i. The dot ('.') in regexp matches any character: *w.ndow*, or if you only want to allow the following 3 characters: *w[il|]ndow*
+ * If you don't know or remember exactly a character in a player's name (maybe because they look alike in Starcraft: 'i', 'l', '|'). The word _window_ where the 2nd carhacter can be anything. The dot ('.') in regexp matches any character: *{{{w.ndow}}}*, or if you want to allow only some characters: *{{{w[il|]ndow}}}*
+ * Words that start with _dak_ and end with _ing_. The {{{.*}}} matches any string: *{{{dak.*ing}}}*
+ * Words that start with any non-word character and ends with some number: *{{{\D+\d+}}}*
+ * Words that has at least 3 x in it in a sequence: *{{{x{3,}+}}}*
