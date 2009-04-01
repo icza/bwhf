@@ -74,7 +74,7 @@ public class ReplaySearchTab extends Tab {
 	 * @author Andras Belicza
 	 */
 	public static class MapSize {
-		/** Standard map lengths (applies both to widht and height). */
+		/** Standard map lengths (applies both to width and height). */
 		private static final short[] STANDARD_MAP_LENGTHS = { 64, 96, 128, 192, 256 };
 		
 		/** Map size indicating any map size. */
@@ -748,9 +748,11 @@ public class ReplaySearchTab extends Tab {
 	 */
 	private void searchFilesAndFolders( final File[] files ) {
 		requestedToStop = false;
-		selectFoldersButton.setEnabled( false );
-		selectFilesButton  .setEnabled( false );
-		stopSearchButton   .setEnabled( true  );
+		selectFoldersButton       .setEnabled( false );
+		selectFilesButton         .setEnabled( false );
+		repeatSearch              .setEnabled( false );
+		searchPreviousResultButton.setEnabled( false );
+		stopSearchButton          .setEnabled( true  );
 		
 		disableResultHandlerButtons();
 		
