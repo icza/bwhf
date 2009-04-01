@@ -7,6 +7,7 @@ import hu.belicza.andras.bwhfagent.view.replayfilter.CreatorNameReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.DurationReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.GameEngineReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.GameNameReplayFilter;
+import hu.belicza.andras.bwhfagent.view.replayfilter.GameTypeReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.MapNameReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.MapSizeReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.PlayerColorReplayFilter;
@@ -60,7 +61,7 @@ public class ReplaySearchTab extends Tab {
 	/** Simple date format to format and parse replay save time. */
 	private static final DateFormat SIMPLE_DATE_FORMAT        = new SimpleDateFormat( "yyyy-MM-dd" );
 	/** Result table column names. */
-	private static final String[]   RESULT_TABLE_COLUMN_NAMES = new String[] { "Saved on", "Engine", "Map", "Duration", "Players", "Game name", "Creator", "File" }; 
+	private static final String[]   RESULT_TABLE_COLUMN_NAMES = new String[] { "Saved on", "Engine", "Map", "Duration", "Players", "Game type", "Game name", "Creator", "File" }; 
 	
 	/**
 	 * Class to specify a map size.
@@ -201,6 +202,8 @@ public class ReplaySearchTab extends Tab {
 	private final JComboBox   mapSizeMinComboBox            = new JComboBox( MapSize.STANDARD_MAP_SIZES );
 	/** Max map size combo box.                           */
 	private final JComboBox   mapSizeMaxComboBox            = new JComboBox( MapSize.STANDARD_MAP_SIZES );
+	/** Game type filter checkboxes.                      */
+	private final JCheckBox[] gameTypeCheckBoxes            = new JCheckBox[ ReplayHeader.GAME_TYPE_NAMES.length ];
 	
 	// TODO: missing fields: game type
 	
@@ -258,6 +261,9 @@ public class ReplaySearchTab extends Tab {
 				versionMaxComboBox.setSelectedIndex( 0 );
 				mapSizeMinComboBox.setSelectedIndex( 0 );
 				mapSizeMaxComboBox.setSelectedIndex( 0 );
+				for ( final JCheckBox checkBox : gameTypeCheckBoxes )
+					if ( checkBox != null )
+						checkBox.setSelected( false );
 			}
 		} );
 		filterFieldsButtonsPanel.add( resetFilterFieldsButton );
@@ -364,8 +370,8 @@ public class ReplaySearchTab extends Tab {
 		gridBagLayout.setConstraints( label, constraints );
 		headerFiltersPanel.add( label );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		final GridBagLayout      gridBagLayout2 = new GridBagLayout();
-		final GridBagConstraints constraints2   = new GridBagConstraints();
+		GridBagLayout      gridBagLayout2 = new GridBagLayout();
+		GridBagConstraints constraints2   = new GridBagConstraints();
 		wrapperPanel = new JPanel( gridBagLayout2 );
 		constraints2.fill = GridBagConstraints.BOTH;
 		constraints2.gridwidth = 1;
@@ -432,6 +438,28 @@ public class ReplaySearchTab extends Tab {
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		gridBagLayout.setConstraints( mapSizeMaxComboBox, constraints );
 		headerFiltersPanel.add( mapSizeMaxComboBox );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Game type:" );
+		gridBagLayout.setConstraints( label, constraints );
+		headerFiltersPanel.add( label );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout2 = new GridBagLayout();
+		constraints2   = new GridBagConstraints();
+		wrapperPanel = new JPanel( gridBagLayout2 );
+		constraints2.fill = GridBagConstraints.BOTH;
+		constraints2.gridwidth = 1;
+		for ( int i = 0; i < gameTypeCheckBoxes.length; i++ ) {
+			if ( ReplayHeader.GAME_TYPE_NAMES[ i ] == null )
+				continue;
+			constraints2.gridwidth = i == ( gameTypeCheckBoxes.length - 1 ) / 2 || i == gameTypeCheckBoxes.length - 1 ? GridBagConstraints.REMAINDER : 1;
+			gameTypeCheckBoxes[ i ] = new JCheckBox( ReplayHeader.GAME_TYPE_NAMES[ i ] );
+			gridBagLayout2.setConstraints( gameTypeCheckBoxes[ i ], constraints2 );
+			wrapperPanel.add( gameTypeCheckBoxes[ i ] );
+		}
+		wrapperPanel = Utils.wrapInPanelLeftAligned( wrapperPanel );
+		gridBagLayout.setConstraints( wrapperPanel, constraints );
+		headerFiltersPanel.add( wrapperPanel );
 		
 		contentBox.add( Utils.wrapInPanel( headerFiltersPanel ) );
 		
@@ -744,7 +772,11 @@ public class ReplaySearchTab extends Tab {
 							if ( replayIncluded ) {
 								lastSearchResultFileList.add( replayFile );
 								final ReplayHeader replayHeader = replay.replayHeader;
-								lastSearchResultRowsData.add( new String[] { SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ), ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate(), replayHeader.mapName, replayHeader.getDurationString(), replayHeader.getPlayerNamesString(), replayHeader.gameName, replayHeader.creatorName, replayFile.getAbsolutePath().toString() } );
+								lastSearchResultRowsData.add( new String[] {
+									SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ), ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate(),
+									replayHeader.mapName, replayHeader.getDurationString(), replayHeader.getPlayerNamesString(),
+									ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ], replayHeader.gameName, replayHeader.creatorName, replayFile.getAbsolutePath().toString()
+								} );
 							}
 						}
 						
@@ -886,6 +918,13 @@ public class ReplaySearchTab extends Tab {
 			maxMapSize = null;
 		if ( minMapSize != null || maxMapSize != null )
 			replayFilterList.add( new MapSizeReplayFilter( minMapSize, maxMapSize ) );
+		
+		final List< Short > selectedShortValueList = new ArrayList< Short >();
+		for ( int i = gameTypeCheckBoxes.length - 1; i >= 0; i-- )
+			if ( gameTypeCheckBoxes[ i ] != null && gameTypeCheckBoxes[ i ].isSelected() )
+				selectedShortValueList.add( (short) i );
+		if ( !selectedShortValueList.isEmpty() )
+			replayFilterList.add( new GameTypeReplayFilter( selectedShortValueList ) );
 		
 		final ReplayFilter[] replayFilters = replayFilterList.toArray( new ReplayFilter[ replayFilterList.size() ] );
 		Arrays.sort( replayFilters );

@@ -45,7 +45,11 @@ public class ReplayHeader {
 		"green", "pale yellow", "tan", "aqua", "pale green", "blueish gray", "pale yellow", "cyan"
 	};
 	
-	// Single Player: only melee, ffa and ums is allowed.
+	public static final String[] GAME_TYPE_NAMES = {
+		null, null, "Melee", "Free for all", "One on one", "Capture the flag", "Greed", "Slaughter",
+		null, "Sudden death", "Use map settings", "Team melee", "Team free for all",
+		"Team capture the flag", null, "Top vs bottom"
+	};
 	
 	public static final short GAME_TYPE_MELEE         = 0x02;
 	public static final short GAME_TYPE_FFA           = 0x03; // Free for all
@@ -268,18 +272,28 @@ public class ReplayHeader {
 		}
 	}
 	
+	/** We store guessed version once it has been determined. */
+	private String guessedVersion;
+	
 	/**
 	 * Guesses the replay Starcraft version from the save date.
 	 * @return the guessed version string
 	 */
 	public String guessVersionFromDate() {
-		final long saveTime_ = saveTime.getTime();
+		if ( guessedVersion == null ) {
+			final long saveTime_ = saveTime.getTime();
+			
+			for ( int i = VERSION_RELEASE_DATES.length - 1; i >= 0; i-- )
+				if ( saveTime_ > VERSION_RELEASE_DATES[ i ] ) {
+					guessedVersion = VERSION_NAMES[ i ];
+					break;
+				}
+			
+			if ( guessedVersion == null )
+				guessedVersion = "<unknown>";
+		}
 		
-		for ( int i = VERSION_RELEASE_DATES.length - 1; i >= 0; i-- )
-			if ( saveTime_ > VERSION_RELEASE_DATES[ i ] )
-				return VERSION_NAMES[ i ];
-		
-		return "<unknown>";
+		return guessedVersion;
 	}
 	
 }
