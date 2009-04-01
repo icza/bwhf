@@ -1,0 +1,5 @@
+#summary This page describes how replay search works in BWHF Agent.
+
+=Replay search in BWHF Agent=
+
+The Replay search tab in BWHF Agent let's you search replays by various conditions. If you don't touch any filters, the search returns all the input replays. If you specify some conditions, they will be in logical _AND_ connection.
