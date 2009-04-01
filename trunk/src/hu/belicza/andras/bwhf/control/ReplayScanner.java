@@ -89,11 +89,11 @@ public class ReplayScanner {
 			final Action action = playerActions[ actionIndex ];
 			
 			// Use Cheat drophack
-			// TODO: gameType is not correctly parsed yet...
-			/*
-			if ( replayHeader.gameType != ReplayHeader.GAME_TYPE_SINGLE_PLAYER && action.actionNameIndex == Action.ACTION_NAME_INDEX_USE_CHEAT )
+			// Single Player: only melee, ffa and ums is allowed.
+			// TODO: This check should relate to all multiplayer mode.
+			// For now I only check if the game type is only allowed in multiplayer mode, this might skip some multiplayer game.  
+			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_USE_CHEAT && ( replayHeader.gameType != ReplayHeader.GAME_TYPE_MELEE && replayHeader.gameType != ReplayHeader.GAME_TYPE_FFA && replayHeader.gameType != ReplayHeader.GAME_TYPE_UMS ) )
 				hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_USE_CHEAT_DROPHACK, action.iteration ) );
-			*/
 			
 			// Ally-vision drophack
 			if ( replayHeader.gameType != ReplayHeader.GAME_TYPE_UMS ) {
