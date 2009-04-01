@@ -18,7 +18,7 @@
  * Regrouped user interface components.
  * Extracted game chat now contains version information.
  * *Detection of use cheat drophack.*
- * *Detection of some build anywhere hack*.
+ * *Detection of some build anywhere hack.*
 
 ----
 ===1.51 2009-03-18===
