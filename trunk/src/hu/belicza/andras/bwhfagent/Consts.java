@@ -22,6 +22,8 @@ public class Consts {
 	public static final String VERSION_RESOURCE_NAME            = "current_version.txt";
 	/** URL pointing to the latest stable version text.                        */
 	public static final String LATEST_STABLE_VERSION_TEXT_URL   = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version.txt";
+	/** Search help page url string.                                           */
+	public static final String SEARCH_HELP_PAGE_URL             = "http://code.google.com/p/bwhf/wiki/ReplaySearchInBWHFAgent";
 	
 	/** URL of the BWHF hacker data base server.                               */
 	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL = "http://94.199.240.39/hackerdb/hackers";

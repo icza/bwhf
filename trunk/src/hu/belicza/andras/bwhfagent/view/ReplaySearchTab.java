@@ -3,6 +3,7 @@ package hu.belicza.andras.bwhfagent.view;
 import hu.belicza.andras.bwhf.control.BinRepParser;
 import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
+import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.bwhfagent.view.replayfilter.CreatorNameReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.DurationReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.GameEngineReplayFilter;
@@ -61,7 +62,12 @@ public class ReplaySearchTab extends Tab {
 	/** Simple date format to format and parse replay save time. */
 	private static final DateFormat SIMPLE_DATE_FORMAT        = new SimpleDateFormat( "yyyy-MM-dd" );
 	/** Result table column names. */
-	private static final String[]   RESULT_TABLE_COLUMN_NAMES = new String[] { "Saved on", "Engine", "Map", "Duration", "Players", "Game type", "Game name", "Creator", "File" }; 
+	private static final String[]   RESULT_TABLE_COLUMN_NAMES = new String[] { "Engine", "Map", "Duration", "Game type", "Players", "Saved on", "Game name", "Creator", "File" }; 
+	
+	/** Background color to be used if a filter field contains syntax error. */
+	private static final Color      NORMAL_BACKGROUND_COLOR       = Color.WHITE;
+	/** Background color to be used if a filter field contains syntax error. */
+	private static final Color      SYNTAX_ERROR_BACKGROUND_COLOR = new Color( 255, 130, 130 );
 	
 	/**
 	 * Class to specify a map size.
@@ -234,18 +240,22 @@ public class ReplaySearchTab extends Tab {
 				for ( final JCheckBox checkBox : gameEngineCheckBoxes )
 					checkBox.setSelected( false );
 				gameNameTextField.setText( "" );
+				gameNameTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 				gameNameExactMatchCheckBox.setSelected( false );
 				gameNameRegexpCheckBox.setSelected( false );
 				gameNameRegexpCheckBox.doClick();
 				creatorNameTextField.setText( "" );
+				creatorNameTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 				creatorNameExactMatchCheckBox.setSelected( false );
 				creatorNameRegexpCheckBox.setSelected( false );
 				creatorNameRegexpCheckBox.doClick();
 				mapNameTextField.setText( "" );
+				mapNameTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 				mapNameExactMatchCheckBox.setSelected( false );
 				mapNameRegexpCheckBox.setSelected( false );
 				mapNameRegexpCheckBox.doClick();
 				playerNameTextField.setText( "" );
+				playerNameTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 				playerNameExactMatchCheckBox.setSelected( false );
 				playerNameRegexpCheckBox.setSelected( false );
 				playerNameRegexpCheckBox.doClick();
@@ -254,9 +264,13 @@ public class ReplaySearchTab extends Tab {
 				for ( final JCheckBox checkBox : inGameColorCheckBoxes )
 					checkBox.setSelected( false );
 				durationMinTextField.setText( "" );
+				durationMinTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 				durationMaxTextField.setText( "" );
+				durationMaxTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 				saveDateEarliestTextField.setText( "" );
+				saveDateEarliestTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 				saveDateLatestTextField.setText( "" );
+				saveDateLatestTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 				versionMinComboBox.setSelectedIndex( 0 );
 				versionMaxComboBox.setSelectedIndex( 0 );
 				mapSizeMinComboBox.setSelectedIndex( 0 );
@@ -269,6 +283,13 @@ public class ReplaySearchTab extends Tab {
 		filterFieldsButtonsPanel.add( resetFilterFieldsButton );
 		final JButton hideFiltersButton = new JButton( "Hide filters" );
 		filterFieldsButtonsPanel.add( hideFiltersButton );
+		final JButton visitSearchHelpPageButton = new JButton( "Visit search help page" );
+		visitSearchHelpPageButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				Utils.showURLInBrowser( Consts.SEARCH_HELP_PAGE_URL );
+			}
+		} );
+		filterFieldsButtonsPanel.add( visitSearchHelpPageButton );
 		contentBox.add( filterFieldsButtonsPanel );
 		
 		final GridBagLayout      gridBagLayout      = new GridBagLayout();
@@ -773,9 +794,9 @@ public class ReplaySearchTab extends Tab {
 								lastSearchResultFileList.add( replayFile );
 								final ReplayHeader replayHeader = replay.replayHeader;
 								lastSearchResultRowsData.add( new String[] {
-									SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ), ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate(),
-									replayHeader.mapName, replayHeader.getDurationString(), replayHeader.getPlayerNamesString(),
-									ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ], replayHeader.gameName, replayHeader.creatorName, replayFile.getAbsolutePath().toString()
+									ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate(),
+									replayHeader.mapName, replayHeader.getDurationString(), ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ], replayHeader.getPlayerNamesString(), SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ),
+									replayHeader.gameName, replayHeader.creatorName, replayFile.getAbsolutePath().toString()
 								} );
 							}
 						}
@@ -839,20 +860,44 @@ public class ReplaySearchTab extends Tab {
 			replayFilterList.add( new GameEngineReplayFilter( selectedByteValueList ) );
 		
 		String stringValue = gameNameTextField.getText();
+		gameNameTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 		if ( stringValue.length() > 0 )
-			replayFilterList.add( new GameNameReplayFilter( stringValue, gameNameExactMatchCheckBox.isSelected(), gameNameRegexpCheckBox.isSelected() ) );
+			try {
+				replayFilterList.add( new GameNameReplayFilter( stringValue, gameNameExactMatchCheckBox.isSelected(), gameNameRegexpCheckBox.isSelected() ) );
+			}
+			catch ( final Exception e ) {
+				gameNameTextField.setBackground( SYNTAX_ERROR_BACKGROUND_COLOR );
+			}
 		
 		stringValue = creatorNameTextField.getText();
+		creatorNameTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 		if ( stringValue.length() > 0 )
-			replayFilterList.add( new CreatorNameReplayFilter( stringValue, creatorNameExactMatchCheckBox.isSelected(), creatorNameRegexpCheckBox.isSelected() ) );
+			try {
+				replayFilterList.add( new CreatorNameReplayFilter( stringValue, creatorNameExactMatchCheckBox.isSelected(), creatorNameRegexpCheckBox.isSelected() ) );
+			}
+			catch ( final Exception e ) {
+				creatorNameTextField.setBackground( SYNTAX_ERROR_BACKGROUND_COLOR );
+			}
 		
 		stringValue = mapNameTextField.getText();
+		mapNameTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 		if ( stringValue.length() > 0 )
-			replayFilterList.add( new MapNameReplayFilter( stringValue, mapNameExactMatchCheckBox.isSelected(), mapNameRegexpCheckBox.isSelected() ) );
+			try {
+				replayFilterList.add( new MapNameReplayFilter( stringValue, mapNameExactMatchCheckBox.isSelected(), mapNameRegexpCheckBox.isSelected() ) );
+			}
+			catch ( final Exception e ) {
+				mapNameTextField.setBackground( SYNTAX_ERROR_BACKGROUND_COLOR );
+			}
 		
 		stringValue = playerNameTextField.getText();
+		playerNameTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 		if ( stringValue.length() > 0 )
-			replayFilterList.add( new PlayerNameReplayFilter( stringValue, playerNameExactMatchCheckBox.isSelected(), playerNameRegexpCheckBox.isSelected() ) );
+			try {
+				replayFilterList.add( new PlayerNameReplayFilter( stringValue, playerNameExactMatchCheckBox.isSelected(), playerNameRegexpCheckBox.isSelected() ) );
+			}
+			catch ( final Exception e ) {
+				playerNameTextField.setBackground( SYNTAX_ERROR_BACKGROUND_COLOR );
+			}
 		
 		selectedByteValueList.clear();
 		for ( int i = raceCheckBoxes.length - 1; i >= 0; i-- )
@@ -870,37 +915,42 @@ public class ReplaySearchTab extends Tab {
 		
 		Integer minDuration = null;
 		Integer maxDuration = null;
+		durationMinTextField.setBackground( NORMAL_BACKGROUND_COLOR );
+		durationMaxTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 		try {
 			if ( durationMinTextField.getText().length() > 0 )
 				minDuration = Integer.parseInt( durationMinTextField.getText() );
 		}
 		catch ( final Exception e ) {
-			durationMinTextField.setText( "" );
+			durationMinTextField.setBackground( SYNTAX_ERROR_BACKGROUND_COLOR );
 		}
 		try {
 			if ( durationMaxTextField.getText().length() > 0 )
 				maxDuration = Integer.parseInt( durationMaxTextField.getText() );
 		}
 		catch ( final Exception e ) {
-			durationMaxTextField.setText( "" );
+			durationMaxTextField.setBackground( SYNTAX_ERROR_BACKGROUND_COLOR );
 		}
 		if ( minDuration != null || maxDuration != null )
 			replayFilterList.add( new DurationReplayFilter( minDuration, maxDuration ) );
 		
 		Long minSaveDate = null;
 		Long maxSaveDate = null;
+		saveDateEarliestTextField.setBackground( NORMAL_BACKGROUND_COLOR );
+		saveDateLatestTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 		try {
 			if ( saveDateEarliestTextField.getText().length() > 0 )
 				minSaveDate = SIMPLE_DATE_FORMAT.parse( saveDateEarliestTextField.getText() ).getTime();
 		}
 		catch ( final Exception e ) {
-			saveDateEarliestTextField.setText( "" );
+			saveDateEarliestTextField.setBackground( SYNTAX_ERROR_BACKGROUND_COLOR );
 		}
 		try {
-			SIMPLE_DATE_FORMAT.parse( saveDateLatestTextField.getText() );
+			if ( saveDateLatestTextField.getText().length() > 0 )
+				SIMPLE_DATE_FORMAT.parse( saveDateLatestTextField.getText() );
 		}
 		catch ( final Exception e ) {
-			saveDateLatestTextField.setText( "" );
+			saveDateLatestTextField.setBackground( SYNTAX_ERROR_BACKGROUND_COLOR );
 		}
 		if ( minSaveDate != null || maxSaveDate != null )
 			replayFilterList.add( new SaveTimeReplayFilter( minSaveDate, maxSaveDate ) );
