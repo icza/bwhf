@@ -515,7 +515,7 @@ public class ChartsComponent extends JPanel {
 		buildOrderDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_STRATEGY_DISPLAY_LEVELS ) ) );
 		overallApmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL ) ) );
 		
-		contentPanel.doLayout();
+		contentPanel.validate();
 		repaint();
 	}
 	
@@ -575,7 +575,7 @@ public class ChartsComponent extends JPanel {
 			playerIndexToShowList = new ArrayList< Integer >( players.length );
 			// Set the initially visible players:
 			playerCheckBoxActionListener.actionPerformed( null ); // This also repaints.
-			contentPanel.doLayout();
+			contentPanel.validate();
 		}
 		else {
 			hackDescriptionList = null;

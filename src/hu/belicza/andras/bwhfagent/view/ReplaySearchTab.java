@@ -488,8 +488,7 @@ public class ReplaySearchTab extends Tab {
 			public void actionPerformed( final ActionEvent event ) {
 				headerFiltersPanel.setVisible( !headerFiltersPanel.isVisible() );
 				hideFiltersButton.setText( headerFiltersPanel.isVisible() ? "Hide filters" : "Show filters" );
-				contentBox.doLayout();
-				hideFiltersButton.getParent().doLayout();
+				contentBox.validate();
 			}
 		} );
 		

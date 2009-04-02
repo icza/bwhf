@@ -199,7 +199,7 @@ public class GeneralSettingsTab extends Tab {
 		checkUpdatesButton.setEnabled( false );
 		
 		checkUpdatesButton.setText( "Checking..." );
-		checkUpdatesButton.getParent().doLayout();
+		checkUpdatesButton.getParent().validate();
 		
 		new NormalThread() {
 			@Override
@@ -221,7 +221,7 @@ public class GeneralSettingsTab extends Tab {
 				}
 				finally {
 					checkUpdatesButton.setEnabled( true );
-					checkUpdatesButton.getParent().doLayout();
+					checkUpdatesButton.getParent().validate();
 				}
 			}
 		}.start();

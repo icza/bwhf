@@ -229,7 +229,7 @@ public class AutoscanTab extends LoggedTab {
 						lastKeyCheckResult = Utils.checkAuthorizationKey( authorizationKey );
 						checkKeyButton.setText( CHECK_KEY_BUTTON_TEXT + ( lastKeyCheckResult == null ? " (check failed!)" : ( lastKeyCheckResult ? " (valid)" : " (invalid)" ) ) );
 						checkKeyButton.setEnabled( true );
-						settingsPanel.getParent().doLayout();
+						settingsPanel.getParent().validate();
 						keyCheckInProgress = false;
 					}
 				}.start();
