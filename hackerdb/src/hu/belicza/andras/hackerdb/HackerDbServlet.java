@@ -249,7 +249,8 @@ public class HackerDbServlet extends HttpServlet {
 			
 			outputWriter = response.getWriter();
 			
-			outputWriter.println( "<html><head><title>BWHF Hacker data base</title><style>" );
+			outputWriter.println( "<html><head><title>BWHF Hacker data base</title>" );
+			outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>" );
 			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
 				outputWriter.println( ".gat" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
 			outputWriter.println( ".gatUn {" + UNKNOWN_GATEWAY_STYLE + "}" );
