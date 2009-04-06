@@ -12,6 +12,11 @@ import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.Formatter;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +40,7 @@ import org.apache.commons.dbcp.BasicDataSource;
  */
 public class HackerDbServlet extends HttpServlet {
 	
-	/** URL of the hacker data base. */
+	/** URL of the hacker database. */
 	private static final String DATABASE_URL = "jdbc:hsqldb:hsql://localhost/hackers";
 	
 	/** Date format to be used to format output dates. */
@@ -44,8 +49,18 @@ public class HackerDbServlet extends HttpServlet {
 	/** Max players in a report. */
 	private static final int MAX_PLAYERS_IN_REPORT = 8;
 	
+	/** Gateway colors.                                              */
+	private static final String[] GATEWAY_COLORS            = new String[] { "ff5050", "00ffff", "00ff00", "ffff00", "000000", "ffffff" };
+	/** Gateway foreground colors.                                   */
+	private static final String[] GATEWAY_FOREGROUND_COLORS = new String[] { "000000", "000000", "000000", "000000", "ffffff", "000000" };
 	/** Styles used for different gateways in the hacker list table. */
-	private static final String[] GATEWAY_STYLES        = new String[] { "background:#ff2020;color:#000000;", "background:#00ffff;color:#000000;", "background:#00ff00;color:#000000;", "background:#ffff00;color:#000000;", "background:#000000;color:#ffffff;", "background:#ffffff;color:#000000;" };
+	private static final String[] GATEWAY_STYLES;
+	static {
+		GATEWAY_STYLES = new String[ GATEWAY_COLORS.length ];
+		for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
+			GATEWAY_STYLES[ i ] = "background:#" + GATEWAY_COLORS[ i ] + ";color:#" + GATEWAY_FOREGROUND_COLORS[ i ] + ";";
+	}
+	
 	/** Style for unknown gateway.                                   */
 	private static final String   UNKNOWN_GATEWAY_STYLE = "background:#f080f0;color:#000000;";
 	
@@ -109,7 +124,7 @@ public class HackerDbServlet extends HttpServlet {
 				filtersWrapper.reportedWithKey   = getStringParamValue( request, FILTER_NAME_REPORTED_WITH_KEY );
 				filtersWrapper.sortByValue       = getStringParamValue( request, FILTER_NAME_SORT_BY );
 				if ( filtersWrapper.sortByValue.length() == 0 )
-					filtersWrapper.sortByValue   = SORT_BY_VALUE_FIRST_REPORTED;
+					filtersWrapper.sortByValue   = SORT_BY_VALUE_LAST_REPORTED;
 				filtersWrapper.ascendantSorting  = request.getParameter( FILTER_NAME_ASCENDANT_SORTING ) == null ? FILTER_DEFAULT_ASCENDANT_SORTING_MAP.get( filtersWrapper.sortByValue ) : request.getParameter( FILTER_NAME_ASCENDANT_SORTING ).equalsIgnoreCase( "true" );
 				filtersWrapper.page              = getIntParamValue( request, FILTER_NAME_PAGE, FILTER_DEFAULT_PAGE );
 				filtersWrapper.pageSize          = getIntParamValue( request, FILTER_NAME_PAGE_SIZE, FILTER_DEFAULT_PAGE_SIZE );
@@ -167,6 +182,11 @@ public class HackerDbServlet extends HttpServlet {
 					throw new BadRequestException();
 				
 				sendBackPlainMessage( handleReport( key, gatewayIndex, gameEngine, mapName, agentVersion, playerNameList.toArray( new String[ playerNameList.size() ] ), request.getRemoteAddr() ), response );
+				
+			} else if ( operation.equals( OPERATION_STATISTICS ) ) {
+				
+				serveStatistics( response );
+				
 			}
 		}
 		catch ( final BadRequestException bre ) {
@@ -249,7 +269,7 @@ public class HackerDbServlet extends HttpServlet {
 			
 			outputWriter = response.getWriter();
 			
-			outputWriter.println( "<html><head><title>BWHF Hacker data base</title>" );
+			outputWriter.println( "<html><head><title>BWHF Hacker database</title>" );
 			outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>" );
 			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
 				outputWriter.println( ".gat" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
@@ -257,8 +277,9 @@ public class HackerDbServlet extends HttpServlet {
 			outputWriter.println( ".sortCol {cursor:pointer;}</style></head><body style='background:#f7f7f7'><center>" );
 			
 			// Header section
-			outputWriter.println( "<h2>BWHF Hacker data base</h2>" );
-			outputWriter.println( "<table border=0 width='100%'><td align=left><a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help about this page (filters, sorting)</a><td align=right>Go to <a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></table>" );
+			outputWriter.println( "<h2>BWHF Hacker database</h2>" );
+			outputWriter.println( "<p><table border=0><tr><td><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a><td>&nbsp;&nbsp;<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + "=" + OPERATION_STATISTICS + "'>Statistics</a><sup style='color:red;background:yellow;font-size:65%'>NEW!</sup>&nbsp;&nbsp;<td><a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help about this page (filters, sorting)</a></table></p>" );
+			//outputWriter.println( "<table border=0><tr><td><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a><td>&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help about this page (filters, sorting)</a></table>" );
 			
 			// Controls section
 			outputWriter.println( "<form id='" + FORM_ID + "' action='hackers' method='POST'>" );
@@ -474,6 +495,199 @@ public class HackerDbServlet extends HttpServlet {
 			statement.setString( keyParamIndex, filtersWrapper.reportedWithKey );
 		
 		return statement;
+	}
+	
+	/**
+	 * Creates and sends statistics of the hacker database.
+	 * @param response the http response
+	 */
+	private void serveStatistics( final HttpServletResponse response ) {
+		setNoCache( response );
+		response.setContentType( "text/html" );
+		
+		Connection connection = null;
+		Statement  statement  = null;
+		ResultSet  resultSet  = null;
+		
+		PrintWriter outputWriter = null;
+		try {
+			
+			final int CHARTS_WIDTH  = 750;
+			final int CHARTS_HEIGHT = 400;
+			
+			final Date currentDate = new Date();
+			
+			connection = dataSource.getConnection();
+			
+			// Gateway distribution chart data
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery( "SELECT hacker.gateway, COUNT(DISTINCT hacker.id) FROM report JOIN key on report.key=key.id JOIN hacker on report.hacker=hacker.id WHERE key.revocated=FALSE GROUP BY hacker.gateway ORDER BY COUNT(DISTINCT hacker.id) DESC" );
+			final List< int[] > gatewayDistributionList = new ArrayList< int[] >();
+			int hackersCount = 0;
+			while ( resultSet.next() ) {
+				final int hackersInGatway = resultSet.getInt( 2 );
+				hackersCount += hackersInGatway;
+				gatewayDistributionList.add( new int[] { resultSet.getInt( 1 ), hackersInGatway } );
+			}
+			resultSet.close();
+			statement.close();
+			
+			// Monthly reports chart data
+			statement = connection.createStatement();
+			
+			final List< Object[] > monthlyReportsList = new ArrayList< Object[] >();
+			final PreparedStatement preparedStatement = connection.prepareStatement( "SELECT COUNT(*) FROM report JOIN key on report.key=key.id WHERE key.revocated=FALSE AND version>=? and version<?" );
+			statement = preparedStatement; // Store it to the statement variable to close it in case of exception
+			final DateFormat monthDateFormat = new SimpleDateFormat( "MMMMM, yyyy" );
+			final GregorianCalendar calendar1 = new GregorianCalendar( 2008, Calendar.DECEMBER, 1 );
+			final GregorianCalendar calendar2 = new GregorianCalendar( 2008, Calendar.DECEMBER, 1 );
+			calendar2.add( Calendar.MONTH, 1 );
+			int reportsCount           = 0;
+			int maxMonthlyReportsCount = 0;
+			while ( calendar1.getTime().before( currentDate  ) ) {
+				preparedStatement.setDate( 1, new java.sql.Date( calendar1.getTime().getTime() ) );
+				preparedStatement.setDate( 2, new java.sql.Date( calendar2.getTime().getTime() ) );
+				
+				resultSet = preparedStatement.executeQuery();
+				while ( resultSet.next() ) {
+					final int reportsInMonth = resultSet.getInt( 1 );
+					reportsCount += reportsInMonth;
+					if ( reportsInMonth > maxMonthlyReportsCount )
+						maxMonthlyReportsCount = reportsInMonth;
+					monthlyReportsList.add( new Object[] { monthDateFormat.format( calendar1.getTime() ), reportsInMonth } );
+				}
+				resultSet.close();
+				
+				calendar1.setTime( calendar2.getTime() );
+				calendar2.add( Calendar.MONTH, 1 );
+			}
+			if ( maxMonthlyReportsCount == 0 )
+				maxMonthlyReportsCount = 1;
+			statement.close();
+			
+			// Gateway distribution chart URL
+			final StringBuilder gatewayDistributionChartUrlBuilder = new StringBuilder();
+			gatewayDistributionChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=p3&amp;chs=" ).append( CHARTS_WIDTH ).append( 'x' ).append( CHARTS_HEIGHT )
+				.append( "&amp;chtt=BWHF+Hacker+gateway+distribution+at+" ).append( DATE_FORMAT.format( currentDate ).replace( " ", "+" ) );
+			gatewayDistributionChartUrlBuilder.append( "&amp;chd=t:" );
+			Formatter numberFormatter = new Formatter( gatewayDistributionChartUrlBuilder );
+			for ( int i = 0; i < gatewayDistributionList.size(); i++ ) {
+				final int[] gatewayDistribution = gatewayDistributionList.get( i ); 
+				if ( i > 0 )
+					gatewayDistributionChartUrlBuilder.append( ',' );
+				numberFormatter.format( "%2.1f", 100.0f * gatewayDistribution[ 1 ] / hackersCount );
+			}
+			gatewayDistributionChartUrlBuilder.append( "&amp;chl=" );
+			for ( int i = 0; i < gatewayDistributionList.size(); i++ ) {
+				final int[] gatewayDistribution = gatewayDistributionList.get( i ); 
+				if ( i > 0 )
+					gatewayDistributionChartUrlBuilder.append( '|' );
+				gatewayDistributionChartUrlBuilder.append( GATEWAYS[ gatewayDistribution[ 0 ] ] );
+				numberFormatter.format( "+%2.1f", 100.0f * gatewayDistribution[ 1 ] / hackersCount );
+				gatewayDistributionChartUrlBuilder.append( "%25" );
+			}
+			gatewayDistributionChartUrlBuilder.append( "&amp;chco=" );
+			for ( int i = 0; i < gatewayDistributionList.size(); i++ ) {
+				final int[] gatewayDistribution = gatewayDistributionList.get( i ); 
+				if ( i > 0 )
+					gatewayDistributionChartUrlBuilder.append( ',' );
+				gatewayDistributionChartUrlBuilder.append( GATEWAY_COLORS[ gatewayDistribution[ 0 ] ] );
+			}
+			
+			// Monthly reports chart URL
+			final StringBuilder monthlyReportsChartUrlBuilder = new StringBuilder();
+			numberFormatter = new Formatter( monthlyReportsChartUrlBuilder );
+			monthlyReportsChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=bvs&amp;chbh=a&amp;chxt=y&amp;chxr=0,0," )
+				.append( maxMonthlyReportsCount ).append( ",100&amp;chg=0," );
+			numberFormatter.format( "%2.2f", 10000f / maxMonthlyReportsCount );
+			monthlyReportsChartUrlBuilder.append( "&amp;chs=" ).append( CHARTS_WIDTH ).append( 'x' ).append( CHARTS_HEIGHT )
+				.append( "&amp;chtt=BWHF+Monthly+reports+at+" ).append( DATE_FORMAT.format( currentDate ).replace( " ", "+" ) );
+			monthlyReportsChartUrlBuilder.append( "&amp;chd=t:" );
+			for ( int i = 0; i < monthlyReportsList.size(); i++ ) {
+				final Object[] monthlyReports = monthlyReportsList.get( i ); 
+				if ( i > 0 )
+					monthlyReportsChartUrlBuilder.append( ',' );
+				numberFormatter.format( "%2.1f", 100.0f * (Integer) monthlyReports[ 1 ] / maxMonthlyReportsCount );
+			}
+			monthlyReportsChartUrlBuilder.append( "&amp;chl=" );
+			for ( int i = 0; i < monthlyReportsList.size(); i++ ) {
+				final Object[] monthlyReports = monthlyReportsList.get( i ); 
+				if ( i > 0 )
+					monthlyReportsChartUrlBuilder.append( '|' );
+				monthlyReportsChartUrlBuilder.append( ( (String) monthlyReports[ 0 ] ).replace( " ", "+" ) );
+			}
+			
+			// Generate HTML output
+			outputWriter = response.getWriter();
+			
+			outputWriter.println( "<html><head><title>BWHF Hacker database statistics</title>" );
+			outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>" );
+			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
+				outputWriter.println( ".gat" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
+			outputWriter.println( ".gatUn {" + UNKNOWN_GATEWAY_STYLE + "}" );
+			outputWriter.println( "</style></head><body style='background:#f7f7f7'><center>" );
+			
+			// Header section
+			outputWriter.println( "<h2>BWHF Hacker database statistics</h2>" );
+			outputWriter.println( "<table border=0><tr><td><a href='hackers'>Back to the hacker list</a><td>&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></table>" );
+			
+			outputWriter.println( "<h3>Hacker distribution between gateways</h3>" );
+			outputWriter.println( "<table border=0><tr><td>" );
+			outputWriter.println( "<tr><td><img src='" + gatewayDistributionChartUrlBuilder.toString() + "' width=" + CHARTS_WIDTH + " height=" + CHARTS_HEIGHT + " title='Hacker distribution between gateways'></img>" );
+			outputWriter.println( "<td><table border=1><tr><th>Gatway:<th>Hackers:" );
+			// Add gateways with no hackers
+			for ( int gateway = 0; gateway < GATEWAYS.length; gateway++ ) {
+				boolean gatewayIncluded = false;
+				for ( final int[] gatewayDistribution : gatewayDistributionList )
+					if ( gatewayDistribution[ 0 ] == gateway ) {
+						gatewayIncluded = true;
+						break;
+					}
+				if ( !gatewayIncluded )
+					gatewayDistributionList.add( new int[] { gateway, 0 } );
+			}
+			outputWriter.println( "<tr class='gatUn'><td>Total:<td align=right>" + hackersCount );
+			for ( final int[] gatewayDistribution : gatewayDistributionList )
+				outputWriter.println( "<tr class='gat" + ( gatewayDistribution[ 0 ] < GATEWAY_STYLES.length ? gatewayDistribution[ 0 ] : "Un" ) + "'><td>" + GATEWAYS[ gatewayDistribution[ 0 ] ] + "<td align=right>" + gatewayDistribution[ 1 ] );
+			outputWriter.println( "</table></table>" );
+			outputWriter.flush();
+			
+			outputWriter.println( "<h3>Monthly reports</h3>" );
+			outputWriter.println( "<table border=0><tr><td>" );
+			outputWriter.println( "<tr><td><img src='" + monthlyReportsChartUrlBuilder.toString() + "' width=" + CHARTS_WIDTH + " height=" + CHARTS_HEIGHT + " title='Monthly reports'></img>" );
+			outputWriter.println( "<td><table border=1><tr><th>Month:<th>Reports:" );
+			Collections.reverse( monthlyReportsList );
+			monthlyReportsList.add( 0, new Object[] { "Total:", reportsCount} );
+			for ( final Object[] monthlyReports : monthlyReportsList )
+				outputWriter.println( "<tr><td>" + monthlyReports[ 0 ] + "<td align=right>" + monthlyReports[ 1 ] );
+			outputWriter.println( "</table></table>" );
+			
+			// Footer section
+			outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></p>" );
+			outputWriter.println( "</center></body></html>" );
+			
+			outputWriter.flush();
+		} catch ( final IOException ie ) {
+			ie.printStackTrace();
+		} catch ( final SQLException se ) {
+			se.printStackTrace();
+			final String errorMessage = "<p>Sorry, the server has encountered an error, we cannot fulfill your request! We apologize.</p>";
+			if ( outputWriter != null )
+				outputWriter.println( errorMessage );
+			else
+				sendBackErrorMessage( response, errorMessage );
+		}
+		finally {
+			if ( resultSet != null )
+				try { resultSet.close(); } catch ( final SQLException se ) {}
+			if ( statement != null )
+				try { statement.close(); } catch ( final SQLException se ) {}
+			if ( connection != null )
+				try { connection.close(); } catch ( final SQLException se ) {}
+			
+			if ( outputWriter != null )
+				outputWriter.close();
+		}
 	}
 	
 	/**

@@ -25,11 +25,13 @@ public class ServerApiConsts {
 	public static final String REQUEST_PARAMETER_FILTERS_PRESENT    = "fpr";
 	
 	/** List hackers operation value.            */
-	public static final String OPERATION_LIST   = "lst";
+	public static final String OPERATION_LIST       = "lst";
 	/** Check authorization key operation value. */
-	public static final String OPERATION_CHECK  = "chk";
+	public static final String OPERATION_CHECK      = "chk";
 	/** Report hackers operation value.          */
-	public static final String OPERATION_REPORT = "rep";
+	public static final String OPERATION_REPORT     = "rep";
+	/** Report hackers operation value.          */
+	public static final String OPERATION_STATISTICS = "sta";
 	
 	/** Message to be sent back to the client if his/her report was accepted and processed. */
 	public static final String REPORT_ACCEPTED_MESSAGE = "OK";
