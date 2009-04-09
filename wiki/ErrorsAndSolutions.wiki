@@ -19,7 +19,7 @@ Or on linux platform:
  * `BWHFAgent.sh` (you might need to set executable privilige first)
 
 ==I have Java installed, still can't start==
-BWHF Agent requires the 32 bit version of java. If you installed the 64 version, please install the 32 bit version too, and edit the starter scripts to use the 32 bit version's java.exe and javaw.exe.
+BWHF Agent requires the 32 bit version of java. If you installed the 64 version, please install the 32 bit version too, and if neccessary, edit the starter scripts to use the 32 bit version's java.exe and javaw.exe.
 
 Another cause can be that even if you might have java installed in your system, the java.exe and the javaw.exe commands are not available because their folder is not in the execution path.
 
