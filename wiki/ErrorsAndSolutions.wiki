@@ -5,7 +5,7 @@
 <wiki:toc max_depth="2" />
 
 ==Can't start BWHF Agent?==
-First check if you have Java installed in your system. BWHF Agent requires thew 32-bit version of Java 6.0 or higher. Type in a command window to check what version and if you have Java installed:
+First check if you have Java installed in your system. BWHF Agent requires the 32-bit version of Java 6.0 or higher. Type in a command window to check what version and if you have Java installed:
 {{{
 java -version
 }}}
