@@ -19,7 +19,7 @@ Search can be executed by specifying the set of replays to search. The currently
 There are several buttons to define the source replays of search:
  * *Select files* button: you can select multiple replay files to search.
  * *Select folders to search recursively* button: you can select folders of replays to search recursively.
- * *Repeat search* button: the search will be repeated on the same replays as the last search but with the newly specified or changed filters of course.
+ * *Repeat search* button: the search will be repeated on the same replays as the last search but with the newly specified or modified filters of course.
  * *Search in previous results (narrows previous result)* button: the search will be executed on the result of the last search. You can filter previous results with this button.
 
 ==Search results==
