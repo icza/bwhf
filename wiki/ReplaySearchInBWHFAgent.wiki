@@ -7,7 +7,7 @@
 The Replay search tab in BWHF Agent let's you search replays by various conditions. If you don't touch any filters, the search returns all the input replays. If you specify some conditions, they will be in logical _AND_ connection.
 
 ==Replay filter fields==
-There are different types of filter fields. When there are some predefined values, you will see them listed with checkboxes. You can check any that you're interested in. They will be in logical connection: if any of the selected values apply to a replay, the replay will be included in the results.
+There are different types of filter fields. When there are some predefined values, you will see them listed with checkboxes. You can check any that you're interested in. They will be in logical _OR_ connection: if any of the selected values apply to a replay, the replay will be included in the results.
 
 Values entered to text fields are case insensitive and will be trimmed: redundant spaces will be removed from the beginning and from the end of the entered values. Text fields have an _Exact match_ option: if this is selected, the entered value must match exactly the replay property they apply to, else the entered value may be a substring. If exact match is not used, you can enter either a single value or a comma separated value list. Text fields also have a _Regexp_ option: if this is checked, the entered value will be interpreted as a _regular expression_. With regular expression you can define _patterns_ which can match lot of values. You can see some examples below on this page.
 
