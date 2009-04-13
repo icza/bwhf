@@ -14,7 +14,7 @@ Values entered to text fields are case insensitive and will be trimmed: redundan
 There are some fields which can have values from a wide range. In these cases the filer is an interval filter: you can define the minimal and the maximal accepted values. You are allowed to only set one of them, and then the other end of the interval will not be limited. When the interval is limited to some valid values, you will see a combo box with the valid values, and you can select the one you wish to set as the limit.
 
 ==Search execution buttons==
-Search can be executed by specifying the set of replay to search. The currently running search can be terminated at any time with the *Stop current search* button.
+Search can be executed by specifying the set of replays to search. The currently running search can be terminated at any time with the *Stop current search* button.
 
 There are several buttons to define the source replays of search:
  * *Select files* button: you can select multiple replay files to search.
