@@ -23,7 +23,7 @@ There are several buttons to define the source replays of search:
  * *Search in previous results (narrows previous result)* button: the search will be executed on the result of the last search. You can filter previous results with this button.
 
 ==Search results==
-The number of searched replays and the number of replays matching the filters is displayed above the result table. The result table lists every replay matching the filters. You can select any of the replays, and you can perform various operations on them with the buttons being on the right of the table. If you double click on a replay, it will be shown on the Charts tab.
+The number of searched replays and the number of replays matching the filters are displayed above the result table. The result table lists every replay matching the filters. You can select any of the replays, and you can perform various operations on them with the buttons being on the right of the table. If you double click on a replay, it will be shown on the Charts tab.
 
 ==Regular expression examples==
 Regular expression is a powerful tool to simplify complex searches. If you want learn more about regular expression, you can google it or check the following links: [http://en.wikipedia.org/wiki/Regular_expression Regular expressions on wikipedia], [http://java.sun.com/javase/6/docs/api/java/util/regex/Pattern.html#sum Java regexp syntax]
