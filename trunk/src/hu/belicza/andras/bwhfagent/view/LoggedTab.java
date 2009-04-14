@@ -77,6 +77,13 @@ public abstract class LoggedTab extends Tab {
 			}
 		} );
 		controlPanel.add( clearLogButton );
+		final JButton viewEntireLogButton = new JButton( "View entire log" );
+		viewEntireLogButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				Utils.editFile( logFileName );
+			}
+		} );
+		controlPanel.add( viewEntireLogButton );
 		logPanel.add( controlPanel, BorderLayout.SOUTH );
 		
 		logPanel.setBorder( BorderFactory.createTitledBorder( "This content is also saved to file '" + logFileName + "'." ) );

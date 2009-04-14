@@ -61,7 +61,7 @@ public class AutoscanTab extends LoggedTab {
 	/** Checkbox to enable/disable reporting hackers.                           */
 	private   final JCheckBox  reportHackersCheckBox          = new JCheckBox( "Report hackers to a central hacker database with Battle.net gateway:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPORT_HACKERS ) ) );
 	/** Combobox to select the gateway of the user.                             */
-	protected final JComboBox gatewayComboBox                 = new JComboBox();
+	protected final JComboBox  gatewayComboBox                = new JComboBox();
 	
 	/** Authorization key to report hackers.      */
 	private String           authorizationKey = Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTHORIZATION_KEY );
@@ -87,9 +87,7 @@ public class AutoscanTab extends LoggedTab {
 		startAutoscanner();
 	}
 	
-	/**
-	 * Builds the GUI of the tab.
-	 */
+	@Override
 	protected void buildGUI() {
 		final GridBagLayout      gridBagLayout = new GridBagLayout();
 		final GridBagConstraints constraints   = new GridBagConstraints();
@@ -140,7 +138,7 @@ public class AutoscanTab extends LoggedTab {
 			@Override
 			public String getDescription() {
 				return "Wave audio files (*.wav)";
-			} 
+			}
 		}, new String[][] { new String[] { "*.wav", "*.*" }, new String[] { "Wave audio files (*.wav)", "All files (*.*)" } }, new Runnable() {
 			public void run() {
 				// If one of our sound file was selected, we replace its path to be relative so it will work if the product is copied/moved to another directory or environment

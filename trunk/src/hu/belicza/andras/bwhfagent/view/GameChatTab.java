@@ -45,9 +45,7 @@ public class GameChatTab extends ProgressLoggedTab {
 		buildGUI();
 	}
 	
-	/**
-	 * Builds the GUI of the tab.
-	 */
+	@Override
 	protected void buildGUI() {
 		final JPanel panel = Utils.createWrapperPanel();
 		displayFromLastReplayButton.setMnemonic( 'l' );

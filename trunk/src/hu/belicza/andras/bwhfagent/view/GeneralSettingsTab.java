@@ -47,12 +47,14 @@ public class GeneralSettingsTab extends Tab {
 	private   final JButton    checkUpdatesButton                 = new JButton( CHECK_UPDATES_BUTTON_TEXT );
 	/** Starcraft directory.                                                 */
 	protected final JTextField starcraftFolderTextField           = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ) );
+	/** Start folder when selecting replay flies.                            */
+	protected final JTextField replayStartFolderTextField         = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPLAY_START_FOLDER ) );
+	/** Program to view/edit files.                                          */
+	protected final JTextField editorProgramTextField             = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_EDITOR_PROGRAM ) );
 	/** Checkbox to tell whether check for updates automatically on startup. */
 	protected final JCheckBox  skipLatterActionsOfHackersCheckBox = new JCheckBox( "During a replay scan if a player is found hacking, skip scanning his latter actions", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS ) ) );
 	/** Slider to set the sound volume.                                      */
 	protected final JSlider    soundVolumeSlider                  = new JSlider( 0, 100, Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_SOUND_VOLUME ) ) );
-	/** Start folder when selecting replay flies.                            */
-	protected final JTextField replayStartFolderTextField         = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPLAY_START_FOLDER ) );
 	/** Checkbox to enable system tray icon.                                 */
 	protected final JCheckBox  enableSystemTrayIconCheckBox       = new JCheckBox( "Enable system tray icon", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ENABLE_SYSTEM_TRAY_ICON ) ) );
 	/** Checkbox to always minimize to tray.                                 */
@@ -96,11 +98,13 @@ public class GeneralSettingsTab extends Tab {
 		final GridBagLayout      gridBagLayout = new GridBagLayout();
 		final GridBagConstraints constraints   = new GridBagConstraints();
 		panel = new JPanel( gridBagLayout );
-		panel.setBorder( BorderFactory.createTitledBorder( "Folder settings:" ) );
+		panel.setBorder( BorderFactory.createTitledBorder( "Folder and editor settings:" ) );
+		
 		JLabel  label;
 		JButton button;
 		
 		constraints.fill = GridBagConstraints.BOTH;
+		
 		constraints.gridwidth = 1;
 		label = new JLabel( "Starcraft directory:", JLabel.WEST );
 		gridBagLayout.setConstraints( label, constraints );
@@ -149,6 +153,18 @@ public class GeneralSettingsTab extends Tab {
 		} );
 		gridBagLayout.setConstraints( button, constraints );
 		panel.add( button );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Program to view/edit files:", JLabel.WEST );
+		gridBagLayout.setConstraints( label, constraints );
+		panel.add( label );
+		gridBagLayout.setConstraints( editorProgramTextField, constraints );
+		panel.add( editorProgramTextField );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		button = Utils.createFileChooserButton( getContent(), editorProgramTextField, JFileChooser.FILES_ONLY, null, null, null );
+		gridBagLayout.setConstraints( button, constraints );
+		panel.add( button );
+		
 		final Box contentBox2 = Box.createVerticalBox();
 		contentBox2.add( panel );
 		
@@ -256,9 +272,10 @@ public class GeneralSettingsTab extends Tab {
 	public void assignUsedProperties() {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_CHECK_UPDATES_ON_STARTUP      , Boolean.toString( checkUpdatesOnStartupCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_STARCRAFT_FOLDER              , starcraftFolderTextField.getText() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_REPLAY_START_FOLDER           , replayStartFolderTextField.getText() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_EDITOR_PROGRAM                , editorProgramTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, Boolean.toString( skipLatterActionsOfHackersCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SOUND_VOLUME                  , Integer.toString( soundVolumeSlider.getValue() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_REPLAY_START_FOLDER           , replayStartFolderTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_ENABLE_SYSTEM_TRAY_ICON       , Boolean.toString( enableSystemTrayIconCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_ALWAYS_MINIMIZE_TO_TRAY       , Boolean.toString( alwaysMinimizeToTrayCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_START_AGENT_MINIMIZED_TO_TRAY , Boolean.toString( startAgentMinimizedToTrayCheckBox.isSelected() ) );

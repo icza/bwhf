@@ -106,9 +106,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 		flagHackerRepsPositionComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS_POSITION ) ) );
 	}
 	
-	/**
-	 * Builds the GUI of the tab.
-	 */
+	@Override
 	protected void buildGUI() {
 		final JButton openPreviousReportButton = new JButton( "Open a previous HTML report" );
 		openPreviousReportButton.setMnemonic( 'h' );
