@@ -117,7 +117,7 @@ public class MainFrame extends JFrame {
 		manualScanTab      = new ManualScanTab();
 		chartsTab          = new ChartsTab();
 		gameChatTab        = new GameChatTab();
-		tabs = new Tab[] { autoscanTab, manualScanTab, chartsTab, new ReplaySearchTab(), gameChatTab, new PcxConverterTab(), generalSettingsTab, new AboutTab() };
+		tabs = new Tab[] { autoscanTab, manualScanTab, new PlayerCheckerTab(), chartsTab, new ReplaySearchTab(), gameChatTab, new PcxConverterTab(), generalSettingsTab, new AboutTab() };
 		
 		buildGUI();
 		

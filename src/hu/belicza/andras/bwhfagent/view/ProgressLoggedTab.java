@@ -22,9 +22,7 @@ public abstract class ProgressLoggedTab extends LoggedTab {
 		super( title, logFileName );
 	}
 	
-	/**
-	 * Builds the GUI of the panel.
-	 */
+	@Override
 	protected void buildGUI() {
 		progressBar.setMaximumSize( Utils.getMaxDimension() );
 		contentBox.add( progressBar );

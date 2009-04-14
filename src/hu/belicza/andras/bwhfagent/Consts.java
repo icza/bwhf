@@ -135,6 +135,18 @@ public class Consts {
 	public static final String PROPERTY_STRATEGY_DISPLAY_LEVELS        = "strategyDisplayLevels";
 	/** Overall APM chart detail level property. */
 	public static final String PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL = "overallApmChartDetailLevel";
+	/** Player checker enabled property.         */
+	public static final String PROPERTY_PLAYER_CHECKER_ENABLED         = "playerCheckerEnabled";
+	/** Hacker list update interval property.    */
+	public static final String PROPERTY_HACKER_LIST_UPDATE_INTERVAL    = "hackerListUpdateInterval";
+	/** Delete game lobby screenshots property.  */
+	public static final String PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS  = "deleteGameLobbyScreenshots";
+	/** Include extra player list property.      */
+	public static final String PROPERTY_INCLUDE_EXTRA_PLAYER_LIST      = "includeExtraPlayerList";
+	/** Extra player list file property.         */
+	public static final String PROPERTY_EXTRA_PLAYER_LIST_FILE         = "extraPlayerListFile";
+	/** Editor program property.                 */
+	public static final String PROPERTY_EDITOR_PROGRAM                 = "editorProgram";
 	
 	/** Properties holding the default settings. */
 	public static final Properties DEFAULT_SETTINGS_PROPERTIES = new Properties();
@@ -178,6 +190,12 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HIDE_WORKER_UNITS             , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_STRATEGY_DISPLAY_LEVELS       , "4" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL, "7" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAYER_CHECKER_ENABLED        , "false" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HACKER_LIST_UPDATE_INTERVAL   , "3" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_INCLUDE_EXTRA_PLAYER_LIST     , "false" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_EXTRA_PLAYER_LIST_FILE        , "" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_EDITOR_PROGRAM                , "notepad.exe" );
 	}
 	
 }
