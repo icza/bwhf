@@ -45,6 +45,8 @@ public class Consts {
 	public static final String UTILS_DIRECTORY_NAME             = "utils";
 	/** Name of directory containing the HTML summary reports of manual scans. */
 	public static final String HTML_REPORT_DIRECTORY_NAME       = "HTML Reports";
+	/** Name of directory containing cache of the hacker list.                 */
+	public static final String HACKER_LIST_DIRECTORY_NAME       = "Hacker list cache";
 	
 	/** Labels for the possible values of flag hacker replays position. */
 	public static final String[] FLAG_HACKER_REPS_POSITION_LABELS = new String[] { "beginning", "end" };

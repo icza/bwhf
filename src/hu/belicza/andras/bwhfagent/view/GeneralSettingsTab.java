@@ -212,6 +212,9 @@ public class GeneralSettingsTab extends Tab {
 	 * Checks for updates.
 	 */
 	private void checkUpdates() {
+		if ( !checkUpdatesButton.isEnabled() )
+			return;
+		
 		checkUpdatesButton.setEnabled( false );
 		
 		checkUpdatesButton.setText( "Checking..." );

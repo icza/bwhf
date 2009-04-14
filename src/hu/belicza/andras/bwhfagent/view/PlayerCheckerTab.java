@@ -1,8 +1,15 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhfagent.Consts;
+import hu.belicza.andras.hackerdb.ServerApiConsts;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
+import java.net.URL;
+import java.util.Date;
 
 import swingwt.awt.BorderLayout;
 import swingwt.awt.GridBagConstraints;
@@ -27,6 +34,18 @@ import swingwtx.swing.filechooser.FileFilter;
  */
 public class PlayerCheckerTab extends LoggedTab {
 	
+	/** Text of the update now button.           */
+	private static final String UPDATE_NOW_BUTTON_TEXT      = "Update now";
+	/** Name of the bwhf hacker list cache file. */
+	private static final String HACKER_LIST_CACHE_FILE_NAME = "BWHF_hacker_list_cache.txt";
+	/** THe hacker list directory.               */
+	private static final File HACKER_LIST_DIRECTORY         = new File( Consts.HACKER_LIST_DIRECTORY_NAME );
+	/** The hacker list cache file.              */
+	private static final File   HACKER_LIST_CACHE_FILE      = new File( Consts.HACKER_LIST_DIRECTORY_NAME, HACKER_LIST_CACHE_FILE_NAME );
+	
+	/** Reference to the settings panel. */
+	private JPanel settingsPanel;
+	
 	/** Checkbox to enable/disable the autoscan.                  */
 	private final JCheckBox  playerCheckerEnabledCheckBox       = new JCheckBox( "Enable checking players in the game lobby when pressing the 'Print Screen' key", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_PLAYER_CHECKER_ENABLED ) ) );
 	/** Combo box to set the hacker list update interval.         */
@@ -34,7 +53,7 @@ public class PlayerCheckerTab extends LoggedTab {
 	/** Label to display the last update time of the hacker list. */
 	private final JLabel     hackerListLastUpdatedLabel         = new JLabel();
 	/** Button to update hacker list now.                         */
-	private final JButton    updateNowButton                    = new JButton( "Update now" );
+	private final JButton    updateNowButton                    = new JButton( UPDATE_NOW_BUTTON_TEXT );
 	/** Checkbox to enable/disable the autoscan.                  */
 	private final JCheckBox  deleteGameLobbyScreenshotsCheckBox = new JCheckBox( "Delete game lobby screenshots after checking players", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS ) ) );
 	/** Checkbox to include extra player list.                    */
@@ -51,13 +70,15 @@ public class PlayerCheckerTab extends LoggedTab {
 		buildGUI();
 		
 		hackerListUpdateIntervalComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_HACKER_LIST_UPDATE_INTERVAL ) ) );
+		
+		refreshLastUpdatedLabel();
 	}
 	
 	@Override
 	protected void buildGUI() {
 		final GridBagLayout      gridBagLayout = new GridBagLayout();
 		final GridBagConstraints constraints   = new GridBagConstraints();
-		final JPanel             settingsPanel = new JPanel( gridBagLayout );
+		settingsPanel = new JPanel( gridBagLayout );
 		settingsPanel.setBorder( BorderFactory.createTitledBorder( "Settings:" ) );
 		
 		JPanel  wrapperPanel;
@@ -87,12 +108,16 @@ public class PlayerCheckerTab extends LoggedTab {
 		label = new JLabel( "Hacker list last updated at:" );
 		gridBagLayout.setConstraints( label, constraints );
 		settingsPanel.add( label );
-		hackerListLastUpdatedLabel.setText( "2009-04-14 08:12:34" );
 		gridBagLayout.setConstraints( hackerListLastUpdatedLabel, constraints );
 		settingsPanel.add( hackerListLastUpdatedLabel );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		// In SwingWT Button text cannot be changed if a mnemonic has been assigned
 		//updateNowButton.setMnemonic( ( updateNowButton.getText().charAt( 0 ) ) );
+		updateNowButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				updateHackerList();
+			}
+		} );
 		gridBagLayout.setConstraints( updateNowButton, constraints );
 		settingsPanel.add( updateNowButton );
 		
@@ -123,6 +148,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		button = new JButton( "Reload" );
 		button.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
+				reloadLists();
 			}
 		} );
 		wrapperPanel.add( button, BorderLayout.CENTER );
@@ -143,6 +169,97 @@ public class PlayerCheckerTab extends LoggedTab {
 		contentBox.add( Utils.wrapInPanel( settingsPanel ) );
 		
 		super.buildGUI();
+	}
+	
+	/**
+	 * Updates the local cache of the hacker list.
+	 */
+	private void updateHackerList() {
+		if ( !updateNowButton.isEnabled() )
+			return;
+		
+		updateNowButton.setEnabled( false );
+		
+		updateNowButton.setText( "Updating..." );
+		settingsPanel.getParent().validate();
+		
+		new NormalThread() {
+			@Override
+			public void run() {
+				BufferedReader input  = null;
+				PrintWriter    output = null;
+				try {
+					logMessage( "\n", false ); // Prints 2 empty lines
+					logMessage( "Updating hacker list..." );
+					
+					if ( HACKER_LIST_DIRECTORY.exists() && HACKER_LIST_DIRECTORY.isFile() ) {
+						logMessage( "Error: hacker list cache directory exists and is a file: " + HACKER_LIST_DIRECTORY.getAbsolutePath() + " (You have to delete it first!)" );
+						throw new Exception();
+					}
+					
+					if ( !HACKER_LIST_DIRECTORY.exists() && !HACKER_LIST_DIRECTORY.mkdirs() ) {
+						logMessage( "Error: could not create hacker list cache directory: " + HACKER_LIST_DIRECTORY.getAbsolutePath() );
+						throw new Exception();
+					}
+					
+					input = new BufferedReader( new InputStreamReader( new URL( Consts.BWHF_HACKER_DATA_BASE_SERVER_URL + "?" + ServerApiConsts.REQUEST_PARAMETER_NAME_OPERATION + "=" + ServerApiConsts.OPERATION_DOWNLOAD ).openStream() ) );
+					final File tempCacheFile = new File( Consts.HACKER_LIST_DIRECTORY_NAME, HACKER_LIST_CACHE_FILE_NAME + ".dl" );
+					output = new PrintWriter( tempCacheFile );
+					
+					String line;
+					while ( ( line = input.readLine() ) != null )
+						output.println( line );
+					output.flush();
+					output.close();
+					
+					if ( HACKER_LIST_CACHE_FILE.exists() && !HACKER_LIST_CACHE_FILE.delete() ) {
+						logMessage( "Error: could not delete old hacker list cache file: " + HACKER_LIST_CACHE_FILE.getAbsolutePath() );
+						throw new Exception();
+					}
+					
+					if ( !tempCacheFile.renameTo( HACKER_LIST_CACHE_FILE ) ) {
+						logMessage( "Error: could not rename '" + tempCacheFile.getAbsolutePath() + "' to '" + HACKER_LIST_CACHE_FILE.getAbsolutePath() + "'" );
+						throw new Exception();
+					}
+					
+					refreshLastUpdatedLabel();
+					
+					logMessage( "Update succeeded." );
+					
+					updateNowButton.setText( UPDATE_NOW_BUTTON_TEXT );
+					
+					reloadLists();
+				}
+				catch ( final Exception e ) {
+					logMessage( "Update failed!" );
+					e.printStackTrace();
+					updateNowButton.setText( UPDATE_NOW_BUTTON_TEXT + " (update failed!)" );
+				}
+				finally {
+					if ( output != null )
+						output.close();
+					if ( input != null )
+						try { input.close(); } catch ( final IOException ie ) { ie.printStackTrace(); }
+					updateNowButton.setEnabled( true );
+					settingsPanel.getParent().validate();
+				}
+			}
+		}.start();
+	}
+	
+	/**
+	 * Reloads player lists from files.
+	 */
+	private synchronized void reloadLists() {
+		refreshLastUpdatedLabel();
+	}
+	
+	/**
+	 * Refreshes the last updated label.
+	 */
+	private void refreshLastUpdatedLabel() {
+		final long lastUpdated = HACKER_LIST_CACHE_FILE.lastModified();
+		hackerListLastUpdatedLabel.setText( lastUpdated > 0l ? DATE_FORMAT.format( new Date( lastUpdated ) ) : "&lt;never&gt;" );
 	}
 	
 	@Override
