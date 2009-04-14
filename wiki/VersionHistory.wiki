@@ -6,7 +6,7 @@
 
 ----
 ===Features and changes in the upcoming new release===
- * A new *Player checker* tab where you can enable checking players BEFORE the game in the game lobby. If players in the game lobby has already been reported as hackers, you will get an alert sound indicating the hackers you're in the same game with. This check is implemented in a way that BWHF Agent *still remains legit*, BWHF Agent obtains the player names WITHOUT reading Starcraft's memory!
+ * A new *Player checker* tab where you can enable checking players BEFORE the game in the game lobby. If players in the game lobby has already been reported as hackers, you will get an alert sound indicating the hackers you're in the same game with. This check is implemented in a way that BWHF Agent *still remains legit*, BWHF Agent obtains the player names WITHOUT reading Starcraft's memory! New hacker list is automatically downloaded in an interval of your choice or at will at anytime.
 
 ----
 ===2.00 2009-04-01===
