@@ -187,6 +187,10 @@ public class HackerDbServlet extends HttpServlet {
 				
 				serveStatistics( response );
 				
+			} else if ( operation.equals( OPERATION_DOWNLOAD ) ) {
+				
+				serveDownload( request, response );
+				
 			}
 		}
 		catch ( final BadRequestException bre ) {
@@ -687,6 +691,44 @@ public class HackerDbServlet extends HttpServlet {
 			
 			if ( outputWriter != null )
 				outputWriter.close();
+		}
+	}
+	
+	/**
+	 * Serves the download of the hacker list.
+	 * @param request  the http request
+	 * @param response the http response
+	 */
+	private void serveDownload( final HttpServletRequest request, final HttpServletResponse response ) {
+		setNoCache( response );
+		response.setContentType( "text/plain" );
+		
+		Connection connection = null;
+		Statement  statement  = null;
+		ResultSet  resultSet  = null;
+		
+		PrintWriter outputWriter = null;
+		try {
+			connection = dataSource.getConnection();
+			
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery( "SELECT DISTINCT gateway, name from hacker JOIN report on report.hacker=hacker.id JOIN key on report.key=key.id WHERE key.revocated=FALSE" );
+			outputWriter = response.getWriter();
+			
+			while ( resultSet.next() )
+				outputWriter.println( resultSet.getInt( 1 ) + "," + resultSet.getString( 2 ) );
+			
+			outputWriter.flush();
+		}
+		catch ( final Exception e ) {
+		}
+		finally {
+			if ( resultSet != null )
+				try { resultSet.close(); } catch ( final SQLException se ) {}
+			if ( statement != null )
+				try { statement.close(); } catch ( final SQLException se ) {}
+			if ( connection != null )
+				try { connection.close(); } catch ( final SQLException se ) {}
 		}
 	}
 	
