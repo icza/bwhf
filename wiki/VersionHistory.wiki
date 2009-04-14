@@ -5,6 +5,10 @@
 <wiki:toc max_depth="3" />
 
 ----
+===Features and changes in the upcoming new release===
+ * A new *Player checker* tab where you can enable checking players BEFORE the game in the game lobby. If players in the game lobby has already been reported as hackers, you will get an alert sound indicating the hackers you're in the same game with. This check is implemented in a way that BWHF Agent *still remains legit*, BWHF Agent obtains the player names WITHOUT reading Starcraft's memory!
+
+----
 ===2.00 2009-04-01===
  * New *System Tray* icon for BWHF Agent. You can control BWHF Agent through the system tray: start Starcraft, change gateway, operate on !LastReplay.rep (like show on charts, display game chat, scan for hacks), hide/restore the main window, disable the tray icon, close the agent.
  * A new *Replay search* tab. You can search replays by any of the header fields (including game engine, game name, creator name, map name, player name, player race, _player color_, duration, save date, _version_, map size, _game type_). Text fields can be filtered as substrings or as exact match. You may enter comma separated lists, or you can even use _regular expressions_ to filter. Search result can be searched again (narrowing the results), can be scanned, shown on charts, copied, moved, deleted, or game chat can be extracted from them.
