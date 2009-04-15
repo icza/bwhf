@@ -44,24 +44,10 @@ public class ManualScanTab extends ProgressLoggedTab {
 	
 	/** Log file name for autoscan.     */
 	private static final String LOG_FILE_NAME         = "manual_scan.log";
-	/** Replay file extension.          */
-	private static final String REPLAY_FILE_EXTENSION = ".rep";
 	/** HTML file extension.            */
 	private static final String HTML_FILE_EXTENSION   = ".html";
 	/** Appendable hacker reps postfix. */
 	private static final String HACKER_REPS_FLAG      = "hack";
-	
-	/** Replay file filter. */
-	public static final FileFilter SWING_REPLAY_FILE_FILTER = new FileFilter() {
-		@Override
-		public boolean accept( final File file ) {
-			return file.isDirectory() || file.getName().toLowerCase().endsWith( REPLAY_FILE_EXTENSION );
-		}
-		@Override
-		public String getDescription() {
-			return "Replay files (*.rep)";
-		}
-	};
 	
 	/** HTML file filter. */
 	public static final FileFilter HTML_FILE_FILTER = new FileFilter() {
@@ -142,7 +128,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 				// This is for SwingWT:
 				fileChooser.setExtensionFilters( new String[] { "*.rep", "*.*" }, new String[] { "Replay Files (*.rep)", "All files (*.*)" } );
 				// This is for Swing:
-				fileChooser.addChoosableFileFilter( SWING_REPLAY_FILE_FILTER ); 
+				fileChooser.addChoosableFileFilter( Utils.SWING_REPLAY_FILE_FILTER ); 
 				
 				fileChooser.setFileSelectionMode( event.getSource() == selectFoldersButton ? JFileChooser.DIRECTORIES_ONLY : JFileChooser.FILES_AND_DIRECTORIES );
 				fileChooser.setMultiSelectionEnabled( true );
@@ -302,7 +288,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 									}
 								}
 								if ( flagHackerRepsCheckBox.isSelected() && !isLastReplay ) {
-									final String replayName  = replayFile.getName().substring( 0, replayFile.getName().length() - REPLAY_FILE_EXTENSION.length() );
+									final String replayName  = replayFile.getName().substring( 0, replayFile.getName().length() - ".rep".length() );
 									String flaggedReplayName = null;
 									switch ( flagHackerRepsPositionComboBox.getSelectedIndex() ) {
 										case Consts.FLAG_HACKER_REPS_POSITION_BEGINNING :
@@ -315,21 +301,21 @@ public class ManualScanTab extends ProgressLoggedTab {
 											break;
 									}
 									if ( flaggedReplayName != null )
-										replayFile.renameTo( new File( replayFile.getParent(), flaggedReplayName + REPLAY_FILE_EXTENSION ) );
+										replayFile.renameTo( new File( replayFile.getParent(), flaggedReplayName + ".rep" ) );
 								}
 							}
 							else {
 								logMessage( "Found no hacks in " + replayFileAbsolutePath + "." );
 								
 								if ( cleanHackFlagCheckBox.isSelected() && !isLastReplay ) {
-									final String replayName  = replayFile.getName().substring( 0, replayFile.getName().length() - REPLAY_FILE_EXTENSION.length() );
+									final String replayName  = replayFile.getName().substring( 0, replayFile.getName().length() - ".rep".length() );
 									String cleanedReplayName = replayName;
 									if ( cleanedReplayName.startsWith( HACKER_REPS_FLAG + " - " ) )
 										cleanedReplayName = cleanedReplayName.substring( ( HACKER_REPS_FLAG + " - " ).length() );
 									if ( cleanedReplayName.endsWith( " - " + HACKER_REPS_FLAG ) )
 										cleanedReplayName = cleanedReplayName.substring( 0, cleanedReplayName.length() - ( " - " + HACKER_REPS_FLAG ).length() + 1 );
 									if ( replayName.length() != cleanedReplayName.length() )
-										replayFile.renameTo( new File( replayFile.getParent(), cleanedReplayName + REPLAY_FILE_EXTENSION ) );
+										replayFile.renameTo( new File( replayFile.getParent(), cleanedReplayName + ".rep" ) );
 								}
 							}
 						
@@ -374,7 +360,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 			
 			private final java.io.FileFilter IO_REPLAY_FILE_FILTER = new java.io.FileFilter() {
 				public boolean accept( final File pathname ) {
-					return SWING_REPLAY_FILE_FILTER.accept( pathname );
+					return Utils.SWING_REPLAY_FILE_FILTER.accept( pathname );
 				}
 			};
 			

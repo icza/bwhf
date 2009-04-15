@@ -5,11 +5,16 @@ import hu.belicza.andras.hackerdb.ServerApiConsts;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import swingwt.awt.BorderLayout;
 import swingwt.awt.GridBagConstraints;
@@ -24,7 +29,6 @@ import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JTextField;
-import swingwtx.swing.filechooser.FileFilter;
 
 /**
  * Player checker tab.<br>
@@ -54,12 +58,19 @@ public class PlayerCheckerTab extends LoggedTab {
 	private final JLabel     hackerListLastUpdatedLabel         = new JLabel();
 	/** Button to update hacker list now.                         */
 	private final JButton    updateNowButton                    = new JButton( UPDATE_NOW_BUTTON_TEXT );
+	/** Checkbox to include custom player list.                   */
+	private final JCheckBox  includeCustomPlayerListCheckBox    = new JCheckBox( "Include this custom player list:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST ) ) );
+	/** File of the custom player list.                           */
+	private final JTextField customPlayerListFileTextField      = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_CUSTOM_PLAYER_LIST_FILE ) );
+	/** Button to reload custom player list.                      */
+	private final JButton    reloadButton                       = new JButton( "Reload" );
 	/** Checkbox to enable/disable the autoscan.                  */
 	private final JCheckBox  deleteGameLobbyScreenshotsCheckBox = new JCheckBox( "Delete game lobby screenshots after checking players", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS ) ) );
-	/** Checkbox to include extra player list.                    */
-	private final JCheckBox  includeExtraPlayerListCheckBox     = new JCheckBox( "Include this extra player list:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS ) ) );
-	/** File of hte extra player list.                            */
-	private final JTextField extraPlayerListFileTextField       = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_EXTRA_PLAYER_LIST_FILE ) );
+	
+	/** BWHF hackers mapped to their gateways.   */
+	private final Map< Integer, Set< String > > gatewayBwhfHackerSetMap   = new HashMap< Integer, Set< String > >();
+	/** Custom players mapped to their gateways. */
+	private final Map< Integer, Set< String > > gatewayCustomPlayerSetMap = new HashMap< Integer, Set< String > >();
 	
 	/**
 	 * Creates a new PlayerCheckerTab.
@@ -72,6 +83,9 @@ public class PlayerCheckerTab extends LoggedTab {
 		hackerListUpdateIntervalComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_HACKER_LIST_UPDATE_INTERVAL ) ) );
 		
 		refreshLastUpdatedLabel();
+		
+		reloadPlayerList( HACKER_LIST_CACHE_FILE, gatewayBwhfHackerSetMap );
+		includeCustomPlayerListCheckBox.doClick();
 	}
 	
 	@Override
@@ -122,40 +136,37 @@ public class PlayerCheckerTab extends LoggedTab {
 		settingsPanel.add( updateNowButton );
 		
 		constraints.gridwidth = 1;
-		gridBagLayout.setConstraints( includeExtraPlayerListCheckBox, constraints );
-		settingsPanel.add( includeExtraPlayerListCheckBox );
-		gridBagLayout.setConstraints( extraPlayerListFileTextField, constraints );
-		settingsPanel.add( extraPlayerListFileTextField );
+		includeCustomPlayerListCheckBox.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				reloadButton.setEnabled( includeCustomPlayerListCheckBox.isSelected() );
+				if ( reloadButton.isEnabled() )
+					reloadButton.doClick();
+			}
+		} );
+		gridBagLayout.setConstraints( includeCustomPlayerListCheckBox, constraints );
+		settingsPanel.add( includeCustomPlayerListCheckBox );
+		gridBagLayout.setConstraints( customPlayerListFileTextField, constraints );
+		settingsPanel.add( customPlayerListFileTextField );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		wrapperPanel = new JPanel( new BorderLayout() );
-		button = Utils.createFileChooserButton( getContent(), extraPlayerListFileTextField, JFileChooser.FILES_ONLY, new FileFilter() {
-			@Override
-			public boolean accept( final File file ) {
-				return file.isDirectory() || file.getName().toLowerCase().endsWith( ".txt" );
-			}
-			@Override
-			public String getDescription() {
-				return "Text files (*.txt)";
-			}
-		}, new String[][] { new String[] { "*.txt", "*.*" }, new String[] { "Text files (*.txt)", "All files (*.*)" } }, new Runnable() {
+		button = Utils.createFileChooserButton( getContent(), customPlayerListFileTextField, JFileChooser.FILES_ONLY, Utils.SWING_TEXT_FILE_FILTER, new String[][] { new String[] { "*.txt", "*.*" }, new String[] { "Text files (*.txt)", "All files (*.*)" } }, new Runnable() {
 			public void run() {
-				final File selectedFile = new File( extraPlayerListFileTextField.getText() );
+				final File selectedFile = new File( customPlayerListFileTextField.getText() );
 				if ( selectedFile.getAbsolutePath().equals( new File( Consts.SOUNDS_DIRECTORY_NAME + "/" + selectedFile.getName() ).getAbsolutePath() ) )
-					extraPlayerListFileTextField.setText( Consts.SOUNDS_DIRECTORY_NAME + "/" + selectedFile.getName() );
+					customPlayerListFileTextField.setText( Consts.SOUNDS_DIRECTORY_NAME + "/" + selectedFile.getName() );
 			}
 		} );
 		wrapperPanel.add( button, BorderLayout.WEST );
-		button = new JButton( "Reload" );
-		button.addActionListener( new ActionListener() {
+		reloadButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				reloadLists();
+				reloadPlayerList( new File( customPlayerListFileTextField.getText() ), gatewayCustomPlayerSetMap );
 			}
 		} );
-		wrapperPanel.add( button, BorderLayout.CENTER );
+		wrapperPanel.add( reloadButton, BorderLayout.CENTER );
 		button = new JButton( "Edit" );
 		button.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				Utils.editFile( extraPlayerListFileTextField.getText() );
+				Utils.editFile( customPlayerListFileTextField.getText() );
 			}
 		} );
 		wrapperPanel.add( button, BorderLayout.EAST );
@@ -228,7 +239,7 @@ public class PlayerCheckerTab extends LoggedTab {
 					
 					updateNowButton.setText( UPDATE_NOW_BUTTON_TEXT );
 					
-					reloadLists();
+					reloadPlayerList( HACKER_LIST_CACHE_FILE, gatewayBwhfHackerSetMap );
 				}
 				catch ( final Exception e ) {
 					logMessage( "Update failed!" );
@@ -248,10 +259,59 @@ public class PlayerCheckerTab extends LoggedTab {
 	}
 	
 	/**
-	 * Reloads player lists from files.
+	 * Reloads player lists from a file.
+	 * @param file               file containing the list
+	 * @param gatewayPlayerSetMap map to be stored the list to
 	 */
-	private synchronized void reloadLists() {
-		refreshLastUpdatedLabel();
+	private synchronized void reloadPlayerList( final File file, final Map< Integer, Set< String > > gatewayPlayerSetMap ) {
+		gatewayPlayerSetMap.clear();
+		
+		logMessage( "\n", false ); // Prints 2 empty lines
+		logMessage( "Reloading player list from file: '" + file.getAbsolutePath() + "'..." );
+		
+		BufferedReader input = null;
+		int skippedLinesCount = 0;
+		int playersCount      = 0;
+		try {
+			input = new BufferedReader( new FileReader( file ) );
+			
+			String line;
+			Integer lastGateway = null;
+			Set< String > playerSet = null;
+			while ( ( line = input.readLine() ) != null ) {
+				try {
+					final int commaIndex = line.indexOf( ',' );
+					if ( commaIndex == line.length() - 1 )
+						throw new Exception(); // Missing player name
+					
+					final Integer gateway  = Integer.valueOf( line.substring( 0, commaIndex ) );
+					
+					if ( !gateway.equals( lastGateway ) ) {
+						playerSet = gatewayPlayerSetMap.get( gateway );
+						if ( playerSet == null )
+							gatewayPlayerSetMap.put( gateway, playerSet = new HashSet< String >() );
+					}
+					
+					playerSet.add( line.substring( commaIndex + 1 ).toLowerCase() );
+					playersCount++;
+					lastGateway = gateway;
+				}
+				catch ( final Exception e ) {
+					skippedLinesCount++;
+				}
+			}
+			
+			if ( skippedLinesCount > 0 )
+				logMessage( "Skipped " + skippedLinesCount + " line" + ( skippedLinesCount == 1 ? "." : "s." ) );
+			logMessage( "Successfully reloaded " + playersCount + " player" + ( playersCount == 1 ? "" : "s" ) + " from file: " + file.getAbsolutePath() );
+		}
+		catch ( final Exception e ) {
+			logMessage( "Error: failed to load list from file: " + file.getAbsolutePath() );
+		}
+		finally {
+			if ( input != null )
+				try { input.close(); } catch ( final IOException ie ) { ie.printStackTrace(); }
+		}
 	}
 	
 	/**
@@ -266,8 +326,8 @@ public class PlayerCheckerTab extends LoggedTab {
 	public void assignUsedProperties() {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_PLAYER_CHECKER_ENABLED       , Boolean.toString( playerCheckerEnabledCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_HACKER_LIST_UPDATE_INTERVAL  , Integer.toString( hackerListUpdateIntervalComboBox.getSelectedIndex() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_INCLUDE_EXTRA_PLAYER_LIST    , Boolean.toString( includeExtraPlayerListCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_EXTRA_PLAYER_LIST_FILE       , extraPlayerListFileTextField.getText() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST   , Boolean.toString( includeCustomPlayerListCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_CUSTOM_PLAYER_LIST_FILE      , customPlayerListFileTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS, Boolean.toString( deleteGameLobbyScreenshotsCheckBox.isSelected() ) );
 	}
 	

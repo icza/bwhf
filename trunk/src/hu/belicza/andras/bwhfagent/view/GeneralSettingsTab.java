@@ -49,6 +49,8 @@ public class GeneralSettingsTab extends Tab {
 	protected final JTextField starcraftFolderTextField           = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ) );
 	/** Start folder when selecting replay flies.                            */
 	protected final JTextField replayStartFolderTextField         = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPLAY_START_FOLDER ) );
+	/** Default folder for replay lists.                                     */
+	protected final JTextField defaultReplayListsFolderTextField  = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_DEFAULT_REPLAY_LISTS_FOLDER ) );
 	/** Program to view/edit files.                                          */
 	protected final JTextField editorProgramTextField             = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_EDITOR_PROGRAM ) );
 	/** Checkbox to tell whether check for updates automatically on startup. */
@@ -69,6 +71,10 @@ public class GeneralSettingsTab extends Tab {
 	 */
 	public GeneralSettingsTab() {
 		super( "General settings" );
+		
+		final File defaultReplayListsFolder = new File( Consts.DEFAULT_REPLAY_LISTS_FOLDER );
+		if ( !defaultReplayListsFolder.exists() )
+			defaultReplayListsFolder.mkdir();
 		
 		buildGUI();
 		checkStarcraftFolder();
@@ -138,7 +144,6 @@ public class GeneralSettingsTab extends Tab {
 		panel.add( label );
 		gridBagLayout.setConstraints( replayStartFolderTextField, constraints );
 		panel.add( replayStartFolderTextField );
-		
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		button = Utils.createFileChooserButton( getContent(), replayStartFolderTextField, JFileChooser.DIRECTORIES_ONLY, null, null, new Runnable() {
 			public void run() {
@@ -149,6 +154,26 @@ public class GeneralSettingsTab extends Tab {
 					replayStartFolderTextField.setText( Consts.STARCRAFT_REPLAY_FOLDER );
 				else if ( selectedFolder.getParentFile() != null && selectedFolder.getParentFile().equals( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_REPLAY_FOLDER ) ) )
 					replayStartFolderTextField.setText( Consts.STARCRAFT_REPLAY_FOLDER + "/" + selectedFolder.getName() );
+			}
+		} );
+		gridBagLayout.setConstraints( button, constraints );
+		panel.add( button );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Default replay lists folder:", JLabel.LEFT );
+		gridBagLayout.setConstraints( label, constraints );
+		panel.add( label );
+		gridBagLayout.setConstraints( defaultReplayListsFolderTextField, constraints );
+		panel.add( defaultReplayListsFolderTextField );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		button = Utils.createFileChooserButton( getContent(), defaultReplayListsFolderTextField, JFileChooser.DIRECTORIES_ONLY, null, null, new Runnable() {
+			public void run() {
+				// If the default folder was selected, we replace its path to be relative so it will work if the product is copied/moved to another directory
+				final File selectedFolder = new File( defaultReplayListsFolderTextField.getText() );
+				System.out.println( selectedFolder.getAbsolutePath() );
+				System.out.println( new File( Consts.DEFAULT_REPLAY_LISTS_FOLDER ).getAbsolutePath() );
+				if ( selectedFolder.getAbsolutePath().equals( new File( Consts.DEFAULT_REPLAY_LISTS_FOLDER ).getAbsolutePath() ) )
+					defaultReplayListsFolderTextField.setText( Consts.DEFAULT_REPLAY_LISTS_FOLDER );
 			}
 		} );
 		gridBagLayout.setConstraints( button, constraints );
@@ -276,6 +301,7 @@ public class GeneralSettingsTab extends Tab {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_CHECK_UPDATES_ON_STARTUP      , Boolean.toString( checkUpdatesOnStartupCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_STARCRAFT_FOLDER              , starcraftFolderTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_REPLAY_START_FOLDER           , replayStartFolderTextField.getText() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_DEFAULT_REPLAY_LISTS_FOLDER   , defaultReplayListsFolderTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_EDITOR_PROGRAM                , editorProgramTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, Boolean.toString( skipLatterActionsOfHackersCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SOUND_VOLUME                  , Integer.toString( soundVolumeSlider.getValue() ) );
