@@ -54,6 +54,30 @@ public class Utils {
 	/** Size of buffer to use to copy files.      */
 	private static final int FILE_COPY_BUFFER_SIZE = 4*1024;
 	
+	/** Replay file filter. */
+	public static final FileFilter SWING_REPLAY_FILE_FILTER = new FileFilter() {
+		@Override
+		public boolean accept( final File file ) {
+			return file.isDirectory() || file.getName().toLowerCase().endsWith( ".rep" );
+		}
+		@Override
+		public String getDescription() {
+			return "Replay files (*.rep)";
+		}
+	};
+	
+	/** Replay file filter. */
+	public static final FileFilter SWING_TEXT_FILE_FILTER = new FileFilter() {
+		@Override
+		public boolean accept( final File file ) {
+			return file.isDirectory() || file.getName().toLowerCase().endsWith( ".txt" );
+		}
+		@Override
+		public String getDescription() {
+			return "Text files (*.txt)";
+		}
+	};
+	
 	/** Public reference to the settings properties. */
 	public static final Properties settingsProperties = new Properties( Consts.DEFAULT_SETTINGS_PROPERTIES );
 	static {

@@ -17,12 +17,17 @@ import hu.belicza.andras.bwhfagent.view.replayfilter.PlayerRaceReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.ReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.SaveTimeReplayFilter;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.StringTokenizer;
 
 import swingwt.awt.BorderLayout;
 import swingwt.awt.Color;
@@ -61,8 +66,15 @@ public class ReplaySearchTab extends Tab {
 	
 	/** Simple date format to format and parse replay save time. */
 	private static final DateFormat SIMPLE_DATE_FORMAT        = new SimpleDateFormat( "yyyy-MM-dd" );
-	/** Result table column names. */
+	/** Result table column names.                               */
 	private static final String[]   RESULT_TABLE_COLUMN_NAMES = new String[] { "Engine", "Map", "Duration", "Game type", "Players", "Saved on", "Game name", "Creator", "File" }; 
+	/** Index of the file name column in the result table.       */
+	private static final int        RESULT_TABLE_FILE_NAME_COLUMN_INDEX = RESULT_TABLE_COLUMN_NAMES.length - 1;
+	
+	/** Separator to use to separate values in the result list files. */
+	private static final char   RESULT_LIST_FILE_VALUE_SEPARATOR_CHAR   = '\t';
+	/** RESULT_LIST_FILE_VALUE_SEPARATOR_CHAR as a String.            */
+	private static final String RESULT_LIST_FILE_VALUE_SEPARATOR_STRING = Character.toString( RESULT_LIST_FILE_VALUE_SEPARATOR_CHAR );
 	
 	/** Background color to be used if a filter field contains syntax error. */
 	private static final Color      NORMAL_BACKGROUND_COLOR       = Color.WHITE;
@@ -119,9 +131,14 @@ public class ReplaySearchTab extends Tab {
 	/** Button to stop the current search. */
 	private final JButton stopSearchButton           = new JButton( "Stop current search" );
 	/** Button to repeat search on the same files. */
-	private final JButton repeatSearch               = new JButton( "Repeat search" );
+	private final JButton repeatSearchButton         = new JButton( "Repeat search" );
 	/** Button to run search on the same files. */
-	private final JButton searchPreviousResultButton = new JButton( "Search in previous result (narrows previous result)" );
+	private final JButton searchPreviousResultButton = new JButton( "Search in previous results (narrows previous results)" );
+	
+	/** Button to save result list.  */
+	private final JButton saveResultListButton       = new JButton( "Save result list..." );
+	/** Button to save result list.  */
+	private final JButton loadResultListButton       = new JButton( "Load result list..." );
 	
 	/** The progress bar component. */
 	private final JProgressBar progressBar = new JProgressBar();
@@ -492,6 +509,9 @@ public class ReplaySearchTab extends Tab {
 			}
 		} );
 		
+		final JPanel allButtonsWrapperPanel = Utils.createWrapperPanel();
+		//allButtonsWrapperPanel.setLayout( new BoxLayout( allButtonsWrapperPanel, BoxLayout.X_AXIS ) );
+		final Box searchStartButtonsBox = Box.createVerticalBox();
 		JPanel selectButtonsPanel = Utils.createWrapperPanel();
 		final ActionListener selectFilesAndFoldersActionListener = new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
@@ -500,7 +520,7 @@ public class ReplaySearchTab extends Tab {
 				// This is for SwingWT:
 				fileChooser.setExtensionFilters( new String[] { "*.rep", "*.*" }, new String[] { "Replay Files (*.rep)", "All files (*.*)" } );
 				// This is for Swing:
-				fileChooser.addChoosableFileFilter( ManualScanTab.SWING_REPLAY_FILE_FILTER ); 
+				fileChooser.addChoosableFileFilter( Utils.SWING_REPLAY_FILE_FILTER ); 
 				
 				fileChooser.setFileSelectionMode( event.getSource() == selectFoldersButton ? JFileChooser.DIRECTORIES_ONLY : JFileChooser.FILES_AND_DIRECTORIES );
 				fileChooser.setMultiSelectionEnabled( true );
@@ -519,22 +539,22 @@ public class ReplaySearchTab extends Tab {
 		stopSearchButton.setMnemonic( 't' );
 		stopSearchButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				requestedToStop = true; // Access to a volatile variable is automatically synchronized from Java 5.0
+				requestedToStop = true;
 				stopSearchButton.setEnabled( false );
 			}
 		} );
 		selectButtonsPanel.add( stopSearchButton );
-		contentBox.add( selectButtonsPanel );
+		searchStartButtonsBox.add( selectButtonsPanel );
 		
 		selectButtonsPanel = Utils.createWrapperPanel();
-		repeatSearch.setEnabled( false );
-		repeatSearch.setMnemonic( 'r' );
-		repeatSearch.addActionListener( new ActionListener() {
+		repeatSearchButton.setEnabled( false );
+		repeatSearchButton.setMnemonic( 'r' );
+		repeatSearchButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent evnet ) {
 				searchFilesAndFolders( lastSearchSourceFiles );
 			}
 		} );
-		selectButtonsPanel.add( repeatSearch );
+		selectButtonsPanel.add( repeatSearchButton );
 		searchPreviousResultButton.setEnabled( false );
 		searchPreviousResultButton.setMnemonic( 'p' );
 		searchPreviousResultButton.addActionListener( new ActionListener() {
@@ -543,7 +563,25 @@ public class ReplaySearchTab extends Tab {
 			}
 		} );
 		selectButtonsPanel.add( searchPreviousResultButton );
-		contentBox.add( selectButtonsPanel );
+		searchStartButtonsBox.add( selectButtonsPanel );
+		allButtonsWrapperPanel.add( Utils.wrapInPanel( searchStartButtonsBox ) );
+		
+		final Box resultListHandlerBox = Box.createVerticalBox();
+		saveResultListButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				saveResultList();
+			} 
+		} );
+		resultListHandlerBox.add( saveResultListButton );
+		loadResultListButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				loadResultList();
+			} 
+		} );
+		resultListHandlerBox.add( loadResultListButton );
+		allButtonsWrapperPanel.add( Utils.wrapInPanel( resultListHandlerBox ) );
+		
+		contentBox.add( allButtonsWrapperPanel );
 		
 		progressBar.setMaximumSize( Utils.getMaxDimension() );
 		contentBox.add( progressBar );
@@ -749,9 +787,11 @@ public class ReplaySearchTab extends Tab {
 		requestedToStop = false;
 		selectFoldersButton       .setEnabled( false );
 		selectFilesButton         .setEnabled( false );
-		repeatSearch              .setEnabled( false );
+		repeatSearchButton        .setEnabled( false );
 		searchPreviousResultButton.setEnabled( false );
 		stopSearchButton          .setEnabled( true  );
+		saveResultListButton      .setEnabled( false );
+		loadResultListButton      .setEnabled( false );
 		
 		disableResultHandlerButtons();
 		
@@ -809,17 +849,19 @@ public class ReplaySearchTab extends Tab {
 				finally {
 					updatedResultsCountLabel();
 					refreshResultTable();
+					loadResultListButton      .setEnabled( true  );
+					saveResultListButton      .setEnabled( true  );
 					stopSearchButton          .setEnabled( false );
 					selectFilesButton         .setEnabled( true  );
 					selectFoldersButton       .setEnabled( true  );
-					repeatSearch              .setEnabled( true  );
+					repeatSearchButton        .setEnabled( true  );
 					searchPreviousResultButton.setEnabled( true  );
 				}
 			}
 			
 			private final java.io.FileFilter IO_REPLAY_FILE_FILTER = new java.io.FileFilter() {
 				public boolean accept( final File pathname ) {
-					return ManualScanTab.SWING_REPLAY_FILE_FILTER.accept( pathname );
+					return Utils.SWING_REPLAY_FILE_FILTER.accept( pathname );
 				}
 			};
 			
@@ -981,6 +1023,132 @@ public class ReplaySearchTab extends Tab {
 		Arrays.sort( replayFilters );
 		
 		return replayFilters;
+	}
+	
+	/**
+	 * Saves the result list.<br>
+	 * First prompts the file to save to.
+	 */
+	private void saveResultList() {
+		final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.defaultReplayListsFolderTextField.getText() );
+		fileChooser.setTitle( "Save result list to..." );
+		
+		fileChooser.addChoosableFileFilter( Utils.SWING_TEXT_FILE_FILTER ); 
+		fileChooser.setExtensionFilters( new String[] { "*.txt", "*.*" }, new String[] { "Text files (*.txt)", "All files (*.*)" } );
+		
+		fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
+		if ( fileChooser.showSaveDialog( getContent() ) == JFileChooser.APPROVE_OPTION ) {
+			PrintWriter output = null;
+			try {
+				output = new PrintWriter( fileChooser.getSelectedFile() );
+				
+				for ( final String resultTableColumnName : RESULT_TABLE_COLUMN_NAMES ) {
+					 // Column name cannot be empty string!
+					output.print( resultTableColumnName.replace( RESULT_LIST_FILE_VALUE_SEPARATOR_CHAR, ' ' ) );
+					output.print( RESULT_LIST_FILE_VALUE_SEPARATOR_CHAR );
+				}
+				output.println();
+				
+				for ( final String[] searchResultRowData : lastSearchResultRowsData ) {
+					for ( final String searchResultCell : searchResultRowData ) {
+						if ( searchResultCell != null )
+							output.print( searchResultCell.replace( RESULT_LIST_FILE_VALUE_SEPARATOR_CHAR, ' ' ) );
+						output.print( RESULT_LIST_FILE_VALUE_SEPARATOR_CHAR );
+					}
+					output.println();
+				}
+				
+				output.flush();
+				JOptionPane.showMessageDialog( getContent(), "Result list saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE );
+			}
+			catch ( final Exception e ) {
+				JOptionPane.showMessageDialog( getContent(), "Could not save result list!", "Error!", JOptionPane.ERROR_MESSAGE );
+			}
+			finally {
+				if ( output != null )
+					output.close();
+			}
+		}
+	}
+	
+	/**
+	 * Loads a result list from a file.
+	 */
+	private void loadResultList() {
+		final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.defaultReplayListsFolderTextField.getText() );
+		fileChooser.setTitle( "Load result list..." );
+		
+		fileChooser.addChoosableFileFilter( Utils.SWING_TEXT_FILE_FILTER ); 
+		fileChooser.setExtensionFilters( new String[] { "*.txt", "*.*" }, new String[] { "Text files (*.txt)", "All files (*.*)" } );
+		
+		fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
+		if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION ) {
+			BufferedReader input = null;
+			try {
+				input = new BufferedReader( new FileReader( fileChooser.getSelectedFile() ) );
+				
+				String line = input.readLine();
+				if ( line == null )
+					throw new Exception();
+				
+				StringTokenizer lineTokenizer = new StringTokenizer( line, RESULT_LIST_FILE_VALUE_SEPARATOR_STRING ); // Column name cannot be empty string!
+				final int[] columnIndices = new int[ lineTokenizer.countTokens() ];
+				int fileColumnIndexForFileName = -1;
+				
+				int fileColumnIndex = 0;
+				while ( lineTokenizer.hasMoreTokens() ) {
+					final String columnName = lineTokenizer.nextToken();
+					columnIndices[ fileColumnIndex ] = -1; // We assume we don't have a column for the stored value as long as we don't find one
+					
+					for ( int i = RESULT_TABLE_COLUMN_NAMES.length - 1; i >= 0; i-- )
+						if ( columnName.equals( RESULT_TABLE_COLUMN_NAMES[ i ] ) ) {
+							columnIndices[ fileColumnIndex ] = i;
+							if ( i == RESULT_TABLE_FILE_NAME_COLUMN_INDEX )
+								fileColumnIndexForFileName = i;
+							break;
+						}
+					
+					fileColumnIndex++;
+				}
+				
+				lastSearchResultFileList.clear();
+				lastSearchResultRowsData.clear();
+				while ( ( line = input.readLine() ) != null ) {
+					lineTokenizer = new StringTokenizer( line, RESULT_LIST_FILE_VALUE_SEPARATOR_STRING, true );
+					
+					final String[] searchResultRowData = new String[ RESULT_TABLE_COLUMN_NAMES.length ];
+					fileColumnIndex = 0;
+					
+					while ( lineTokenizer.hasMoreTokens() ) {
+						final String token = lineTokenizer.nextToken();
+						
+						if ( !token.equals( RESULT_LIST_FILE_VALUE_SEPARATOR_STRING ) ) {
+							searchResultRowData[ columnIndices[ fileColumnIndex ] ] = token;
+							if ( fileColumnIndex == fileColumnIndexForFileName ) {
+								// We found file name, we can add it to the results table now.
+								lastSearchResultFileList.add( new File( token ) );
+								lastSearchResultRowsData.add( searchResultRowData );
+							}
+						}
+						else
+							fileColumnIndex++;
+					}
+				}
+				
+				// We enable searching in previous results now.
+				searchPreviousResultButton.setEnabled( true  );
+				
+				updatedResultsCountLabel();
+				refreshResultTable();
+			}
+			catch ( final Exception e ) {
+				JOptionPane.showMessageDialog( getContent(), "Could not load result list!", "Error!", JOptionPane.ERROR_MESSAGE );
+			}
+			finally {
+				if ( input != null )
+					try { input.close(); } catch ( final IOException ie ) { ie.printStackTrace(); }
+			}
+		}
 	}
 	
 	@Override

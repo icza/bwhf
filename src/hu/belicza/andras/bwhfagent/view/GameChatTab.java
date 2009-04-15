@@ -63,7 +63,7 @@ public class GameChatTab extends ProgressLoggedTab {
 				// This is for SwingWT:
 				fileChooser.setExtensionFilters( new String[] { "*.rep", "*.*" }, new String[] { "Replay Files (*.rep)", "All files (*.*)" } );
 				// This is for Swing:
-				fileChooser.addChoosableFileFilter( ManualScanTab.SWING_REPLAY_FILE_FILTER ); 
+				fileChooser.addChoosableFileFilter( Utils.SWING_REPLAY_FILE_FILTER ); 
 				
 				fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
 				fileChooser.setMultiSelectionEnabled( false );
@@ -83,7 +83,7 @@ public class GameChatTab extends ProgressLoggedTab {
 				// This is for SwingWT:
 				fileChooser.setExtensionFilters( new String[] { "*.rep", "*.*" }, new String[] { "Replay Files (*.rep)", "All files (*.*)" } );
 				// This is for Swing:
-				fileChooser.addChoosableFileFilter( ManualScanTab.SWING_REPLAY_FILE_FILTER ); 
+				fileChooser.addChoosableFileFilter( Utils.SWING_REPLAY_FILE_FILTER ); 
 				
 				fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
 				fileChooser.setMultiSelectionEnabled( true );
