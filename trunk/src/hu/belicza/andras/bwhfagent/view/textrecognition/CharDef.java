@@ -1,23 +1,42 @@
 package hu.belicza.andras.bwhfagent.view.textrecognition;
 
+import java.awt.Color;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.imageio.ImageIO;
+
 /**
  * Definition of a character used in the game lobby in Starcraft.<br>
- * This font builds up the characters using 3 tones of a color. I will only model the strongest color to define
- * the outline of the characters.<br>
- * 9x9 is the biggest dimension of a char, and there can be 1 more row and column for character shadow
- * (color of weakest tone). We can enclose any character in a 10x10 square.<br>
- * The height of the characters is always <code>10</code>.
+ * This font builds up the characters using 4 tones of a color.<br>
+ * The maximum height of the characters is <code>11</code>.
  * The <code>width</code> of the characters defines the smallest area where the character has pixels.<br>
+ * If there is a space between 2 characters, there are 6 empty lines.<br>
  * <br>
  * One thing that should be known: the characters 'I' and 'l' looks exactly the same, there is no way to distinguish between them.
- * The <code>CHAR_DEFS</code> array only contains and parses these 2 letters as 'l'.
+ * The <code>CHAR_DEFS</code> array contains and parses these 2 letters as 'l'.
  * 
  * @author Andras Belicza
  */
 public class CharDef {
 	
 	/** Height of the characters. */
-	private static final int HEIGHT = 10;
+	public static final int HEIGHT = 11;
+	
+	/** Name of the image file containing the character definitions. */
+	private static final String CHAR_DEFS_FILE_NAME = "chardefs.png";
+	
+	/** RGB values of the colors of the characters' image.<br>
+	 * First element indicates no pixel. */
+	public static final int[] CHAR_IMAGE_RGBS = { 0, new Color( 120, 216, 80 ).getRGB(), new Color( 104, 179, 64 ).getRGB(), new Color( 75, 135, 52 ).getRGB(), new Color( 45, 85, 29 ).getRGB(), new Color( 29, 38, 59 ).getRGB() };
+	
+	/** Width of the space character. */
+	public static final int SPACE_CHAR_WIDTH = 5;
 	
 	/** Width of the character in pixels.              */
 	public final int  width;
@@ -26,35 +45,111 @@ public class CharDef {
 	/** The associated character with this definition. */
 	public final char associatedChar;
 	
-	/** The outline (strongest colors) of the image of the character.<br>
-	 * Each element of the array describes 1 line in the characters' picture:
-	 * First element is the first line, 2nd element is the second line etc.<br>
-	 * An element stores the pixels in bits: first (least significant bit) is the state of the 1st pixel in the line,
-	 * 2nd bit is the 2nd pixel in the line etc. Value of bit 0 means no pixel, 1 means there is an outline pixel in the position.<br>
-	 * The array has a number of <code>height</code> elements which is always <code>10</code>, and elements has a number of <code>width</code> valuable bits.
+	/** The pixels of the image of the character.<br>
+	 * The value <code>(bye) 0x00</code> means no pixel.
 	 */
-	public final int[] outline;
+	public final byte[][] imageData;
 	
 	/**
 	 * Creates a new CharDef.
 	 * @param width          width of the character in pixels
 	 * @param associatedChar the associated character with this definition
-	 * @param outline        the outline of the image of the character
+	 * @param imageData      the pixels of the image of the character
 	 */
-	public CharDef( final int width, final char associatedChar, final int[] outline ) {
+	public CharDef( final int width, final char associatedChar, final byte[][] imageData ) {
 		this.width          = width;
 		this.height         = HEIGHT;
 		this.associatedChar = associatedChar;
-		this.outline        = outline;
+		this.imageData      = imageData;
 	}
 	
 	/** The available and distinguishable characters in the game lobby font (does not contain 'I' because it looks the same as 'l').*/
-	public static final CharDef[] CHAR_DEFS = {
-		new CharDef(  6, 'a', new int[] { 0x00, 0x00, 0x0e, 0x10, 0x1e, 0x11, 0x1e, 0x00, 0x00, 0x00 } ),
-		new CharDef(  6, 'b', new int[] { 0x01, 0x01, 0x0f, 0x11, 0x11, 0x11, 0x0f, 0x00, 0x00, 0x00 } ),
-		new CharDef(  5, 'c', new int[] { 0x00, 0x00, 0x06, 0x09, 0x01, 0x09, 0x06, 0x00, 0x00, 0x00 } ),
+	public static final CharDef[]                 CHAR_DEFS;
+	/** The same width chars mapped to their width. */
+	public static final Map< Integer, CharDef[] > CHAR_WIDTH_CHAR_DEFS_MAP = new HashMap< Integer, CharDef[] >();
+	/** Maximum char width.                         */
+	public static final int                       MAX_CHAR_WIDTH;
+	static {
+		final List< Character > charsInCharDefsPic = new ArrayList< Character >( 100 );
+		for ( char ch = 'a'; ch <= 'z'; ch++ )
+			charsInCharDefsPic.add( ch );
+		for ( char ch = 'A'; ch <= 'Z'; ch++ )
+			charsInCharDefsPic.add( ch );
+		for ( char ch = '0'; ch <= '9'; ch++ )
+			charsInCharDefsPic.add( ch );
+		for ( final char ch : new char[] { '.', ',', ';', '_', '"', '!', '@', '#', '$', '%', '(', ')', '[', ']', '\'' } )
+			charsInCharDefsPic.add( ch );
 		
-		new CharDef(  0, ' ', new int[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } ),
-	};
+		CHAR_DEFS = new CharDef[ charsInCharDefsPic.size() ];
+		final Map< Integer, List< CharDef > > charWidthCharDefListMap = new HashMap< Integer, List< CharDef > >();
+		int maxCharWidth = 0;
+		try {
+			final BufferedImage charDefsImage = ImageIO.read( CharDef.class.getResource( CHAR_DEFS_FILE_NAME ) );
+			
+			int xPos = 0;
+			for ( int i = 0; i < charsInCharDefsPic.size(); i++ ) {
+				// First let's find out the width of the character by scanning for the empty line after that.
+				int width = 0;
+				for ( int x = xPos + 2; ; x++ ) // Chars are at least 2 length, we skip scanning the first 2 columns
+					if ( isCharColumnEmpty( x, 0, charDefsImage ) ) {
+						width = x - xPos;
+						break;
+					}
+				
+				final Character ch = charsInCharDefsPic.get( i );
+				if ( ch.charValue() != 'I' ) {
+					final byte[][] imageData = new byte[ HEIGHT ][ width ];
+					for ( int x = xPos + width - 1; x >= xPos; x-- )
+						for ( int y = HEIGHT - 1; y >= 0; y-- )
+							for ( byte colorIndex = (byte) ( CHAR_IMAGE_RGBS.length - 1 ); colorIndex > (byte) 0; colorIndex-- )
+								if ( CHAR_IMAGE_RGBS[ colorIndex ] == charDefsImage.getRGB( x, y ) ) {
+									imageData[ y ][ x - xPos ] = colorIndex;
+									break;
+								}
+					
+					final CharDef charDef = new CharDef( width, ch, imageData );
+					
+					CHAR_DEFS[ i ] = charDef;
+					List< CharDef > charDefList = charWidthCharDefListMap.get( width );
+					if ( charDefList == null )
+						charWidthCharDefListMap.put( width, charDefList = new ArrayList< CharDef >() );
+					charDefList.add( charDef );
+					if ( width > maxCharWidth )
+						maxCharWidth = width;
+				}
+				
+				xPos += width + 1;
+			}
+		} catch ( final IOException ie) {
+			ie.printStackTrace();
+		}
+		
+		for ( final Entry< Integer, List< CharDef > > charWidthCharDefListEntry : charWidthCharDefListMap.entrySet() ) {
+			final List< CharDef > charDefList = charWidthCharDefListEntry.getValue();
+			CHAR_WIDTH_CHAR_DEFS_MAP.put( charWidthCharDefListEntry.getKey(), charDefList.toArray( new CharDef[ charDefList.size() ] ) );
+		}
+		MAX_CHAR_WIDTH = maxCharWidth;
+	}
+	
+	/**
+	 * Check if there is an empty column at the specified position. Empty columns indicate end of the picture of a character.
+	 * 
+	 * @param x     x coordinate of the position
+	 * @param y     y coordinate of the position
+	 * @param image image in which to check
+	 * @return true if there is an empty column at the specified position; false otherwise
+	 */
+	public static boolean isCharColumnEmpty( final int x, int y, final BufferedImage image ) {
+		final int y2 = y + HEIGHT;
+		
+		for ( ; y < y2; y++ ) {
+			int picRgb = image.getRGB( x, y );
+			for ( int colorIndex = CHAR_IMAGE_RGBS.length - 1; colorIndex > 0; colorIndex-- )
+				if ( picRgb == CHAR_IMAGE_RGBS[ colorIndex ] )
+					return false;
+		}
+		
+		return true;
+	}
 	
 }

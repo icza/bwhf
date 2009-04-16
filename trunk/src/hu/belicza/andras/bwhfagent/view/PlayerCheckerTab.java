@@ -43,7 +43,7 @@ public class PlayerCheckerTab extends LoggedTab {
 	/** Name of the bwhf hacker list cache file. */
 	private static final String HACKER_LIST_CACHE_FILE_NAME = "BWHF_hacker_list_cache.txt";
 	/** THe hacker list directory.               */
-	private static final File HACKER_LIST_DIRECTORY         = new File( Consts.HACKER_LIST_DIRECTORY_NAME );
+	private static final File   HACKER_LIST_DIRECTORY       = new File( Consts.HACKER_LIST_DIRECTORY_NAME );
 	/** The hacker list cache file.              */
 	private static final File   HACKER_LIST_CACHE_FILE      = new File( Consts.HACKER_LIST_DIRECTORY_NAME, HACKER_LIST_CACHE_FILE_NAME );
 	
