@@ -64,8 +64,8 @@ public class TextRecognizer {
 			return false;
 		
 		// We check if the first game slot frame is present
-		for ( int x = PLAYER_SLOT_FRAME_X + 2; x < PLAYER_SLOT_FRAME_X + 2 + 15; x++ )
-			if ( image.getRGB( x, FIRST_PLAYER_SLOT_FRAME_Y ) != PLAYER_FRAME_RGB )
+		for ( int x = 251; x < 266; x++ )
+			if ( !CharDef.doPixelsMatch( image.getRGB( x, 25 ), PLAYER_FRAME_RGB ) )
 				return false;
 		
 		return true;
@@ -82,7 +82,7 @@ public class TextRecognizer {
 		final int y1 = FIRST_PLAYER_SLOT_FRAME_Y + ( PLAYER_SLOT_HEIGHT + GAP_BETWEEN_PLAYER_SLOTS ) * slot + 2;
 		
 		for ( int y = y1 + PLAYER_SLOT_HEIGHT - 5; y >= y1; y-- )
-			if ( image.getRGB( PLAYER_SLOT_FRAME_X, y ) != PLAYER_FRAME_RGB )
+			if ( !CharDef.doPixelsMatch( image.getRGB( PLAYER_SLOT_FRAME_X, y ), PLAYER_FRAME_RGB ) )
 				return false;
 		
 		return true;
@@ -128,13 +128,13 @@ public class TextRecognizer {
 						
 						if ( colorIndex == (byte) 0x00 ) // If no pixel in charDef, no valid char color may occur
 							for ( int colorIndex2 = CharDef.CHAR_IMAGE_RGBS.length - 1; colorIndex2 > 1; colorIndex2-- ) {
-								if ( pixelRgb == CharDef.CHAR_IMAGE_RGBS[ colorIndex2 ] ) {
+								if ( CharDef.doPixelsMatch( pixelRgb, CharDef.CHAR_IMAGE_RGBS[ colorIndex2 ] ) ) {
 									charDefMatches = false;
 									break charMatchCheck;
 								}
 							}
 						else                             // Pixel in charDef must match the picture
-							if ( pixelRgb != CharDef.CHAR_IMAGE_RGBS[ colorIndex ] ) {
+							if ( !CharDef.doPixelsMatch( pixelRgb, CharDef.CHAR_IMAGE_RGBS[ colorIndex ] ) ) {
 								charDefMatches = false;
 								break charMatchCheck;
 							}

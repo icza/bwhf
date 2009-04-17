@@ -102,7 +102,7 @@ public class CharDef {
 					for ( int x = xPos + width - 1; x >= xPos; x-- )
 						for ( int y = HEIGHT - 1; y >= 0; y-- )
 							for ( byte colorIndex = (byte) ( CHAR_IMAGE_RGBS.length - 1 ); colorIndex > (byte) 0; colorIndex-- )
-								if ( CHAR_IMAGE_RGBS[ colorIndex ] == charDefsImage.getRGB( x, y ) ) {
+								if ( doPixelsMatch( CHAR_IMAGE_RGBS[ colorIndex ], charDefsImage.getRGB( x, y ) ) ) {
 									imageData[ y ][ x - xPos ] = colorIndex;
 									break;
 								}
@@ -145,8 +145,26 @@ public class CharDef {
 		for ( ; y < y2; y++ ) {
 			int picRgb = image.getRGB( x, y );
 			for ( int colorIndex = CHAR_IMAGE_RGBS.length - 1; colorIndex > 0; colorIndex-- )
-				if ( picRgb == CHAR_IMAGE_RGBS[ colorIndex ] )
+				if ( doPixelsMatch( picRgb, CHAR_IMAGE_RGBS[ colorIndex ] ) )
 					return false;
+		}
+		
+		return true;
+	}
+	
+	/**
+	 * Tests if 2 pixels given with their rgb values match allowing "some" difference.
+	 * @param rgb1 rgb value of the first pixel to test
+	 * @param rgb2 rgb vlaue of the second pixel to text
+	 * @return true if the 2 pixels match
+	 */
+	public static boolean doPixelsMatch( int rgb1, int rgb2 ) {
+		final int MAX_DIFF = 15;
+		
+		for ( int i = 0; i < 3; i++, rgb1 >>= 8, rgb2 >>= 8 ) { // 3 components: R, G, B
+			final int compDiff = ( rgb1 & 0xff ) - ( rgb2 & 0xff );
+			if ( compDiff > MAX_DIFF || compDiff < -MAX_DIFF )
+				return false;
 		}
 		
 		return true;
