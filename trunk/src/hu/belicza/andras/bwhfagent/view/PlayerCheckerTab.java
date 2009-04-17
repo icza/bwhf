@@ -207,29 +207,35 @@ public class PlayerCheckerTab extends LoggedTab {
 			if ( image == null || !TextRecognizer.isGameLobbyScreenshot( image ) )
 				remainedScreenshotFileList.add( screenshotFile );
 			else {
+				logMessage( "\n", false ); // Prints 2 empty lines
 				logMessage( "Game lobby screenshot detected, proceeding to check..." );
-				final int gateway = MainFrame.getInstance().autoscanTab.gatewayComboBox.getSelectedIndex();
+				
+				final int gateway = MainFrame.getInstance().autoscanTab.gatewayComboBox.getSelectedIndex() - 1;
 				
 				final String[] playerNames = TextRecognizer.readPlayerNamesFromGameLobbyImage( image );
 				
 				for ( int i = 0; i < playerNames.length; i++ ) {
-					String playerName = playerNames[ i ]; 
+					final String playerName = playerNames[ i ]; 
 					if ( playerName != null ) {
 						final boolean exactMatch = playerName.indexOf( 'I' ) < 0 && playerName.indexOf( 'l' ) < 0;
-						playerName = playerName.toLowerCase();
+						final String loweredPlayerName = playerName.toLowerCase();
 						
-						if ( gatewayBwhfHackerSetMap.get( gateway ).contains( playerName ) ) {
+						Set< String > playerNameSet;
+						if ( ( playerNameSet = gatewayBwhfHackerSetMap.get( gateway ) ) != null && gatewayBwhfHackerSetMap.get( gateway ).contains( loweredPlayerName ) ) {
+							logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "hacker player in game lobby: " + playerName );
 							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "hacker.wav" : "suspicious.wav" ) );
 							// TODO: handle proper delay here
 							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "player" + (i+1) + ".wav" ) );
 						}
-						else if ( gatewayCustomPlayerSetMap.get( gateway ).contains( playerName ) ) {
+						else if ( ( playerNameSet = gatewayCustomPlayerSetMap.get( gateway ) ) != null && playerNameSet.contains( loweredPlayerName ) ) {
+							logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "custom listed player in game lobby: " + playerName );
 							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "custom.wav" : "custom2.wav" ) );
 							// TODO: handle proper delay here
 							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "player" + (i+1) + ".wav" ) );
 						}
 					}
 				}
+				logMessage( "Player check finished." );
 				
 				if ( deleteGameLobbyScreenshotsCheckBox.isSelected() )
 					screenshotFile.delete();

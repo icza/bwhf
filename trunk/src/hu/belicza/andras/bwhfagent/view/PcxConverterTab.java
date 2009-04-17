@@ -186,17 +186,17 @@ public class PcxConverterTab extends ProgressLoggedTab {
 				final JTextField       starcraftFolderTextField = MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField;
 				final PlayerCheckerTab playerCheckerTab         = MainFrame.getInstance().playerCheckerTab;
 				
-				final Date[] autoscanEnabledTimeHolder = new Date[ 1 ]; // Have to use a holder so the file filter local can access it
+				final Date[] lastCheckTimeHolder = new Date[ 1 ]; // Have to use a holder so the file filter local class can access it
 				while ( true ) {
 					try {
 						synchronized (lock) {
 							if ( autoConvertEnabledCheckBox.isSelected() || playerCheckerTab.playerCheckerEnabledCheckBox.isSelected() ) {
-								if ( autoscanEnabledTimeHolder[ 0 ] == null )
-									autoscanEnabledTimeHolder[ 0 ] = new Date();
+								if ( lastCheckTimeHolder[ 0 ] == null )
+									lastCheckTimeHolder[ 0 ] = new Date();
 								
 								File[] pcxFiles = new File( starcraftFolderTextField.getText() ).listFiles( new java.io.FileFilter() {
 									public boolean accept( final File pathname ) {
-										return pathname.lastModified() > autoscanEnabledTimeHolder[ 0 ].getTime() && pathname.getName().toLowerCase().endsWith( PCX_FILE_EXTENSION );
+										return pathname.lastModified() > lastCheckTimeHolder[ 0 ].getTime() && pathname.getName().toLowerCase().endsWith( PCX_FILE_EXTENSION );
 									}
 								} );
 								
@@ -210,9 +210,11 @@ public class PcxConverterTab extends ProgressLoggedTab {
 										convertPcxFiles( pcxFiles, true, false );
 									}
 								}
+								
+								lastCheckTimeHolder[ 0 ] = new Date();
 							}
 							else
-								autoscanEnabledTimeHolder[ 0 ] = null;
+								lastCheckTimeHolder[ 0 ] = null;
 						}
 						
 						sleep( TIME_BETWEEN_CHECKS_FOR_NEW_PCX_FILES_MS );
