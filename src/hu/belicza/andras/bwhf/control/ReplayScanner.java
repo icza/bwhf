@@ -70,11 +70,11 @@ public class ReplayScanner {
 		}
 		
 		
-		int            lastIteration                        = -1;
-		int            nonHotkeyActionsCountInSameIteration = 0;
-		Action         lastAction                           = null;
-		boolean        foundTerranComsatCancelHack          = false;
-		Action         lastSelectAction                     = null;
+		int            lastIteration                          = -1;
+		int            actionsCountForGeneralMulticommandHack = 0;
+		Action         lastAction                             = null;
+		boolean        foundTerranComsatCancelHack            = false;
+		Action         lastSelectAction                       = null;
 		// We store the last select action which identifies units which were assigned/added to the hotkeys.
 		// So if in the future we see a "hotkey select,xx" action, it will basically mean the action: lastSelectActionSetAsHotkeys[ xx ]
 		// This is only an approximate solution! Exceptions:
@@ -181,13 +181,13 @@ public class ReplayScanner {
 			// it can be due to lag and/or "action spam". Don't count and report those.
 			// This "same" action checking is not completely correct, since we don't distinguish between a lot of actions,
 			// but this is accurate enough since we parse and use the most common actions for hack detection
-			if ( lastIteration == action.iteration && lastAction.actionNameIndex != action.actionNameIndex && action.actionNameIndex != Action.ACTION_NAME_INDEX_HOTKEY )
-				nonHotkeyActionsCountInSameIteration++;
+			if ( lastIteration == action.iteration && lastAction.actionNameIndex != action.actionNameIndex && action.actionNameIndex != Action.ACTION_NAME_INDEX_HOTKEY && action.actionNameIndex != Action.ACTION_NAME_INDEX_ALLY && action.actionNameIndex != Action.ACTION_NAME_INDEX_VISION )
+				actionsCountForGeneralMulticommandHack++;
 			else {
-				if ( nonHotkeyActionsCountInSameIteration > 18 )
+				if ( actionsCountForGeneralMulticommandHack > 18 )
 					hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_MULTICOMMAND, lastAction.iteration ) );
 				lastIteration = action.iteration;
-				nonHotkeyActionsCountInSameIteration = 0;
+				actionsCountForGeneralMulticommandHack = 0;
 			}
 			
 			
