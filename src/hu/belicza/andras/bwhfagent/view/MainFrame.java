@@ -69,9 +69,11 @@ public class MainFrame extends JFrame {
 	private final JTabbedPane tabbedPane = new JTabbedPane();
 	
 	/** Reference to the autoscan tab.         */
-	private   final AutoscanTab        autoscanTab;
+	protected final AutoscanTab        autoscanTab;
 	/** Reference to the manual scan tab.      */
 	protected final ManualScanTab      manualScanTab;
+	/** Reference to the manual scan tab.      */
+	protected final PlayerCheckerTab   playerCheckerTab;
 	/** Reference to the charts tab.           */
 	protected final ChartsTab          chartsTab;
 	/** Reference to the game chat tab.        */
@@ -115,9 +117,10 @@ public class MainFrame extends JFrame {
 		generalSettingsTab = new GeneralSettingsTab(); // This has to be created fist, autoscan tab uses this.
 		autoscanTab        = new AutoscanTab();
 		manualScanTab      = new ManualScanTab();
+		playerCheckerTab   = new PlayerCheckerTab();
 		chartsTab          = new ChartsTab();
 		gameChatTab        = new GameChatTab();
-		tabs = new Tab[] { autoscanTab, manualScanTab, new PlayerCheckerTab(), chartsTab, new ReplaySearchTab(), gameChatTab, new PcxConverterTab(), generalSettingsTab, new AboutTab() };
+		tabs = new Tab[] { autoscanTab, manualScanTab, playerCheckerTab, chartsTab, new ReplaySearchTab(), gameChatTab, new PcxConverterTab(), generalSettingsTab, new AboutTab() };
 		
 		buildGUI();
 		

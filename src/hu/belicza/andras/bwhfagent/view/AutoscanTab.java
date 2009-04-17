@@ -152,7 +152,7 @@ public class AutoscanTab extends LoggedTab {
 		testButton.setToolTipText( "Play the selected sound file" );
 		testButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				Utils.playWavFile( foundHacksWavFileTextField.getText() );
+				Utils.playWavFile( new File( foundHacksWavFileTextField.getText() ) );
 			}
 		} );
 		panel.add( testButton, BorderLayout.EAST );
@@ -298,7 +298,7 @@ public class AutoscanTab extends LoggedTab {
 											MainFrame.getInstance().toFront();
 										}
 										if ( playSoundCheckBox.isSelected() )
-											Utils.playWavFile( foundHacksWavFileTextField.getText() );
+											Utils.playWavFile( new File( foundHacksWavFileTextField.getText() ) );
 										
 										logMessage( "Found " + hackDescriptionList.size() + " hack" + (hackDescriptionList.size() == 1 ? "" : "s" ) + " in LastReplay.rep:" );
 										for ( final HackDescription hackDescription : hackDescriptionList )

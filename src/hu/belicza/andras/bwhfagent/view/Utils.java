@@ -288,12 +288,12 @@ public class Utils {
 	 * Plays a wav file.<br>
 	 * Will return immediately, the wav playing will run on a new thread.
 	 * 
-	 * @param wavFileName name of the wav file to play
+	 * @param wavFile the wav file to play
 	 * @return true if the file was started playing; false if error occurred
 	 */
-	public static boolean playWavFile( final String wavFileName ) {
+	public static boolean playWavFile( final File wavFile ) {
 		try {
-			final AudioInputStream audioInputStream = AudioSystem.getAudioInputStream( new File( wavFileName ) );
+			final AudioInputStream audioInputStream = AudioSystem.getAudioInputStream( wavFile );
 			final AudioFormat      audioFormat      = audioInputStream.getFormat();
 			final SourceDataLine   audioLine        = (SourceDataLine) AudioSystem.getLine( new DataLine.Info( SourceDataLine.class, audioFormat ) );
 			

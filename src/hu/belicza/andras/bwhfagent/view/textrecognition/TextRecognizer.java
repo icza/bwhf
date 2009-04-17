@@ -30,23 +30,25 @@ public class TextRecognizer {
 	private static final int GAP_BETWEEN_PLAYER_SLOTS  = 2;
 	
 	/**
-	 * Tries to read player names from a game lobby screenshot.
+	 * Tries to read player names from a game lobby screenshot.<br>
+	 * The returned array contains as many elements as player slots are detected in the image.
+	 * Player names for slots not containing players will be <code>null</code> (for example empty slots, or slots set to computer).
 	 * @param image screenshot image of the game lobby
-	 * @return <code>null</code> if the image is not a game lobby screenshot, else an array of player names read from the image
+	 * @return an array of player names read from the image
 	 */
 	public static String[] readPlayerNamesFromGameLobbyImage( final BufferedImage image ) {
-		if ( !isGameLobbyScreenshot( image ) )
-			return null;
-		
 		final List< String > playerNames = new ArrayList< String >();
 		for ( int slot = 0; slot < 12; slot++ )
-			if ( isPlayerSlotPlayer( slot, image ) ) {
+			if ( isSlotPlayerSlot( slot, image ) ) {
 				String playerName = readString( PLAYER_SLOT_FRAME_X + 4, FIRST_PLAYER_SLOT_FRAME_Y + ( PLAYER_SLOT_HEIGHT + GAP_BETWEEN_PLAYER_SLOTS ) * slot + 2, image );
+				
 				if ( playerName != null ) {
-					playerName = playerName.toLowerCase();
-					if ( !playerName.equals( "open" ) && !playerName.equals( "closed" ) && !playerName.equals( "computer" ) )
-						playerNames.add( playerName );
+					final String loweredPlayerName = playerName.toLowerCase();
+					if ( loweredPlayerName.equals( "open" ) || loweredPlayerName.equals( "closed" ) || loweredPlayerName.equals( "computer" ) )
+						playerName = null;
 				}
+				
+				playerNames.add( playerName );
 			}
 		
 		return playerNames.toArray( new String[ playerNames.size() ] );
@@ -57,7 +59,7 @@ public class TextRecognizer {
 	 * @param image image to be checked
 	 * @return true if the image is a game lobby screenshot; false otherwise
 	 */
-	private static boolean isGameLobbyScreenshot( final BufferedImage image ) {
+	public static boolean isGameLobbyScreenshot( final BufferedImage image ) {
 		if ( image.getWidth() != VALID_SCREENSHOT_WIDTH || image.getHeight() != VALID_SCREENSHOT_HEIGHT )
 			return false;
 		
@@ -70,12 +72,12 @@ public class TextRecognizer {
 	}
 	
 	/**
-	 * Checks if a player slot is used for player
+	 * Checks if a slot is used for player.
 	 * @param slot slot to be checked
 	 * @param image screenshot image of the game lobby
 	 * @return true if the specified slot is for player; false otherwise
 	 */
-	private static boolean isPlayerSlotPlayer( final int slot, final BufferedImage image ) {
+	private static boolean isSlotPlayerSlot( final int slot, final BufferedImage image ) {
 		// Player slots are more idented than non-player slots.
 		final int y1 = FIRST_PLAYER_SLOT_FRAME_Y + ( PLAYER_SLOT_HEIGHT + GAP_BETWEEN_PLAYER_SLOTS ) * slot + 2;
 		
@@ -116,7 +118,7 @@ public class TextRecognizer {
 				
 				// Check if charDef matches the picture at the given location
 				boolean charDefMatches = true;
-				charCheck:
+				charMatchCheck:
 				for ( int charY = 0; charY < CharDef.HEIGHT; charY++ ) {
 					final byte[] imageDataRow = charDef.imageData[ charY ];
 					int rgbBufferIndex = charY * CharDef.MAX_CHAR_WIDTH + width - 1;
@@ -128,13 +130,13 @@ public class TextRecognizer {
 							for ( int colorIndex2 = CharDef.CHAR_IMAGE_RGBS.length - 1; colorIndex2 > 1; colorIndex2-- ) {
 								if ( pixelRgb == CharDef.CHAR_IMAGE_RGBS[ colorIndex2 ] ) {
 									charDefMatches = false;
-									break charCheck;
+									break charMatchCheck;
 								}
 							}
 						else                             // Pixel in charDef must match the picture
 							if ( pixelRgb != CharDef.CHAR_IMAGE_RGBS[ colorIndex ] ) {
 								charDefMatches = false;
-								break charCheck;
+								break charMatchCheck;
 							}
 					}
 				}
