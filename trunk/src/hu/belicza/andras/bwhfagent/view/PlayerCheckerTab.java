@@ -1,8 +1,10 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhfagent.Consts;
+import hu.belicza.andras.bwhfagent.view.textrecognition.TextRecognizer;
 import hu.belicza.andras.hackerdb.ServerApiConsts;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -10,11 +12,15 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import javax.imageio.ImageIO;
 
 import swingwt.awt.BorderLayout;
 import swingwt.awt.GridBagConstraints;
@@ -51,21 +57,21 @@ public class PlayerCheckerTab extends LoggedTab {
 	private JPanel settingsPanel;
 	
 	/** Checkbox to enable/disable the autoscan.                  */
-	private final JCheckBox  playerCheckerEnabledCheckBox       = new JCheckBox( "Enable checking players in the game lobby when pressing the 'Print Screen' key", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_PLAYER_CHECKER_ENABLED ) ) );
+	protected final JCheckBox  playerCheckerEnabledCheckBox       = new JCheckBox( "Enable checking players in the game lobby when pressing the 'Print Screen' key", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_PLAYER_CHECKER_ENABLED ) ) );
 	/** Combo box to set the hacker list update interval.         */
-	private final JComboBox  hackerListUpdateIntervalComboBox   = new JComboBox( new Object[] { 1, 2, 6, 12, 24, 48 } );
+	private   final JComboBox  hackerListUpdateIntervalComboBox   = new JComboBox( new Object[] { 1, 2, 6, 12, 24, 48 } );
 	/** Label to display the last update time of the hacker list. */
-	private final JLabel     hackerListLastUpdatedLabel         = new JLabel();
+	private   final JLabel     hackerListLastUpdatedLabel         = new JLabel();
 	/** Button to update hacker list now.                         */
-	private final JButton    updateNowButton                    = new JButton( UPDATE_NOW_BUTTON_TEXT );
+	private   final JButton    updateNowButton                    = new JButton( UPDATE_NOW_BUTTON_TEXT );
 	/** Checkbox to include custom player list.                   */
-	private final JCheckBox  includeCustomPlayerListCheckBox    = new JCheckBox( "Include this custom player list:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST ) ) );
+	private   final JCheckBox  includeCustomPlayerListCheckBox    = new JCheckBox( "Include this custom player list:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST ) ) );
 	/** File of the custom player list.                           */
-	private final JTextField customPlayerListFileTextField      = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_CUSTOM_PLAYER_LIST_FILE ) );
+	private   final JTextField customPlayerListFileTextField      = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_CUSTOM_PLAYER_LIST_FILE ) );
 	/** Button to reload custom player list.                      */
-	private final JButton    reloadButton                       = new JButton( "Reload" );
+	private   final JButton    reloadButton                       = new JButton( "Reload" );
 	/** Checkbox to enable/disable the autoscan.                  */
-	private final JCheckBox  deleteGameLobbyScreenshotsCheckBox = new JCheckBox( "Delete game lobby screenshots after checking players", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS ) ) );
+	private   final JCheckBox  deleteGameLobbyScreenshotsCheckBox = new JCheckBox( "Delete game lobby screenshots after checking players", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS ) ) );
 	
 	/** BWHF hackers mapped to their gateways.   */
 	private final Map< Integer, Set< String > > gatewayBwhfHackerSetMap   = new HashMap< Integer, Set< String > >();
@@ -180,6 +186,59 @@ public class PlayerCheckerTab extends LoggedTab {
 		contentBox.add( Utils.wrapInPanel( settingsPanel ) );
 		
 		super.buildGUI();
+	}
+	
+	/**
+	 * Check players from the provided screenshot files.
+	 * @param screenshotFiles screehshot files to be used to obtain player names
+	 * @return the remaining files that were not deleted
+	 */
+	public synchronized File[] checkPlayers( final File[] screenshotFiles ) {
+		final List< File > remainedScreenshotFileList = new ArrayList< File >( screenshotFiles.length );
+		
+		for ( final File screenshotFile : screenshotFiles ) {
+			BufferedImage image = null;
+			try {
+				image = ImageIO.read( screenshotFile );
+			}
+			catch ( final IOException ie ) {
+			}
+			
+			if ( image == null || !TextRecognizer.isGameLobbyScreenshot( image ) )
+				remainedScreenshotFileList.add( screenshotFile );
+			else {
+				logMessage( "Game lobby screenshot detected, proceeding to check..." );
+				final int gateway = MainFrame.getInstance().autoscanTab.gatewayComboBox.getSelectedIndex();
+				
+				final String[] playerNames = TextRecognizer.readPlayerNamesFromGameLobbyImage( image );
+				
+				for ( int i = 0; i < playerNames.length; i++ ) {
+					String playerName = playerNames[ i ]; 
+					if ( playerName != null ) {
+						final boolean exactMatch = playerName.indexOf( 'I' ) < 0 && playerName.indexOf( 'l' ) < 0;
+						playerName = playerName.toLowerCase();
+						
+						if ( gatewayBwhfHackerSetMap.get( gateway ).contains( playerName ) ) {
+							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "hacker.wav" : "suspicious.wav" ) );
+							// TODO: handle proper delay here
+							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "player" + (i+1) + ".wav" ) );
+						}
+						else if ( gatewayCustomPlayerSetMap.get( gateway ).contains( playerName ) ) {
+							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "custom.wav" : "custom2.wav" ) );
+							// TODO: handle proper delay here
+							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "player" + (i+1) + ".wav" ) );
+						}
+					}
+				}
+				
+				if ( deleteGameLobbyScreenshotsCheckBox.isSelected() )
+					screenshotFile.delete();
+				else
+					remainedScreenshotFileList.add( screenshotFile );
+			}
+		}
+		
+		return remainedScreenshotFileList.toArray( new File[ remainedScreenshotFileList.size() ] );
 	}
 	
 	/**

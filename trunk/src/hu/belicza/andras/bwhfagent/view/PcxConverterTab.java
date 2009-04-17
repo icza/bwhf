@@ -33,7 +33,7 @@ public class PcxConverterTab extends ProgressLoggedTab {
 	/** PCX file extension.                            */
 	private static final String PCX_FILE_EXTENSION                       = ".pcx";
 	/** Time between checking for new PCX files in ms. */
-	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_PCX_FILES_MS = 2000l;
+	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_PCX_FILES_MS = 1500l;
 	
 	/** PCX file filter. */
 	private static final FileFilter SWING_PCX_FILE_FILTER = new FileFilter() {
@@ -183,26 +183,32 @@ public class PcxConverterTab extends ProgressLoggedTab {
 			
 			@Override
 			public void run() {
-				final JTextField starcraftFolderTextField = MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField;
+				final JTextField       starcraftFolderTextField = MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField;
+				final PlayerCheckerTab playerCheckerTab         = MainFrame.getInstance().playerCheckerTab;
 				
-				final Date[] autoscanEnabledTimeHolder = new Date[ 1 ];
+				final Date[] autoscanEnabledTimeHolder = new Date[ 1 ]; // Have to use a holder so the file filter local can access it
 				while ( true ) {
 					try {
 						synchronized (lock) {
-							if ( autoConvertEnabledCheckBox.isSelected() ) {
-								if ( autoscanEnabledTimeHolder[ 0 ] == null ) {
+							if ( autoConvertEnabledCheckBox.isSelected() || playerCheckerTab.playerCheckerEnabledCheckBox.isSelected() ) {
+								if ( autoscanEnabledTimeHolder[ 0 ] == null )
 									autoscanEnabledTimeHolder[ 0 ] = new Date();
-								}
 								
-								final File[] pcxFiles = new File( starcraftFolderTextField.getText() ).listFiles( new java.io.FileFilter() {
+								File[] pcxFiles = new File( starcraftFolderTextField.getText() ).listFiles( new java.io.FileFilter() {
 									public boolean accept( final File pathname ) {
 										return pathname.lastModified() > autoscanEnabledTimeHolder[ 0 ].getTime() && pathname.getName().toLowerCase().endsWith( PCX_FILE_EXTENSION );
 									}
 								} );
+								
 								if ( pcxFiles != null && pcxFiles.length > 0 ) {
-									logMessage( "\n", false ); // Prints 2 empty lines
-									logMessage( "New PCX file" + ( pcxFiles.length == 1 ? "" : "s" ) + " detected - proceeding to convert..." );
-									convertPcxFiles( pcxFiles, true, false );
+									if ( playerCheckerTab.playerCheckerEnabledCheckBox.isSelected() )
+										pcxFiles = playerCheckerTab.checkPlayers( pcxFiles );
+									
+									if ( autoConvertEnabledCheckBox.isSelected() && pcxFiles.length > 0 ) {
+										logMessage( "\n", false ); // Prints 2 empty lines
+										logMessage( "New PCX file" + ( pcxFiles.length == 1 ? "" : "s" ) + " detected - proceeding to convert..." );
+										convertPcxFiles( pcxFiles, true, false );
+									}
 								}
 							}
 							else
