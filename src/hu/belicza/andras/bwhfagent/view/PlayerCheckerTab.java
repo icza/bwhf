@@ -94,7 +94,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		reloadPlayerList( HACKER_LIST_CACHE_FILE, gatewayBwhfHackerSetMap );
 		includeCustomPlayerListCheckBox.doClick();
 		
-		// Load the CharDef class to avoid delays later on
+		// Load the CharDef class (and the definitions from file) to avoid delays later on
 		CharDef.class.toString();
 	}
 	
@@ -224,6 +224,7 @@ public class PlayerCheckerTab extends LoggedTab {
 						final boolean exactMatch = playerName.indexOf( 'I' ) < 0 && playerName.indexOf( 'l' ) < 0;
 						final String loweredPlayerName = playerName.toLowerCase();
 						
+						// TODO: have to check variations: i, l (permutations for all that was from I or l)
 						Set< String > playerNameSet;
 						if ( ( playerNameSet = gatewayBwhfHackerSetMap.get( gateway ) ) != null && gatewayBwhfHackerSetMap.get( gateway ).contains( loweredPlayerName ) ) {
 							logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "hacker player in game lobby: " + playerName );
