@@ -289,9 +289,10 @@ public class Utils {
 	 * Will return immediately, the wav playing will run on a new thread.
 	 * 
 	 * @param wavFile the wav file to play
+	 * @param waitPlayEnd tells if have to wait the end of the play
 	 * @return true if the file was started playing; false if error occurred
 	 */
-	public static boolean playWavFile( final File wavFile ) {
+	public static boolean playWavFile( final File wavFile, final boolean waitPlayEnd ) {
 		try {
 			final AudioInputStream audioInputStream = AudioSystem.getAudioInputStream( wavFile );
 			final AudioFormat      audioFormat      = audioInputStream.getFormat();
@@ -304,7 +305,7 @@ public class Utils {
 	            volume.setValue( (float) ( 20.0*Math.log10( MainFrame.getInstance().generalSettingsTab.soundVolumeSlider.getValue() / 100.0 ) ) );
 			}
 			
-			new Thread() {
+			final Thread wavPlayerThread = new Thread() {
 				@Override
 				public void run() {
 					try {
@@ -324,7 +325,11 @@ public class Utils {
 						audioLine.close();
 					}
 				}
-			}.start();
+			};
+			wavPlayerThread.start();
+			
+			if ( waitPlayEnd )
+				wavPlayerThread.join();
 			
 			return true;
 		}

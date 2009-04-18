@@ -125,9 +125,9 @@ public class ReplaySearchTab extends Tab {
 	private final MainFrame mainFrame = MainFrame.getInstance();
 	
 	/** Button to select folders to search.  */
-	private final JButton selectFoldersButton        = new JButton( "Select folders to search recursively" );
+	private final JButton selectFoldersButton        = new JButton( "Select folders to search recursively..." );
 	/** Button to select files to search.    */
-	private final JButton selectFilesButton          = new JButton( "Select files to search" );
+	private final JButton selectFilesButton          = new JButton( "Select files to search..." );
 	/** Button to stop the current search. */
 	private final JButton stopSearchButton           = new JButton( "Stop current search" );
 	/** Button to repeat search on the same files. */
