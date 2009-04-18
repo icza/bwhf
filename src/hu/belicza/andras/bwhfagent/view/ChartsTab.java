@@ -31,7 +31,7 @@ public class ChartsTab extends Tab {
 	/** Button to display game chat from the last replay.  */
 	private final JButton   openLastReplayButton = new JButton( "Open 'LastReplay.rep'" );
 	/** Button to select files to extract game chat.       */
-	private final JButton   selectFileButton     = new JButton( "Select file to open" );
+	private final JButton   selectFileButton     = new JButton( "Select file to open..." );
 	/** Label to display the loaded replay.                */
 	private final JLabel    loadedReplayLabel    = new JLabel( "No replay loaded." );
 	

@@ -1,6 +1,7 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhfagent.Consts;
+import hu.belicza.andras.bwhfagent.view.textrecognition.CharDef;
 import hu.belicza.andras.bwhfagent.view.textrecognition.TextRecognizer;
 import hu.belicza.andras.hackerdb.ServerApiConsts;
 
@@ -92,6 +93,9 @@ public class PlayerCheckerTab extends LoggedTab {
 		
 		reloadPlayerList( HACKER_LIST_CACHE_FILE, gatewayBwhfHackerSetMap );
 		includeCustomPlayerListCheckBox.doClick();
+		
+		// Load the CharDef class to avoid delays later on
+		CharDef.class.toString();
 	}
 	
 	@Override
@@ -190,7 +194,7 @@ public class PlayerCheckerTab extends LoggedTab {
 	
 	/**
 	 * Check players from the provided screenshot files.
-	 * @param screenshotFiles screehshot files to be used to obtain player names
+	 * @param screenshotFiles screenshot files to be used to obtain player names
 	 * @return the remaining files that were not deleted
 	 */
 	public synchronized File[] checkPlayers( final File[] screenshotFiles ) {
@@ -207,7 +211,7 @@ public class PlayerCheckerTab extends LoggedTab {
 			if ( image == null || !TextRecognizer.isGameLobbyScreenshot( image ) )
 				remainedScreenshotFileList.add( screenshotFile );
 			else {
-				logMessage( "\n", false ); // Prints 2 empty lines
+				logMessage( "", false ); // Prints 2 empty lines
 				logMessage( "Game lobby screenshot detected, proceeding to check..." );
 				
 				final int gateway = MainFrame.getInstance().autoscanTab.gatewayComboBox.getSelectedIndex() - 1;
@@ -223,15 +227,13 @@ public class PlayerCheckerTab extends LoggedTab {
 						Set< String > playerNameSet;
 						if ( ( playerNameSet = gatewayBwhfHackerSetMap.get( gateway ) ) != null && gatewayBwhfHackerSetMap.get( gateway ).contains( loweredPlayerName ) ) {
 							logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "hacker player in game lobby: " + playerName );
-							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "hacker.wav" : "suspicious.wav" ) );
-							// TODO: handle proper delay here
-							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "player" + (i+1) + ".wav" ) );
+							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "hacker_at_slot.wav" : "possible_hacker_at_slot.wav" ), true );
+							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (i+1) + ".wav" ), true );
 						}
 						else if ( ( playerNameSet = gatewayCustomPlayerSetMap.get( gateway ) ) != null && playerNameSet.contains( loweredPlayerName ) ) {
 							logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "custom listed player in game lobby: " + playerName );
-							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "custom.wav" : "custom2.wav" ) );
-							// TODO: handle proper delay here
-							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "player" + (i+1) + ".wav" ) );
+							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "custom_at_slot.wav" : "possible_custom_at_slot.wav" ), true );
+							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (i+1) + ".wav" ), true );
 						}
 					}
 				}
@@ -265,7 +267,7 @@ public class PlayerCheckerTab extends LoggedTab {
 				BufferedReader input  = null;
 				PrintWriter    output = null;
 				try {
-					logMessage( "\n", false ); // Prints 2 empty lines
+					logMessage( "", false ); // Prints 2 empty lines
 					logMessage( "Updating hacker list..." );
 					
 					if ( HACKER_LIST_DIRECTORY.exists() && HACKER_LIST_DIRECTORY.isFile() ) {
@@ -331,7 +333,7 @@ public class PlayerCheckerTab extends LoggedTab {
 	private synchronized void reloadPlayerList( final File file, final Map< Integer, Set< String > > gatewayPlayerSetMap ) {
 		gatewayPlayerSetMap.clear();
 		
-		logMessage( "\n", false ); // Prints 2 empty lines
+		logMessage( "", false ); // Prints 2 empty lines
 		logMessage( "Reloading player list from file: '" + file.getAbsolutePath() + "'..." );
 		
 		BufferedReader input = null;
