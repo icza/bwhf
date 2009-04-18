@@ -199,6 +199,8 @@ public class PcxConverterTab extends ProgressLoggedTab {
 										return pathname.lastModified() > lastCheckTimeHolder[ 0 ].getTime() && pathname.getName().toLowerCase().endsWith( PCX_FILE_EXTENSION );
 									}
 								} );
+								// We store it here, because what comes next might take some time (while new screenshot might be saved).
+								lastCheckTimeHolder[ 0 ] = new Date();
 								
 								if ( pcxFiles != null && pcxFiles.length > 0 ) {
 									if ( playerCheckerTab.playerCheckerEnabledCheckBox.isSelected() )
@@ -210,8 +212,6 @@ public class PcxConverterTab extends ProgressLoggedTab {
 										convertPcxFiles( pcxFiles, true, false );
 									}
 								}
-								
-								lastCheckTimeHolder[ 0 ] = new Date();
 							}
 							else
 								lastCheckTimeHolder[ 0 ] = null;
