@@ -708,6 +708,8 @@ public class HackerDbServlet extends HttpServlet {
 		ResultSet  resultSet  = null;
 		
 		PrintWriter outputWriter = null;
+		boolean     success      = true;
+		final long  startTime    = System.nanoTime();
 		try {
 			connection = dataSource.getConnection();
 			
@@ -719,10 +721,29 @@ public class HackerDbServlet extends HttpServlet {
 				outputWriter.println( resultSet.getInt( 1 ) + "," + resultSet.getString( 2 ) );
 			
 			outputWriter.flush();
+			
 		}
 		catch ( final Exception e ) {
+			success = false;
 		}
 		finally {
+			if ( connection != null ) {
+				PreparedStatement preparedStatement = null;
+				try {
+					preparedStatement = connection.prepareStatement( "INSERT INTO download_log (ip,success,exec_time_ms) VALUES (?,?,?)" );
+					preparedStatement.setString ( 1, request.getRemoteAddr() );
+					preparedStatement.setBoolean( 2, success );
+					preparedStatement.setInt    ( 3, (int) ( ( System.nanoTime() - startTime ) / 1000000l ) );
+					preparedStatement.executeUpdate();
+				}
+				catch ( final Exception e ) {
+				}
+				finally {
+					if ( preparedStatement != null )
+						try { preparedStatement.close(); } catch ( final SQLException se ) {}
+				}
+			}
+			
 			if ( resultSet != null )
 				try { resultSet.close(); } catch ( final SQLException se ) {}
 			if ( statement != null )

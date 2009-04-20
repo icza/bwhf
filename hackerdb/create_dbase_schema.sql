@@ -47,3 +47,12 @@ CREATE CACHED TABLE report (
     FOREIGN KEY (hacker) REFERENCES hacker(id) ON DELETE CASCADE
 );
 
+
+CREATE CACHED TABLE download_log (
+    id           IDENTITY,
+    ip           VARCHAR,                --IP of the downloader's computer.
+    success      BOOLEAN,
+    exec_time_ms INT,                    --Execution time in ms.
+    version      TIMESTAMP DEFAULT NOW
+);
+
