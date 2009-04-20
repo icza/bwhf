@@ -31,9 +31,9 @@ public class CharDef {
 	/** Name of the image file containing the character definitions. */
 	private static final String CHAR_DEFS_FILE_NAME = "chardefs.png";
 	
-	/** RGB values of the colors of the characters' image.<br>
+	/** HSB values of the colors of the characters' image.<br>
 	 * First element indicates no pixel. */
-	public static final int[] CHAR_IMAGE_RGBS = { 0, new Color( 120, 216, 80 ).getRGB(), new Color( 104, 179, 64 ).getRGB(), new Color( 75, 135, 52 ).getRGB(), new Color( 45, 85, 29 ).getRGB(), new Color( 29, 38, 59 ).getRGB() };
+	public static final float[][] CHAR_IMAGE_HSBS = { null, Color.RGBtoHSB( 120, 216, 80, null ), Color.RGBtoHSB( 104, 179, 64, null ), Color.RGBtoHSB( 75, 135, 52, null ), Color.RGBtoHSB( 45, 85, 29, null ), Color.RGBtoHSB( 29, 38, 59, null ) };
 	
 	/** Width of the space character. */
 	public static final int SPACE_CHAR_WIDTH = 5;
@@ -101,8 +101,8 @@ public class CharDef {
 					final byte[][] imageData = new byte[ HEIGHT ][ width ];
 					for ( int x = xPos + width - 1; x >= xPos; x-- )
 						for ( int y = HEIGHT - 1; y >= 0; y-- )
-							for ( byte colorIndex = (byte) ( CHAR_IMAGE_RGBS.length - 1 ); colorIndex > (byte) 0; colorIndex-- )
-								if ( doPixelsMatch( CHAR_IMAGE_RGBS[ colorIndex ], charDefsImage.getRGB( x, y ) ) ) {
+							for ( byte colorIndex = (byte) ( CHAR_IMAGE_HSBS.length - 1 ); colorIndex > (byte) 0; colorIndex-- )
+								if ( doPixelsMatch( charDefsImage.getRGB( x, y ), CHAR_IMAGE_HSBS[ colorIndex ] ) ) {
 									imageData[ y ][ x - xPos ] = colorIndex;
 									break;
 								}
@@ -144,8 +144,8 @@ public class CharDef {
 		
 		for ( ; y < y2; y++ ) {
 			int picRgb = image.getRGB( x, y );
-			for ( int colorIndex = CHAR_IMAGE_RGBS.length - 1; colorIndex > 0; colorIndex-- )
-				if ( doPixelsMatch( picRgb, CHAR_IMAGE_RGBS[ colorIndex ] ) )
+			for ( int colorIndex = CHAR_IMAGE_HSBS.length - 1; colorIndex > 0; colorIndex-- )
+				if ( doPixelsMatch( picRgb, CHAR_IMAGE_HSBS[ colorIndex ] ) )
 					return false;
 		}
 		
@@ -153,21 +153,17 @@ public class CharDef {
 	}
 	
 	/**
-	 * Tests if 2 pixels given with their rgb values match allowing "some" difference.
-	 * @param rgb1 rgb value of the first pixel to test
-	 * @param rgb2 rgb vlaue of the second pixel to text
-	 * @return true if the 2 pixels match
+	 * Tests if a pixel given with its rgb values match a hsb specified color disregarding their brightness.
+	 * @param rgb rgb value of the pixel to be texted
+	 * @param hsb hsb values of the second pixel
+	 * @return true if the 2 pixels match disregarding their brightness
 	 */
-	public static boolean doPixelsMatch( int rgb1, int rgb2 ) {
-		final int MAX_DIFF = 15;
+	public static boolean doPixelsMatch( int rgb, float[] hsb ) {
+		final float[] hsb2 = Color.RGBtoHSB( ( rgb >> 16 ) & 0xff, ( rgb >> 8 ) & 0xff, rgb & 0xff, null );
 		
-		for ( int i = 0; i < 3; i++, rgb1 >>= 8, rgb2 >>= 8 ) { // 3 components: R, G, B
-			final int compDiff = ( rgb1 & 0xff ) - ( rgb2 & 0xff );
-			if ( compDiff > MAX_DIFF || compDiff < -MAX_DIFF )
-				return false;
-		}
+		final float diff = hsb[ 0 ] - hsb2[ 0 ];
 		
-		return true;
+		return diff > -0.1f && diff < 0.1f;
 	}
 	
 }
