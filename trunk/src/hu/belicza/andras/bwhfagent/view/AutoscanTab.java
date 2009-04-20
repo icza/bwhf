@@ -4,6 +4,7 @@ import hu.belicza.andras.bwhf.control.BinRepParser;
 import hu.belicza.andras.bwhf.control.ReplayScanner;
 import hu.belicza.andras.bwhf.model.HackDescription;
 import hu.belicza.andras.bwhf.model.Replay;
+import hu.belicza.andras.bwhf.model.ReplayHeader;
 import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.hackerdb.ServerApiConsts;
 
@@ -53,13 +54,11 @@ public class AutoscanTab extends LoggedTab {
 	/** Save hacker replays to this folder.                                     */
 	private   final JTextField allRepsDestinationTextField    = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_REPS_DESTINATION ) );
 	/** Checkbox to enable/disable playing sound if found hacks.                */
-	private   final JCheckBox  playSoundCheckBox              = new JCheckBox( "Play wav file if found hacks:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_PLAY_SOUND ) ) );
-	/** Wav file to play when found hacks.                                      */
-	private   final JTextField foundHacksWavFileTextField     = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_FOUND_HACKS_WAV_FILE ) );
+	private   final JCheckBox  playSoundCheckBox              = new JCheckBox( "Play sound alert if found hackers", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_PLAY_SOUND_IF_FOUND_HACKERS ) ) );
 	/** Checkbox to enable/disable bringing main frame to front if found hacks. */
-	private   final JCheckBox  bringToFrontCheckBox           = new JCheckBox( "Bring agent to front if found hacks", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_BRING_TO_FRONT ) ) );
+	private   final JCheckBox  bringToFrontCheckBox           = new JCheckBox( "Bring Agent to front if found hackers", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_BRING_TO_FRONT ) ) );
 	/** Checkbox to enable/disable reporting hackers.                           */
-	private   final JCheckBox  reportHackersCheckBox          = new JCheckBox( "Report hackers to a central hacker database with Battle.net gateway:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPORT_HACKERS ) ) );
+	private   final JCheckBox  reportHackersCheckBox          = new JCheckBox( "Report hackers to the central hacker database with Battle.net gateway:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPORT_HACKERS ) ) );
 	/** Combobox to select the gateway of the user.                             */
 	protected final JComboBox  gatewayComboBox                = new JComboBox();
 	
@@ -123,41 +122,9 @@ public class AutoscanTab extends LoggedTab {
 		gridBagLayout.setConstraints( button, constraints );
 		settingsPanel.add( button );
 		
-		constraints.gridwidth = 1;
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		gridBagLayout.setConstraints( playSoundCheckBox, constraints );
 		settingsPanel.add( playSoundCheckBox );
-		gridBagLayout.setConstraints( foundHacksWavFileTextField, constraints );
-		settingsPanel.add( foundHacksWavFileTextField );
-		constraints.gridwidth = GridBagConstraints.REMAINDER;
-		JPanel panel = new JPanel( new BorderLayout() );
-		button = createFileChooserButton( foundHacksWavFileTextField, JFileChooser.FILES_ONLY, new FileFilter() {
-			@Override
-			public boolean accept( final File file ) {
-				return file.isDirectory() || file.getName().toLowerCase().endsWith( ".wav" );
-			}
-			@Override
-			public String getDescription() {
-				return "Wave audio files (*.wav)";
-			}
-		}, new String[][] { new String[] { "*.wav", "*.*" }, new String[] { "Wave audio files (*.wav)", "All files (*.*)" } }, new Runnable() {
-			public void run() {
-				// If one of our sound file was selected, we replace its path to be relative so it will work if the product is copied/moved to another directory or environment
-				final File selectedFile = new File( foundHacksWavFileTextField.getText() );
-				if ( selectedFile.getAbsolutePath().equals( new File( Consts.SOUNDS_DIRECTORY_NAME + "/" + selectedFile.getName() ).getAbsolutePath() ) )
-					foundHacksWavFileTextField.setText( Consts.SOUNDS_DIRECTORY_NAME + "/" + selectedFile.getName() );
-			}
-		} );
-		panel.add( button, BorderLayout.CENTER );
-		final JButton testButton = new JButton( "Play" );
-		testButton.setToolTipText( "Play the selected sound file" );
-		testButton.addActionListener( new ActionListener() {
-			public void actionPerformed( final ActionEvent event ) {
-				Utils.playWavFile( new File( foundHacksWavFileTextField.getText() ), false );
-			}
-		} );
-		panel.add( testButton, BorderLayout.EAST );
-		gridBagLayout.setConstraints( panel, constraints );
-		settingsPanel.add( panel );
 		
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		gridBagLayout.setConstraints( bringToFrontCheckBox, constraints );
@@ -165,7 +132,7 @@ public class AutoscanTab extends LoggedTab {
 		
 		constraints.gridwidth = 2;
 		final JButton checkKeyButton = new JButton( CHECK_KEY_BUTTON_TEXT );
-		panel = new JPanel( new BorderLayout() );
+		JPanel panel = new JPanel( new BorderLayout() );
 		reportHackersCheckBox.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				if ( reportHackersCheckBox.isSelected() ) {
@@ -297,15 +264,30 @@ public class AutoscanTab extends LoggedTab {
 											MainFrame.getInstance().selectTab( AutoscanTab.this );
 											MainFrame.getInstance().toFront();
 										}
-										if ( playSoundCheckBox.isSelected() )
-											Utils.playWavFile( new File( foundHacksWavFileTextField.getText() ), false );
 										
+										final Set< String > hackerSet = new HashSet< String >();
 										logMessage( "Found " + hackDescriptionList.size() + " hack" + (hackDescriptionList.size() == 1 ? "" : "s" ) + " in LastReplay.rep:" );
-										for ( final HackDescription hackDescription : hackDescriptionList )
+										for ( final HackDescription hackDescription : hackDescriptionList ) {
 											logMessage( "\t" + hackDescription.description, false );
+											hackerSet.add( hackDescription.playerName );
+										}
 										
 										if ( saveHackerRepsCheckBox.isSelected() )
 											Utils.copyFile( lastReplayFile, new File( hackerRepsDestinationTextField.getText() ), Utils.DATE_FORMAT.format( new Date() ) + " LastRep.rep" );
+										
+										if ( playSoundCheckBox.isSelected() ) {
+											final ReplayHeader replayHeader = replay.replayHeader;
+											for ( final String hacker : hackerSet ) {
+												final int playerIndex = replayHeader.getPlayerIndexByName( hacker );
+												if ( playerIndex >= 0 ) {
+													Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "hacker.wav" ), true );
+													if ( replayHeader.playerColors[ playerIndex ] < 8  )
+														Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, ReplayHeader.IN_GAME_COLOR_NAMES[ replayHeader.playerColors[ playerIndex ] ]+ ".wav" ), true );
+													if ( replayHeader.playerRaces[ playerIndex ] < ReplayHeader.RACE_NAMES.length )
+														Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, ReplayHeader.RACE_NAMES[ replayHeader.playerRaces[ playerIndex ] ].toLowerCase() + ".wav" ), true );
+												}
+											}
+										}
 										
 										if ( reportHackersCheckBox.isSelected() ) {
 											if ( gatewayComboBox.getSelectedIndex() == 0 )
@@ -325,7 +307,7 @@ public class AutoscanTab extends LoggedTab {
 										}
 									}
 									else
-										logMessage( "Found no hacks in LastReplay.rep." );
+										logMessage( "Found no hacks in 'LastReplay.rep.'" );
 							}
 						}
 						else
@@ -343,17 +325,16 @@ public class AutoscanTab extends LoggedTab {
 	
 	@Override
 	public void assignUsedProperties() {
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTOSCAN_ENABLED       , Boolean.toString( autoscanEnabledCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_SAVE_HACKER_REPS       , Boolean.toString( saveHackerRepsCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_HACKER_REPS_DESTINATION, hackerRepsDestinationTextField.getText() );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_SAVE_ALL_REPS          , Boolean.toString( saveAllRepsCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_ALL_REPS_DESTINATION   , allRepsDestinationTextField.getText() );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_PLAY_SOUND             , Boolean.toString( playSoundCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_FOUND_HACKS_WAV_FILE   , foundHacksWavFileTextField.getText() );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_BRING_TO_FRONT         , Boolean.toString( bringToFrontCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_REPORT_HACKERS         , Boolean.toString( reportHackersCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_GATEWAY                , Integer.toString( gatewayComboBox.getSelectedIndex() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTHORIZATION_KEY      , authorizationKey );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTOSCAN_ENABLED           , Boolean.toString( autoscanEnabledCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SAVE_HACKER_REPS           , Boolean.toString( saveHackerRepsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_HACKER_REPS_DESTINATION    , hackerRepsDestinationTextField.getText() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SAVE_ALL_REPS              , Boolean.toString( saveAllRepsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_ALL_REPS_DESTINATION       , allRepsDestinationTextField.getText() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_PLAY_SOUND_IF_FOUND_HACKERS, Boolean.toString( playSoundCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_BRING_TO_FRONT             , Boolean.toString( bringToFrontCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_REPORT_HACKERS             , Boolean.toString( reportHackersCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_GATEWAY                    , Integer.toString( gatewayComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTHORIZATION_KEY          , authorizationKey );
 	}
 	
 }
