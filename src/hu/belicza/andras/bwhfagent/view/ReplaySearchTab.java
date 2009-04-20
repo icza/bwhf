@@ -149,6 +149,9 @@ public class ReplaySearchTab extends Tab {
 	/** Label to display the results count. */
 	private final JLabel resultsCountLabel = new JLabel();
 	
+	/** Checkbox to add new search results to previous one (do not clear). */
+	private final JCheckBox appendResultsToTableCheckBox = new JCheckBox( "Append results to table (will not clear table)", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_APPEND_RESULTS_TO_TABLE ) ) );
+	
 	/** Button to show selected replay on charts.               */
 	private final JButton showOnChartsButton    = new JButton( "Show on charts"    );
 	/** Button to scan selected replays for hacks.              */
@@ -510,7 +513,14 @@ public class ReplaySearchTab extends Tab {
 		} );
 		
 		final JPanel allButtonsWrapperPanel = Utils.createWrapperPanel();
-		//allButtonsWrapperPanel.setLayout( new BoxLayout( allButtonsWrapperPanel, BoxLayout.X_AXIS ) );
+		appendResultsToTableCheckBox.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				if ( !stopSearchButton.isEnabled() )
+					searchPreviousResultButton.setEnabled( !appendResultsToTableCheckBox.isSelected() );
+			}
+		} );
+		allButtonsWrapperPanel.add( Utils.wrapInPanel( appendResultsToTableCheckBox ) );
+		
 		final Box searchStartButtonsBox = Box.createVerticalBox();
 		JPanel selectButtonsPanel = Utils.createWrapperPanel();
 		final ActionListener selectFilesAndFoldersActionListener = new ActionListener() {
@@ -785,19 +795,22 @@ public class ReplaySearchTab extends Tab {
 	 */
 	private void searchFilesAndFolders( final File[] files ) {
 		requestedToStop = false;
-		selectFoldersButton       .setEnabled( false );
-		selectFilesButton         .setEnabled( false );
-		repeatSearchButton        .setEnabled( false );
-		searchPreviousResultButton.setEnabled( false );
-		stopSearchButton          .setEnabled( true  );
-		saveResultListButton      .setEnabled( false );
-		loadResultListButton      .setEnabled( false );
+		selectFoldersButton         .setEnabled( false );
+		selectFilesButton           .setEnabled( false );
+		repeatSearchButton          .setEnabled( false );
+		searchPreviousResultButton  .setEnabled( false );
+		stopSearchButton            .setEnabled( true  );
+		saveResultListButton        .setEnabled( false );
+		loadResultListButton        .setEnabled( false );
+		appendResultsToTableCheckBox.setEnabled( false );
 		
 		disableResultHandlerButtons();
 		
 		lastSearchSourceFiles = files;
-		lastSearchResultFileList.clear();
-		lastSearchResultRowsData.clear();
+		if ( !appendResultsToTableCheckBox.isSelected() ) {
+			lastSearchResultFileList.clear();
+			lastSearchResultRowsData.clear();
+		}
 		
 		final ReplayFilter[] replayFilters = getReplayFilters();
 		
@@ -849,13 +862,14 @@ public class ReplaySearchTab extends Tab {
 				finally {
 					updatedResultsCountLabel();
 					refreshResultTable();
-					loadResultListButton      .setEnabled( true  );
-					saveResultListButton      .setEnabled( true  );
-					stopSearchButton          .setEnabled( false );
-					selectFilesButton         .setEnabled( true  );
-					selectFoldersButton       .setEnabled( true  );
-					repeatSearchButton        .setEnabled( true  );
-					searchPreviousResultButton.setEnabled( true  );
+					appendResultsToTableCheckBox.setEnabled( true );
+					loadResultListButton        .setEnabled( true  );
+					saveResultListButton        .setEnabled( true  );
+					stopSearchButton            .setEnabled( false );
+					selectFilesButton           .setEnabled( true  );
+					selectFoldersButton         .setEnabled( true  );
+					repeatSearchButton          .setEnabled( true  );
+					searchPreviousResultButton  .setEnabled( !appendResultsToTableCheckBox.isSelected() );
 				}
 			}
 			
