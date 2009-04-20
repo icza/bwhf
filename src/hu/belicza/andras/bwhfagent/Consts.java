@@ -79,10 +79,8 @@ public class Consts {
 	public static final String PROPERTY_PCX_OUTPUT_FORMAT              = "pcxOutputFormat";
 	/** Include replay header property.          */
 	public static final String PROPERTY_INCLUDE_REPLAY_HEADER          = "includeReplayHeader";
-	/** Play sound property.                     */
-	public static final String PROPERTY_PLAY_SOUND                     = "playSound";
-	/** Found hacks wav file property.           */
-	public static final String PROPERTY_FOUND_HACKS_WAV_FILE           = "foundHacksWavFile";
+	/** Play sound if found hackers property.    */
+	public static final String PROPERTY_PLAY_SOUND_IF_FOUND_HACKERS    = "playSoundIfFoundHackers";
 	/** Bring to front property.                 */
 	public static final String PROPERTY_BRING_TO_FRONT                 = "bringToFront";
 	/** Report hackers property.                 */
@@ -168,8 +166,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_CONVERT_PCX_ENABLED      , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PCX_OUTPUT_FORMAT             , "JPG" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_INCLUDE_REPLAY_HEADER         , "true" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAY_SOUND                    , "true" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_FOUND_HACKS_WAV_FILE          , SOUNDS_DIRECTORY_NAME + "/falling.wav" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAY_SOUND_IF_FOUND_HACKERS   , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_BRING_TO_FRONT                , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPORT_HACKERS                , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_GATEWAY                       , "0" );
