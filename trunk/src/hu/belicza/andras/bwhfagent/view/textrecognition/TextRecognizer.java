@@ -38,12 +38,10 @@ public class TextRecognizer {
 			if ( isSlotPlayerSlot( slot, image ) ) {
 				String playerName = readString( PLAYER_SLOT_FRAME_X + 4, FIRST_PLAYER_SLOT_FRAME_Y + ( PLAYER_SLOT_HEIGHT + GAP_BETWEEN_PLAYER_SLOTS ) * slot + 2, image );
 				
-				if ( playerName != null ) {
-					if ( playerName.equals( "Open" ) || playerName.equals( "Closed" ) || playerName.equals( "Computer" ) )
-						playerNames.add( null );
-					else
-						playerNames.add( playerName );
-				}
+				if ( playerName == null || playerName.equals( "Open" ) || playerName.equals( "Closed" ) || playerName.equals( "Computer" ) )
+					playerNames.add( null );
+				else
+					playerNames.add( playerName );
 			}
 		
 		return playerNames.toArray( new String[ playerNames.size() ] );
@@ -72,7 +70,7 @@ public class TextRecognizer {
 	 * @return true if the specified slot is for player; false otherwise
 	 */
 	private static boolean isSlotPlayerSlot( final int slot, final BufferedImage image ) {
-		// Player slots are more idented than non-player slots.
+		// Player slots are more indented than non-player slots.
 		final int y1 = FIRST_PLAYER_SLOT_FRAME_Y + ( PLAYER_SLOT_HEIGHT + GAP_BETWEEN_PLAYER_SLOTS ) * slot + 2;
 		
 		for ( int y = y1 + PLAYER_SLOT_HEIGHT - 5; y >= y1; y-- )
@@ -104,9 +102,9 @@ public class TextRecognizer {
 		final int[] rgbBuffer = new int[ CharDef.HEIGHT * CharDef.MAX_CHAR_WIDTH ];
 		
 		while ( true ) {
-			// First determine the widht of the next char
+			// First determine the width of the next char
 			int width = 0;
-			for ( int xPos = x; x < VALID_SCREENSHOT_WIDTH; xPos++ )
+			for ( int xPos = x; x < 216; xPos++ ) // 216 is the end of the player slot frame
 				if ( CharDef.isCharColumnEmpty( xPos, y, image ) ) {
 					width = xPos - x;
 					break;
@@ -114,6 +112,9 @@ public class TextRecognizer {
 			
 			if ( width == 0 ) // We do not handle spaces yet.
 				break;
+			
+			if ( width > CharDef.MAX_CHAR_WIDTH )
+				return null; // Mouse cursor might have intervened.
 			
 			image.getRGB( x, y, width, CharDef.HEIGHT, rgbBuffer, 0, CharDef.MAX_CHAR_WIDTH );
 			

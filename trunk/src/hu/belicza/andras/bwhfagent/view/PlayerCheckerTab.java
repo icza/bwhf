@@ -235,7 +235,7 @@ public class PlayerCheckerTab extends LoggedTab {
 				
 				for ( int i = 0; i < playerNames.length; i++ ) {
 					final String playerName = playerNames[ i ];
-					logMessage( "Name detected at slot: " + (i+1) + ": " + ( playerName != null && playerName.length() == 0 ? "<empty>" : playerName ) );
+					
 					if ( playerName != null ) {
 						final String[] playerNamePermutations = generatePlayerNamePermutations( playerName );
 						final boolean  exactMatch             = playerNamePermutations.length == 1;

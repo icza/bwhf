@@ -170,7 +170,7 @@ public class AutoscanTab extends LoggedTab {
 		settingsPanel.add( panel );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		panel = new JPanel( new BorderLayout() );
-		button = new JButton( "Change key" );
+		button = new JButton( "Change key..." );
 		button.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				final Object newAuthorizationKeyObject = JOptionPane.showInputDialog( getContent(), "Enter your authorization key:", "Changing key", JOptionPane.QUESTION_MESSAGE, null, null, authorizationKey );
@@ -282,7 +282,9 @@ public class AutoscanTab extends LoggedTab {
 												final int playerIndex = replayHeader.getPlayerIndexByName( hacker );
 												if ( playerIndex >= 0 ) {
 													if ( replayHeader.playerColors[ playerIndex ] < 8 )
-														Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, ReplayHeader.IN_GAME_COLOR_NAMES[ replayHeader.playerColors[ playerIndex ] ]+ ".wav" ), true );
+														Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, ReplayHeader.IN_GAME_COLOR_NAMES[ replayHeader.playerColors[ playerIndex ] ] + ".wav" ), true );
+													else
+														Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "unique.wav" ), true );
 													if ( replayHeader.playerRaces[ playerIndex ] < ReplayHeader.RACE_NAMES.length )
 														Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, ReplayHeader.RACE_NAMES[ replayHeader.playerRaces[ playerIndex ] ].toLowerCase() + ".wav" ), true );
 												}
