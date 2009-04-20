@@ -1,6 +1,5 @@
 package hu.belicza.andras.bwhfagent.view.textrecognition;
 
-import java.awt.Color;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,9 +16,6 @@ public class TextRecognizer {
 	/** Height of the valid screenshot. */
 	private static final int VALID_SCREENSHOT_HEIGHT = 480;
 	
-	/** RGB value of the color of inactive player frames in the game lobby. */
-	private static final int PLAYER_FRAME_RGB = new Color( 149, 0, 0 ).getRGB(); // Active frame has a color of new Color( 253, 0, 0 ) 
-	
 	/** y coordinate of the first player slot frame. */
 	private static final int FIRST_PLAYER_SLOT_FRAME_Y = 35;
 	/** x coordinate of the player slot frames.      */
@@ -32,7 +28,7 @@ public class TextRecognizer {
 	/**
 	 * Tries to read player names from a game lobby screenshot.<br>
 	 * The returned array contains as many elements as player slots are detected in the image.
-	 * Player names for slots not containing players will be <code>null</code> (for example empty slots, or slots set to computer).
+	 * Player names for slots not containing players will be <code>null</code> (when slot is "Open", "Closed" or "Computer").
 	 * @param image screenshot image of the game lobby
 	 * @return an array of player names read from the image
 	 */
@@ -43,12 +39,11 @@ public class TextRecognizer {
 				String playerName = readString( PLAYER_SLOT_FRAME_X + 4, FIRST_PLAYER_SLOT_FRAME_Y + ( PLAYER_SLOT_HEIGHT + GAP_BETWEEN_PLAYER_SLOTS ) * slot + 2, image );
 				
 				if ( playerName != null ) {
-					final String loweredPlayerName = playerName.toLowerCase();
-					if ( loweredPlayerName.equals( "open" ) || loweredPlayerName.equals( "closed" ) || loweredPlayerName.equals( "computer" ) )
-						playerName = null;
+					if ( playerName.equals( "Open" ) || playerName.equals( "Closed" ) || playerName.equals( "Computer" ) )
+						playerNames.add( null );
+					else
+						playerNames.add( playerName );
 				}
-				
-				playerNames.add( playerName );
 			}
 		
 		return playerNames.toArray( new String[ playerNames.size() ] );
@@ -63,17 +58,16 @@ public class TextRecognizer {
 		if ( image.getWidth() != VALID_SCREENSHOT_WIDTH || image.getHeight() != VALID_SCREENSHOT_HEIGHT )
 			return false;
 		
-		// We check if the first game slot frame is present
 		for ( int x = 251; x < 266; x++ )
-			if ( !CharDef.doPixelsMatch( image.getRGB( x, 25 ), PLAYER_FRAME_RGB ) )
+			if ( !isPixelFrameColor( image.getRGB( x, 25 ) ) )
 				return false;
 		
 		return true;
 	}
 	
 	/**
-	 * Checks if a slot is used for player.
-	 * @param slot slot to be checked
+	 * Checks if a slot is used for player.<br>
+	 * @param slot slot to be checked (starting from 0)
 	 * @param image screenshot image of the game lobby
 	 * @return true if the specified slot is for player; false otherwise
 	 */
@@ -82,10 +76,20 @@ public class TextRecognizer {
 		final int y1 = FIRST_PLAYER_SLOT_FRAME_Y + ( PLAYER_SLOT_HEIGHT + GAP_BETWEEN_PLAYER_SLOTS ) * slot + 2;
 		
 		for ( int y = y1 + PLAYER_SLOT_HEIGHT - 5; y >= y1; y-- )
-			if ( !CharDef.doPixelsMatch( image.getRGB( PLAYER_SLOT_FRAME_X, y ), PLAYER_FRAME_RGB ) )
+			if ( !isPixelFrameColor( image.getRGB( PLAYER_SLOT_FRAME_X, y ) ) )
 				return false;
 		
 		return true;
+	}
+	
+	/**
+	 * Tests if the given color is a frame color.
+	 * @param rgb rgb to be tested
+	 * @return true if the specified color is a frame color
+	 */
+	private static boolean isPixelFrameColor( final int rgb ) {
+		// Frames are "clean" red
+		return ( rgb & 0xff ) == 0 && ( ( rgb >> 8 ) & 0xff ) == 0 && ( ( rgb >> 16 ) & 0xff ) > 20;
 	}
 	
 	/**
@@ -127,14 +131,14 @@ public class TextRecognizer {
 						final int  pixelRgb   = rgbBuffer[ rgbBufferIndex ]; 
 						
 						if ( colorIndex == (byte) 0x00 ) // If no pixel in charDef, no valid char color may occur
-							for ( int colorIndex2 = CharDef.CHAR_IMAGE_RGBS.length - 1; colorIndex2 > 1; colorIndex2-- ) {
-								if ( CharDef.doPixelsMatch( pixelRgb, CharDef.CHAR_IMAGE_RGBS[ colorIndex2 ] ) ) {
+							for ( int colorIndex2 = CharDef.CHAR_IMAGE_HSBS.length - 1; colorIndex2 > 1; colorIndex2-- ) {
+								if ( CharDef.doPixelsMatch( pixelRgb, CharDef.CHAR_IMAGE_HSBS[ colorIndex2 ] ) ) {
 									charDefMatches = false;
 									break charMatchCheck;
 								}
 							}
 						else                             // Pixel in charDef must match the picture
-							if ( !CharDef.doPixelsMatch( pixelRgb, CharDef.CHAR_IMAGE_RGBS[ colorIndex ] ) ) {
+							if ( !CharDef.doPixelsMatch( pixelRgb, CharDef.CHAR_IMAGE_HSBS[ colorIndex ] ) ) {
 								charDefMatches = false;
 								break charMatchCheck;
 							}

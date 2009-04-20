@@ -45,6 +45,11 @@ import swingwtx.swing.JTextField;
  */
 public class PlayerCheckerTab extends LoggedTab {
 	
+	/** Time between checking if there's need to update the local hacker list cache. */
+	private static final long   TIME_BETWEEN_CHECKS_FOR_NEED_OF_UPDATE = 10000l;
+	/** Ms in an hour.                                                               */
+	private static final long   MS_IN_AN_HOUR                          = 60*60*1000l;
+	
 	/** Text of the update now button.           */
 	private static final String UPDATE_NOW_BUTTON_TEXT      = "Update now";
 	/** Name of the bwhf hacker list cache file. */
@@ -79,6 +84,9 @@ public class PlayerCheckerTab extends LoggedTab {
 	/** Custom players mapped to their gateways. */
 	private final Map< Integer, Set< String > > gatewayCustomPlayerSetMap = new HashMap< Integer, Set< String > >();
 	
+	/** Last update time. */
+	private volatile long lastUpdateTime = HACKER_LIST_CACHE_FILE.lastModified(); // If local cache doesn't exist yet, this returns 0l, and will update immediatelly if player checker is enabled.
+	
 	/**
 	 * Creates a new PlayerCheckerTab.
 	 */
@@ -96,6 +104,8 @@ public class PlayerCheckerTab extends LoggedTab {
 		
 		// Load the CharDef class (and the definitions from file) to avoid delays later on
 		CharDef.class.toString();
+		
+		startCacheAutoUpdater();
 	}
 	
 	@Override
@@ -169,7 +179,10 @@ public class PlayerCheckerTab extends LoggedTab {
 		wrapperPanel.add( button, BorderLayout.WEST );
 		reloadButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				reloadPlayerList( new File( customPlayerListFileTextField.getText() ), gatewayCustomPlayerSetMap );
+				if ( !includeCustomPlayerListCheckBox.isSelected() || customPlayerListFileTextField.getText().length() == 0 )
+					gatewayCustomPlayerSetMap.clear();
+				else
+					reloadPlayerList( new File( customPlayerListFileTextField.getText() ), gatewayCustomPlayerSetMap );
 			}
 		} );
 		wrapperPanel.add( reloadButton, BorderLayout.CENTER );
@@ -200,6 +213,10 @@ public class PlayerCheckerTab extends LoggedTab {
 	public synchronized File[] checkPlayers( final File[] screenshotFiles ) {
 		final List< File > remainedScreenshotFileList = new ArrayList< File >( screenshotFiles.length );
 		
+		final int gateway = MainFrame.getInstance().autoscanTab.gatewayComboBox.getSelectedIndex() - 1;
+		final Set< String > bwhfHackerSet       = gatewayBwhfHackerSetMap  .get( gateway );
+		final Set< String > customPlayerNameSet = gatewayCustomPlayerSetMap.get( gateway );
+		
 		for ( final File screenshotFile : screenshotFiles ) {
 			BufferedImage image = null;
 			try {
@@ -211,31 +228,36 @@ public class PlayerCheckerTab extends LoggedTab {
 			if ( image == null || !TextRecognizer.isGameLobbyScreenshot( image ) )
 				remainedScreenshotFileList.add( screenshotFile );
 			else {
-				logMessage( "", false ); // Prints 2 empty lines
+				logMessage( "", false ); // Prints an empty line
 				logMessage( "Game lobby screenshot detected, proceeding to check..." );
-				
-				final int gateway = MainFrame.getInstance().autoscanTab.gatewayComboBox.getSelectedIndex() - 1;
 				
 				final String[] playerNames = TextRecognizer.readPlayerNamesFromGameLobbyImage( image );
 				
 				for ( int i = 0; i < playerNames.length; i++ ) {
-					final String playerName = playerNames[ i ]; 
+					final String playerName = playerNames[ i ];
+					logMessage( "Name detected at slot: " + (i+1) + ": " + ( playerName != null && playerName.length() == 0 ? "<empty>" : playerName ) );
 					if ( playerName != null ) {
-						final boolean exactMatch = playerName.indexOf( 'I' ) < 0 && playerName.indexOf( 'l' ) < 0;
-						final String loweredPlayerName = playerName.toLowerCase();
+						final String[] playerNamePermutations = generatePlayerNamePermutations( playerName );
+						final boolean  exactMatch             = playerNamePermutations.length == 1;
 						
-						// TODO: have to check variations: i, l (permutations for all that was from I or l)
-						Set< String > playerNameSet;
-						if ( ( playerNameSet = gatewayBwhfHackerSetMap.get( gateway ) ) != null && gatewayBwhfHackerSetMap.get( gateway ).contains( loweredPlayerName ) ) {
-							logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "hacker player in game lobby: " + playerName );
-							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "hacker_at_slot.wav" : "possible_hacker_at_slot.wav" ), true );
-							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (i+1) + ".wav" ), true );
-						}
-						else if ( ( playerNameSet = gatewayCustomPlayerSetMap.get( gateway ) ) != null && playerNameSet.contains( loweredPlayerName ) ) {
-							logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "custom listed player in game lobby: " + playerName );
-							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "custom_at_slot.wav" : "possible_custom_at_slot.wav" ), true );
-							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (i+1) + ".wav" ), true );
-						}
+						// First check if the player is a hacker
+						boolean isHacker = false;
+						for ( final String playerNamePermutation : playerNamePermutations )
+							if ( bwhfHackerSet != null && bwhfHackerSet.contains( playerNamePermutation ) ) {
+								isHacker = true;
+								logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "hacker player in game lobby: " + playerName );
+								Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "hacker_at_slot.wav" : "possible_hacker_at_slot.wav" ), true );
+								Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (i+1) + ".wav" ), true );
+								break;
+							}
+						
+						if ( !isHacker ) for ( final String playerNamePermutation : playerNamePermutations )
+							if ( customPlayerNameSet != null && customPlayerNameSet.contains( playerNamePermutation ) ) {
+								logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "custom listed player in game lobby: " + playerName );
+								Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "custom_at_slot.wav" : "possible_custom_at_slot.wav" ), true );
+								Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (i+1) + ".wav" ), true );
+								break;
+							}
 					}
 				}
 				logMessage( "Player check finished." );
@@ -248,6 +270,54 @@ public class PlayerCheckerTab extends LoggedTab {
 		}
 		
 		return remainedScreenshotFileList.toArray( new File[ remainedScreenshotFileList.size() ] );
+	}
+	
+	/**
+	 * Generates possible player name permutations by varying between 'i' and 'l' where 'l' is detected.<br>
+	 * If no 'l' is found in the player name, then a 1-length array is returned with the original player name.
+	 * The returned array contains lowercased player names.<br>
+	 * The method only generates permutations for the first 5 'l's because player names can be up 15 (or something) chars,
+	 * and if all is 'l', it could define a really big amount of permutations.
+	 * @param playerName player name to permutate
+	 * @return an array of possible player name permutations
+	 */
+	private static String[] generatePlayerNamePermutations( final String playerName ) {
+		int lsCount = 0;
+		for ( int i = playerName.length() - 1; i >= 0; i-- )
+			if ( playerName.charAt( i ) == 'l' )
+				lsCount++;
+		
+		if ( lsCount == 0 )
+			return new String[] { playerName.toLowerCase() };
+		
+		if ( lsCount > 5 )
+			lsCount = 5;
+		
+		// Let's find the indices of 'l's
+		final int[] lsIndices = new int[ lsCount ];
+		int counter = 0;
+		for ( int i = playerName.length() - 1; i >= 0; i-- )
+			if ( playerName.charAt( i ) == 'l' )
+				lsIndices[ counter++ ] = i;
+		
+		final String[] playerNamePermutations = new String[ 1 << lsCount ];
+		final StringBuilder playerNamePermutationBuilder = new StringBuilder();
+		
+		// Now we build the permutations
+		for ( int permutation = playerNamePermutations.length - 1; permutation >= 0; permutation-- ) {
+			playerNamePermutationBuilder.setLength( 0 );
+			playerNamePermutationBuilder.append( playerName );
+			
+			// bit 0 means 'l', bit 1 means 'i'
+			int bitPos  = lsCount - 1;
+			int bitMask = playerNamePermutations.length >> 1;
+			for ( ; bitPos >= 0; bitPos--, bitMask >>= 1 )
+				playerNamePermutationBuilder.setCharAt( lsIndices[ bitPos ], ( permutation & bitMask ) > 0 ? 'i' : 'l' );
+			
+			playerNamePermutations[ permutation ] = playerNamePermutationBuilder.toString().toLowerCase();
+		}
+		
+		return playerNamePermutations;
 	}
 	
 	/**
@@ -268,7 +338,7 @@ public class PlayerCheckerTab extends LoggedTab {
 				BufferedReader input  = null;
 				PrintWriter    output = null;
 				try {
-					logMessage( "", false ); // Prints 2 empty lines
+					logMessage( "", false ); // Prints an empty line
 					logMessage( "Updating hacker list..." );
 					
 					if ( HACKER_LIST_DIRECTORY.exists() && HACKER_LIST_DIRECTORY.isFile() ) {
@@ -301,6 +371,8 @@ public class PlayerCheckerTab extends LoggedTab {
 						throw new Exception();
 					}
 					
+					// Local hacker list cache was modified, we set the last update time
+					lastUpdateTime = HACKER_LIST_CACHE_FILE.lastModified();
 					refreshLastUpdatedLabel();
 					
 					logMessage( "Update succeeded." );
@@ -334,7 +406,7 @@ public class PlayerCheckerTab extends LoggedTab {
 	private synchronized void reloadPlayerList( final File file, final Map< Integer, Set< String > > gatewayPlayerSetMap ) {
 		gatewayPlayerSetMap.clear();
 		
-		logMessage( "", false ); // Prints 2 empty lines
+		logMessage( "", false ); // Prints an empty line
 		logMessage( "Reloading player list from file: '" + file.getAbsolutePath() + "'..." );
 		
 		BufferedReader input = null;
@@ -388,6 +460,32 @@ public class PlayerCheckerTab extends LoggedTab {
 	private void refreshLastUpdatedLabel() {
 		final long lastUpdated = HACKER_LIST_CACHE_FILE.lastModified();
 		hackerListLastUpdatedLabel.setText( lastUpdated > 0l ? DATE_FORMAT.format( new Date( lastUpdated ) ) : "&lt;never&gt;" );
+	}
+	
+	/**
+	 * Starts the local hacker list cache auto updater. 
+	 */
+	private void startCacheAutoUpdater() {
+		new NormalThread() {
+			
+			@Override
+			public void run() {
+				while ( true ) {
+					try {
+						if ( playerCheckerEnabledCheckBox.isSelected() && new Date().getTime() > lastUpdateTime + MS_IN_AN_HOUR * (Integer) hackerListUpdateIntervalComboBox.getSelectedItem() ) {
+							// Regarding whether update succeeded or not, we set the last update time (we don't want to retry in every cycle if server is down for example)
+							lastUpdateTime = new Date().getTime();
+							updateHackerList();
+						}
+						
+						sleep( TIME_BETWEEN_CHECKS_FOR_NEED_OF_UPDATE );
+					}
+					catch ( final InterruptedException ie ) {
+					}
+				}
+			}
+			
+		}.start();
 	}
 	
 	@Override

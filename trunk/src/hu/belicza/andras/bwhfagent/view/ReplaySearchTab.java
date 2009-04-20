@@ -124,6 +124,9 @@ public class ReplaySearchTab extends Tab {
 	/** Reference to the main frame. */
 	private final MainFrame mainFrame = MainFrame.getInstance();
 	
+	/** Checkbox to add new search results to previous one (do not clear). */
+	private final JCheckBox appendResultsToTableCheckBox = new JCheckBox( "Append results to table (will not clear table)", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_APPEND_RESULTS_TO_TABLE ) ) );
+	
 	/** Button to select folders to search.  */
 	private final JButton selectFoldersButton        = new JButton( "Select folders to search recursively..." );
 	/** Button to select files to search.    */
@@ -148,9 +151,6 @@ public class ReplaySearchTab extends Tab {
 	
 	/** Label to display the results count. */
 	private final JLabel resultsCountLabel = new JLabel();
-	
-	/** Checkbox to add new search results to previous one (do not clear). */
-	private final JCheckBox appendResultsToTableCheckBox = new JCheckBox( "Append results to table (will not clear table)", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_APPEND_RESULTS_TO_TABLE ) ) );
 	
 	/** Button to show selected replay on charts.               */
 	private final JButton showOnChartsButton    = new JButton( "Show on charts"    );
@@ -247,6 +247,8 @@ public class ReplaySearchTab extends Tab {
 		}
 		
 		buildGUI();
+		
+		appendResultsToTableCheckBox.doClick(); // To enable/disable dependent buttons (will not change anything, but logically needed; might change in the future).
 	}
 	
 	/**
@@ -515,7 +517,7 @@ public class ReplaySearchTab extends Tab {
 		final JPanel allButtonsWrapperPanel = Utils.createWrapperPanel();
 		appendResultsToTableCheckBox.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				if ( !stopSearchButton.isEnabled() )
+				if ( !stopSearchButton.isEnabled() && !lastSearchResultFileList.isEmpty() )
 					searchPreviousResultButton.setEnabled( !appendResultsToTableCheckBox.isSelected() );
 			}
 		} );
@@ -1167,6 +1169,7 @@ public class ReplaySearchTab extends Tab {
 	
 	@Override
 	public void assignUsedProperties() {
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_APPEND_RESULTS_TO_TABLE, Boolean.toString( appendResultsToTableCheckBox.isSelected() ) );
 	}
 	
 }
