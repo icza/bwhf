@@ -220,6 +220,13 @@ public class GeneralSettingsTab extends Tab {
 		soundVolumeSlider.setLabelTable( soundVolumeSlider.createStandardLabels( 10 ) );
 		soundVolumeSlider.setPreferredSize( new Dimension( 300, 45 ) );
 		panel.add( soundVolumeSlider );
+		final JButton testSoundButton = new JButton( "Play test sound" );
+		testSoundButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "hacker.wav" ), false );
+			}
+		} );
+		panel.add( testSoundButton );
 		miscBox.add( panel );
 		miscBox.add( saveWindowPositionCheckBox );
 		miscBox.add( skipLatterActionsOfHackersCheckBox );
