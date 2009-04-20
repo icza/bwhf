@@ -278,10 +278,10 @@ public class AutoscanTab extends LoggedTab {
 										if ( playSoundCheckBox.isSelected() ) {
 											final ReplayHeader replayHeader = replay.replayHeader;
 											for ( final String hacker : hackerSet ) {
+												Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "hacker.wav" ), true );
 												final int playerIndex = replayHeader.getPlayerIndexByName( hacker );
 												if ( playerIndex >= 0 ) {
-													Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "hacker.wav" ), true );
-													if ( replayHeader.playerColors[ playerIndex ] < 8  )
+													if ( replayHeader.playerColors[ playerIndex ] < 8 )
 														Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, ReplayHeader.IN_GAME_COLOR_NAMES[ replayHeader.playerColors[ playerIndex ] ]+ ".wav" ), true );
 													if ( replayHeader.playerRaces[ playerIndex ] < ReplayHeader.RACE_NAMES.length )
 														Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, ReplayHeader.RACE_NAMES[ replayHeader.playerRaces[ playerIndex ] ].toLowerCase() + ".wav" ), true );
