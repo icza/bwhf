@@ -14,7 +14,7 @@
  * New setting on the general settings tab to set the default replay lists folder.
  * New setting on the general settings tab to select a program to view/edit files.
  * Added a new 'View entire log' button to all tabs which have a log text area. This button opens the proper log file in the editor set in the general settings tab.
- * If updates are available, the window icon and the tray icon is changed to a blue pill.
+ * If updates are available, the window icon and the tray icon is changed to a blue pill image.
  * Some other minor bug fixes.
 
 ----
