@@ -42,7 +42,7 @@ public class MainFrame extends JFrame {
 	/** Name of the image resource file to be used as icon image.     */
 	private static final String ICON_IMAGE_RESOURCE_NAME  = "red-pill.gif";
 	/** Name of the 2nd image resource file to be used as icon image. */
-	//private static final String ICON_IMAGE_RESOURCE_NAME2 = "blue-pill.gif";
+	private static final String ICON_IMAGE_RESOURCE_NAME2 = "blue-pill.gif";
 	
 	/** Stores the reference of the main frame. */
 	private static MainFrame mainFrame;
@@ -156,7 +156,7 @@ public class MainFrame extends JFrame {
 		if ( !new File( Consts.SETTINGS_PROPERTIES_FILE ).exists() ) {
 			// First run of BWHF Agent
 			if ( trayIconInstalled )
-				trayIcon.displayMessage( "Welcome!", "This is the first run of BWHF Agent.\nPlease set the Starcraft directory in the General settings tab.\n\nThank you for choosing BWHF Agent.", MessageType.INFO );
+				trayIcon.displayMessage( "Welcome!", "This is the first run of BWHF Agent.\n\nPlease set the Starcraft directory in the General settings tab.\nDon't forget to re-enter your Key if you have one.\n\nThank you for choosing BWHF Agent.", MessageType.INFO );
 		}
 	}
 	
@@ -431,6 +431,16 @@ public class MainFrame extends JFrame {
 			SystemTray.getSystemTray().remove( trayIcon );
 			trayIconInstalled = false;
 		}
+	}
+	
+	/**
+	 * "Stays in Wonderland."<br>
+	 * Changes the window icon and the tray icon to the blue pill.
+	 */
+	public void stayInWonderland() {
+		setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME2 ) ).getImage() );
+		if ( trayIcon != null )
+			trayIcon.setImage( new javax.swing.ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME2 ) ).getImage() );
 	}
 	
 }

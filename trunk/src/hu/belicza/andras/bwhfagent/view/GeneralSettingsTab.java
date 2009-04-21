@@ -79,8 +79,18 @@ public class GeneralSettingsTab extends Tab {
 		buildGUI();
 		checkStarcraftFolder();
 		
-		if ( checkUpdatesOnStartupCheckBox.isSelected() )
-			checkUpdatesButton.doClick();
+		if ( checkUpdatesOnStartupCheckBox.isSelected() ) // Start thread delayed in new thread becase main frame might not yet (or at all) be visible
+			new Thread() {
+				@Override
+				public void run() {
+					try {
+						sleep( 2000l );
+						checkUpdatesButton.doClick();
+					} catch ( final InterruptedException ie ) {
+						ie.printStackTrace();
+					}
+				}
+			}.start();
 	}
 	
 	/**
@@ -263,7 +273,8 @@ public class GeneralSettingsTab extends Tab {
 					if ( versionString.equals( MainFrame.getInstance().applicationVersion ) )
 						checkUpdatesButton.setText( CHECK_UPDATES_BUTTON_TEXT + " (no new version)" );
 					else {
-						if ( JOptionPane.showConfirmDialog( MainFrame.getInstance(), "A newer version of " + Consts.APPLICATION_NAME + " is available.\nWould you like to visit the home page to download it?", "New version available!", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE ) == JOptionPane.YES_OPTION )
+						mainFrame.stayInWonderland();
+						if ( JOptionPane.showConfirmDialog( null, "A newer version of " + Consts.APPLICATION_NAME + " is available.\nWould you like to visit the home page to download it?", "New version available!", JOptionPane.YES_NO_OPTION, JOptionPane.INFORMATION_MESSAGE ) == JOptionPane.YES_OPTION ) // Parent is not the mainFrame, because it might not be yet (or at all) visible
 							Utils.showURLInBrowser( Consts.HOME_PAGE_URL );
 						checkUpdatesButton.setText( CHECK_UPDATES_BUTTON_TEXT + " (new version available!)" );
 					}

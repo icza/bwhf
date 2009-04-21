@@ -50,7 +50,7 @@ public class Utils {
 	public static final DateFormat DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd HH-mm-ss" );
 	
 	/** Size of buffer to use to play wav files.  */
-	private static final int WAV_BUFFER_SIZE       = 128*1024;
+	private static final int WAV_BUFFER_SIZE       = 64*1024;
 	/** Size of buffer to use to copy files.      */
 	private static final int FILE_COPY_BUFFER_SIZE = 4*1024;
 	

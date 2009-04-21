@@ -579,6 +579,7 @@ public class ReplaySearchTab extends Tab {
 		allButtonsWrapperPanel.add( Utils.wrapInPanel( searchStartButtonsBox ) );
 		
 		final Box resultListHandlerBox = Box.createVerticalBox();
+		saveResultListButton.setEnabled( false );
 		saveResultListButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				saveResultList();
@@ -864,6 +865,7 @@ public class ReplaySearchTab extends Tab {
 				finally {
 					updatedResultsCountLabel();
 					refreshResultTable();
+					saveResultListButton        .setEnabled( true );
 					appendResultsToTableCheckBox.setEnabled( true );
 					loadResultListButton        .setEnabled( true  );
 					saveResultListButton        .setEnabled( true  );
