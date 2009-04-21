@@ -7,7 +7,7 @@
 ==What is this key?==
 The key authenticates its owner toward the BWHF hacker database server. It's like the CD key for Starcraft: you need a valid CD key which authenticates you toward Blizzard's battle.net servers.
 
-Only those who possess a valid authorization key can report hackers to the central hacker data base. Reports with invalid key are discarded.
+Only those who possess a valid authorization key can report hackers to the central hacker database. Reports with invalid key are discarded.
 
 ==How can I get a key?==
 Keys cannot be purchased. I give keys for free to those who can be trusted. This includes my friends and people I play with on battle.net. Of course this is a very limited group of people.
