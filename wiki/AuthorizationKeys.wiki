@@ -5,7 +5,7 @@
 <wiki:toc max_depth="2" />
 
 ==What is this key?==
-The key authenticates its owner toward the BWHF hacker data base server. It's like the CD key for Starcraft: you need a valid CD key which authenticates you toward Blizzard's battle.net servers.
+The key authenticates its owner toward the BWHF hacker database server. It's like the CD key for Starcraft: you need a valid CD key which authenticates you toward Blizzard's battle.net servers.
 
 Only those who possess a valid authorization key can report hackers to the central hacker data base. Reports with invalid key are discarded.
 
