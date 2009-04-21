@@ -39,3 +39,12 @@ You have to select your gateway corresponding to where you play in order to repo
 Try to start the program with the `BWHFAgent-console.cmd` script on windows platform. That way you get a console where you might see some errors and details.
 
 In a case when error or exception occurs, you are welcome to report it by creating an issue here in the [http://code.google.com/p/bwhf/issues/list Issues] tab.
+
+==People from the hacker list joined my game, but BWHF Agent didn't alert me==
+Check if you have the player checker enabled on the Player checker tab.
+To issue a player check, you have to press the _'Print Screen'_ (or _'PrtScn'_) key on your keyboard. Player check only works in the game lobby.
+BWHF Agent only notifies you of players reported with the same gateway as you set in your autoscan tab. Check if you have set the gatway and if your set the right one.
+
+If you still don't hear anything, check if your sound is not muted in BWHF Agent on the general settings tab.
+
+You can execute a manual update of your local cache of the hacker list too by pressing the  'Update now' button on the Player checker tab.
