@@ -202,6 +202,8 @@ public class PlayerCheckerTab extends LoggedTab {
 		
 		contentBox.add( Utils.wrapInPanel( settingsPanel ) );
 		
+		contentBox.add( Utils.wrapInPanel( new JLabel( "Note that you will only be notified of players reported with the gateway set on your autoscan tab!" ) ) );
+		
 		super.buildGUI();
 	}
 	
@@ -443,7 +445,7 @@ public class PlayerCheckerTab extends LoggedTab {
 			
 			if ( skippedLinesCount > 0 )
 				logMessage( "Skipped " + skippedLinesCount + " line" + ( skippedLinesCount == 1 ? "." : "s." ) );
-			logMessage( "Successfully reloaded " + playersCount + " player" + ( playersCount == 1 ? "" : "s" ) + " from file: " + file.getAbsolutePath() );
+			logMessage( "Successfully reloaded " + playersCount + " player" + ( playersCount == 1 ? "" : "s" ) + " from file: '" + file.getAbsolutePath() + "'" );
 		}
 		catch ( final Exception e ) {
 			logMessage( "Error: failed to load list from file: " + file.getAbsolutePath() );
