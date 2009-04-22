@@ -184,7 +184,7 @@ public class ReplayScanner {
 			if ( lastIteration == action.iteration && lastAction.actionNameIndex != action.actionNameIndex && action.actionNameIndex != Action.ACTION_NAME_INDEX_HOTKEY && action.actionNameIndex != Action.ACTION_NAME_INDEX_ALLY && action.actionNameIndex != Action.ACTION_NAME_INDEX_VISION )
 				actionsCountForGeneralMulticommandHack++;
 			else {
-				if ( actionsCountForGeneralMulticommandHack > 18 )
+				if ( actionsCountForGeneralMulticommandHack > 20 )
 					hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_MULTICOMMAND, lastAction.iteration ) );
 				lastIteration = action.iteration;
 				actionsCountForGeneralMulticommandHack = 0;
