@@ -58,16 +58,11 @@ public class KeyGen extends JFrame {
 		generateButton.setMnemonic( generateButton.getText().charAt( 0 ) );
 		getContentPane().add( controlPanel, BorderLayout.NORTH );
 		
-		
-		final JPanel formPanel = new JPanel( new GridLayout( 5, 2 ) );
+		final JPanel formPanel = new JPanel( new GridLayout( 4, 2 ) );
 		
 		formPanel.add( new JLabel( "Number of keys:" ) );
 		final JSpinner keysCountSpinner = new JSpinner( new SpinnerNumberModel( 1, 1, 1000, 1 ) );
 		formPanel.add( keysCountSpinner );
-		
-		formPanel.add( new JLabel( "Id of person:" ) );
-		final JSpinner personIdSpinner = new JSpinner( new SpinnerNumberModel( 1, 0, 1000000000, 1 ) );
-		formPanel.add( personIdSpinner );
 		
 		formPanel.add( new JLabel( "Name of the person:" ) );
 		final JTextField nameTextField = new JTextField();
@@ -88,10 +83,7 @@ public class KeyGen extends JFrame {
 		
 		generateButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				final int personId = (Integer) personIdSpinner.getValue();
-				final StringBuilder sqlBuilder = new StringBuilder();
-				sqlBuilder.append( "INSERT INTO person (id,name,email,comment) VALUES(" )
-					.append( personId ).append( ',' );
+				final StringBuilder sqlBuilder = new StringBuilder( "INSERT INTO person (name,email,comment) VALUES(" );
 				if ( nameTextField.getText().length() > 0 )
 					sqlBuilder.append( '\'' ).append( nameTextField.getText() ).append( "'," );
 				else
@@ -112,7 +104,7 @@ public class KeyGen extends JFrame {
 					sqlBuilder.append( "INSERT INTO key (value,person) VALUES ('" );
 					for ( int j = 0; j < PASSWORD_LENGTH; j++ )
 						sqlBuilder.append( PASSWORD_CHARSET[ random.nextInt( PASSWORD_CHARSET.length ) ] );
-					sqlBuilder.append( "'," ).append( personId ).append( ");\n" );
+					sqlBuilder.append( "',(SELECT MAX(id) FROM person));\n" );
 				}
 				
 				resultTextArea.setText( sqlBuilder.toString() );
