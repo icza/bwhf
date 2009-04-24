@@ -5,8 +5,9 @@
 <wiki:toc max_depth="3" />
 
 ----
-===2.20 2009-04-21===
+===2.21 2009-04-24===
  * Modified the Player checker to properly recognize game lobby screenshots (apparently there are minor variations of the picture of game lobby on different computers).
+ * New setting on the Player checker tab: "Echo recognized player names in the log below".
  * Fine-tuned the general multicommand hack detection (fixes a false alert).
 
 ----
