@@ -9,7 +9,6 @@ import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
-import java.awt.TrayIcon.MessageType;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
@@ -27,6 +26,7 @@ import swingwtx.swing.ImageIcon;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JFrame;
 import swingwtx.swing.JLabel;
+import swingwtx.swing.JOptionPane;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JTabbedPane;
 import swingwtx.swing.event.ChangeEvent;
@@ -98,6 +98,9 @@ public class MainFrame extends JFrame {
 	/** To know when we first make window visible. */
 	private boolean windowHasBeenShown;
 	
+	/** Tells if we're in Wonderland (newew version is available). */
+	private boolean inWonderland = false;
+	
 	/**
 	 * Creates a new MainFrame.
 	 * @param applicationVersion the application version string
@@ -112,7 +115,7 @@ public class MainFrame extends JFrame {
 		this.applicationVersion = applicationVersion;
 		
 		setTitle( Consts.APPLICATION_NAME );
-		setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
+		setIconImage( new ImageIcon( getClass().getResource( inWonderland ? ICON_IMAGE_RESOURCE_NAME2 : ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
 		
 		generalSettingsTab = new GeneralSettingsTab(); // This has to be created fist, autoscan tab uses this.
 		autoscanTab        = new AutoscanTab();
@@ -155,8 +158,7 @@ public class MainFrame extends JFrame {
 		
 		if ( !new File( Consts.SETTINGS_PROPERTIES_FILE ).exists() ) {
 			// First run of BWHF Agent
-			if ( trayIconInstalled )
-				trayIcon.displayMessage( "Welcome!", "This is the first run of BWHF Agent.\n\nPlease set the Starcraft directory in the General settings tab.\nDon't forget to re-enter your Key if you have one.\n\nThank you for choosing BWHF Agent.", MessageType.INFO );
+			JOptionPane.showMessageDialog( null, "Welcome!\nThis is the first run of BWHF Agent.\n\nPlease set the Starcraft directory in the General settigns tab.\nDon't forget to re-enter your Key if you have one.\n\nOptionally you can copy the 'settings.properties' file from your old BWHF Agent's folder to keep the old settings.\n\nThank your for choosing BWHF Agent.", "Welcome", JOptionPane.INFORMATION_MESSAGE );
 		}
 	}
 	
@@ -203,7 +205,7 @@ public class MainFrame extends JFrame {
 		getContentPane().add( tabbedPane, BorderLayout.CENTER );
 		
 		if ( SystemTray.isSupported() ) {
-			trayIcon = new TrayIcon( new javax.swing.ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
+			trayIcon = new TrayIcon( new javax.swing.ImageIcon( getClass().getResource( inWonderland ? ICON_IMAGE_RESOURCE_NAME : ICON_IMAGE_RESOURCE_NAME2 ) ).getImage() );
 			trayIcon.setImageAutoSize( true );
 			
 			trayIcon.setToolTip( "BWHF Agent is running." );
@@ -438,6 +440,7 @@ public class MainFrame extends JFrame {
 	 * Changes the window icon and the tray icon to the blue pill.
 	 */
 	public void stayInWonderland() {
+		inWonderland = true;
 		setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME2 ) ).getImage() );
 		if ( trayIcon != null )
 			trayIcon.setImage( new javax.swing.ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME2 ) ).getImage() );

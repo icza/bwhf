@@ -78,6 +78,8 @@ public class PlayerCheckerTab extends LoggedTab {
 	private   final JButton    reloadButton                       = new JButton( "Reload" );
 	/** Checkbox to enable/disable the autoscan.                  */
 	private   final JCheckBox  deleteGameLobbyScreenshotsCheckBox = new JCheckBox( "Delete game lobby screenshots after checking players", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS ) ) );
+	/** Checkbox to enable/disable the autoscan.                  */
+	private   final JCheckBox  echoRecognizedPlayerNamesCheckBox  = new JCheckBox( "Echo recognized player names in the log below", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ECHO_RECOGNIZED_PLAYER_NAMES ) ) );
 	
 	/** BWHF hackers mapped to their gateways.   */
 	private final Map< Integer, Set< String > > gatewayBwhfHackerSetMap   = new HashMap< Integer, Set< String > >();
@@ -159,8 +161,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		includeCustomPlayerListCheckBox.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				reloadButton.setEnabled( includeCustomPlayerListCheckBox.isSelected() );
-				if ( reloadButton.isEnabled() )
-					reloadButton.doClick();
+				reloadButton.doClick();
 			}
 		} );
 		gridBagLayout.setConstraints( includeCustomPlayerListCheckBox, constraints );
@@ -200,6 +201,10 @@ public class PlayerCheckerTab extends LoggedTab {
 		gridBagLayout.setConstraints( deleteGameLobbyScreenshotsCheckBox, constraints );
 		settingsPanel.add( deleteGameLobbyScreenshotsCheckBox );
 		
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( echoRecognizedPlayerNamesCheckBox, constraints );
+		settingsPanel.add( echoRecognizedPlayerNamesCheckBox );
+		
 		contentBox.add( Utils.wrapInPanel( settingsPanel ) );
 		
 		contentBox.add( Utils.wrapInPanel( new JLabel( "Note that you will only be notified of players reported with the gateway set on your autoscan tab!" ) ) );
@@ -234,6 +239,17 @@ public class PlayerCheckerTab extends LoggedTab {
 				logMessage( "Game lobby screenshot detected, proceeding to check..." );
 				
 				final String[] playerNames = TextRecognizer.readPlayerNamesFromGameLobbyImage( image );
+				
+				if ( echoRecognizedPlayerNamesCheckBox.isSelected() ) {
+					final StringBuilder playerNamesBuilder = new StringBuilder();
+					for ( final String playerName : playerNames )
+						if ( playerName != null ) {
+							if ( playerNamesBuilder.length() > 0 )
+								playerNamesBuilder.append( ", " );
+							playerNamesBuilder.append( playerName );
+						}
+					logMessage( "Recognized player names in game lobby: " + playerNamesBuilder.toString() );
+				}
 				
 				for ( int i = 0; i < playerNames.length; i++ ) {
 					final String playerName = playerNames[ i ];
@@ -497,6 +513,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST   , Boolean.toString( includeCustomPlayerListCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_CUSTOM_PLAYER_LIST_FILE      , customPlayerListFileTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS, Boolean.toString( deleteGameLobbyScreenshotsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_ECHO_RECOGNIZED_PLAYER_NAMES , Boolean.toString( echoRecognizedPlayerNamesCheckBox.isSelected() ) );
 	}
 	
 }

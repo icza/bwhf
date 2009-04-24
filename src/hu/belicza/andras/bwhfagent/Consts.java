@@ -147,6 +147,8 @@ public class Consts {
 	public static final String PROPERTY_HACKER_LIST_UPDATE_INTERVAL    = "hackerListUpdateInterval";
 	/** Delete game lobby screenshots property.  */
 	public static final String PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS  = "deleteGameLobbyScreenshots";
+	/** Echo recognized player names property.   */
+	public static final String PROPERTY_ECHO_RECOGNIZED_PLAYER_NAMES   = "echoRecognizedPlayerNames";
 	/** Include custom player list property.     */
 	public static final String PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST     = "includeCustomPlayerList";
 	/** Custom player list file property.        */
@@ -177,7 +179,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CREATE_HTML_SUMMARY_REPORT    , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHECK_UPDATES_ON_STARTUP      , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, "true" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SOUND_VOLUME                  , "60" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SOUND_VOLUME                  , "70" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPLAY_START_FOLDER           , STARCRAFT_REPLAY_FOLDER );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ENABLE_SYSTEM_TRAY_ICON       , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALWAYS_MINIMIZE_TO_TRAY       , "false" );
@@ -199,6 +201,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAYER_CHECKER_ENABLED        , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HACKER_LIST_UPDATE_INTERVAL   , "2" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ECHO_RECOGNIZED_PLAYER_NAMES  , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST    , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CUSTOM_PLAYER_LIST_FILE       , "" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DEFAULT_REPLAY_LISTS_FOLDER   , DEFAULT_REPLAY_LISTS_FOLDER );

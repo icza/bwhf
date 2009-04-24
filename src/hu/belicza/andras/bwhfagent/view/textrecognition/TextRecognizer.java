@@ -56,8 +56,8 @@ public class TextRecognizer {
 		if ( image.getWidth() != VALID_SCREENSHOT_WIDTH || image.getHeight() != VALID_SCREENSHOT_HEIGHT )
 			return false;
 		
-		for ( int x = 251; x < 266; x++ )
-			if ( !isPixelFrameColor( image.getRGB( x, 25 ) ) )
+		for ( int y = 42; y < 62; y++ )
+			if ( !isPixelFrameColor( image.getRGB( 368, y ) ) )
 				return false;
 		
 		return true;
