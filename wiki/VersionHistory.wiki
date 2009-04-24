@@ -6,6 +6,11 @@
 
 ----
 ===2.20 2009-04-21===
+ * Modified the Player checker to properly recognize game lobby screenshots (apparently there are minor variations of the picture of game lobby on different computers).
+ * Fine-tuned the general multicommand hack detection (fixes a false alert).
+
+----
+===2.20 2009-04-21===
  * A new *Player checker* tab where you can enable *checking players in the game lobby BEFORE game*. If players in the game lobby has already been reported as hackers, you will get an alert sound indicating the slots of the hackers you're in the same game with. For example: _"hacker at slot 3"_. This check is implemented in a way that BWHF Agent *still remains legit*, BWHF Agent obtains the player names *WITHOUT* reading Starcraft's memory (uses image processing and text recognition)! A local cache of the hacker list is kept in the Agent's folder which is automatically updated in an interval of your choice or at will at anytime. The player check will conform to the gateway set in you autoscan tab and to the reported gateways of the hackers.
  * On the Player checker tab you can choose *your own extra list of players* who you want to check whether they are in the same game as you. You can use this list to enumerate players who you think hack or you don't want to play with or you just want to remember them but they are not int the BWHF hacker database. The format of the custom player list file is very simple: every line contains a player, the line starts with a number identifying the gateway and after that the player name separated with a comma. Valid gateways are: 0-USEast, 1-USWest, 2-Europe, 3-Asia, 4-iCCup, 5-Other
  * *Autoscan now reads out loud the hackers' colors and races*, so you will know who hacked in your last game without switching (alt+tab) to BWHF Agent. For example: _"hacker blue protoss"_.
