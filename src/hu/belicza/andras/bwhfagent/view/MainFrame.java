@@ -205,7 +205,7 @@ public class MainFrame extends JFrame {
 		getContentPane().add( tabbedPane, BorderLayout.CENTER );
 		
 		if ( SystemTray.isSupported() ) {
-			trayIcon = new TrayIcon( new javax.swing.ImageIcon( getClass().getResource( inWonderland ? ICON_IMAGE_RESOURCE_NAME : ICON_IMAGE_RESOURCE_NAME2 ) ).getImage() );
+			trayIcon = new TrayIcon( new javax.swing.ImageIcon( getClass().getResource( inWonderland ? ICON_IMAGE_RESOURCE_NAME2 : ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
 			trayIcon.setImageAutoSize( true );
 			
 			trayIcon.setToolTip( "BWHF Agent is running." );
