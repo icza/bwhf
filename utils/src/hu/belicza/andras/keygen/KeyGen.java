@@ -5,6 +5,7 @@ import java.awt.GridLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.Random;
 
 import javax.swing.BorderFactory;
@@ -105,7 +106,7 @@ public class KeyGen extends JFrame {
 		
 		generateButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				final Random          random      = new Random( System.nanoTime() );
+				final Random          random      = new Random( System.nanoTime() + new File( "/" ).getFreeSpace() );
 				final int             keysCount   = (Integer) keysCountSpinner.getValue();
 				final StringBuilder[] keyBuilders = new StringBuilder[ keysCount ];
 				
