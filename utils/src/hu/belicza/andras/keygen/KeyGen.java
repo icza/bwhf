@@ -2,10 +2,13 @@ package hu.belicza.andras.keygen;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Random;
 
+import javax.swing.BorderFactory;
+import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -43,8 +46,14 @@ public class KeyGen extends JFrame {
 		super( "Key Generator for BWHFAgent (c) András Belicza" );
 		setDefaultCloseOperation( EXIT_ON_CLOSE );
 		buildGUI();
+		
 		pack();
+		
 		setLocation( 200, 200 );
+		final Rectangle bounds = getBounds();
+		bounds.width += 50; // To get rid of horizontal scrollbars of the text areas
+		setBounds( bounds );
+		
 		setVisible( true );
 	}
 	
@@ -52,42 +61,67 @@ public class KeyGen extends JFrame {
 	 * Builds the graphical user interface of the program.
 	 */
 	private void buildGUI() {
+		final Box contentBox = Box.createVerticalBox();
+		
 		final JPanel controlPanel = new JPanel();
 		final JButton generateButton = new JButton( "Generate" );
 		controlPanel.add( generateButton );
 		generateButton.setMnemonic( generateButton.getText().charAt( 0 ) );
-		getContentPane().add( controlPanel, BorderLayout.NORTH );
+		contentBox.add( controlPanel );
 		
 		final JPanel formPanel = new JPanel( new GridLayout( 4, 2 ) );
 		
-		formPanel.add( new JLabel( "Number of keys:" ) );
+		formPanel.add( new JLabel( "Number of keys:", JLabel.RIGHT ) );
 		final JSpinner keysCountSpinner = new JSpinner( new SpinnerNumberModel( 1, 1, 1000, 1 ) );
 		formPanel.add( keysCountSpinner );
 		
-		formPanel.add( new JLabel( "Name of the person:" ) );
-		final JTextField nameTextField = new JTextField();
+		formPanel.add( new JLabel( "Name of the person:", JLabel.RIGHT ) );
+		final JTextField nameTextField = new JTextField( 20 );
 		formPanel.add( nameTextField );
 		
-		formPanel.add( new JLabel( "E-mail of the person:" ) );
+		formPanel.add( new JLabel( "E-mail of the person:", JLabel.RIGHT ) );
 		final JTextField emailTextField = new JTextField();
 		formPanel.add( emailTextField );
 		
-		formPanel.add( new JLabel( "Comment to the person:" ) );
+		formPanel.add( new JLabel( "Comment to the person:", JLabel.RIGHT ) );
 		final JTextField commentTextField = new JTextField();
 		formPanel.add( commentTextField );
 		
-		getContentPane().add( formPanel, BorderLayout.CENTER );
+		final JPanel wrapperPanel = new JPanel();
+		wrapperPanel.add( formPanel );
+		contentBox.add( wrapperPanel );
 		
-		final JTextArea resultTextArea = new JTextArea( 10, 40 );
-		getContentPane().add( new JScrollPane( resultTextArea ), BorderLayout.SOUTH );
+		final JTextArea sqlTextArea = new JTextArea( 8, 60 );
+		JScrollPane scrollPane = new JScrollPane( sqlTextArea );
+		scrollPane.setBorder( BorderFactory.createTitledBorder( "SQL:" ) );
+		contentBox.add( scrollPane );
+		
+		final JTextArea emailMessageTextArea = new JTextArea( 18, 60 );
+		scrollPane = new JScrollPane( emailMessageTextArea );
+		scrollPane.setBorder( BorderFactory.createTitledBorder( "Email:" ) );
+		contentBox.add( scrollPane );
+		
+		getContentPane().add( contentBox, BorderLayout.CENTER );
 		
 		generateButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
+				final Random          random      = new Random( System.nanoTime() );
+				final int             keysCount   = (Integer) keysCountSpinner.getValue();
+				final StringBuilder[] keyBuilders = new StringBuilder[ keysCount ];
+				
+				for ( int i = 0; i < keysCount; i++ ) {
+					final StringBuilder keyBuilder = keyBuilders[ i ] = new StringBuilder();
+					for ( int j = 0; j < PASSWORD_LENGTH; j++ )
+						keyBuilder.append( PASSWORD_CHARSET[ random.nextInt( PASSWORD_CHARSET.length ) ] );
+				}
+				
 				final StringBuilder sqlBuilder = new StringBuilder( "INSERT INTO person (name,email,comment) VALUES(" );
+				
 				if ( nameTextField.getText().length() > 0 )
 					sqlBuilder.append( '\'' ).append( nameTextField.getText() ).append( "'," );
 				else
 					sqlBuilder.append( "null," );
+				
 				if ( emailTextField.getText().length() > 0 )
 					sqlBuilder.append( '\'' ).append( emailTextField.getText() ).append( "'," );
 				else
@@ -98,16 +132,40 @@ public class KeyGen extends JFrame {
 					sqlBuilder.append( "null" );
 				sqlBuilder.append( ");\n" );
 				
-				final Random random = new Random( System.nanoTime() );
-				final int keysCount = (Integer) keysCountSpinner.getValue();
 				for ( int i = 0; i < keysCount; i++ ) {
 					sqlBuilder.append( "INSERT INTO key (value,person) VALUES ('" );
-					for ( int j = 0; j < PASSWORD_LENGTH; j++ )
-						sqlBuilder.append( PASSWORD_CHARSET[ random.nextInt( PASSWORD_CHARSET.length ) ] );
+					sqlBuilder.append( keyBuilders[ i ] );
 					sqlBuilder.append( "',(SELECT MAX(id) FROM person));\n" );
 				}
 				
-				resultTextArea.setText( sqlBuilder.toString() );
+				sqlTextArea.setText( sqlBuilder.toString() );
+				
+				final StringBuilder emailMessageBuilder = new StringBuilder();
+				if ( emailTextField.getText().length() > 0 )
+					emailMessageBuilder.append( emailTextField.getText() );
+				emailMessageBuilder.append( "\nBWHF authorization key\n\n\n" );
+				
+				emailMessageBuilder.append( "Hi" );
+				if ( nameTextField.getText().length() > 0 )
+					emailMessageBuilder.append( ' ' ).append( nameTextField.getText() );
+				emailMessageBuilder.append( "!\n\n" );
+				
+				emailMessageBuilder.append( keysCount == 1 ? "This is your BWHF authorization key:" : "Here are your BWHF authorization keys:" );
+				
+				for ( final StringBuilder keyBuilder : keyBuilders )
+					emailMessageBuilder.append( '\n' ).append( keyBuilder );
+				
+				emailMessageBuilder.append( "\n\n" );
+				
+				if ( keysCount == 1 ) {
+					emailMessageBuilder.append( "It's your own, don't give it to anyone." );
+				}
+				else {
+					emailMessageBuilder.append( "Plz make sure that one key is only used by one person." );
+				}
+				emailMessageBuilder.append( "\n\nCheers,\n    Dakota_Fanning" );
+				
+				emailMessageTextArea.setText( emailMessageBuilder.toString() );
 			}
 		} );
 	}
