@@ -154,7 +154,7 @@ public class CharDef {
 	
 	/**
 	 * Tests if a pixel given with its rgb values match a hsb specified color disregarding their brightness.
-	 * @param rgb rgb value of the pixel to be texted
+	 * @param rgb rgb value of the pixel to be tested
 	 * @param hsb hsb values of the second pixel
 	 * @return true if the 2 pixels match disregarding their brightness
 	 */
