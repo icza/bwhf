@@ -159,7 +159,7 @@ public class KeyGen extends JFrame {
 				emailMessageBuilder.append( "\n\n" );
 				
 				if ( keysCount == 1 ) {
-					emailMessageBuilder.append( "It's your own, don't give it to anyone." );
+					emailMessageBuilder.append( "It's your own, don't give it to anyone. After you enter your key, check \"report hackers\" and you're good to go." );
 				}
 				else {
 					emailMessageBuilder.append( "Plz make sure that one key is only used by one person." );
