@@ -29,8 +29,8 @@ You can fix this in 2 ways:
 
 Tip: you can check the value of the `PATH` environment variable by typing `PATH` in a command window.
 
-==Autoscan doesn't work?==
-You have to set Starcraft directory to let BWHF Agent know where to look for !LastReplay.rep.
+==Autoscan, PCX autoconversion or Player checker doesn't work?==
+You have to set Starcraft directory to let BWHF Agent know where to look for !LastReplay.rep and screenshot files.
 
 ==Can't report hackers?==
 You have to select your gateway corresponding to where you play in order to report hackers. Moreover you need a valid autorization key. You can read about these keys here: AuthorizationKeys
