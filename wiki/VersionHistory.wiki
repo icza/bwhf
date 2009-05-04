@@ -6,7 +6,7 @@
 
 ----
 ===Features and changes in the upcoming new version===
- * New *Previous replay* and *Next replay* buttons on the charts tab to easily navigate between the replays of the replay search tab. If there are more than 1 selected replays, the buttons will iterate through the selected replays. If there are no selected replays, these buttons will iterate through all replays of the result table.
+ * New *Previous replay* and *Next replay* buttons on the charts tab to easily navigate between the replays of the replay search tab. If there are more than 1 replays selected, the buttons will iterate through the selected replays. If there are no selected replays, these buttons will iterate through all replays of the result table.
  * Modified the _build anywhere_ hack detection to recognize more cases.
 
 ----
