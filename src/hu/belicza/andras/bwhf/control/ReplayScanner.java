@@ -113,7 +113,8 @@ public class ReplayScanner {
 						final int commaIndex = action.parameters.indexOf( ',' );
 						final int x = Integer.parseInt( action.parameters.substring( action.parameters.indexOf( '(' ) + 1, commaIndex ) );
 						final int y = Integer.parseInt( action.parameters.substring( commaIndex + 1, action.parameters.indexOf( ')', commaIndex ) ) );
-						if ( x > replayHeader.mapWidth - buildingSize.width || y > replayHeader.mapHeight - buildingSize.height )
+						// In the range of x all coordinate is buildable, but in the range of y the bottom line is reserved
+						if ( x > replayHeader.mapWidth - buildingSize.width || y > replayHeader.mapHeight - buildingSize.height - 1 )
 							hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_BUILD_ANYWHERE, action.iteration ) );
 					}
 					catch ( final Exception e ) {

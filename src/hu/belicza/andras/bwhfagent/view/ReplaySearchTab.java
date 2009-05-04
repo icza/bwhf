@@ -795,7 +795,7 @@ public class ReplaySearchTab extends Tab {
 	
 	/**
 	 * Returns the next replay file based on a current index.<br>
-	 * If there are selected replays, then the selection is the source, otherwise the whole result list.
+	 * If there are more than 1 selected replays, then the selection is the source, otherwise the whole result list.
 	 * If the index refers to the last, the first is returned.<br>
 	 * The new index is set in the indexWrapper.
 	 * @param indexWrapper wrapper of the index to calculate next replay from; can be <code>null</code> in which case the first is returned
@@ -805,7 +805,7 @@ public class ReplaySearchTab extends Tab {
 		final Integer index = indexWrapper[ 0 ];
 		
 		final int[] selectedIndices = resultTable.getSelectedRows();
-		if ( selectedIndices.length > 0 ) {
+		if ( selectedIndices.length > 1 ) {
 			if ( index == null )
 				return lastSearchResultFileList.get( indexWrapper[ 0 ] = selectedIndices[ 0 ] );
 			
@@ -825,7 +825,7 @@ public class ReplaySearchTab extends Tab {
 	
 	/**
 	 * Returns the previous replay file based on a current index.<br>
-	 * If there are selected replays, then the selection is the source, otherwise the whole result list.
+	 * If there are more than 1 selected replays, then the selection is the source, otherwise the whole result list.
 	 * If the index refers to the first, the last is returned.
 	 * The new index is set in the indexWrapper.
 	 * @param indexWrapper wrapper of the index to calculate next replay from; can be <code>null</code> in which case the last is returned
@@ -835,7 +835,7 @@ public class ReplaySearchTab extends Tab {
 		final Integer index = indexWrapper[ 0 ];
 		
 		final int[] selectedIndices = resultTable.getSelectedRows();
-		if ( selectedIndices.length > 0 ) {
+		if ( selectedIndices.length > 1 ) {
 			if ( index == null )
 				return lastSearchResultFileList.get( indexWrapper[ 0 ] = selectedIndices[ selectedIndices.length - 1 ] );
 			
