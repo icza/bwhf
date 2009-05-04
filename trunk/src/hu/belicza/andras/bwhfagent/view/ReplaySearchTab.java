@@ -527,7 +527,7 @@ public class ReplaySearchTab extends Tab {
 		JPanel selectButtonsPanel = Utils.createWrapperPanel();
 		final ActionListener selectFilesAndFoldersActionListener = new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.getReplayStartFolder() );
+				final JFileChooser fileChooser = new JFileChooser( mainFrame.generalSettingsTab.getReplayStartFolder() );
 				
 				// This is for SwingWT:
 				fileChooser.setExtensionFilters( new String[] { "*.rep", "*.*" }, new String[] { "Replay Files (*.rep)", "All files (*.*)" } );
@@ -640,7 +640,7 @@ public class ReplaySearchTab extends Tab {
 				
 				boolean success = true;
 				if ( event.getSource() != deleteReplaysButton ) {
-					final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.getReplayStartFolder() );
+					final JFileChooser fileChooser = new JFileChooser( mainFrame.generalSettingsTab.getReplayStartFolder() );
 					fileChooser.setTitle( ( event.getSource() == copyReplaysButton ? "Copy " : "Move ") + selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? "" : "s" ) + " to" );
 					fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
 					if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION ) {
@@ -679,7 +679,7 @@ public class ReplaySearchTab extends Tab {
 		resultTable.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
 			public void valueChanged( final ListSelectionEvent event ) {
 				final int selectedCount = resultTable.getSelectedRowCount();
-				showOnChartsButton   .setEnabled( selectedCount == 1 );
+				showOnChartsButton   .setEnabled( selectedCount >  0 );
 				scanForHacksButton   .setEnabled( selectedCount >  0 );
 				displayGameChatButton.setEnabled( selectedCount == 1 );
 				extractGameChatButton.setEnabled( selectedCount >  0 );
@@ -756,6 +756,7 @@ public class ReplaySearchTab extends Tab {
 				return false;
 			}
 		} );
+		mainFrame.chartsTab.onReplayResultListChange( !lastSearchResultRowsData.isEmpty() );
 	}
 	
 	/**
@@ -793,8 +794,68 @@ public class ReplaySearchTab extends Tab {
 	}
 	
 	/**
+	 * Returns the next replay file based on a current index.<br>
+	 * If there are selected replays, then the selection is the source, otherwise the whole result list.
+	 * If the index refers to the last, the first is returned.<br>
+	 * The new index is set in the indexWrapper.
+	 * @param indexWrapper wrapper of the index to calculate next replay from; can be <code>null</code> in which case the first is returned
+	 * @return the next file or the source list
+	 */
+	public File getNextReplayFile( final Integer[] indexWrapper ) {
+		final Integer index = indexWrapper[ 0 ];
+		
+		final int[] selectedIndices = resultTable.getSelectedRows();
+		if ( selectedIndices.length > 0 ) {
+			if ( index == null )
+				return lastSearchResultFileList.get( indexWrapper[ 0 ] = selectedIndices[ 0 ] );
+			
+			for ( final int selectedIndex : selectedIndices )
+				if ( selectedIndex > index )
+					return lastSearchResultFileList.get( indexWrapper[ 0 ] = selectedIndex );
+			
+			return lastSearchResultFileList.get( indexWrapper[ 0 ] = selectedIndices[ 0 ] );
+		}
+		else {
+			if ( index == null )
+				return lastSearchResultFileList.get( indexWrapper[ 0 ] = 0 );
+			
+			return lastSearchResultFileList.get( indexWrapper[ 0 ] = index < lastSearchResultFileList.size() - 1 ? index + 1 : 0 );
+		}
+	}
+	
+	/**
+	 * Returns the previous replay file based on a current index.<br>
+	 * If there are selected replays, then the selection is the source, otherwise the whole result list.
+	 * If the index refers to the first, the last is returned.
+	 * The new index is set in the indexWrapper.
+	 * @param indexWrapper wrapper of the index to calculate next replay from; can be <code>null</code> in which case the last is returned
+	 * @return the previous file or the source list
+	 */
+	public File getPreviousReplayFile( final Integer[] indexWrapper ) {
+		final Integer index = indexWrapper[ 0 ];
+		
+		final int[] selectedIndices = resultTable.getSelectedRows();
+		if ( selectedIndices.length > 0 ) {
+			if ( index == null )
+				return lastSearchResultFileList.get( indexWrapper[ 0 ] = selectedIndices[ selectedIndices.length - 1 ] );
+			
+			for ( int i = selectedIndices.length - 1; i >= 0; i-- )
+				if ( selectedIndices[ i ] < index )
+					return lastSearchResultFileList.get( indexWrapper[ 0 ] = selectedIndices[ i ] );
+			
+			return lastSearchResultFileList.get( indexWrapper[ 0 ] = selectedIndices[ selectedIndices.length - 1 ] );
+		}
+		else {
+			if ( index == null )
+				return lastSearchResultFileList.get( indexWrapper[ 0 ] = lastSearchResultFileList.size() - 1 );
+			
+			return lastSearchResultFileList.get( indexWrapper[ 0 ] = index > 0 ? index - 1 : lastSearchResultFileList.size() - 1 );
+		}
+	}
+	
+	/**
 	 * Searches the specified files and folders.
-	 * @param files        files and folders to be searched
+	 * @param files files and folders to be searched
 	 */
 	private void searchFilesAndFolders( final File[] files ) {
 		requestedToStop = false;
@@ -1048,7 +1109,7 @@ public class ReplaySearchTab extends Tab {
 	 * First prompts the file to save to.
 	 */
 	private void saveResultList() {
-		final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.defaultReplayListsFolderTextField.getText() );
+		final JFileChooser fileChooser = new JFileChooser( mainFrame.generalSettingsTab.defaultReplayListsFolderTextField.getText() );
 		fileChooser.setTitle( "Save result list to..." );
 		
 		fileChooser.addChoosableFileFilter( Utils.SWING_TEXT_FILE_FILTER ); 
@@ -1093,7 +1154,7 @@ public class ReplaySearchTab extends Tab {
 	 * Loads a result list from a file.
 	 */
 	private void loadResultList() {
-		final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.defaultReplayListsFolderTextField.getText() );
+		final JFileChooser fileChooser = new JFileChooser( mainFrame.generalSettingsTab.defaultReplayListsFolderTextField.getText() );
 		fileChooser.setTitle( "Load result list..." );
 		
 		fileChooser.addChoosableFileFilter( Utils.SWING_TEXT_FILE_FILTER ); 
