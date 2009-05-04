@@ -9,9 +9,11 @@ import hu.belicza.andras.bwhfagent.view.charts.ChartsComponent.ChartType;
 import java.io.File;
 
 import swingwt.awt.Color;
+import swingwt.awt.Dimension;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.BorderFactory;
+import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
@@ -28,12 +30,19 @@ import swingwtx.swing.event.ChangeListener;
  */
 public class ChartsTab extends Tab {
 	
-	/** Button to display game chat from the last replay.  */
+	/** Button to display game chat from the last replay.      */
 	private final JButton   openLastReplayButton = new JButton( "Open 'LastReplay.rep'" );
-	/** Button to select files to extract game chat.       */
+	/** Button to select files to extract game chat.           */
 	private final JButton   selectFileButton     = new JButton( "Select file to open..." );
-	/** Label to display the loaded replay.                */
+	/** Button to open previous replay from replay search tab. */
+	private final JButton   previousReplayButton = new JButton( "Previous replay" );
+	/** Button to open next replay from replay search tab. */
+	private final JButton   nextReplayButton     = new JButton( "Next replay" );
+	/** Label to display the loaded replay.                    */
 	private final JLabel    loadedReplayLabel    = new JLabel( "No replay loaded." );
+	
+	/** Wrapper for the index of the opened replay from the result list of the replay search tab. */
+	private final Integer[] openedIndexFromResultListWrapper = new Integer[ 1 ];
 	
 	/** Combobox to select the chart type.                                   */
 	public final JComboBox chartTypeComboBox                  = new JComboBox( ChartsComponent.ChartType.values() );
@@ -47,6 +56,9 @@ public class ChartsTab extends Tab {
 	/** The component visualizing the charts. */
 	private final ChartsComponent chartsComponent = new ChartsComponent( this );
 	
+	/**
+	 * Creates a new ChartsTab.
+	 */
 	public ChartsTab() {
 		super( "Charts" );
 		
@@ -62,7 +74,9 @@ public class ChartsTab extends Tab {
 	private void buildGUI() {
 		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
 		
-		final JPanel panel = Utils.createWrapperPanel();
+		final Box buttonsPanel = Box.createHorizontalBox();
+		JPanel panel = Utils.createWrapperPanel();
+		panel.setMaximumSize( new Dimension( Integer.MAX_VALUE, 100 ) );
 		openLastReplayButton.setMnemonic( 'l' );
 		openLastReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
@@ -87,10 +101,29 @@ public class ChartsTab extends Tab {
 			}
 		} );
 		panel.add( selectFileButton );
+		buttonsPanel.add( panel );
+		panel = Utils.createWrapperPanel();
+		previousReplayButton.setMnemonic( 'p' );
+		previousReplayButton.setEnabled( false );
+		previousReplayButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				setReplayFile( MainFrame.getInstance().replaySearchTab.getPreviousReplayFile( openedIndexFromResultListWrapper ) );
+			}
+		} );
+		panel.add( previousReplayButton );
+		nextReplayButton.setMnemonic( 'n' );
+		nextReplayButton.setEnabled( false );
+		nextReplayButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				setReplayFile( MainFrame.getInstance().replaySearchTab.getNextReplayFile( openedIndexFromResultListWrapper ) );
+			}
+		} );
+		panel.add( nextReplayButton );
+		buttonsPanel.add( panel );
 		// We wrap it in another panel so it gets some border space;
 		// This is needed because SwingWT resizes components wrongly when window is maximized and de-maximized
 		// The extra space still lets the content be seen.
-		contentBox.add( Utils.wrapInPanel( panel ) );
+		contentBox.add( buttonsPanel );
 		
 		final JPanel chartsCommonControlPanel = Utils.createWrapperPanel();
 		chartsCommonControlPanel.setBorder( BorderFactory.createTitledBorder( "General chart settings:" ) );
@@ -127,6 +160,10 @@ public class ChartsTab extends Tab {
 		chartsComponent.initializationEnded();
 	}
 	
+	/**
+	 * Sets the replay file displayed on the charts tab.
+	 * @param file replay file to be set
+	 */
 	public void setReplayFile( final File file ) {
 		final Replay replay = BinRepParser.parseReplay( file, true, false );
 		
@@ -140,6 +177,17 @@ public class ChartsTab extends Tab {
 		}
 		
 		chartsComponent.setReplay( replay );
+	}
+	
+	/**
+	 * Called when the result list of the replay search tab changes. 
+	 * @param hasResultReplay tells if the result list has any replay
+	 */
+	public void onReplayResultListChange( final boolean hasResultReplay ) {
+		if ( !hasResultReplay )
+			openedIndexFromResultListWrapper[ 0 ] = null;
+		previousReplayButton.setEnabled( hasResultReplay );
+		nextReplayButton    .setEnabled( hasResultReplay );
 	}
 	
 	@Override
