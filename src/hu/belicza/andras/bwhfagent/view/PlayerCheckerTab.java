@@ -24,6 +24,7 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 
 import swingwt.awt.BorderLayout;
+import swingwt.awt.Font;
 import swingwt.awt.GridBagConstraints;
 import swingwt.awt.GridBagLayout;
 import swingwt.awt.event.ActionEvent;
@@ -62,23 +63,25 @@ public class PlayerCheckerTab extends LoggedTab {
 	/** Reference to the settings panel. */
 	private JPanel settingsPanel;
 	
-	/** Checkbox to enable/disable the autoscan.                  */
+	/** Checkbox to enable/disable the autoscan.                       */
 	protected final JCheckBox  playerCheckerEnabledCheckBox       = new JCheckBox( "Enable checking players in the game lobby when pressing the 'Print Screen' key", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_PLAYER_CHECKER_ENABLED ) ) );
-	/** Combo box to set the hacker list update interval.         */
+	/** Combo box to set the hacker list update interval.              */
 	private   final JComboBox  hackerListUpdateIntervalComboBox   = new JComboBox( new Object[] { 1, 2, 6, 12, 24, 48 } );
-	/** Label to display the last update time of the hacker list. */
+	/** Label to display the last update time of the hacker list.      */
 	private   final JLabel     hackerListLastUpdatedLabel         = new JLabel();
-	/** Button to update hacker list now.                         */
+	/** Button to update hacker list now.                              */
 	private   final JButton    updateNowButton                    = new JButton( UPDATE_NOW_BUTTON_TEXT );
-	/** Checkbox to include custom player list.                   */
+	/** Checkbox to include custom player list.                        */
 	private   final JCheckBox  includeCustomPlayerListCheckBox    = new JCheckBox( "Include this custom player list:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST ) ) );
-	/** File of the custom player list.                           */
+	/** File of the custom player list.                                */
 	private   final JTextField customPlayerListFileTextField      = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_CUSTOM_PLAYER_LIST_FILE ) );
-	/** Button to reload custom player list.                      */
+	/** Button to reload custom player list.                           */
 	private   final JButton    reloadButton                       = new JButton( "Reload" );
-	/** Checkbox to enable/disable the autoscan.                  */
+	/** Checkbox to enable/disable saying "clean" if no hackers found. */
+	private   final JCheckBox  sayCleanCheckBox                   = new JCheckBox( "Say \"clean\" if no hackers found", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAY_CLEAN ) ) );
+	/** Checkbox to enable/disable the autoscan.                       */
 	private   final JCheckBox  deleteGameLobbyScreenshotsCheckBox = new JCheckBox( "Delete game lobby screenshots after checking players", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS ) ) );
-	/** Checkbox to enable/disable the autoscan.                  */
+	/** Checkbox to enable/disable the autoscan.                       */
 	private   final JCheckBox  echoRecognizedPlayerNamesCheckBox  = new JCheckBox( "Echo recognized player names in the log below", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ECHO_RECOGNIZED_PLAYER_NAMES ) ) );
 	
 	/** BWHF hackers mapped to their gateways.   */
@@ -198,6 +201,10 @@ public class PlayerCheckerTab extends LoggedTab {
 		settingsPanel.add( wrapperPanel );
 		
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( sayCleanCheckBox, constraints );
+		settingsPanel.add( sayCleanCheckBox );
+		
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		gridBagLayout.setConstraints( deleteGameLobbyScreenshotsCheckBox, constraints );
 		settingsPanel.add( deleteGameLobbyScreenshotsCheckBox );
 		
@@ -207,7 +214,9 @@ public class PlayerCheckerTab extends LoggedTab {
 		
 		contentBox.add( Utils.wrapInPanel( settingsPanel ) );
 		
-		contentBox.add( Utils.wrapInPanel( new JLabel( "Note that you will only be notified of players reported with the gateway set on your autoscan tab!" ) ) );
+		final JLabel noteLabel = new JLabel( "Note that you will only be notified of players reported with the gateway set on your autoscan tab! (Keep it always synchronized with the gateway you play on.)" );
+		noteLabel.setFont( new Font( "Default", Font.BOLD, 9 ) );
+		contentBox.add( Utils.wrapInPanel( noteLabel ) );
 		
 		super.buildGUI();
 	}
@@ -251,6 +260,7 @@ public class PlayerCheckerTab extends LoggedTab {
 					logMessage( "Recognized player names in game lobby: " + playerNamesBuilder.toString() );
 				}
 				
+				boolean foundHacker = false;
 				for ( int i = 0; i < playerNames.length; i++ ) {
 					final String playerName = playerNames[ i ];
 					
@@ -262,6 +272,7 @@ public class PlayerCheckerTab extends LoggedTab {
 						boolean isHacker = false;
 						for ( final String playerNamePermutation : playerNamePermutations )
 							if ( bwhfHackerSet != null && bwhfHackerSet.contains( playerNamePermutation ) ) {
+								foundHacker = true;
 								isHacker = true;
 								logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "hacker player in game lobby: " + playerName );
 								Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "hacker_at_slot.wav" : "possible_hacker_at_slot.wav" ), true );
@@ -271,6 +282,7 @@ public class PlayerCheckerTab extends LoggedTab {
 						
 						if ( !isHacker ) for ( final String playerNamePermutation : playerNamePermutations )
 							if ( customPlayerNameSet != null && customPlayerNameSet.contains( playerNamePermutation ) ) {
+								foundHacker = true;
 								logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "custom listed player in game lobby: " + playerName );
 								Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "custom_at_slot.wav" : "possible_custom_at_slot.wav" ), true );
 								Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (i+1) + ".wav" ), true );
@@ -278,6 +290,9 @@ public class PlayerCheckerTab extends LoggedTab {
 							}
 					}
 				}
+				if ( !foundHacker && sayCleanCheckBox.isSelected() )
+					Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "clean.wav" ), true );
+				
 				logMessage( "Player check finished." );
 				
 				if ( deleteGameLobbyScreenshotsCheckBox.isSelected() )
@@ -512,6 +527,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_HACKER_LIST_UPDATE_INTERVAL  , Integer.toString( hackerListUpdateIntervalComboBox.getSelectedIndex() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST   , Boolean.toString( includeCustomPlayerListCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_CUSTOM_PLAYER_LIST_FILE      , customPlayerListFileTextField.getText() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SAY_CLEAN                    , Boolean.toString( sayCleanCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS, Boolean.toString( deleteGameLobbyScreenshotsCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_ECHO_RECOGNIZED_PLAYER_NAMES , Boolean.toString( echoRecognizedPlayerNamesCheckBox.isSelected() ) );
 	}

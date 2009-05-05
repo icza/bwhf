@@ -145,6 +145,8 @@ public class Consts {
 	public static final String PROPERTY_PLAYER_CHECKER_ENABLED         = "playerCheckerEnabled";
 	/** Hacker list update interval property.    */
 	public static final String PROPERTY_HACKER_LIST_UPDATE_INTERVAL    = "hackerListUpdateInterval";
+	/** Say "clean" property.                    */
+	public static final String PROPERTY_SAY_CLEAN                      = "sayClean";
 	/** Delete game lobby screenshots property.  */
 	public static final String PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS  = "deleteGameLobbyScreenshots";
 	/** Echo recognized player names property.   */
@@ -200,6 +202,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_APPEND_RESULTS_TO_TABLE       , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAYER_CHECKER_ENABLED        , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HACKER_LIST_UPDATE_INTERVAL   , "2" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SAY_CLEAN                     , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ECHO_RECOGNIZED_PLAYER_NAMES  , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST    , "false" );
