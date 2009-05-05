@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.StringTokenizer;
+import java.util.Vector;
 
 import swingwt.awt.BorderLayout;
 import swingwt.awt.Color;
@@ -231,7 +232,9 @@ public class ReplaySearchTab extends Tab {
 	/** Game type filter checkboxes.                      */
 	private final JCheckBox[] gameTypeCheckBoxes            = new JCheckBox[ ReplayHeader.GAME_TYPE_NAMES.length ];
 	
-	// TODO: missing fields: game type
+	// SwingWT does not implement column rearrange and sorting, so here it comes:
+	/** Tells the model indices of the columns. */
+	private final int[] columnModelIndices = new int[ RESULT_TABLE_COLUMN_NAMES.length ];
 	
 	/**
 	 * Creates a new ReplaySearchTab.
@@ -244,6 +247,16 @@ public class ReplaySearchTab extends Tab {
 		for ( int i = ReplayHeader.VERSION_NAMES.length - 1; i >= 0; i-- ) {
 			versionMinComboBox.addItem( ReplayHeader.VERSION_NAMES[ i ] );
 			versionMaxComboBox.addItem( ReplayHeader.VERSION_NAMES[ i ] );
+		}
+		
+		final StringTokenizer columnModelIndicesTokenizer = new StringTokenizer( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPLAY_COLUMN_MODEL_INDICES ), "," );
+		try {
+			for ( int i = 0; i < columnModelIndices.length; i++ )
+				columnModelIndices[ i ] = Integer.parseInt( columnModelIndicesTokenizer.nextToken() );
+		}
+		catch ( final Exception e ) {
+			for ( int i = 0; i < columnModelIndices.length; i++ )
+				columnModelIndices[ i ] = i;
 		}
 		
 		buildGUI();
@@ -750,7 +763,19 @@ public class ReplaySearchTab extends Tab {
 	 * Refreshes the result table from the <code>lastSearchResultRowsData</code> data list.
 	 */
 	private void refreshResultTable() {
-		resultTable.setModel( new DefaultTableModel( lastSearchResultRowsData.toArray( new String[ lastSearchResultRowsData.size() ][] ), RESULT_TABLE_COLUMN_NAMES ) {
+		final Vector< Vector< String > > resultDataVector = new Vector< Vector< String > >( lastSearchResultRowsData.size() );
+		for ( final String[] rowData : lastSearchResultRowsData ) {
+			final Vector< String > rowVector = new Vector< String >( RESULT_TABLE_COLUMN_NAMES.length );
+			for ( final int columnModelIndex : columnModelIndices )
+				rowVector.add( rowData[ columnModelIndex ] );
+			resultDataVector.add( rowVector );
+		}
+		final Vector< String > columnNameVector = new Vector< String >( RESULT_TABLE_COLUMN_NAMES.length );
+		for ( final int columnModelIndex : columnModelIndices )
+			columnNameVector.add( RESULT_TABLE_COLUMN_NAMES[ columnModelIndex ] );
+		
+		//resultTable.setModel( new DefaultTableModel( lastSearchResultRowsData.toArray( new String[ lastSearchResultRowsData.size() ][] ), RESULT_TABLE_COLUMN_NAMES ) {
+		resultTable.setModel( new DefaultTableModel( resultDataVector, columnNameVector ) {
 			@Override
 			public boolean isCellEditable( final int row, final int column ) {
 				return false;
@@ -1233,6 +1258,13 @@ public class ReplaySearchTab extends Tab {
 	@Override
 	public void assignUsedProperties() {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_APPEND_RESULTS_TO_TABLE, Boolean.toString( appendResultsToTableCheckBox.isSelected() ) );
+		final StringBuilder columnModelIndicesBuilder = new StringBuilder();
+		for ( final int columnModelIndex : columnModelIndices ) {
+			if ( columnModelIndicesBuilder.length() > 0 )
+				columnModelIndicesBuilder.append( ',' );
+			columnModelIndicesBuilder.append( columnModelIndex );
+		}
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_REPLAY_COLUMN_MODEL_INDICES, columnModelIndicesBuilder.toString() );
 	}
 	
 }
