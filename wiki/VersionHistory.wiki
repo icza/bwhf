@@ -10,6 +10,7 @@
  * New setting on the player checker tab: *Say "clean" if no hackers found*. This way you can be sure a player check was performed but no hackers found in the game lobby.
  * A new *"Column setup..."* button on the replay search tab to customize replay columns order.
  * Modified the _build anywhere_ hack detection to recognize more cases.
+ * Some minor bugfixes.
 
 ----
 ===2.21 2009-04-24===
