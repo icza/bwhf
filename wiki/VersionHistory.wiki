@@ -10,7 +10,7 @@
  * New setting on the player checker tab: *Say "clean" if no hackers found*. This way you can be sure a player check was performed but no hackers found in the game lobby.
  * A new *"Column setup..."* button on the replay search tab to customize replay columns order.
  * Clicking on the column headers in the replay search tab will *sort the table*. Clicking again on the same column will reverse the order.
- * New setting on the charts tab: *Display actions in seconds*
+ * New setting on the charts tab: *Display actions in seconds*.
  * Modified the *build anywhere* hack detection to recognize more cases.
  * Some minor bugfixes.
 
