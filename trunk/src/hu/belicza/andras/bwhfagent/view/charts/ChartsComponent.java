@@ -799,7 +799,7 @@ public class ChartsComponent extends JPanel {
 			if ( !chartsParams.allPlayersOnOneChart || i == 0 ) { // We draw labels once if all players are on one chart
 				graphics.setFont( CHART_AXIS_LABEL_FONT );
 				// if no actions, let's define axis labels from zero to ASSIST_LINES_COUNT
-				final int maxApm = maxActionss[ i ] > 0 ? maxActionss[ i ] * ( chartPoints - 1 ) * 60 / ReplayHeader.convertFramesToSeconds( chartsParams.frames ) : ASSIST_LINES_COUNT;
+				final int maxApm = maxActionss[ i ] > 0 ? maxActionss[ i ] * ( chartPoints - 1 ) * 60 / Math.max( ReplayHeader.convertFramesToSeconds( chartsParams.frames ), 1 ) : ASSIST_LINES_COUNT;
 				for ( int j = 0; j <= ASSIST_LINES_COUNT; j++ ) {
 					final int y   = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
 					final int apm = maxApm * j / ASSIST_LINES_COUNT;
@@ -1048,7 +1048,7 @@ public class ChartsComponent extends JPanel {
 			graphics.setFont( CHART_AXIS_LABEL_FONT );
 			for ( int j = 0; j <= TIME_LABELS_COUNT; j++ ) {
 				final StringBuilder timeBuilder = new StringBuilder();
-				ReplayHeader.formatFrames( frames * j / TIME_LABELS_COUNT, timeBuilder );
+				ReplayHeader.formatFrames( frames * j / TIME_LABELS_COUNT, timeBuilder, false );
 				final int x = chartsParams.x1 + ( chartsParams.maxXInChart * j / TIME_LABELS_COUNT )
 								- ( j == 0 ? 0 : ( j == TIME_LABELS_COUNT ? timeBuilder.length() * 7 : timeBuilder.length() * 7 / 2 ) );
 				graphics.drawString( timeBuilder.toString(), x, y1 + chartsParams.maxYInChart + 1 );
