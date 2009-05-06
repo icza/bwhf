@@ -214,7 +214,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		
 		contentBox.add( Utils.wrapInPanel( settingsPanel ) );
 		
-		final JLabel noteLabel = new JLabel( "Note that you will only be notified of players reported with the gateway set on your autoscan tab! (Keep it always synchronized with the gateway you play on.)" );
+		final JLabel noteLabel = new JLabel( "Note that you will only be notified of players reported with the gateway set on your autoscan tab! (Always keep it synchronized with the gateway you play on.)" );
 		noteLabel.setFont( new Font( "Default", Font.BOLD, 9 ) );
 		contentBox.add( Utils.wrapInPanel( noteLabel ) );
 		

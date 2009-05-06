@@ -33,8 +33,10 @@ import java.util.Vector;
 import swingwt.awt.BorderLayout;
 import swingwt.awt.Color;
 import swingwt.awt.Dimension;
+import swingwt.awt.Font;
 import swingwt.awt.GridBagConstraints;
 import swingwt.awt.GridBagLayout;
+import swingwt.awt.GridLayout;
 import swingwt.awt.Insets;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
@@ -45,6 +47,7 @@ import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
+import swingwtx.swing.JDialog;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JOptionPane;
@@ -528,13 +531,22 @@ public class ReplaySearchTab extends Tab {
 		} );
 		
 		final JPanel allButtonsWrapperPanel = Utils.createWrapperPanel();
+		wrapperBox = Box.createVerticalBox();
 		appendResultsToTableCheckBox.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				if ( !stopSearchButton.isEnabled() && !lastSearchResultFileList.isEmpty() )
 					searchPreviousResultButton.setEnabled( !appendResultsToTableCheckBox.isSelected() );
 			}
 		} );
-		allButtonsWrapperPanel.add( Utils.wrapInPanel( appendResultsToTableCheckBox ) );
+		wrapperBox.add( appendResultsToTableCheckBox );
+		final JButton columnSetupButton = new JButton( "Column setup..." );
+		columnSetupButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				showColumnSetupDialog();
+			}
+		} );
+		wrapperBox.add( Utils.wrapInPanel( columnSetupButton ) );
+		allButtonsWrapperPanel.add( wrapperBox );
 		
 		final Box searchStartButtonsBox = Box.createVerticalBox();
 		JPanel selectButtonsPanel = Utils.createWrapperPanel();
@@ -757,6 +769,86 @@ public class ReplaySearchTab extends Tab {
 		copyReplaysButton    .setEnabled( false );
 		moveReplaysButton    .setEnabled( false );
 		deleteReplaysButton  .setEnabled( false );
+	}
+	
+	/**
+	 * Shows the column setup dialog.
+	 */
+	private void showColumnSetupDialog() {
+		final JDialog dialog = new JDialog( mainFrame, "Column setup" );
+		dialog.setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
+		
+		final int[] columnModelIndicesClone = columnModelIndices.clone();
+		
+		final JPanel columnsGrid = new JPanel( new GridLayout( columnModelIndices.length, 3 ) );
+		buildColumnsGrid( columnsGrid, columnModelIndicesClone );
+		dialog.add( columnsGrid, BorderLayout.CENTER );
+		
+		final JPanel buttonsPanel = Utils.createWrapperPanel();
+		final JButton applyButton = new JButton( "Apply" );
+		applyButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				for ( int i = columnModelIndices.length - 1; i >= 0; i-- )
+					columnModelIndices[ i ]= columnModelIndicesClone[ i ];
+				dialog.dispose();
+				if ( !lastSearchResultFileList.isEmpty() )
+					refreshResultTable();
+			}
+		} );
+		applyButton.setMnemonic( applyButton.getText().charAt( 0 ) );
+		buttonsPanel.add( applyButton );
+		final JButton cancelButton = new JButton( "Cancel" );
+		cancelButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				dialog.dispose();
+			}
+		} );
+		cancelButton.setMnemonic( cancelButton.getText().charAt( 0 ) );
+		buttonsPanel.add( cancelButton );
+		dialog.add( buttonsPanel, BorderLayout.SOUTH );
+		
+		dialog.pack();
+		dialog.setLocation( mainFrame.getLocationOnScreen().x + mainFrame.getWidth() / 2 - 150, mainFrame.getLocationOnScreen().y + mainFrame.getHeight() / 2 - 200 );
+		dialog.setVisible( true );
+	}
+	
+	private void buildColumnsGrid( final JPanel columnsGrid, final int[] columnModelIndicesClone ) {
+		for ( int i = columnsGrid.getComponentCount() - 1; i >= 0; i-- )
+			columnsGrid.remove( i );
+		for ( int i = 0; i < columnModelIndicesClone.length; i++ ) {
+			final int i_ = i;
+			final JLabel columnNameLabel = new JLabel( RESULT_TABLE_COLUMN_NAMES[ columnModelIndicesClone[ i ] ] );
+			columnNameLabel.setFont( new Font( "Default", Font.BOLD, 9 ) );
+			columnsGrid.add( columnNameLabel );
+			if ( i > 0 ) {
+				final JButton moveUpButton = new JButton( "\u2191" ); // Up arrow
+				moveUpButton.addActionListener( new ActionListener() {
+					public void actionPerformed( final ActionEvent event ) {
+						final int tempIndex = columnModelIndicesClone[ i_ ];
+						columnModelIndicesClone[ i_ ] = columnModelIndicesClone[  i_ - 1 ];
+						columnModelIndicesClone[ i_ - 1 ] = tempIndex;
+						buildColumnsGrid( columnsGrid, columnModelIndicesClone );
+					}
+				} );
+				columnsGrid.add( moveUpButton );
+			}
+			else
+				columnsGrid.add( new JLabel() );
+			if ( i < columnModelIndicesClone.length - 1 ) {
+				final JButton moveDownButton = new JButton( "\u2193" ); // Down arrow
+				moveDownButton.addActionListener( new ActionListener() {
+					public void actionPerformed( final ActionEvent event ) {
+						final int tempIndex = columnModelIndicesClone[ i_ ];
+						columnModelIndicesClone[ i_ ] = columnModelIndicesClone[  i_ + 1 ];
+						columnModelIndicesClone[ i_ + 1 ] = tempIndex;
+						buildColumnsGrid( columnsGrid, columnModelIndicesClone );
+					}
+				} );
+				columnsGrid.add( moveDownButton );
+			}
+			else
+				columnsGrid.add( new JLabel() );
+		}
 	}
 	
 	/**
