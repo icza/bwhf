@@ -244,7 +244,7 @@ public class ChartsComponent extends JPanel {
 					try {
 						int iteration = Integer.parseInt( jumpToIterationTextField.getText() );
 						final int index = searchActionForIteration( iteration );
-						actionsListTextArea.setCaretPosition( actionsListTextArea.getText().indexOf( ( (Action) actionList.get( index )[ 0 ] ).toString( (String) actionList.get( index )[ 1 ] ) ) + 1 );
+						actionsListTextArea.setCaretPosition( actionsListTextArea.getText().indexOf( ( (Action) actionList.get( index )[ 0 ] ).toString( (String) actionList.get( index )[ 1 ], chartsTab.displayActionsInSecondsCheckBox.isSelected() ) ) + 1 );
 						syncMarkerFromActionListToChart();
 					}
 					catch ( final Exception e ) {
@@ -341,7 +341,7 @@ public class ChartsComponent extends JPanel {
 			final int index = searchActionForIteration( iteration );
 			
 			if ( iteration >= 0 && index >= 0 ) {
-				final String actionString = ( (Action) actionList.get( index )[ 0 ] ).toString( (String) actionList.get( index )[ 1 ] );
+				final String actionString = ( (Action) actionList.get( index )[ 0 ] ).toString( (String) actionList.get( index )[ 1 ], chartsTab.displayActionsInSecondsCheckBox.isSelected() );
 				// We get position in the textarea's text, because this might differ from the position in acitonsListTextBuilder
 				final int actionCaretPosition = actionsListTextArea.getText().indexOf( actionString );
 				actionsListTextArea.setCaretPosition( actionCaretPosition );
@@ -415,9 +415,18 @@ public class ChartsComponent extends JPanel {
 		actionsListTextArea.setSelectionEnd( actionLastPosition );
 		actionsListTextArea.setSelectionStart( actionFirstPosition );
 		
-		final String actionString = (String) actionListText.substring( actionFirstPosition, actionLastPosition );
-		final int    iteration    = Integer.parseInt( new StringTokenizer( actionString ).nextToken() );
-		markerPosition = ChartsParams.getXForIteration( iteration, replay.replayHeader.gameFrames, ChartsComponent.this );
+		final StringTokenizer timeTokenizer = new StringTokenizer( (String) actionListText.substring( actionFirstPosition, actionLastPosition ) );
+		int time;
+		int maxTime;
+		if ( chartsTab.displayActionsInSecondsCheckBox.isSelected() ) {
+			time    = 3600 * Integer.parseInt( timeTokenizer.nextToken( ":" ) ) + 60 * Integer.parseInt( timeTokenizer.nextToken( ":" ) ) + Integer.parseInt( timeTokenizer.nextToken( ": " ) );
+			maxTime = replay.replayHeader.getDurationSeconds();
+		}
+		else {
+			time    = Integer.parseInt( timeTokenizer.nextToken() );
+			maxTime = replay.replayHeader.gameFrames;
+		}
+		markerPosition = ChartsParams.getXForTime( time, maxTime, ChartsComponent.this );
 		
 		repaint();
 	}
@@ -584,7 +593,10 @@ public class ChartsComponent extends JPanel {
 		}
 	}
 	
-	private void loadPlayerActionsIntoList() {
+	/**
+	 * Loads the player actions into the action list text area.
+	 */
+	public void loadPlayerActionsIntoList() {
 		final String[][] filterGroups = createFilterGroups();
 		
 		actionList.clear();
@@ -601,7 +613,7 @@ public class ChartsComponent extends JPanel {
 				final String playerName = playerActionss[ playerIndex ].playerName;
 				for ( final Action action : playerActionss[ playerIndex ].actions ) {
 					if ( filterGroups != null ) {
-						final String actionString = action.toString( playerName ).toLowerCase();
+						final String actionString = action.toString( playerName, chartsTab.displayActionsInSecondsCheckBox.isSelected() ).toLowerCase();
 						for ( final String[] filterGroup : filterGroups ) {
 							boolean filterApplies = true;
 							for ( final String filter : filterGroup )
@@ -626,15 +638,16 @@ public class ChartsComponent extends JPanel {
 				}
 			} );
 			
+			final boolean displayActionsInSeconds = chartsTab.displayActionsInSecondsCheckBox.isSelected();
 			for ( final Object[] action : actionList )
-				actionsListTextBuilder.append( ( (Action) action[ 0 ] ).toString( (String) action[ 1 ] ) ).append( '\n' );
+				actionsListTextBuilder.append( ( (Action) action[ 0 ] ).toString( (String) action[ 1 ], displayActionsInSeconds ) ).append( '\n' );
 			if ( actionsListTextBuilder.length() > 0 ) // remove the last '\n'
 				actionsListTextBuilder.setLength( actionsListTextBuilder.length() - 1 );
 		}
 		actionsListTextArea.setText( actionsListTextBuilder.toString() );
 		actionsListTextBuilder.setLength( 0 ); // To indicate that this does not yet contain the lowercased version for searching
 	}
-	
+	static int asdf=0;
 	/**
 	 * Creates the filter groups from the <code>filterTextField</code>.<br>
 	 * Filters in a group are connected with logical AND condition, and the groups are connected

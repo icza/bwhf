@@ -125,6 +125,8 @@ public class Consts {
 	public static final String PROPERTY_USE_PLAYERS_IN_GAME_COLORS     = "usePlayersInGameColors";
 	/** Auto-disable inactive players property.  */
 	public static final String PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS  = "autoDisableInactivePlayers";
+	/** Display actions in seconds property.     */
+	public static final String PROPERTY_DISPLAY_ACTIONS_IN_SECONDS     = "displayActionsInSeconds";
 	/** APM chart detail level property.         */
 	public static final String PROPERTY_APM_CHART_DETAIL_LEVEL         = "apmChartDetailLevel";
 	/** Show select hotkeys property.            */
@@ -194,6 +196,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_PLAYERS_ON_ONE_CHART      , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_USE_PLAYERS_IN_GAME_COLORS    , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DISPLAY_ACTIONS_IN_SECONDS    , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_APM_CHART_DETAIL_LEVEL        , "4" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SHOW_SELECT_HOTKEYS           , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_BUILD_ORDER_DISPLAY_LEVELS    , "4" );

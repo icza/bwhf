@@ -572,20 +572,23 @@ public class Action implements Comparable< Action > {
 	
 	@Override
 	public String toString() {
-		return toString( null );
+		return toString( null, false );
 	}
 	
 	
 	/** Attribute to cache the value returned by the <code>toString()</code> method. */
 	private String toStringValue;
+	/** Attribute to cache the value returned by the <code>toString()</code> method with seconds. */
+	private String toStringValueSeconds;
 	
 	/**
 	 * Returns the string representation of this action owned by the specified player.
-	 * @param playerName name of player owning this action
+	 * @param playerName    name of player owning this action
+	 * @param timeInSeconds tells if time has to be printed as seconds instead of iteration
 	 * @return the string representation of this action owned by the specified player
 	 */
-	public String toString( final String playerName ) {
-		if ( toStringValue == null ) {
+	public String toString( final String playerName, final boolean timeInSeconds ) {
+		if ( timeInSeconds && toStringValueSeconds == null || !timeInSeconds && toStringValue == null ) {
 			String actionName = null;
 			
 			if ( subactionNameIndex != SUBACTION_NAME_INDEX_UNKNOWN )
@@ -599,13 +602,31 @@ public class Action implements Comparable< Action > {
 				actionName = "<not parsed>";
 			}
 			
-			if ( playerName == null )
-				toStringValue = new Formatter().format( "%6d %-13s %s", iteration, actionName, parameters ).toString();
+			final StringBuilder actionStringBuilder = new StringBuilder();
+			if ( timeInSeconds )
+				ReplayHeader.formatFrames( iteration, actionStringBuilder, true );
+			
+			final Formatter actionStringFormatter = new Formatter( actionStringBuilder );
+			if ( playerName == null ) {
+				if ( timeInSeconds )
+					actionStringFormatter.format( " %-13s %s", actionName, parameters );
+				else
+					actionStringFormatter.format( "%6d %-13s %s", iteration, actionName, parameters );
+			}
+			else {
+				if ( timeInSeconds )
+					actionStringFormatter.format( " %-25s %-17s %s", playerName, actionName, parameters );
+				else
+					actionStringFormatter.format( "%6d %-25s %-17s %s", iteration, playerName, actionName, parameters );
+			}
+			
+			if ( timeInSeconds )
+				toStringValueSeconds = actionStringBuilder.toString();
 			else
-				toStringValue = new Formatter().format( "%6d %-25s %-17s %s", iteration, playerName, actionName, parameters ).toString();
+				toStringValue = actionStringBuilder.toString();
 		}
 		
-		return toStringValue;
+		return timeInSeconds ? toStringValueSeconds : toStringValue;
 	}
 	
 	/**

@@ -47,11 +47,13 @@ public class ChartsTab extends Tab {
 	/** Combobox to select the chart type.                                   */
 	public final JComboBox chartTypeComboBox                  = new JComboBox( ChartsComponent.ChartType.values() );
 	/** Checkbox to enable/disable putting all players on one chart.         */
-	public final JCheckBox allPlayersOnOneChartCheckBox       = new JCheckBox( "All players on one chart", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_PLAYERS_ON_ONE_CHART ) ) );
+	public final JCheckBox allPlayersOnOneChartCheckBox       = new JCheckBox( "All players on 1 chart", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_PLAYERS_ON_ONE_CHART ) ) );
 	/** Checkbox to enable/disable using players' in-game colors for charts. */
-	public final JCheckBox usePlayersColorsCheckBox           = new JCheckBox( "Use players' in-game colors for charts", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLORS ) ) );
+	public final JCheckBox usePlayersColorsCheckBox           = new JCheckBox( "Use players' in-game colors", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLORS ) ) );
 	/** Checkbox to auto-disable inactive players.                           */
-	public final JCheckBox autoDisableInactivePlayersCheckBox = new JCheckBox( "Auto-disable players with less than 30 APM", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS ) ) );
+	public final JCheckBox autoDisableInactivePlayersCheckBox = new JCheckBox( "Auto-disable players < 30 APM", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS ) ) );
+	/** Checkbox to display actions in seconds.                              */
+	public final JCheckBox displayActionsInSecondsCheckBox    = new JCheckBox( "Display actions in seconds", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DISPLAY_ACTIONS_IN_SECONDS ) ) );
 	
 	/** The component visualizing the charts. */
 	private final ChartsComponent chartsComponent = new ChartsComponent( this );
@@ -149,6 +151,12 @@ public class ChartsTab extends Tab {
 		usePlayersColorsCheckBox.setEnabled( !allPlayersOnOneChartCheckBox.isSelected() );
 		chartsCommonControlPanel.add( usePlayersColorsCheckBox );
 		chartsCommonControlPanel.add( autoDisableInactivePlayersCheckBox );
+		chartsCommonControlPanel.add( displayActionsInSecondsCheckBox );
+		displayActionsInSecondsCheckBox.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				chartsComponent.loadPlayerActionsIntoList();
+			}
+		} );
 		contentBox.add( chartsCommonControlPanel );
 		
 		contentBox.add( chartsComponent.getContentPanel() );
@@ -208,6 +216,7 @@ public class ChartsTab extends Tab {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_ALL_PLAYERS_ON_ONE_CHART     , Boolean.toString( allPlayersOnOneChartCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLORS   , Boolean.toString( usePlayersColorsCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS, Boolean.toString( autoDisableInactivePlayersCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_DISPLAY_ACTIONS_IN_SECONDS   , Boolean.toString( displayActionsInSecondsCheckBox.isSelected() ) );
 		
 		chartsComponent.assignUsedProperties();
 	}
