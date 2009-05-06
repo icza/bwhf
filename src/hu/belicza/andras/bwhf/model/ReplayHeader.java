@@ -110,16 +110,19 @@ public class ReplayHeader {
 	 * @param frames amount of frames to be formatted
 	 * @param formatBuilder builder to be used to append the output to
 	 */
-	public static void formatFrames( final int frames, final StringBuilder formatBuilder ) {
+	public static void formatFrames( final int frames, final StringBuilder formatBuilder, final boolean longFormat ) {
 		int seconds = convertFramesToSeconds( frames );
 		
 		final int hours = seconds / 3600;
-		if ( hours > 0 )
+		if ( longFormat || hours > 0 ) {
+			if ( longFormat && hours < 10 )
+				formatBuilder.append( 0 );
 			formatBuilder.append( hours ).append( ':' );
+		}
 		
 		seconds %= 3600;
 		final int minutes = seconds / 60;
-		if ( hours > 0 && minutes < 10 )
+		if ( ( longFormat || hours > 0 ) && minutes < 10 )
 			formatBuilder.append( 0 );
 		formatBuilder.append( minutes ).append( ':' );
 		
@@ -133,9 +136,9 @@ public class ReplayHeader {
 	 * Returns the duration as a human friendly string.
 	 * @return the duration as a human friendly string
 	 */
-	public String getDurationString() {
+	public String getDurationString( final boolean longFormat ) {
 		final StringBuilder formatBuilder = new StringBuilder();
-		formatFrames( gameFrames, formatBuilder );
+		formatFrames( gameFrames, formatBuilder, longFormat );
 		return formatBuilder.toString();
 	}
 	
@@ -185,7 +188,7 @@ public class ReplayHeader {
 		if ( playerIndex < 0 )
 			return null;
 		
-		final Integer apm = playerIdActionsCounts[ playerIds[ playerIndex ] ] * 60 / getDurationSeconds();
+		final Integer apm = playerIdActionsCounts[ playerIds[ playerIndex ] ] * 60 / Math.max( getDurationSeconds(), 1 );
 		return playerNames[ playerIndex ] + " (" + RACE_CHARACTERS[ playerRaces[ playerIndex ] ] + "), actions: " + playerIdActionsCounts[ playerIds[ playerIndex ] ] + ", APM: " + apm;
 	}
 	
@@ -207,7 +210,7 @@ public class ReplayHeader {
 	 */
 	public void printHeaderInformation( final PrintWriter output ) {
 		output.println( "Game engine: " + getGameEngineString() );
-		output.println( "Duration: " + getDurationString() );
+		output.println( "Duration: " + getDurationString( false ) );
 		output.println( "Saved on: " + saveTime );
 		output.println( "Version: " + guessVersionFromDate() );
 		output.println( "Game name: " + gameName );

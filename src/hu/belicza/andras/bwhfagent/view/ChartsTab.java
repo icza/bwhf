@@ -165,6 +165,18 @@ public class ChartsTab extends Tab {
 	 * @param file replay file to be set
 	 */
 	public void setReplayFile( final File file ) {
+		setReplayFile( file, null );
+	}
+	
+	/**
+	 * Sets the replay file displayed on the charts tab.
+	 * @param file replay file to be set
+	 * @param indexInResultList index of the file in the result list
+	 */
+	public void setReplayFile( final File file, final Integer indexInResultList ) {
+		if ( indexInResultList != null )
+			openedIndexFromResultListWrapper[ 0 ] = indexInResultList;
+		
 		final Replay replay = BinRepParser.parseReplay( file, true, false );
 		
 		if ( replay == null ) {

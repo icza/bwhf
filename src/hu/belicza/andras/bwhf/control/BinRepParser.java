@@ -417,7 +417,7 @@ public class BinRepParser {
 				else {
 					if ( gameChatWrapper.gameChatBuilder.length() > 0 )
 						gameChatWrapper.gameChatBuilder.append( "\r\n" );
-					ReplayHeader.formatFrames( frame, gameChatWrapper.gameChatBuilder );
+					ReplayHeader.formatFrames( frame, gameChatWrapper.gameChatBuilder, false );
 					gameChatWrapper.gameChatBuilder.append( " - " ).append( gameChatWrapper.playerIndexNameMap.get( commandsBuffer.get() & 0xff ) );
 					commandsBuffer.get( gameChatWrapper.messageBuffer );
 					gameChatWrapper.gameChatBuilder.append( ": " ).append( getZeroPaddedString( gameChatWrapper.messageBuffer, 0, gameChatWrapper.messageBuffer.length ) );

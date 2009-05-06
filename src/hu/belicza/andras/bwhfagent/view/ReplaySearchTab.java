@@ -26,6 +26,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
@@ -237,7 +239,45 @@ public class ReplaySearchTab extends Tab {
 	
 	// SwingWT does not implement column rearrange and sorting, so here it comes:
 	/** Tells the model indices of the columns. */
-	private final int[] columnModelIndices = new int[ RESULT_TABLE_COLUMN_NAMES.length ];
+	private final int[] columnModelIndices    = new int[ RESULT_TABLE_COLUMN_NAMES.length ];
+	private int         lastSortingModelIndex = -1;
+	private boolean     lastSortingAscendant;
+	
+	/**
+	 * Ascendant comparator for replay data.
+	 * @author Andras Belicza
+	 */
+	private static class AscendantReplayDataComparator implements Comparator< String[] > {
+		private final int sortingModelIndex;
+		public AscendantReplayDataComparator( final int sortingModelIndex ) {
+			this.sortingModelIndex = sortingModelIndex;
+		}
+		public int compare( final String[] replayData1, final String[] replayData2 ) {
+			if ( replayData1[ sortingModelIndex ] == null )
+				return 1;
+			if ( replayData2[ sortingModelIndex ] == null )
+				return -1;
+			return replayData1[ sortingModelIndex ].compareTo( replayData2[ sortingModelIndex ] );
+		}
+	};
+	
+	/**
+	 * Descendant comparator for replay data.
+	 * @author Andras Belicza
+	 */
+	private static class DescendantReplayDataComparator implements Comparator< String[] > {
+		private final int sortingModelIndex;
+		public DescendantReplayDataComparator( final int sortingModelIndex ) {
+			this.sortingModelIndex = sortingModelIndex;
+		}
+		public int compare( final String[] replayData1, final String[] replayData2 ) {
+			if ( replayData1[ sortingModelIndex ] == null )
+				return -1;
+			if ( replayData2[ sortingModelIndex ] == null )
+				return 1;
+			return -replayData1[ sortingModelIndex ].compareTo( replayData2[ sortingModelIndex ] );
+		}
+	};
 	
 	/**
 	 * Creates a new ReplaySearchTab.
@@ -632,7 +672,7 @@ public class ReplaySearchTab extends Tab {
 		final JPanel resultsPanel = new JPanel( new BorderLayout() );
 		showOnChartsButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				mainFrame.chartsTab.setReplayFile( lastSearchResultFileList.get( resultTable.getSelectedRow() ) );
+				mainFrame.chartsTab.setReplayFile( lastSearchResultFileList.get( resultTable.getSelectedRow() ), resultTable.getSelectedRow() );
 				mainFrame.selectTab( mainFrame.chartsTab );
 			}
 		} );
@@ -719,6 +759,22 @@ public class ReplaySearchTab extends Tab {
 			public void mouseClicked( final MouseEvent event ) {
 				if ( event.getClickCount() == 2 )
 					showOnChartsButton.doClick();
+			}
+		} );
+		resultTable.getTableHeader().addMouseListener( new MouseAdapter() {
+			@Override
+			public void mouseClicked( final MouseEvent event ) {
+				final int     sortingModelIndex = columnModelIndices[ resultTable.getTableHeader().columnAtPoint( event.getPoint() ) ];
+				final boolean sortingAscendant  = sortingModelIndex == lastSortingModelIndex ? !lastSortingAscendant : true;
+				
+				Collections.sort( lastSearchResultRowsData, sortingAscendant ? new AscendantReplayDataComparator( sortingModelIndex ) : new DescendantReplayDataComparator( sortingModelIndex ) );
+				for ( int i = lastSearchResultRowsData.size() - 1; i >= 0; i-- )
+					lastSearchResultFileList.set( i, new File( lastSearchResultRowsData.get( i )[ RESULT_TABLE_FILE_NAME_COLUMN_INDEX ] ) );
+				
+				lastSortingModelIndex = sortingModelIndex;
+				lastSortingAscendant  = sortingAscendant;
+				
+				refreshResultTable();
 			}
 		} );
 		resultsPanel.add( new JScrollPane( resultTable ), BorderLayout.CENTER );
@@ -991,6 +1047,7 @@ public class ReplaySearchTab extends Tab {
 		if ( !appendResultsToTableCheckBox.isSelected() ) {
 			lastSearchResultFileList.clear();
 			lastSearchResultRowsData.clear();
+			lastSortingModelIndex = -1;
 		}
 		
 		final ReplayFilter[] replayFilters = getReplayFilters();
@@ -1030,7 +1087,7 @@ public class ReplaySearchTab extends Tab {
 								final ReplayHeader replayHeader = replay.replayHeader;
 								lastSearchResultRowsData.add( new String[] {
 									ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate(),
-									replayHeader.mapName, replayHeader.getDurationString(), ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ], replayHeader.getPlayerNamesString(), SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ),
+									replayHeader.mapName, replayHeader.getDurationString( true ), ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ], replayHeader.getPlayerNamesString(), SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ),
 									replayHeader.gameName, replayHeader.creatorName, replayFile.getAbsolutePath().toString()
 								} );
 							}
@@ -1309,6 +1366,7 @@ public class ReplaySearchTab extends Tab {
 				
 				lastSearchResultFileList.clear();
 				lastSearchResultRowsData.clear();
+				lastSortingModelIndex = -1;
 				while ( ( line = input.readLine() ) != null ) {
 					lineTokenizer = new StringTokenizer( line, RESULT_LIST_FILE_VALUE_SEPARATOR_STRING, true );
 					
