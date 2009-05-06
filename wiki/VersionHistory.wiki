@@ -9,6 +9,7 @@
  * New *Previous replay* and *Next replay* buttons on the charts tab to navigate easily between the replays of the replay search tab. If there are more than 1 replays selected, the buttons will iterate through the selected replays. If there are no selected replays, these buttons will iterate through all replays of the result table.
  * New setting on the player checker tab: *Say "clean" if no hackers found*. This way you can be sure a player check was performed but no hackers found in the game lobby.
  * A new *"Column setup..."* button on the replay search tab to customize replay columns order.
+ * Clicking on the column headers in the replay search tab will sort the table. Clicking again on the same column will reverse the order.
  * Modified the _build anywhere_ hack detection to recognize more cases.
  * Some minor bugfixes.
 
