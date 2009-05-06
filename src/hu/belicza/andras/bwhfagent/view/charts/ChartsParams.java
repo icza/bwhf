@@ -66,27 +66,31 @@ public class ChartsParams {
 	}
 	
 	/**
-	 * Returns the x coordinate calculated for the given iteration.
-	 * @param iteration       iteration whose x coordinate to be returned
-	 * @param frames          frames count
+	 * Returns the x coordinate calculated for the given time.
+	 * @param time            time whose x coordinate to be returned (either iteration or seconds)
+	 * @param maxTime         max time (either frames count or duration) 
 	 * @param chartsComponent reference to the charts component
-	 * @return the x coordinate calculated for the given iteration
+	 * @return the x coordinate calculated for the specified time
 	 */
-	public static int getXForIteration( final int iteration, final int frames, final JComponent chartsComponent ) {
-		return AXIS_SPACE_X + iteration * ( chartsComponent.getWidth() - AXIS_SPACE_X  - 1 ) / frames;
+	public static int getXForTime( final int time, int maxTime, final JComponent chartsComponent ) {
+		if ( maxTime == 0 )
+			maxTime = 1;
+		return AXIS_SPACE_X + time * ( chartsComponent.getWidth() - AXIS_SPACE_X  - 1 ) / maxTime;
 	}
 	
 	/**
-	 * Returns the iteration denoted by the x coordinate on the charts component.
-	 * @param x               x coordinate whose iteration is to be returned
-	 * @param frames          frames count
+	 * Returns the time denoted by the x coordinate on the charts component.
+	 * @param x               x coordinate whose time is to be returned
+	 * @param maxTime         max time (either frames count or duration)
 	 * @param chartsComponent reference to the charts component
-	 * @return the iteration denoted by the x coordinate on the charts component or -1 if it is outside the game iteration domain
+	 * @return the time denoted by the x coordinate on the charts component or -1 if it is outside the game domain
 	 */
-	public static int getIterationForX( final int x, final int frames, final JComponent chartsComponent ) {
+	public static int getIterationForX( final int x, int maxTime, final JComponent chartsComponent ) {
 		if ( x < AXIS_SPACE_X )
 			return -1;
-		return ( x - AXIS_SPACE_X ) * frames / ( chartsComponent.getWidth() - AXIS_SPACE_X  - 1 );
+		if ( maxTime == 0 )
+			maxTime = 1;
+		return ( x - AXIS_SPACE_X ) * maxTime / ( chartsComponent.getWidth() - AXIS_SPACE_X  - 1 );
 	}
 	
 }
