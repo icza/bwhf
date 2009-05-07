@@ -79,7 +79,7 @@ public abstract class LoggedTab extends Tab {
 			}
 		} );
 		controlPanel.add( clearLogButton );
-		final JButton viewEntireLogButton = new JButton( "View entire log" );
+		final JButton viewEntireLogButton = new JButton( "View entire log", IconResourceManager.ICON_VIEW_LOG );
 		viewEntireLogButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				Utils.editFile( logFileName );
