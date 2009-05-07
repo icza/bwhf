@@ -91,6 +91,8 @@ public class IconResourceManager {
 	public static final ImageIcon ICON_SOUND               = new ImageIcon( IconResourceManager.class.getResource( "icons/sound.png" ) );
 	/** Minimize icon.            */
 	public static final ImageIcon ICON_MINIMIZE            = new ImageIcon( IconResourceManager.class.getResource( "icons/application_put.png" ) );
+	/** View log icon.            */
+	public static final ImageIcon ICON_VIEW_LOG            = new ImageIcon( IconResourceManager.class.getResource( "icons/book_open.png" ) );
 	
 	/** Game chat icon.           */
 	public static final ImageIcon ICON_GAME_CHAT           = new ImageIcon( IconResourceManager.class.getResource( ICON_RESOURCE_GAME_CHAT ) );
