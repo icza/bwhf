@@ -44,7 +44,7 @@ public class GeneralSettingsTab extends Tab {
 	/** Checkbox to tell whether check for updates automatically on startup. */
 	private   final JCheckBox  checkUpdatesOnStartupCheckBox      = new JCheckBox( "Check for updates on startup", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHECK_UPDATES_ON_STARTUP ) ) );
 	/** Check for updates button.                                            */
-	private   final JButton    checkUpdatesButton                 = new JButton( CHECK_UPDATES_BUTTON_TEXT );
+	private   final JButton    checkUpdatesButton                 = new JButton( CHECK_UPDATES_BUTTON_TEXT, IconResourceManager.ICON_SERVER_CONNECT );
 	/** Starcraft directory.                                                 */
 	protected final JTextField starcraftFolderTextField           = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ) );
 	/** Start folder when selecting replay flies.                            */
@@ -70,7 +70,7 @@ public class GeneralSettingsTab extends Tab {
 	 * Creates a new GeneralSettings.
 	 */
 	public GeneralSettingsTab() {
-		super( "General settings" );
+		super( "General settings", IconResourceManager.ICON_GENERAL_SETTINGS );
 		
 		final File defaultReplayListsFolder = new File( Consts.DEFAULT_REPLAY_LISTS_FOLDER );
 		if ( !defaultReplayListsFolder.exists() )
@@ -230,7 +230,7 @@ public class GeneralSettingsTab extends Tab {
 		soundVolumeSlider.setLabelTable( soundVolumeSlider.createStandardLabels( 10 ) );
 		soundVolumeSlider.setPreferredSize( new Dimension( 300, 45 ) );
 		panel.add( soundVolumeSlider );
-		final JButton testSoundButton = new JButton( "Play test sound" );
+		final JButton testSoundButton = new JButton( "Play test sound", IconResourceManager.ICON_SOUND );
 		testSoundButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "hacker.wav" ), false );

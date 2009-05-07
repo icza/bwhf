@@ -52,13 +52,13 @@ public class PcxConverterTab extends ProgressLoggedTab {
 	/** Combo box to display supported output formats. */
 	private final JComboBox outputFormatComboBox       = new JComboBox( unifyStrings( ImageIO.getWriterFormatNames() ) );
 	/** Button to select files to scan.                  */
-	private final JButton   selectFilesButton          = new JButton( "Select PCX files to convert..." );
+	private final JButton   selectFilesButton          = new JButton( "Select PCX files to convert...", IconResourceManager.ICON_FILE_CHOOSER );
 	
 	/**
 	 * Creates a new PcxConverterTab.
 	 */
 	public PcxConverterTab() {
-		super( "PCX converter", LOG_FILE_NAME );
+		super( "PCX converter", IconResourceManager.ICON_PCX_CONVERTER, LOG_FILE_NAME );
 		
 		outputFormatComboBox.setSelectedItem( Utils.settingsProperties.getProperty( Consts.PROPERTY_PCX_OUTPUT_FORMAT ) );
 		buildGUI();

@@ -176,7 +176,7 @@ public class Utils {
 	 * @return a button handling the file chooser
 	 */
 	public static JButton createFileChooserButton( final Component parent, final JTextField targetTextField, final int fileSelectionMode, final FileFilter choosableFileFilter, final String[][] choosableFileFilterSWT, final Runnable taskOnApprove ) {
-		final JButton chooseButton = new JButton( "Choose..." );
+		final JButton chooseButton = new JButton( "Choose...", fileSelectionMode == JFileChooser.DIRECTORIES_ONLY ? IconResourceManager.ICON_FOLDER_CHOOSER : IconResourceManager.ICON_FILE_CHOOSER );
 		
 		chooseButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {

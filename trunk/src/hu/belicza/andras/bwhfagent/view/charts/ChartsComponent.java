@@ -8,6 +8,7 @@ import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
 import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.bwhfagent.view.ChartsTab;
+import hu.belicza.andras.bwhfagent.view.IconResourceManager;
 import hu.belicza.andras.bwhfagent.view.Utils;
 
 import java.util.ArrayList;
@@ -286,7 +287,7 @@ public class ChartsComponent extends JPanel {
 		// I put clear filter button in a different grid panel, because button's height is significantly greater than texfields'.
 		final JPanel clearFilterButtonPanel = new JPanel( new GridLayout( 1, 2 ) );
 		clearFilterButtonPanel.add( new JLabel() );
-		final JButton clearFilterButton = new JButton( "Clear filter" );
+		final JButton clearFilterButton = new JButton( "Clear filter", IconResourceManager.ICON_UNDO );
 		clearFilterButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				filterTextField.setText( "" );

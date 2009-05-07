@@ -73,7 +73,7 @@ public class AutoscanTab extends LoggedTab {
 	 * Creates a new AutoscanTab.
 	 */
 	public AutoscanTab() {
-		super( "Autoscan", LOG_FILE_NAME );
+		super( "Autoscan", IconResourceManager.ICON_AUTOSCAN, LOG_FILE_NAME );
 		
 		gatewayComboBox.addItem( "<select your gateway>" );
 		for ( final String gateway : ServerApiConsts.GATEWAYS )
@@ -131,7 +131,7 @@ public class AutoscanTab extends LoggedTab {
 		settingsPanel.add( bringToFrontCheckBox );
 		
 		constraints.gridwidth = 2;
-		final JButton checkKeyButton = new JButton( CHECK_KEY_BUTTON_TEXT );
+		final JButton checkKeyButton = new JButton( CHECK_KEY_BUTTON_TEXT, IconResourceManager.ICON_SERVER_CONNECT );
 		JPanel panel = new JPanel( new BorderLayout() );
 		reportHackersCheckBox.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
@@ -170,7 +170,7 @@ public class AutoscanTab extends LoggedTab {
 		settingsPanel.add( panel );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		panel = new JPanel( new BorderLayout() );
-		button = new JButton( "Change key..." );
+		button = new JButton( "Change key...", IconResourceManager.ICON_KEY );
 		button.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				final Object newAuthorizationKeyObject = JOptionPane.showInputDialog( getContent(), "Enter your authorization key:", "Changing key", JOptionPane.QUESTION_MESSAGE, null, null, authorizationKey );

@@ -1,6 +1,7 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import swingwtx.swing.Box;
+import swingwtx.swing.Icon;
 import swingwtx.swing.JComponent;
 
 /**
@@ -14,14 +15,18 @@ public abstract class Tab {
 	protected final Box contentBox = Box.createVerticalBox();
 	
 	/** The title of the tab. */
-	private String title;
+	private final String title;
+	/** The icon of the tab.  */
+	private final Icon   icon;
 	
 	/**
 	 * Creates a new Tab.
 	 * @param title title of the tab
+	 * @param icon icon of the tab
 	 */
-	public Tab( final String title ) {
+	public Tab( final String title, final Icon icon ) {
 		this.title = title;
+		this.icon  = icon;
 	}
 	
 	/**
@@ -30,6 +35,14 @@ public abstract class Tab {
 	 */
 	public String getTitle() {
 		return title;
+	}
+	
+	/**
+	 * Returns the icon of the tab.
+	 * @return the icon of the tab
+	 */
+	public Icon getIcon() {
+		return icon;
 	}
 	
 	/**
