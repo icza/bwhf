@@ -70,13 +70,13 @@ public class PlayerCheckerTab extends LoggedTab {
 	/** Label to display the last update time of the hacker list.      */
 	private   final JLabel     hackerListLastUpdatedLabel         = new JLabel();
 	/** Button to update hacker list now.                              */
-	private   final JButton    updateNowButton                    = new JButton( UPDATE_NOW_BUTTON_TEXT );
+	private   final JButton    updateNowButton                    = new JButton( UPDATE_NOW_BUTTON_TEXT, IconResourceManager.ICON_DATABASE_REFRESH );
 	/** Checkbox to include custom player list.                        */
 	private   final JCheckBox  includeCustomPlayerListCheckBox    = new JCheckBox( "Include this custom player list:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST ) ) );
 	/** File of the custom player list.                                */
 	private   final JTextField customPlayerListFileTextField      = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_CUSTOM_PLAYER_LIST_FILE ) );
 	/** Button to reload custom player list.                           */
-	private   final JButton    reloadButton                       = new JButton( "Reload" );
+	private   final JButton    reloadButton                       = new JButton( "Reload", IconResourceManager.ICON_ARROW_REFRESH );
 	/** Checkbox to enable/disable saying "clean" if no hackers found. */
 	private   final JCheckBox  sayCleanCheckBox                   = new JCheckBox( "Say \"clean\" if no hackers found", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAY_CLEAN ) ) );
 	/** Checkbox to enable/disable the autoscan.                       */
@@ -96,7 +96,7 @@ public class PlayerCheckerTab extends LoggedTab {
 	 * Creates a new PlayerCheckerTab.
 	 */
 	public PlayerCheckerTab() {
-		super( "Player checker", "player_checker.log" );
+		super( "Player checker", IconResourceManager.ICON_PLAYER_CHECKER, "player_checker.log" );
 		
 		buildGUI();
 		
@@ -190,7 +190,7 @@ public class PlayerCheckerTab extends LoggedTab {
 			}
 		} );
 		wrapperPanel.add( reloadButton, BorderLayout.CENTER );
-		button = new JButton( "Edit" );
+		button = new JButton( "Edit", IconResourceManager.ICON_EDIT );
 		button.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				Utils.editFile( customPlayerListFileTextField.getText() );

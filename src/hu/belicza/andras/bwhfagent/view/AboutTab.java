@@ -37,7 +37,7 @@ public class AboutTab extends Tab {
 	 * Creates a new AboutTab.
 	 */
 	public AboutTab() {
-		super( "About" );
+		super( "About", IconResourceManager.ICON_ABOUT );
 		
 		templateParameterValueMap.put( "%APPLICATION_NAME%"                , Consts.APPLICATION_NAME + "&#8482;" ); // &#8482; is the code of trade mark ('™')
 		templateParameterValueMap.put( "%APPLICATION_AUTHOR%"              , Consts.APPLICATION_AUTHOR );
@@ -53,14 +53,14 @@ public class AboutTab extends Tab {
 	 */
 	private void buildGUI() {
 		final JPanel buttonsPanel = Utils.createWrapperPanel();
-		final JButton homePageButton = new JButton( "Visit home page" );
+		final JButton homePageButton = new JButton( "Visit home page", IconResourceManager.ICON_WORLD_GO );
 		homePageButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				Utils.showURLInBrowser( Consts.HOME_PAGE_URL );
 			}
 		} );
 		buttonsPanel.add( homePageButton );
-		final JButton databaseButton = new JButton( "View online hacker database" );
+		final JButton databaseButton = new JButton( "View online hacker database", IconResourceManager.ICON_WORLD_GO );
 		databaseButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				Utils.showURLInBrowser( Consts.BWHF_HACKER_DATA_BASE_SERVER_URL );

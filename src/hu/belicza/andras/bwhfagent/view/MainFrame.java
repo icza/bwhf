@@ -22,7 +22,6 @@ import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwt.awt.event.WindowAdapter;
 import swingwt.awt.event.WindowEvent;
-import swingwtx.swing.ImageIcon;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JFrame;
 import swingwtx.swing.JLabel;
@@ -38,11 +37,6 @@ import swingwtx.swing.event.ChangeListener;
  * @author Andras Belicza
  */
 public class MainFrame extends JFrame {
-	
-	/** Name of the image resource file to be used as icon image.     */
-	private static final String ICON_IMAGE_RESOURCE_NAME  = "red-pill.gif";
-	/** Name of the 2nd image resource file to be used as icon image. */
-	private static final String ICON_IMAGE_RESOURCE_NAME2 = "blue-pill.gif";
 	
 	/** Stores the reference of the main frame. */
 	private static MainFrame mainFrame;
@@ -61,7 +55,7 @@ public class MainFrame extends JFrame {
 	/** Button to start/switch to Starcraft.                   */
 	protected final JButton    startScButton              = new JButton( "Start/Switch to Starcraft" );
 	/** Button to minimize to tray.                            */
-	protected final JButton    minimizeToTrayButton       = new JButton( "Minimize to tray" );
+	protected final JButton    minimizeToTrayButton       = new JButton( "Minimize to tray", IconResourceManager.ICON_MINIMIZE );
 	/** Label to display if starcraft folder is set correctly. */
 	protected final JLabel     starcraftFolderStatusLabel = new JLabel();
 	
@@ -117,7 +111,7 @@ public class MainFrame extends JFrame {
 		this.applicationVersion = applicationVersion;
 		
 		setTitle( Consts.APPLICATION_NAME );
-		setIconImage( new ImageIcon( getClass().getResource( inWonderland ? ICON_IMAGE_RESOURCE_NAME2 : ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
+		setIconImage( ( inWonderland ? IconResourceManager.ICON_BLUE_PILL : IconResourceManager.ICON_RED_PILL ).getImage() );
 		
 		generalSettingsTab = new GeneralSettingsTab(); // This has to be created fist, autoscan tab uses this.
 		autoscanTab        = new AutoscanTab();
@@ -193,10 +187,9 @@ public class MainFrame extends JFrame {
 		
 		for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ ) {
 			final Tab tab = tabs[ tabIndex ];
-			final char mnemonicChar = Integer.toString( tabIndex + 1 ).charAt( 0 );
-			tabbedPane.add( mnemonicChar + " " + tab.getTitle(), tab.getContent() );
-			// SwingWT doesn't support mnemonics for tabs
-			//tabbedPane.setMnemonicAt( tabIndex, mnemonicChar );
+			tabbedPane.add( tab.getTitle(), tab.getContent() );
+			if ( tab.getIcon() != null )
+				tabbedPane.setIconAt( tabIndex, tab.getIcon() );
 		}
 		
 		tabbedPane.addChangeListener( new ChangeListener() {
@@ -208,7 +201,7 @@ public class MainFrame extends JFrame {
 		getContentPane().add( tabbedPane, BorderLayout.CENTER );
 		
 		if ( SystemTray.isSupported() ) {
-			trayIcon = new TrayIcon( new javax.swing.ImageIcon( getClass().getResource( inWonderland ? ICON_IMAGE_RESOURCE_NAME2 : ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
+			trayIcon = new TrayIcon( new javax.swing.ImageIcon( getClass().getResource( inWonderland ? IconResourceManager.ICON_RESOURCE_BLUE_PILL : IconResourceManager.ICON_RESOURCE_RED_PILL ) ).getImage() );
 			trayIcon.setImageAutoSize( true );
 			
 			trayIcon.setToolTip( "BWHF Agent is running." );
@@ -382,7 +375,7 @@ public class MainFrame extends JFrame {
 			Runtime.getRuntime().exec( new File( generalSettingsTab.starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).getCanonicalPath(), null, new File( generalSettingsTab.starcraftFolderTextField.getText() ) );
 		} catch ( final IOException ie ) {
 			final JFrame errorFrame = new JFrame( "BWHF Agent error" );
-			errorFrame.setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME ) ).getImage() );
+			errorFrame.setIconImage( ( inWonderland ? IconResourceManager.ICON_BLUE_PILL : IconResourceManager.ICON_RED_PILL ).getImage() );
 			errorFrame.getContentPane().add( Utils.wrapInPanel( new JLabel( "Could not start " + Consts.STARCRAFT_EXECUTABLE_FILE_NAME + "!" ) ), BorderLayout.NORTH );
 			errorFrame.getContentPane().add( Utils.wrapInPanel( new JLabel( "Is Starcraft directory properly set?" ) ), BorderLayout.CENTER );
 			final JButton closeButton = new JButton( "Close" );
@@ -444,9 +437,9 @@ public class MainFrame extends JFrame {
 	 */
 	public void stayInWonderland() {
 		inWonderland = true;
-		setIconImage( new ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME2 ) ).getImage() );
+		setIconImage( IconResourceManager.ICON_BLUE_PILL.getImage() );
 		if ( trayIcon != null )
-			trayIcon.setImage( new javax.swing.ImageIcon( getClass().getResource( ICON_IMAGE_RESOURCE_NAME2 ) ).getImage() );
+			trayIcon.setImage( new javax.swing.ImageIcon( getClass().getResource( IconResourceManager.ICON_RESOURCE_BLUE_PILL ) ).getImage() );
 	}
 	
 }

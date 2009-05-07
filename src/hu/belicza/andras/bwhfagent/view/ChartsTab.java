@@ -33,11 +33,11 @@ public class ChartsTab extends Tab {
 	/** Button to display game chat from the last replay.      */
 	private final JButton   openLastReplayButton = new JButton( "Open 'LastReplay.rep'" );
 	/** Button to select files to extract game chat.           */
-	private final JButton   selectFileButton     = new JButton( "Select file to open..." );
+	private final JButton   selectFileButton     = new JButton( "Select file to open...", IconResourceManager.ICON_FILE_CHOOSER );
 	/** Button to open previous replay from replay search tab. */
-	private final JButton   previousReplayButton = new JButton( "Previous replay" );
+	private final JButton   previousReplayButton = new JButton( "Previous replay", IconResourceManager.ICON_ARROW_LEFT );
 	/** Button to open next replay from replay search tab. */
-	private final JButton   nextReplayButton     = new JButton( "Next replay" );
+	private final JButton   nextReplayButton     = new JButton( "Next replay", IconResourceManager.ICON_ARROW_RIGHT );
 	/** Label to display the loaded replay.                    */
 	private final JLabel    loadedReplayLabel    = new JLabel( "No replay loaded." );
 	
@@ -62,7 +62,7 @@ public class ChartsTab extends Tab {
 	 * Creates a new ChartsTab.
 	 */
 	public ChartsTab() {
-		super( "Charts" );
+		super( "Charts", IconResourceManager.ICON_CHARTS );
 		
 		buildGUI();
 		

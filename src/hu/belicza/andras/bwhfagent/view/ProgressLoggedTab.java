@@ -1,5 +1,6 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import swingwtx.swing.Icon;
 import swingwtx.swing.JProgressBar;
 
 
@@ -15,11 +16,12 @@ public abstract class ProgressLoggedTab extends LoggedTab {
 	
 	/**
 	 * Creates a new ProgressLoggedTab.
-	 * @param title title of the tab
+	 * @param title       title of the tab
+	 * @param icon        icon of the tab
 	 * @param logFileName name of the log file
 	 */
-	public ProgressLoggedTab( final String title, final String logFileName ) {
-		super( title, logFileName );
+	public ProgressLoggedTab( final String title, final Icon icon, final String logFileName ) {
+		super( title, icon, logFileName );
 	}
 	
 	@Override

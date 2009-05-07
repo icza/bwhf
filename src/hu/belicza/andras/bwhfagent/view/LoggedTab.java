@@ -11,6 +11,7 @@ import swingwt.awt.Font;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.BorderFactory;
+import swingwtx.swing.Icon;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JPanel;
@@ -40,11 +41,12 @@ public abstract class LoggedTab extends Tab {
 	
 	/**
 	 * Creates a new LoggedTab.
-	 * @param title title of the tab
+	 * @param title       title of the tab
+	 * @param icon        icon of the tab
 	 * @param logFileName name of the log file
 	 */
-	public LoggedTab( final String title, final String logFileName ) {
-		super( title );
+	public LoggedTab( final String title, final Icon icon, final String logFileName ) {
+		super( title, icon );
 		this.logFileName = logFileName;
 		
 		try {

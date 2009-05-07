@@ -64,11 +64,11 @@ public class ManualScanTab extends ProgressLoggedTab {
 	/** Button to scan the last replay.                  */
 	protected final JButton   scanLastReplayButton            = new JButton( "Scan 'LastReplay.rep'" );
 	/** Button to select folders to scan.                */
-	private   final JButton   selectFoldersButton             = new JButton( "Select folders to scan recursively..." );
+	private   final JButton   selectFoldersButton             = new JButton( "Select folders to scan recursively...", IconResourceManager.ICON_FOLDER_CHOOSER );
 	/** Button to select files to scan.                  */
-	private   final JButton   selectFilesButton               = new JButton( "Select files to scan..." );
+	private   final JButton   selectFilesButton               = new JButton( "Select files to scan...", IconResourceManager.ICON_FILE_CHOOSER );
 	/** Button to stop the current scan.                 */
-	private   final JButton   stopScanButton                  = new JButton( "Stop current scan" );
+	private   final JButton   stopScanButton                  = new JButton( "Stop current scan", IconResourceManager.ICON_STOP );
 	/** Flag hacker reps checkbox.                       */
 	private   final JCheckBox flagHackerRepsCheckBox          = new JCheckBox( "Flag hacker replays by appending '" + HACKER_REPS_FLAG + "' to the", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_FLAG_HACKER_REPS ) ) );
 	/** Position where to flag hacker replays combo box. */
@@ -85,7 +85,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 	 * Creates a new ManualScanTab.
 	 */
 	public ManualScanTab() {
-		super( "Manual scan", LOG_FILE_NAME );
+		super( "Manual scan", IconResourceManager.ICON_MANUAL_SCAN, LOG_FILE_NAME );
 		
 		buildGUI();
 		
@@ -94,7 +94,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 	
 	@Override
 	protected void buildGUI() {
-		final JButton openPreviousReportButton = new JButton( "Open a previous HTML report" );
+		final JButton openPreviousReportButton = new JButton( "Open a previous HTML report", IconResourceManager.ICON_HTML );
 		openPreviousReportButton.setMnemonic( 'h' );
 		openPreviousReportButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {

@@ -136,20 +136,20 @@ public class ReplaySearchTab extends Tab {
 	private final JCheckBox appendResultsToTableCheckBox = new JCheckBox( "Append results to table (will not clear table)", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_APPEND_RESULTS_TO_TABLE ) ) );
 	
 	/** Button to select folders to search.  */
-	private final JButton selectFoldersButton        = new JButton( "Select folders to search recursively..." );
+	private final JButton selectFoldersButton        = new JButton( "Select folders to search recursively...", IconResourceManager.ICON_FOLDER_CHOOSER );
 	/** Button to select files to search.    */
-	private final JButton selectFilesButton          = new JButton( "Select files to search..." );
+	private final JButton selectFilesButton          = new JButton( "Select files to search...", IconResourceManager.ICON_FILE_CHOOSER );
 	/** Button to stop the current search. */
-	private final JButton stopSearchButton           = new JButton( "Stop current search" );
+	private final JButton stopSearchButton           = new JButton( "Stop current search", IconResourceManager.ICON_STOP );
 	/** Button to repeat search on the same files. */
-	private final JButton repeatSearchButton         = new JButton( "Repeat search" );
+	private final JButton repeatSearchButton         = new JButton( "Repeat search", IconResourceManager.ICON_REPEAT );
 	/** Button to run search on the same files. */
-	private final JButton searchPreviousResultButton = new JButton( "Search in previous results (narrows previous results)" );
+	private final JButton searchPreviousResultButton = new JButton( "Search in previous results (narrows previous results)", IconResourceManager.ICON_TABLE_GO );
 	
 	/** Button to save result list.  */
-	private final JButton saveResultListButton       = new JButton( "Save result list..." );
+	private final JButton saveResultListButton       = new JButton( "Save result list...", IconResourceManager.ICON_TABLE_SAVE );
 	/** Button to save result list.  */
-	private final JButton loadResultListButton       = new JButton( "Load result list..." );
+	private final JButton loadResultListButton       = new JButton( "Load result list...", IconResourceManager.ICON_TABLE_LOAD );
 	
 	/** The progress bar component. */
 	private final JProgressBar progressBar = new JProgressBar();
@@ -163,27 +163,27 @@ public class ReplaySearchTab extends Tab {
 	/** The replay operations popup menu.                          */
 	private JPopupMenu replayOperationsPopupMenu;
 	/** Menu item to show selected replay on charts.               */
-	private final JMenuItem showOnChartsMenuItem       = new JMenuItem( "Show on charts"    );
+	private final JMenuItem showOnChartsMenuItem       = new JMenuItem( "Show on charts", IconResourceManager.ICON_CHARTS );
 	/** Menu item to scan selected replays for hacks.              */
-	private final JMenuItem scanForHacksMenuItem       = new JMenuItem( "Scan for hacks"    );
+	private final JMenuItem scanForHacksMenuItem       = new JMenuItem( "Scan for hacks", IconResourceManager.ICON_MANUAL_SCAN );
 	/** Menu item to display game chat from selected replay.       */
-	private final JMenuItem displayGameChatMenuItem    = new JMenuItem( "Display game chat" );
+	private final JMenuItem displayGameChatMenuItem    = new JMenuItem( "Display game chat", IconResourceManager.ICON_GAME_CHAT );
 	/** Menu item to extract game chat from selected replays.      */
-	private final JMenuItem extractGameChatMenuItem    = new JMenuItem( "Extract game chat" );
+	private final JMenuItem extractGameChatMenuItem    = new JMenuItem( "Extract game chat", IconResourceManager.ICON_GAME_CHATS );
 	/** Menu item to remove selected replays from the result list. */
-	private final JMenuItem removeFromListMenuItem     = new JMenuItem( "Remove from list"  );
+	private final JMenuItem removeFromListMenuItem     = new JMenuItem( "Remove from list", IconResourceManager.ICON_REMOVE_FROM_LIST );
 	/** Menu item to copy selected replay files.                   */
-	private final JMenuItem copyReplaysMenuItem        = new JMenuItem( "Copy replays..."   );
+	private final JMenuItem copyReplaysMenuItem        = new JMenuItem( "Copy replays...", IconResourceManager.ICON_COPY_REPLAY );
 	/** Menu item to move selected replay files.                   */
-	private final JMenuItem moveReplaysMenuItem        = new JMenuItem( "Move replays..."   );
+	private final JMenuItem moveReplaysMenuItem        = new JMenuItem( "Move replays..." );
 	/** Menu item to delete selected replay files.                 */
-	private final JMenuItem deleteReplaysMenuItem      = new JMenuItem( "Delete replays..." );
+	private final JMenuItem deleteReplaysMenuItem      = new JMenuItem( "Delete replays...", IconResourceManager.ICON_DELETE_REPLAY );
 	/** Menu item to rename replay.                                */
-	private final JMenuItem renameReplayMenuItem       = new JMenuItem( "Rename replay..."  );
+	private final JMenuItem renameReplayMenuItem       = new JMenuItem( "Rename replay...", IconResourceManager.ICON_EDIT );
 	/** Menu item to rename replay.                                */
-	private final JMenuItem groupRenameReplaysMenuItem = new JMenuItem( "Group rename replays..." );
+	private final JMenuItem groupRenameReplaysMenuItem = new JMenuItem( "Group rename replays...", IconResourceManager.ICON_GROUP_RENAME_REPLAY );
 	/** Menu item to open replay's folder in explorer.             */
-	private final JMenuItem openInExplorerMenuItem     = new JMenuItem( "Open replay's folder in explorer" );
+	private final JMenuItem openInExplorerMenuItem     = new JMenuItem( "Open replay's folder in explorer", IconResourceManager.ICON_FOLDER );
 	
 	/** Reference to the source files of the last search.            */
 	private       File[]           lastSearchSourceFiles;
@@ -293,7 +293,7 @@ public class ReplaySearchTab extends Tab {
 	 * Creates a new ReplaySearchTab.
 	 */
 	public ReplaySearchTab() {
-		super( "Replay search" );
+		super( "Replay search", IconResourceManager.ICON_REPLAY_SEARCH );
 		
 		versionMinComboBox.addItem( "<any>" );
 		versionMaxComboBox.addItem( "<any>" );
@@ -322,7 +322,7 @@ public class ReplaySearchTab extends Tab {
 	 */
 	private void buildGUI() {
 		final JPanel filterFieldsButtonsPanel = Utils.createWrapperPanel();
-		final JButton resetFilterFieldsButton = new JButton( "Reset fields" );
+		final JButton resetFilterFieldsButton = new JButton( "Reset fields", IconResourceManager.ICON_UNDO );
 		resetFilterFieldsButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				for ( final JCheckBox checkBox : gameEngineCheckBoxes )
@@ -369,9 +369,9 @@ public class ReplaySearchTab extends Tab {
 			}
 		} );
 		filterFieldsButtonsPanel.add( resetFilterFieldsButton );
-		final JButton hideFiltersButton = new JButton( "Hide filters" );
+		final JButton hideFiltersButton = new JButton( "Hide filters", IconResourceManager.ICON_ARROW_IN );
 		filterFieldsButtonsPanel.add( hideFiltersButton );
-		final JButton visitSearchHelpPageButton = new JButton( "Visit search help page" );
+		final JButton visitSearchHelpPageButton = new JButton( "Visit search help page", IconResourceManager.ICON_WORLD_GO );
 		visitSearchHelpPageButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				Utils.showURLInBrowser( Consts.SEARCH_HELP_PAGE_URL );
@@ -576,6 +576,7 @@ public class ReplaySearchTab extends Tab {
 			public void actionPerformed( final ActionEvent event ) {
 				headerFiltersPanel.setVisible( !headerFiltersPanel.isVisible() );
 				hideFiltersButton.setText( headerFiltersPanel.isVisible() ? "Hide filters" : "Show filters" );
+				hideFiltersButton.setIcon( headerFiltersPanel.isVisible() ? IconResourceManager.ICON_ARROW_IN : IconResourceManager.ICON_ARROW_OUT );
 				contentBox.validate();
 			}
 		} );
@@ -589,7 +590,7 @@ public class ReplaySearchTab extends Tab {
 			}
 		} );
 		wrapperBox.add( appendResultsToTableCheckBox );
-		final JButton columnSetupButton = new JButton( "Column setup..." );
+		final JButton columnSetupButton = new JButton( "Column setup...", IconResourceManager.ICON_COLUMNS );
 		columnSetupButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				showColumnSetupDialog();
@@ -922,7 +923,7 @@ public class ReplaySearchTab extends Tab {
 			columnNameLabel.setFont( new Font( "Default", Font.BOLD, 9 ) );
 			columnsGrid.add( columnNameLabel );
 			if ( i > 0 ) {
-				final JButton moveUpButton = new JButton( "Up" );
+				final JButton moveUpButton = new JButton( IconResourceManager.ICON_ARROW_UP );
 				moveUpButton.addActionListener( new ActionListener() {
 					public void actionPerformed( final ActionEvent event ) {
 						final int tempIndex = columnModelIndicesClone[ i_ ];
@@ -936,7 +937,7 @@ public class ReplaySearchTab extends Tab {
 			else
 				columnsGrid.add( new JLabel() );
 			if ( i < columnModelIndicesClone.length - 1 ) {
-				final JButton moveDownButton = new JButton( "Down" );
+				final JButton moveDownButton = new JButton( IconResourceManager.ICON_ARROW_DOWN );
 				moveDownButton.addActionListener( new ActionListener() {
 					public void actionPerformed( final ActionEvent event ) {
 						final int tempIndex = columnModelIndicesClone[ i_ ];
@@ -1437,8 +1438,9 @@ public class ReplaySearchTab extends Tab {
 					}
 				}
 				
-				// We enable searching in previous results now.
+				// We enable searching in previous results and saving result list.
 				searchPreviousResultButton.setEnabled( true  );
+				saveResultListButton      .setEnabled( true );
 				
 				updatedResultsCountLabel();
 				refreshResultTable();

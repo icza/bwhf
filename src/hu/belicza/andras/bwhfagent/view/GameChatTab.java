@@ -30,9 +30,9 @@ public class GameChatTab extends ProgressLoggedTab {
 	/** Button to display game chat from the last replay.  */
 	protected final JButton   displayFromLastReplayButton    = new JButton( "Display game chat from 'LastReplay.rep'" );
 	/** Button to select a file to display game chat from. */
-	private   final JButton   selectFileToDisplayFromButton  = new JButton( "Select file to display game chat from..." );
+	private   final JButton   selectFileToDisplayFromButton  = new JButton( "Select file to display game chat from...", IconResourceManager.ICON_FILE_CHOOSER );
 	/** Button to select files to extract game chat from.  */
-	private   final JButton   selectFilesToExtractFromButton = new JButton( "Select files to extract game chat from..." );
+	private   final JButton   selectFilesToExtractFromButton = new JButton( "Select files to extract game chat from...", IconResourceManager.ICON_FILE_CHOOSER );
 	/** Checkbox to tell whether to include replay header. */
 	private   final JCheckBox includeReplayHeaderCheckBox    = new JCheckBox( "Also include replay header information", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_INCLUDE_REPLAY_HEADER ) ) );
 	
@@ -40,7 +40,7 @@ public class GameChatTab extends ProgressLoggedTab {
 	 * Creates a new PcxConverterTab.
 	 */
 	public GameChatTab() {
-		super( "Game chat", LOG_FILE_NAME );
+		super( "Game chat", IconResourceManager.ICON_GAME_CHATS, LOG_FILE_NAME );
 		
 		buildGUI();
 	}
