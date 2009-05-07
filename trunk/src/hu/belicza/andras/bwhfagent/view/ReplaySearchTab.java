@@ -52,8 +52,10 @@ import swingwtx.swing.JComboBox;
 import swingwtx.swing.JDialog;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JLabel;
+import swingwtx.swing.JMenuItem;
 import swingwtx.swing.JOptionPane;
 import swingwtx.swing.JPanel;
+import swingwtx.swing.JPopupMenu;
 import swingwtx.swing.JProgressBar;
 import swingwtx.swing.JScrollPane;
 import swingwtx.swing.JTable;
@@ -158,22 +160,30 @@ public class ReplaySearchTab extends Tab {
 	/** Label to display the results count. */
 	private final JLabel resultsCountLabel = new JLabel();
 	
-	/** Button to show selected replay on charts.               */
-	private final JButton showOnChartsButton    = new JButton( "Show on charts"    );
-	/** Button to scan selected replays for hacks.              */
-	private final JButton scanForHacksButton    = new JButton( "Scan for hacks"    );
-	/** Button to display game chat from selected replay.       */
-	private final JButton displayGameChatButton = new JButton( "Display game chat" );
-	/** Button to extract game chat from selected replays.      */
-	private final JButton extractGameChatButton = new JButton( "Extract game chat" );
-	/** Button to remove selected replays from the result list. */
-	private final JButton removeFromListButton  = new JButton( "Remove from list"  );
-	/** Button to copy selected replay files.                   */
-	private final JButton copyReplaysButton     = new JButton( "Copy replays..."   );
-	/** Button to move selected replay files.                   */
-	private final JButton moveReplaysButton     = new JButton( "Move replays..."   );
-	/** Button to delete selected replay files.                 */
-	private final JButton deleteReplaysButton   = new JButton( "Delete replays..." );
+	/** The replay operations popup menu.                          */
+	private JPopupMenu replayOperationsPopupMenu;
+	/** Menu item to show selected replay on charts.               */
+	private final JMenuItem showOnChartsMenuItem       = new JMenuItem( "Show on charts"    );
+	/** Menu item to scan selected replays for hacks.              */
+	private final JMenuItem scanForHacksMenuItem       = new JMenuItem( "Scan for hacks"    );
+	/** Menu item to display game chat from selected replay.       */
+	private final JMenuItem displayGameChatMenuItem    = new JMenuItem( "Display game chat" );
+	/** Menu item to extract game chat from selected replays.      */
+	private final JMenuItem extractGameChatMenuItem    = new JMenuItem( "Extract game chat" );
+	/** Menu item to remove selected replays from the result list. */
+	private final JMenuItem removeFromListMenuItem     = new JMenuItem( "Remove from list"  );
+	/** Menu item to copy selected replay files.                   */
+	private final JMenuItem copyReplaysMenuItem        = new JMenuItem( "Copy replays..."   );
+	/** Menu item to move selected replay files.                   */
+	private final JMenuItem moveReplaysMenuItem        = new JMenuItem( "Move replays..."   );
+	/** Menu item to delete selected replay files.                 */
+	private final JMenuItem deleteReplaysMenuItem      = new JMenuItem( "Delete replays..." );
+	/** Menu item to rename replay.                                */
+	private final JMenuItem renameReplayMenuItem       = new JMenuItem( "Rename replay..."  );
+	/** Menu item to rename replay.                                */
+	private final JMenuItem groupRenameReplaysMenuItem = new JMenuItem( "Group rename replays..." );
+	/** Menu item to open replay's folder in explorer.             */
+	private final JMenuItem openInExplorerMenuItem     = new JMenuItem( "Open replay's folder in explorer" );
 	
 	/** Reference to the source files of the last search.            */
 	private       File[]           lastSearchSourceFiles;
@@ -669,32 +679,31 @@ public class ReplaySearchTab extends Tab {
 		panel.add( resultsCountLabel );
 		contentBox.add( panel );
 		
-		final JPanel resultsPanel = new JPanel( new BorderLayout() );
-		showOnChartsButton.addActionListener( new ActionListener() {
+		showOnChartsMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				mainFrame.chartsTab.setReplayFile( lastSearchResultFileList.get( resultTable.getSelectedRow() ), resultTable.getSelectedRow() );
 				mainFrame.selectTab( mainFrame.chartsTab );
 			}
 		} );
-		scanForHacksButton.addActionListener( new ActionListener() {
+		scanForHacksMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				mainFrame.selectTab( mainFrame.manualScanTab );
 				mainFrame.manualScanTab.scanFilesAndFolders( getSelectedResultFiles(), false );
 			}
 		} );
-		displayGameChatButton.addActionListener( new ActionListener() {
+		displayGameChatMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				mainFrame.selectTab( mainFrame.gameChatTab );
 				mainFrame.gameChatTab.showGameChatFromReplay( lastSearchResultFileList.get( resultTable.getSelectedRow() ) );
 			}
 		} );
-		extractGameChatButton.addActionListener( new ActionListener() {
+		extractGameChatMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				mainFrame.selectTab( mainFrame.gameChatTab );
 				mainFrame.gameChatTab.extractGameChatFromFiles( getSelectedResultFiles() );
 			}
 		} );
-		removeFromListButton.addActionListener( new ActionListener() {
+		removeFromListMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				removeSelectedFromResultList();
 			}
@@ -704,16 +713,16 @@ public class ReplaySearchTab extends Tab {
 				final File[] selectedFiles = getSelectedResultFiles();
 				
 				boolean success = true;
-				if ( event.getSource() != deleteReplaysButton ) {
+				if ( event.getSource() != deleteReplaysMenuItem ) {
 					final JFileChooser fileChooser = new JFileChooser( mainFrame.generalSettingsTab.getReplayStartFolder() );
-					fileChooser.setTitle( ( event.getSource() == copyReplaysButton ? "Copy " : "Move ") + selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? "" : "s" ) + " to" );
+					fileChooser.setTitle( ( event.getSource() == copyReplaysMenuItem ? "Copy " : "Move ") + selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? "" : "s" ) + " to" );
 					fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
 					if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION ) {
 						final File destinationFolder = fileChooser.getSelectedFile();
 						for ( final File selectedFile : selectedFiles )
 							success &= Utils.copyFile( selectedFile, destinationFolder, selectedFile.getName() );
 						
-						if ( event.getSource() == moveReplaysButton && success )
+						if ( event.getSource() == moveReplaysMenuItem && success )
 							for ( int index : resultTable.getSelectedRows() )
 								lastSearchResultFileList.set( index, new File( destinationFolder, lastSearchResultFileList.get( index ).getName() ) );
 					}
@@ -721,44 +730,67 @@ public class ReplaySearchTab extends Tab {
 						return;
 				}
 				
-				if ( event.getSource() == deleteReplaysButton )
+				if ( event.getSource() == deleteReplaysMenuItem )
 					if ( JOptionPane.YES_OPTION != JOptionPane.showConfirmDialog( getContent(), "Are you sure that you want to delete " + selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? "?" : "s?" ), "Warning!", JOptionPane.WARNING_MESSAGE, JOptionPane.YES_NO_OPTION ) )
 						return;
 				
-				if ( success && event.getSource() != copyReplaysButton ) { // If copying failed, we don't delete
+				if ( success && event.getSource() != copyReplaysMenuItem ) { // If copying failed, we don't delete
 					for ( final File selectedFile : selectedFiles )
 						success &= selectedFile.delete();
 				}
-				if ( event.getSource() == deleteReplaysButton && success )
+				if ( event.getSource() == deleteReplaysMenuItem && success )
 					removeSelectedFromResultList();
-				JOptionPane.showMessageDialog( getContent(), selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? " " : "s " ) + ( event.getSource() == copyReplaysButton ? "copied" : ( event.getSource() == moveReplaysButton ? "moved" : "deleted" ) ) + ( success ? " successfully." : " with some errors." ), "Done", success ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE );
+				JOptionPane.showMessageDialog( getContent(), selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? " " : "s " ) + ( event.getSource() == copyReplaysMenuItem ? "copied" : ( event.getSource() == moveReplaysMenuItem ? "moved" : "deleted" ) ) + ( success ? " successfully." : " with some errors." ), "Done", success ? JOptionPane.INFORMATION_MESSAGE : JOptionPane.ERROR_MESSAGE );
 			}
 		};
-		copyReplaysButton  .addActionListener( copyMoveDeleteReplaysActionListener );
-		moveReplaysButton  .addActionListener( copyMoveDeleteReplaysActionListener );
-		deleteReplaysButton.addActionListener( copyMoveDeleteReplaysActionListener );
-		disableResultHandlerButtons();
+		copyReplaysMenuItem  .addActionListener( copyMoveDeleteReplaysActionListener );
+		moveReplaysMenuItem  .addActionListener( copyMoveDeleteReplaysActionListener );
+		deleteReplaysMenuItem.addActionListener( copyMoveDeleteReplaysActionListener );
+		renameReplayMenuItem.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+			}
+		} );
+		groupRenameReplaysMenuItem.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+			}
+		} );
+		openInExplorerMenuItem.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				try {
+					Runtime.getRuntime().exec( new String[] { "explorer", lastSearchResultFileList.get( resultTable.getSelectedRow() ).getParent() } );
+				} catch ( final Exception e ) {
+				}
+			}
+		} );
+		disableReplayOperationMenuItems();
 		resultTable.setPreferredSize( new Dimension( 50, 50 ) );
 		resultTable.setRowSelectionAllowed( true );
 		resultTable.getSelectionModel().setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
 		resultTable.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
 			public void valueChanged( final ListSelectionEvent event ) {
 				final int selectedCount = resultTable.getSelectedRowCount();
-				showOnChartsButton   .setEnabled( selectedCount >  0 );
-				scanForHacksButton   .setEnabled( selectedCount >  0 );
-				displayGameChatButton.setEnabled( selectedCount == 1 );
-				extractGameChatButton.setEnabled( selectedCount >  0 );
-				removeFromListButton .setEnabled( selectedCount >  0 );
-				copyReplaysButton    .setEnabled( selectedCount >  0 );
-				moveReplaysButton    .setEnabled( selectedCount >  0 );
-				deleteReplaysButton  .setEnabled( selectedCount >  0 );
+				showOnChartsMenuItem      .setEnabled( selectedCount >  0 );
+				scanForHacksMenuItem      .setEnabled( selectedCount >  0 );
+				displayGameChatMenuItem   .setEnabled( selectedCount == 1 );
+				extractGameChatMenuItem   .setEnabled( selectedCount >  0 );
+				removeFromListMenuItem    .setEnabled( selectedCount >  0 );
+				copyReplaysMenuItem       .setEnabled( selectedCount >  0 );
+				moveReplaysMenuItem       .setEnabled( selectedCount >  0 );
+				deleteReplaysMenuItem     .setEnabled( selectedCount >  0 );
+				renameReplayMenuItem      .setEnabled( selectedCount == 1 );
+				groupRenameReplaysMenuItem.setEnabled( selectedCount >  0 );
+				openInExplorerMenuItem    .setEnabled( selectedCount == 1 );
 			}
 		} );
+		rebuildReplayOperationsPopupMenu();
 		resultTable.addMouseListener( new MouseAdapter() {
 			@Override
 			public void mouseClicked( final MouseEvent event ) {
-				if ( event.getClickCount() == 2 )
-					showOnChartsButton.doClick();
+				if ( event.getButton() == MouseEvent.BUTTON3 )
+					replayOperationsPopupMenu.show( resultTable, event.getX(), event.getY() );
+				if ( event.getButton() == MouseEvent.BUTTON1 )
+					if ( resultTable.getSelectedRow() >= 0 && event.getClickCount() == 2 )
+						showOnChartsMenuItem.doClick();
 			}
 		} );
 		resultTable.getTableHeader().addMouseListener( new MouseAdapter() {
@@ -777,18 +809,7 @@ public class ReplaySearchTab extends Tab {
 				refreshResultTable();
 			}
 		} );
-		resultsPanel.add( new JScrollPane( resultTable ), BorderLayout.CENTER );
-		final JPanel resultActionsBox = Box.createVerticalBox();
-		resultActionsBox.add( showOnChartsButton    );
-		resultActionsBox.add( scanForHacksButton    );
-		resultActionsBox.add( displayGameChatButton );
-		resultActionsBox.add( extractGameChatButton );
-		resultActionsBox.add( removeFromListButton  );
-		resultActionsBox.add( copyReplaysButton     );
-		resultActionsBox.add( moveReplaysButton     );
-		resultActionsBox.add( deleteReplaysButton   );
-		resultsPanel.add( Utils.wrapInPanel( resultActionsBox ), BorderLayout.EAST );
-		contentBox.add( resultsPanel );
+		contentBox.add( new JScrollPane( resultTable ) );
 	}
 	
 	/**
@@ -814,17 +835,41 @@ public class ReplaySearchTab extends Tab {
 	}
 	
 	/**
-	 * Disables the result handler buttons.
+	 * Rebuilds the replay operations popup menu.
 	 */
-	private void disableResultHandlerButtons() {
-		showOnChartsButton   .setEnabled( false );
-		scanForHacksButton   .setEnabled( false );
-		displayGameChatButton.setEnabled( false );
-		extractGameChatButton.setEnabled( false );
-		removeFromListButton .setEnabled( false );
-		copyReplaysButton    .setEnabled( false );
-		moveReplaysButton    .setEnabled( false );
-		deleteReplaysButton  .setEnabled( false );
+	private void rebuildReplayOperationsPopupMenu() {
+		replayOperationsPopupMenu = new JPopupMenu();
+		replayOperationsPopupMenu.add( showOnChartsMenuItem       );
+		replayOperationsPopupMenu.add( scanForHacksMenuItem       );
+		replayOperationsPopupMenu.add( displayGameChatMenuItem    );
+		replayOperationsPopupMenu.add( extractGameChatMenuItem    );
+		replayOperationsPopupMenu.add( removeFromListMenuItem     );
+		replayOperationsPopupMenu.addSeparator();
+		replayOperationsPopupMenu.add( copyReplaysMenuItem        );
+		replayOperationsPopupMenu.add( moveReplaysMenuItem        );
+		replayOperationsPopupMenu.add( deleteReplaysMenuItem      );
+		replayOperationsPopupMenu.addSeparator();
+		replayOperationsPopupMenu.add( renameReplayMenuItem       );
+		replayOperationsPopupMenu.add( groupRenameReplaysMenuItem );
+		replayOperationsPopupMenu.addSeparator();
+		replayOperationsPopupMenu.add( openInExplorerMenuItem     );
+	}
+	
+	/**
+	 * Disables the replay operation menu items.
+	 */
+	private void disableReplayOperationMenuItems() {
+		showOnChartsMenuItem      .setEnabled( false );
+		scanForHacksMenuItem      .setEnabled( false );
+		displayGameChatMenuItem   .setEnabled( false );
+		extractGameChatMenuItem   .setEnabled( false );
+		removeFromListMenuItem    .setEnabled( false );
+		copyReplaysMenuItem       .setEnabled( false );
+		moveReplaysMenuItem       .setEnabled( false );
+		deleteReplaysMenuItem     .setEnabled( false );
+		renameReplayMenuItem      .setEnabled( false );
+		groupRenameReplaysMenuItem.setEnabled( false );
+		openInExplorerMenuItem    .setEnabled( false );
 	}
 	
 	/**
@@ -877,7 +922,7 @@ public class ReplaySearchTab extends Tab {
 			columnNameLabel.setFont( new Font( "Default", Font.BOLD, 9 ) );
 			columnsGrid.add( columnNameLabel );
 			if ( i > 0 ) {
-				final JButton moveUpButton = new JButton( "\u2191" ); // Up arrow
+				final JButton moveUpButton = new JButton( "Up" );
 				moveUpButton.addActionListener( new ActionListener() {
 					public void actionPerformed( final ActionEvent event ) {
 						final int tempIndex = columnModelIndicesClone[ i_ ];
@@ -891,7 +936,7 @@ public class ReplaySearchTab extends Tab {
 			else
 				columnsGrid.add( new JLabel() );
 			if ( i < columnModelIndicesClone.length - 1 ) {
-				final JButton moveDownButton = new JButton( "\u2193" ); // Down arrow
+				final JButton moveDownButton = new JButton( "Down" );
 				moveDownButton.addActionListener( new ActionListener() {
 					public void actionPerformed( final ActionEvent event ) {
 						final int tempIndex = columnModelIndicesClone[ i_ ];
@@ -922,13 +967,16 @@ public class ReplaySearchTab extends Tab {
 		for ( final int columnModelIndex : columnModelIndices )
 			columnNameVector.add( RESULT_TABLE_COLUMN_NAMES[ columnModelIndex ] );
 		
-		//resultTable.setModel( new DefaultTableModel( lastSearchResultRowsData.toArray( new String[ lastSearchResultRowsData.size() ][] ), RESULT_TABLE_COLUMN_NAMES ) {
 		resultTable.setModel( new DefaultTableModel( resultDataVector, columnNameVector ) {
 			@Override
 			public boolean isCellEditable( final int row, final int column ) {
 				return false;
 			}
 		} );
+		
+		// When model is replaced, the context menu is disposed (bug in SwingWT?). We have to rebuild it.
+		rebuildReplayOperationsPopupMenu();
+		
 		mainFrame.chartsTab.onReplayResultListChange( !lastSearchResultRowsData.isEmpty() );
 	}
 	
@@ -1041,7 +1089,7 @@ public class ReplaySearchTab extends Tab {
 		loadResultListButton        .setEnabled( false );
 		appendResultsToTableCheckBox.setEnabled( false );
 		
-		disableResultHandlerButtons();
+		disableReplayOperationMenuItems();
 		
 		lastSearchSourceFiles = files;
 		if ( !appendResultsToTableCheckBox.isSelected() ) {
