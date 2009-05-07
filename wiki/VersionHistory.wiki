@@ -11,7 +11,7 @@
  * A new *"Column setup..."* button on the replay search tab to customize replay columns order.
  * Clicking on the column headers in the replay search tab will *sort the table*. Clicking again on the same column will reverse the order.
  * New setting on the charts tab: *Display actions in seconds*.
- * Removed the replay handler buttons from the search tab, and added a context menu (right click menu) to the result table. You can find here all operations that were available through the buttons. This gives more space to the result table.
+ * Removed the replay handler buttons from the search tab, and added a context menu (right click popup menu) to the result table. You can find here all operations that were available through the buttons. This gives more space to the result table.
  * Modified the *build anywhere* hack detection to recognize more cases.
  * Some minor bugfixes.
 
