@@ -13,6 +13,8 @@
  * New setting on the charts tab: *Display actions in seconds*.
  * Removed the replay handler buttons from the search tab, and added a context menu (right click popup menu) to the result table. You can find here all operations that were available through the buttons. This gives more space to the result table.
  * New replay operation: Open replay's folder in explorer.
+ * New replay operation: Rename replay.
+ * New replay operation: Group rename replays.
  * Modified the *build anywhere* hack detection to recognize more cases.
  * Some minor bugfixes.
 
