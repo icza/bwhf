@@ -15,7 +15,7 @@
  * New replay operation: Open replay's folder in explorer.
  * New replay operation: Rename replay.
  * New replay operation: Group rename replays.
- * *Added icons* to tabs and buttons.
+ * *Added icons* to tabs and buttons (user interface is much more friendly this way).
  * Modified the *build anywhere* hack detection to recognize more cases.
  * Some minor bugfixes.
 
