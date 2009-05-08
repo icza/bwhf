@@ -142,6 +142,8 @@ public class Consts {
 	/** Overall APM chart detail level property. */
 	public static final String PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL = "overallApmChartDetailLevel";
 	/** Player checker enabled property.         */
+	public static final String PROPERTY_HIDE_SEARCH_FILTERS            = "hideSearchFilters";
+	/** Player checker enabled property.         */
 	public static final String PROPERTY_APPEND_RESULTS_TO_TABLE        = "appendResultsToTable";
 	/** Player checker enabled property.         */
 	public static final String PROPERTY_PLAYER_CHECKER_ENABLED         = "playerCheckerEnabled";
@@ -204,6 +206,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HIDE_WORKER_UNITS             , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_STRATEGY_DISPLAY_LEVELS       , "4" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL, "7" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HIDE_SEARCH_FILTERS           , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_APPEND_RESULTS_TO_TABLE       , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAYER_CHECKER_ENABLED        , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HACKER_LIST_UPDATE_INTERVAL   , "2" );
