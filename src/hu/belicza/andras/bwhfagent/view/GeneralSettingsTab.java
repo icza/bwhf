@@ -8,6 +8,7 @@ import java.net.URL;
 import swingwt.awt.BorderLayout;
 import swingwt.awt.Color;
 import swingwt.awt.Dimension;
+import swingwt.awt.Font;
 import swingwt.awt.GridBagConstraints;
 import swingwt.awt.GridBagLayout;
 import swingwt.awt.GridLayout;
@@ -51,6 +52,8 @@ public class GeneralSettingsTab extends Tab {
 	protected final JTextField replayStartFolderTextField         = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPLAY_START_FOLDER ) );
 	/** Default folder for replay lists.                                     */
 	protected final JTextField defaultReplayListsFolderTextField  = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_DEFAULT_REPLAY_LISTS_FOLDER ) );
+	/** Replay list to be loaded on startup.                                 */
+	protected final JTextField replayListToLoadOnStartupTextField = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPLAY_LIST_TO_LOAD_ON_STARTUP ) );
 	/** Program to view/edit files.                                          */
 	protected final JTextField editorProgramTextField             = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_EDITOR_PROGRAM ) );
 	/** Checkbox to tell whether check for updates automatically on startup. */
@@ -160,9 +163,9 @@ public class GeneralSettingsTab extends Tab {
 				// If one of Starcraft's folder was selected, we replace its path to be relative so it will work if the product is copied/moved to another directory
 				final File selectedFolder = new File( replayStartFolderTextField.getText() );
 				
-				if ( selectedFolder.equals( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_REPLAY_FOLDER ) ) )
+				if ( selectedFolder.getAbsolutePath().equals( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_REPLAY_FOLDER ).getAbsolutePath() ) )
 					replayStartFolderTextField.setText( Consts.STARCRAFT_REPLAY_FOLDER );
-				else if ( selectedFolder.getParentFile() != null && selectedFolder.getParentFile().equals( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_REPLAY_FOLDER ) ) )
+				else if ( selectedFolder.getParentFile() != null && selectedFolder.getParentFile().getAbsolutePath().equals( new File( starcraftFolderTextField.getText(), Consts.STARCRAFT_REPLAY_FOLDER ).getAbsolutePath() ) )
 					replayStartFolderTextField.setText( Consts.STARCRAFT_REPLAY_FOLDER + "/" + selectedFolder.getName() );
 			}
 		} );
@@ -180,14 +183,38 @@ public class GeneralSettingsTab extends Tab {
 			public void run() {
 				// If the default folder was selected, we replace its path to be relative so it will work if the product is copied/moved to another directory
 				final File selectedFolder = new File( defaultReplayListsFolderTextField.getText() );
-				System.out.println( selectedFolder.getAbsolutePath() );
-				System.out.println( new File( Consts.DEFAULT_REPLAY_LISTS_FOLDER ).getAbsolutePath() );
 				if ( selectedFolder.getAbsolutePath().equals( new File( Consts.DEFAULT_REPLAY_LISTS_FOLDER ).getAbsolutePath() ) )
 					defaultReplayListsFolderTextField.setText( Consts.DEFAULT_REPLAY_LISTS_FOLDER );
 			}
 		} );
 		gridBagLayout.setConstraints( button, constraints );
 		panel.add( button );
+		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Replay list to load on startup:", JLabel.LEFT );
+		gridBagLayout.setConstraints( label, constraints );
+		panel.add( label );
+		gridBagLayout.setConstraints( replayListToLoadOnStartupTextField, constraints );
+		panel.add( replayListToLoadOnStartupTextField );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		button = Utils.createFileChooserButton( getContent(), replayListToLoadOnStartupTextField, JFileChooser.FILES_ONLY, Utils.SWING_TEXT_FILE_FILTER , new String[][] { { "*.txt", "*.*" }, { "Text files (*.txt)", "All files (*.*)" } }, new Runnable() {
+			public void run() {
+				// If the selected replay list file is in the default replay list folder, we replace its path to be relative so it will work if the product is copied/moved to another directory
+				final File selectedFile = new File( replayListToLoadOnStartupTextField.getText() );
+				
+				if ( selectedFile.getParentFile() != null && selectedFile.getParentFile().getAbsolutePath().equals( new File( Consts.DEFAULT_REPLAY_LISTS_FOLDER ).getAbsolutePath() ) )
+					replayListToLoadOnStartupTextField.setText( Consts.DEFAULT_REPLAY_LISTS_FOLDER + "/" + selectedFile.getName() );
+			}
+		} );
+		gridBagLayout.setConstraints( button, constraints );
+		panel.add( button );
+		
+		label = new JLabel( "(Note that if you select a big list with thousands of replays, it might significantly slow down the startup of BWHF Agent.)" );
+		label.setFont( new Font( "Default", Font.ITALIC, 9 ) );
+		final JPanel wrapperPanel = Utils.wrapInPanel( label );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		gridBagLayout.setConstraints( wrapperPanel, constraints );
+		panel.add( wrapperPanel );
 		
 		constraints.gridwidth = 1;
 		label = new JLabel( "Program to view/edit files:", JLabel.WEST );
@@ -320,6 +347,7 @@ public class GeneralSettingsTab extends Tab {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_STARCRAFT_FOLDER              , starcraftFolderTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_REPLAY_START_FOLDER           , replayStartFolderTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_DEFAULT_REPLAY_LISTS_FOLDER   , defaultReplayListsFolderTextField.getText() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_REPLAY_LIST_TO_LOAD_ON_STARTUP, replayListToLoadOnStartupTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_EDITOR_PROGRAM                , editorProgramTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS, Boolean.toString( skipLatterActionsOfHackersCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SOUND_VOLUME                  , Integer.toString( soundVolumeSlider.getValue() ) );
