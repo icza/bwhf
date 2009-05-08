@@ -13,7 +13,7 @@
  * Clicking on the column headers in the replay search tab will *sort the table*. Clicking again on the same column will reverse the order.
  * New setting on the charts tab: *Display actions in seconds*.
  * Removed the replay handler buttons from the search tab, and added a context menu (right click popup menu) to the result table. You can find here all operations that were available through the buttons. This gives more space to the result table.
- * Hide search filters are now saved and remembered on next startup.
+ * Hide search filters state are now saved and remembered on next startup.
  * New replay operation: Open replay's folder in explorer.
  * New replay operation: Rename replay.
  * New replay operation: Group rename replays.
