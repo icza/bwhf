@@ -159,6 +159,8 @@ public class Consts {
 	public static final String PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST     = "includeCustomPlayerList";
 	/** Custom player list file property.        */
 	public static final String PROPERTY_CUSTOM_PLAYER_LIST_FILE        = "customPlayerListFile";
+	/** Replay list to load on startup property. */
+	public static final String PROPERTY_REPLAY_LIST_TO_LOAD_ON_STARTUP = "replayListToLoadOnStartup";
 	/** Editor program property.                 */
 	public static final String PROPERTY_EDITOR_PROGRAM                 = "editorProgram";
 	/** Replay column model indices property.    */
@@ -216,6 +218,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST    , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CUSTOM_PLAYER_LIST_FILE       , "" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DEFAULT_REPLAY_LISTS_FOLDER   , DEFAULT_REPLAY_LISTS_FOLDER );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPLAY_LIST_TO_LOAD_ON_STARTUP, "" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_EDITOR_PROGRAM                , "notepad.exe" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPLAY_COLUMN_MODEL_INDICES   , "" );
 	}

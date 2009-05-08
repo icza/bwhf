@@ -323,6 +323,9 @@ public class ReplaySearchTab extends Tab {
 		
 		if ( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_SEARCH_FILTERS ) ) )
 			hideFiltersButton.doClick();
+		
+		// Replay list to be loaded on startup will be loaded in the initializationEnded() method,
+		// because it loads a lot faster if window is visible!
 	}
 	
 	/**
@@ -671,7 +674,7 @@ public class ReplaySearchTab extends Tab {
 		resultListHandlerBox.add( saveResultListButton );
 		loadResultListButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				loadResultList();
+				loadResultList( null );
 			} 
 		} );
 		resultListHandlerBox.add( loadResultListButton );
@@ -1381,20 +1384,30 @@ public class ReplaySearchTab extends Tab {
 	}
 	
 	/**
-	 * Loads a result list from a file.
+	 * Loads a result list from a file.<br>
+	 * If the name of the list file is provided, error messages will not pop up.
+	 * @param listFileName name of the list file to load; can be <code>null</code> and then a file chooser dialog will be shown 
 	 */
-	private void loadResultList() {
-		final JFileChooser fileChooser = new JFileChooser( mainFrame.generalSettingsTab.defaultReplayListsFolderTextField.getText() );
-		fileChooser.setTitle( "Load result list..." );
+	private void loadResultList( final String listFileName ) {
+		File listFile = null;
+		if ( listFileName == null ) {
+			final JFileChooser fileChooser = new JFileChooser( mainFrame.generalSettingsTab.defaultReplayListsFolderTextField.getText() );
+			fileChooser.setTitle( "Load result list..." );
+			
+			fileChooser.addChoosableFileFilter( Utils.SWING_TEXT_FILE_FILTER ); 
+			fileChooser.setExtensionFilters( new String[] { "*.txt", "*.*" }, new String[] { "Text files (*.txt)", "All files (*.*)" } );
+			
+			fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
+			if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION )
+				listFile = fileChooser.getSelectedFile();
+		}
+		else
+			listFile = new File( listFileName );
 		
-		fileChooser.addChoosableFileFilter( Utils.SWING_TEXT_FILE_FILTER ); 
-		fileChooser.setExtensionFilters( new String[] { "*.txt", "*.*" }, new String[] { "Text files (*.txt)", "All files (*.*)" } );
-		
-		fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
-		if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION ) {
+		if ( listFile != null ) {
 			BufferedReader input = null;
 			try {
-				input = new BufferedReader( new FileReader( fileChooser.getSelectedFile() ) );
+				input = new BufferedReader( new FileReader( listFile ) );
 				
 				String line = input.readLine();
 				if ( line == null )
@@ -1453,13 +1466,21 @@ public class ReplaySearchTab extends Tab {
 				refreshResultTable();
 			}
 			catch ( final Exception e ) {
-				JOptionPane.showMessageDialog( getContent(), "Could not load result list!", "Error!", JOptionPane.ERROR_MESSAGE );
+				if ( listFileName != null )
+					JOptionPane.showMessageDialog( getContent(), "Could not load result list!", "Error!", JOptionPane.ERROR_MESSAGE );
 			}
 			finally {
 				if ( input != null )
 					try { input.close(); } catch ( final IOException ie ) { ie.printStackTrace(); }
 			}
 		}
+	}
+	
+	@Override
+	public void initializationEnded() {
+		super.initializationEnded();
+		if ( mainFrame.generalSettingsTab.replayListToLoadOnStartupTextField.getText().length() > 0 )
+			loadResultList( mainFrame.generalSettingsTab.replayListToLoadOnStartupTextField.getText() );
 	}
 	
 	@Override
