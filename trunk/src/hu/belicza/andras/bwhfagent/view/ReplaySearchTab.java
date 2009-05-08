@@ -132,23 +132,28 @@ public class ReplaySearchTab extends Tab {
 	/** Reference to the main frame. */
 	private final MainFrame mainFrame = MainFrame.getInstance();
 	
+	/** Button to hide/show filters.               */
+	private final JButton hideFiltersButton          = new JButton( "Hide filters", IconResourceManager.ICON_ARROW_IN );
+	/** Reference to the header filters panel.     */
+	private JPanel headerFiltersPanel; 
+	
 	/** Checkbox to add new search results to previous one (do not clear). */
 	private final JCheckBox appendResultsToTableCheckBox = new JCheckBox( "Append results to table (will not clear table)", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_APPEND_RESULTS_TO_TABLE ) ) );
 	
-	/** Button to select folders to search.  */
+	/** Button to select folders to search.        */
 	private final JButton selectFoldersButton        = new JButton( "Select folders to search recursively...", IconResourceManager.ICON_FOLDER_CHOOSER );
-	/** Button to select files to search.    */
+	/** Button to select files to search.          */
 	private final JButton selectFilesButton          = new JButton( "Select files to search...", IconResourceManager.ICON_FILE_CHOOSER );
-	/** Button to stop the current search. */
+	/** Button to stop the current search.         */
 	private final JButton stopSearchButton           = new JButton( "Stop current search", IconResourceManager.ICON_STOP );
 	/** Button to repeat search on the same files. */
 	private final JButton repeatSearchButton         = new JButton( "Repeat search", IconResourceManager.ICON_REPEAT );
-	/** Button to run search on the same files. */
+	/** Button to run search on the same files.    */
 	private final JButton searchPreviousResultButton = new JButton( "Search in previous results (narrows previous results)", IconResourceManager.ICON_TABLE_GO );
 	
-	/** Button to save result list.  */
+	/** Button to save result list.                */
 	private final JButton saveResultListButton       = new JButton( "Save result list...", IconResourceManager.ICON_TABLE_SAVE );
-	/** Button to save result list.  */
+	/** Button to save result list.                */
 	private final JButton loadResultListButton       = new JButton( "Load result list...", IconResourceManager.ICON_TABLE_LOAD );
 	
 	/** The progress bar component. */
@@ -314,7 +319,10 @@ public class ReplaySearchTab extends Tab {
 		
 		buildGUI();
 		
-		appendResultsToTableCheckBox.doClick(); // To enable/disable dependent buttons (will not change anything, but logically needed; might change in the future).
+		appendResultsToTableCheckBox.doClick(); // To enable/disable dependant buttons (will not change anything, but logically needed; might change in the future).
+		
+		if ( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_SEARCH_FILTERS ) ) )
+			hideFiltersButton.doClick();
 	}
 	
 	/**
@@ -369,7 +377,6 @@ public class ReplaySearchTab extends Tab {
 			}
 		} );
 		filterFieldsButtonsPanel.add( resetFilterFieldsButton );
-		final JButton hideFiltersButton = new JButton( "Hide filters", IconResourceManager.ICON_ARROW_IN );
 		filterFieldsButtonsPanel.add( hideFiltersButton );
 		final JButton visitSearchHelpPageButton = new JButton( "Visit search help page", IconResourceManager.ICON_WORLD_GO );
 		visitSearchHelpPageButton.addActionListener( new ActionListener() {
@@ -380,9 +387,9 @@ public class ReplaySearchTab extends Tab {
 		filterFieldsButtonsPanel.add( visitSearchHelpPageButton );
 		contentBox.add( filterFieldsButtonsPanel );
 		
-		final GridBagLayout      gridBagLayout      = new GridBagLayout();
-		final GridBagConstraints constraints        = new GridBagConstraints();
-		final JPanel             headerFiltersPanel = new JPanel( gridBagLayout );
+		final GridBagLayout      gridBagLayout = new GridBagLayout();
+		final GridBagConstraints constraints   = new GridBagConstraints();
+		headerFiltersPanel = new JPanel( gridBagLayout );
 		headerFiltersPanel.setBorder( BorderFactory.createTitledBorder( "Replay header fields:" ) );
 		
 		JLabel label;
@@ -1457,6 +1464,7 @@ public class ReplaySearchTab extends Tab {
 	
 	@Override
 	public void assignUsedProperties() {
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_HIDE_SEARCH_FILTERS, Boolean.toString( !headerFiltersPanel.isVisible() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_APPEND_RESULTS_TO_TABLE, Boolean.toString( appendResultsToTableCheckBox.isSelected() ) );
 		final StringBuilder columnModelIndicesBuilder = new StringBuilder();
 		for ( final int columnModelIndex : columnModelIndices ) {
