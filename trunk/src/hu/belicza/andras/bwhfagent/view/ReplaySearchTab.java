@@ -1466,7 +1466,7 @@ public class ReplaySearchTab extends Tab {
 				refreshResultTable();
 			}
 			catch ( final Exception e ) {
-				if ( listFileName != null )
+				if ( listFileName == null )
 					JOptionPane.showMessageDialog( getContent(), "Could not load result list!", "Error!", JOptionPane.ERROR_MESSAGE );
 			}
 			finally {
