@@ -17,7 +17,7 @@
  * Hide search filters state is now saved and remembered on next startup.
  * New replay operation: *Open replay's folder in explorer*.
  * New replay operation: *Rename replay*.
- * New replay operation: *Group rename replays*. Group rename operates on a template. This template can contain any text and special symbols. Special symbols will be substituted with proper text when renaming specific replays. Valid symbols are: */n* - the name of the original replay; */e* - the extension of the original replay (usually 'rep'); */c* - a counter which starts from 1 and incremented by 1 at each use. With this you can easily rename many replays. Let's say you have 20 tournament replays. You can select those replays and click on group rename. Give a template of _"Tourney reps /c./e"_. This will rename all those reps to _"Tourney reps 1.rep"_, _"Tourney reps 2.rep"_ etc.
+ * New replay operation: *Group rename replays*. Group rename operates on a template. This template can contain any text and special symbols. Special symbols will be substituted with proper text when renaming specific replays. Valid symbols are: */n* - the name of the original replay; */e* - the extension of the original replay (usually 'rep'); */c* - a counter which starts from 1 and will be incremented by 1 at each use. With this you can easily rename many replays. Let's say you have 20 tournament replays. You can select those replays and click on group rename. Give a template of _"Tourney reps /c./e"_. This will rename all those reps to _"Tourney reps 1.rep"_, _"Tourney reps 2.rep"_ etc. You can preview new names before proceeding to rename.
  * Modified the *build anywhere* hack detection to recognize more cases.
  * Some minor bugfixes.
 
