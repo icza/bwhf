@@ -1002,7 +1002,7 @@ public class ReplaySearchTab extends Tab {
 		final JDialog dialog = new JDialog( mainFrame, "Group renaming replays..." );
 		dialog.setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
 		final Box box = Box.createVerticalBox();
-		box.add( new JLabel( "Enter the template for renaming replays. You can insert any text and you can use the following symbols:\n\t/n the original name\n\t/e extension ('rep')\n\t/c acounter which starts from 1 and will be incremented by 1 on each use" ) );
+		box.add( new JLabel( "Enter the template for renaming replays. You can insert any text and you can use the following symbols:\n\t/n the original name\n\t/e extension ('rep')\n\t/c counter which starts from 1 and will be incremented by 1 on each use" ) );
 		final JTextField templateTextField = new JTextField( "NEW /n /c./e" );
 		box.add( templateTextField );
 		final JPanel buttonsPanel = Utils.createWrapperPanel();
