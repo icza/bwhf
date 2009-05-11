@@ -59,6 +59,7 @@ import swingwtx.swing.JPopupMenu;
 import swingwtx.swing.JProgressBar;
 import swingwtx.swing.JScrollPane;
 import swingwtx.swing.JTable;
+import swingwtx.swing.JTextArea;
 import swingwtx.swing.JTextField;
 import swingwtx.swing.ListSelectionModel;
 import swingwtx.swing.event.ListSelectionEvent;
@@ -759,10 +760,34 @@ public class ReplaySearchTab extends Tab {
 		deleteReplaysMenuItem.addActionListener( copyMoveDeleteReplaysActionListener );
 		renameReplayMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
+				final File selectedFile = lastSearchResultFileList.get( resultTable.getSelectedRow() );
+				final Object newName = JOptionPane.showInputDialog( getContent(), "Enter the new name of the replay file:", "Renaming replay...", JOptionPane.QUESTION_MESSAGE, null, null, selectedFile.getName() );
+				if ( newName != null ) {
+					final String newNameString = (String) newName;
+					if ( selectedFile.getName().equals( newName ) )
+						JOptionPane.showMessageDialog( getContent(), "You provided the same name!", "Error", JOptionPane.ERROR_MESSAGE );
+					else if ( newNameString.indexOf( '/' ) >= 0 || newNameString.indexOf( '\\' ) >= 0 || newNameString.indexOf( '\n' ) >= 0 )
+						JOptionPane.showMessageDialog( getContent(), "The provided name contains invalid characters!", "Error", JOptionPane.ERROR_MESSAGE );
+					else {
+						final File newFile = new File( selectedFile.getParent(), newNameString );
+						if ( newFile.exists() ) 
+							JOptionPane.showMessageDialog( getContent(), "The provided name already exists!", "Error", JOptionPane.ERROR_MESSAGE );
+						else {
+							if ( !selectedFile.renameTo( newFile ) )
+								JOptionPane.showMessageDialog( getContent(), "Failed to rename file!", "Error", JOptionPane.ERROR_MESSAGE );
+							else {
+								lastSearchResultFileList.set( resultTable.getSelectedRow(), newFile );
+								lastSearchResultRowsData.get( resultTable.getSelectedRow() )[ RESULT_TABLE_FILE_NAME_COLUMN_INDEX ] = newFile.getAbsolutePath();
+								refreshResultTable();
+							}
+						}
+					}
+				}
 			}
 		} );
 		groupRenameReplaysMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
+				showGroupRenameDialog();
 			}
 		} );
 		openInExplorerMenuItem.addActionListener( new ActionListener() {
@@ -924,6 +949,11 @@ public class ReplaySearchTab extends Tab {
 		dialog.setVisible( true );
 	}
 	
+	/**
+	 * Builds the columns grid with buttons to rearrange columns.
+	 * @param columnsGrid             panel with <code>GridLayout</code> to build columns grid on
+	 * @param columnModelIndicesClone column model indices to use
+	 */
 	private void buildColumnsGrid( final JPanel columnsGrid, final int[] columnModelIndicesClone ) {
 		for ( int i = columnsGrid.getComponentCount() - 1; i >= 0; i-- )
 			columnsGrid.remove( i );
@@ -961,6 +991,132 @@ public class ReplaySearchTab extends Tab {
 			else
 				columnsGrid.add( new JLabel() );
 		}
+	}
+	
+	/**
+	 * Shows the group rename dialog.
+	 */
+	private void showGroupRenameDialog() {
+		final int[]  selectedIndices = resultTable.getSelectedRows();
+		
+		final JDialog dialog = new JDialog( mainFrame, "Group renaming replays..." );
+		dialog.setDefaultCloseOperation( JDialog.DISPOSE_ON_CLOSE );
+		final Box box = Box.createVerticalBox();
+		box.add( new JLabel( "Enter the template for renaming replays. You can insert any text and you can use the following symbols:\n\t/n the original name\n\t/e extension ('rep')\n\t/c acounter which starts from 1 and will be incremented by 1 on each use" ) );
+		final JTextField templateTextField = new JTextField( "NEW /n /c./e" );
+		box.add( templateTextField );
+		final JPanel buttonsPanel = Utils.createWrapperPanel();
+		final JButton previewButton = new JButton( "Preview" );
+		final JButton renameButton = new JButton( "Rename replays" );
+		final JTextArea previewTextArea = new JTextArea( 5, 10 );
+		final ActionListener renameActionListener = new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				final String template = templateTextField.getText();
+				if ( template.length() == 0 ) {
+					JOptionPane.showMessageDialog( dialog, "No template has been specified!", "Error", JOptionPane.ERROR_MESSAGE );
+					return;
+				}
+				
+				if ( template.indexOf( '\\' ) >= 0 ) {
+					JOptionPane.showMessageDialog( dialog, "Template contains invalid characters!", "Error", JOptionPane.ERROR_MESSAGE );
+					return;
+				}
+				
+				final boolean previewOnly = event.getSource() == previewButton;
+				if ( previewOnly )
+					previewTextArea.setText( "" );
+				
+				final char[] templateCharArray = template.toCharArray();
+				int counter      = 1;
+				int errorCounter = 0;
+				for ( final int selectedIndex : selectedIndices ) {
+					final File selectedFile = lastSearchResultFileList.get( selectedIndex );
+					final int lastPointIndex = selectedFile.getName().lastIndexOf( '.' );
+					final String originalName = lastPointIndex >= 0 ? selectedFile.getName().substring( 0, lastPointIndex ) : selectedFile.getName();
+					final String originalExt  = lastPointIndex >= 0 ? selectedFile.getName().substring( lastPointIndex + 1 ) : "";
+					final StringBuilder newNameBuilder = new StringBuilder();
+					boolean symbol = false;
+					for ( final char templateChar : templateCharArray ) {
+						if ( templateChar == '/' )
+							symbol = true;
+						else {
+							if ( symbol ) {
+								switch ( templateChar ) {
+									case 'n': newNameBuilder.append( originalName ); break;
+									case 'e': newNameBuilder.append( originalExt  ); break;
+									case 'c': newNameBuilder.append( counter++    ); break;
+									default : 
+										JOptionPane.showMessageDialog( dialog, "Invalid symbol character: /" + templateChar, "Error", JOptionPane.ERROR_MESSAGE );
+										return;
+								}
+								symbol = false;
+							}
+							else
+								newNameBuilder.append( templateChar );
+						}
+					}
+					if ( symbol ) {
+						JOptionPane.showMessageDialog( dialog, "Missing symbol character at the end!", "Error", JOptionPane.ERROR_MESSAGE );
+						return;
+					}
+					
+					if ( previewOnly ) {
+						previewTextArea.append( newNameBuilder.toString() );
+						previewTextArea.append( "\n" );
+					}
+					else {
+						final File newFile = new File( selectedFile.getParent(), newNameBuilder.toString() );
+						if ( newFile.exists() ) 
+							errorCounter++;
+						else {
+							if ( !selectedFile.renameTo( newFile ) )
+								errorCounter++;
+							else {
+								lastSearchResultFileList.set( selectedIndex, newFile );
+								lastSearchResultRowsData.get( selectedIndex )[ RESULT_TABLE_FILE_NAME_COLUMN_INDEX ] = newFile.getAbsolutePath();
+							}
+						}
+					}
+				}
+				
+				if ( !previewOnly ) {
+					if ( errorCounter > 0 ) {
+						if ( errorCounter < selectedIndices.length ) {
+							JOptionPane.showMessageDialog( getContent(), "Rename completed with some errors (" + errorCounter + " out of " + selectedIndices.length + ")!", "Warning", JOptionPane.WARNING_MESSAGE );
+							refreshResultTable();
+						}
+						else
+							JOptionPane.showMessageDialog( getContent(), "Failed to rename replays!", "Error", JOptionPane.ERROR_MESSAGE );
+					}
+					else {
+						JOptionPane.showMessageDialog( getContent(), "Successfully renamed " + selectedIndices.length + " replay" + ( selectedIndices.length == 1 ? "." : "s." ), "Success", JOptionPane.INFORMATION_MESSAGE );
+						refreshResultTable();
+					}
+					dialog.dispose();
+				}
+			}
+		};
+		previewButton.addActionListener( renameActionListener );
+		buttonsPanel.add( previewButton );
+		renameButton.addActionListener( renameActionListener );
+		buttonsPanel.add( renameButton );
+		final JButton cancelButton = new JButton( "Cancel" );
+		cancelButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				dialog.dispose();
+			}
+		} );
+		buttonsPanel.add( cancelButton );
+		box.add( buttonsPanel );
+		box.add( new JLabel( "Preview of the new names:" ) );
+		previewTextArea.setEditable( false );
+		box.add( new JScrollPane( previewTextArea ) );
+		dialog.add( box, BorderLayout.CENTER );
+		
+		previewButton.doClick();
+		dialog.setSize( 700, 300 );
+		dialog.setLocation( mainFrame.getLocationOnScreen().x + mainFrame.getWidth() / 2 - 350, mainFrame.getLocationOnScreen().y + mainFrame.getHeight() / 2 - 150 );
+		dialog.setVisible( true );
 	}
 	
 	/**
