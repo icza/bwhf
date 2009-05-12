@@ -22,7 +22,7 @@
  * Modified the *build anywhere* hack detection to recognize more cases.
  * Some minor bugfixes.
 
-Note that if you edit/add a comment, you sort the table or your rename replays, you have to save the list to keep the changes.
+Note that if you make changes on the result list such as edit/add a comment, sort the table or rename replays, you have to save the list to keep the changes.
 
 ----
 ===2.21 2009-04-24===
