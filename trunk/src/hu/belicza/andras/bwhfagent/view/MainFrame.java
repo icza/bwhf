@@ -53,7 +53,7 @@ public class MainFrame extends JFrame {
 	public final String applicationVersion;
 	
 	/** Button to start/switch to Starcraft.                   */
-	protected final JButton    startScButton              = new JButton( "Start/Switch to Starcraft" );
+	protected final JButton    startScButton              = new JButton( "Start/Switch to Starcraft", IconResourceManager.ICON_WRAITH );
 	/** Button to minimize to tray.                            */
 	protected final JButton    minimizeToTrayButton       = new JButton( "Minimize to tray", IconResourceManager.ICON_MINIMIZE );
 	/** Label to display if starcraft folder is set correctly. */

@@ -31,7 +31,7 @@ import swingwtx.swing.event.ChangeListener;
 public class ChartsTab extends Tab {
 	
 	/** Button to display game chat from the last replay.      */
-	private final JButton   openLastReplayButton = new JButton( "Open 'LastReplay.rep'" );
+	private final JButton   openLastReplayButton = new JButton( "Open 'LastReplay.rep'", IconResourceManager.ICON_LASTREPLAY );
 	/** Button to select files to extract game chat.           */
 	private final JButton   selectFileButton     = new JButton( "Select file to open...", IconResourceManager.ICON_FILE_CHOOSER );
 	/** Button to open previous replay from replay search tab. */

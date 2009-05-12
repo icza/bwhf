@@ -62,7 +62,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 	};
 	
 	/** Button to scan the last replay.                  */
-	protected final JButton   scanLastReplayButton            = new JButton( "Scan 'LastReplay.rep'" );
+	protected final JButton   scanLastReplayButton            = new JButton( "Scan 'LastReplay.rep'", IconResourceManager.ICON_LASTREPLAY );
 	/** Button to select folders to scan.                */
 	private   final JButton   selectFoldersButton             = new JButton( "Select folders to scan recursively...", IconResourceManager.ICON_FOLDER_CHOOSER );
 	/** Button to select files to scan.                  */
