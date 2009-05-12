@@ -5,43 +5,46 @@
 <wiki:toc max_depth="3" />
 
 ===Overall APM chart:===
-http://lh4.ggpht.com/_jDMClHrENz8/Se13rwPP3tI/AAAAAAAANX0/DdQr-tNj6YU/s800/overall_apm_chart.png.jpg
+http://lh3.ggpht.com/_jDMClHrENz8/SgkyICsdW5I/AAAAAAAAN0A/tpKi8_cNHpY/s800/overall_apm_chart.png.jpg
+
+===Overall APM chart #2:===
+http://lh5.ggpht.com/_jDMClHrENz8/SgkyJGKLlSI/AAAAAAAAN0M/xUjof06Pfhg/s800/overall_apm_chart_2.png.jpg
 
 ===Strategy chart:===
-http://lh6.ggpht.com/_jDMClHrENz8/Se13sm2q41I/AAAAAAAANYE/0T7asSVlR-M/s800/strategy_chart.png.jpg
+http://lh4.ggpht.com/_jDMClHrENz8/SgkyJetx-2I/AAAAAAAAN0Q/1nFsGJ7r4jA/s800/strategy_chart.png.jpg
 
 ===Replay search:===
-http://lh3.ggpht.com/_jDMClHrENz8/Se13tttbnVI/AAAAAAAANYc/UfCvU_45gZI/s800/replay_search.png.jpg
+http://lh6.ggpht.com/_jDMClHrENz8/SgkyHM5UK5I/AAAAAAAANzw/-BkechLbNCA/s800/replay_search_tab.png.jpg
 
 ===APM chart:===
-http://lh3.ggpht.com/_jDMClHrENz8/Se13syPqBxI/AAAAAAAANYM/sop4o8kyIKU/s800/apm_chart.png.jpg
+http://lh3.ggpht.com/_jDMClHrENz8/SgkyJujbYhI/AAAAAAAAN0U/RJH_4oVXcQ4/s800/apm_chart.png.jpg
 
 ===APM chart #2:===
-http://lh6.ggpht.com/_jDMClHrENz8/Se13t9H5ybI/AAAAAAAANYk/2XfRZl2IHlk/s800/apm2_chart.png.jpg
+http://lh3.ggpht.com/_jDMClHrENz8/SgkyIwGW_uI/AAAAAAAAN0I/j8V0GjmnD2s/s800/apm_chart_2.png.jpg
 
 ===Hotkeys chart:===
-http://lh3.ggpht.com/_jDMClHrENz8/Se13tFYZkjI/AAAAAAAANYU/Yr3ycFXsa8U/s800/hotkeys_chart.png.jpg
+http://lh5.ggpht.com/_jDMClHrENz8/SgkyIXjmthI/AAAAAAAAN0E/qerysIQZTB8/s800/hotkeys_chart.png.jpg
 
 ===Build orders chart:===
-http://lh6.ggpht.com/_jDMClHrENz8/Se13sCscFuI/AAAAAAAANX8/PZt4awyj-7k/s800/build_orders_chart.png.jpg
+http://lh3.ggpht.com/_jDMClHrENz8/SgkyJ8RaZiI/AAAAAAAAN0Y/54-Y2Pwl_4c/s800/build_orders.png.jpg
 
 ===Player checker tab:===
-http://lh3.ggpht.com/_jDMClHrENz8/Se16nBfR2kI/AAAAAAAANZI/RKXSs7jojvg/player_checker.png.jpg
+http://lh3.ggpht.com/_jDMClHrENz8/SgkyHW0EMBI/AAAAAAAANz0/Nyko6L_AKHs/s800/player_checker_tab.png.jpg
 
 ===Autoscan tab:===
-http://lh5.ggpht.com/_jDMClHrENz8/Se13p3EwAPI/AAAAAAAANW8/E2cUjP-YpSc/autoscan.png.jpg
+http://lh3.ggpht.com/_jDMClHrENz8/SgkyGhXDW5I/AAAAAAAANzo/Xpg-nayIN94/s800/autoscan_tab.png.jpg
 
 ===Manual scan tab:===
-http://lh6.ggpht.com/_jDMClHrENz8/Se13qU8bkYI/AAAAAAAANXE/YkOr3QWtKc4/manual_scan.png.jpg
+http://lh5.ggpht.com/_jDMClHrENz8/SgkyGxW0IdI/AAAAAAAANzs/d3uVOpIIZ00/s800/manual_scan_tab.png.jpg
 
 ===Game chat tab:===
-http://lh5.ggpht.com/_jDMClHrENz8/Se13q5bEPmI/AAAAAAAANXU/hnjVZ-q4XII/game_chat.png.jpg
+http://lh6.ggpht.com/_jDMClHrENz8/SgkyHgoCczI/AAAAAAAANz4/4if_HL1_92s/s800/game_chat_tab.png.jpg
 
 ===PCX converter tab:===
-http://lh4.ggpht.com/_jDMClHrENz8/Se13rEImD1I/AAAAAAAANXc/ZEdsZTui1mA/pcx_converter.png.jpg
+http://lh5.ggpht.com/_jDMClHrENz8/SgkyKKQfIqI/AAAAAAAAN0c/rNpLcPhQb_w/s800/pcx_converter_tab.png.jpg
 
 ===General settings tab:===
-http://lh6.ggpht.com/_jDMClHrENz8/Se13ra43ocI/AAAAAAAANXk/RbHbKo1s5ww/general_settings.png.jpg
+http://lh3.ggpht.com/_jDMClHrENz8/SgkyKV38y5I/AAAAAAAAN0g/RSQhYA2ZpJw/s800/general_settings_tab.png.jpg
 
 ===About tab:===
-http://lh6.ggpht.com/_jDMClHrENz8/Se13rj2OJwI/AAAAAAAANXs/yARPXV_su78/about.png.jpg
+http://lh4.ggpht.com/_jDMClHrENz8/SgkyH6BvWBI/AAAAAAAANz8/wm5NNu6ijng/s800/about_tab.png.jpg
