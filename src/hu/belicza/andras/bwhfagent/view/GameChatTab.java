@@ -28,7 +28,7 @@ public class GameChatTab extends ProgressLoggedTab {
 	private static final String LOG_FILE_NAME = "game_chat.log";
 	
 	/** Button to display game chat from the last replay.  */
-	protected final JButton   displayFromLastReplayButton    = new JButton( "Display game chat from 'LastReplay.rep'" );
+	protected final JButton   displayFromLastReplayButton    = new JButton( "Display game chat from 'LastReplay.rep'", IconResourceManager.ICON_LASTREPLAY );
 	/** Button to select a file to display game chat from. */
 	private   final JButton   selectFileToDisplayFromButton  = new JButton( "Select file to display game chat from...", IconResourceManager.ICON_FILE_CHOOSER );
 	/** Button to select files to extract game chat from.  */

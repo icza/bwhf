@@ -76,9 +76,11 @@ public class ReplaySearchTab extends Tab {
 	/** Simple date format to format and parse replay save time. */
 	private static final DateFormat SIMPLE_DATE_FORMAT        = new SimpleDateFormat( "yyyy-MM-dd" );
 	/** Result table column names.                               */
-	private static final String[]   RESULT_TABLE_COLUMN_NAMES = new String[] { "Engine", "Map", "Duration", "Game type", "Players", "Saved on", "Game name", "Creator", "File" }; 
+	private static final String[]   RESULT_TABLE_COLUMN_NAMES = new String[] { "Engine", "Map", "Duration", "Game type", "Players", "Saved on", "Game name", "Creator", "File", "Comment" }; 
 	/** Index of the file name column in the result table.       */
-	private static final int        RESULT_TABLE_FILE_NAME_COLUMN_INDEX = RESULT_TABLE_COLUMN_NAMES.length - 1;
+	private static final int        RESULT_TABLE_FILE_NAME_COLUMN_INDEX = RESULT_TABLE_COLUMN_NAMES.length - 2;
+	/** Index of the comment column in the result table.         */
+	private static final int        RESULT_TABLE_COMMENT_COLUMN_INDEX   = RESULT_TABLE_COLUMN_NAMES.length - 1;
 	
 	/** Separator to use to separate values in the result list files. */
 	private static final char   RESULT_LIST_FILE_VALUE_SEPARATOR_CHAR   = '\t';
@@ -152,10 +154,10 @@ public class ReplaySearchTab extends Tab {
 	/** Button to run search on the same files.    */
 	private final JButton searchPreviousResultButton = new JButton( "Search in previous results (narrows previous results)", IconResourceManager.ICON_TABLE_GO );
 	
-	/** Button to save result list.                */
-	private final JButton saveResultListButton       = new JButton( "Save result list...", IconResourceManager.ICON_TABLE_SAVE );
-	/** Button to save result list.                */
-	private final JButton loadResultListButton       = new JButton( "Load result list...", IconResourceManager.ICON_TABLE_LOAD );
+	/** Button to save replay list.                */
+	private final JButton saveReplayListButton       = new JButton( "Save replay list...", IconResourceManager.ICON_TABLE_SAVE );
+	/** Button to save replay list.                */
+	private final JButton loadReplayListButton       = new JButton( "Load replay list...", IconResourceManager.ICON_TABLE_LOAD );
 	
 	/** The progress bar component. */
 	private final JProgressBar progressBar = new JProgressBar();
@@ -181,9 +183,11 @@ public class ReplaySearchTab extends Tab {
 	/** Menu item to copy selected replay files.                   */
 	private final JMenuItem copyReplaysMenuItem        = new JMenuItem( "Copy replays...", IconResourceManager.ICON_COPY_REPLAY );
 	/** Menu item to move selected replay files.                   */
-	private final JMenuItem moveReplaysMenuItem        = new JMenuItem( "Move replays..." );
+	private final JMenuItem moveReplaysMenuItem        = new JMenuItem( "Move replays...", IconResourceManager.ICON_MOVE_REPLAY );
 	/** Menu item to delete selected replay files.                 */
 	private final JMenuItem deleteReplaysMenuItem      = new JMenuItem( "Delete replays...", IconResourceManager.ICON_DELETE_REPLAY );
+	/** Menu item to edit comment.                                 */
+	private final JMenuItem editCommentMenuItem       = new JMenuItem( "Edit comment...", IconResourceManager.ICON_EDIT_COMMENT_REPLAY );
 	/** Menu item to rename replay.                                */
 	private final JMenuItem renameReplayMenuItem       = new JMenuItem( "Rename replay...", IconResourceManager.ICON_EDIT );
 	/** Menu item to rename replay.                                */
@@ -666,19 +670,19 @@ public class ReplaySearchTab extends Tab {
 		allButtonsWrapperPanel.add( Utils.wrapInPanel( searchStartButtonsBox ) );
 		
 		final Box resultListHandlerBox = Box.createVerticalBox();
-		saveResultListButton.setEnabled( false );
-		saveResultListButton.addActionListener( new ActionListener() {
+		saveReplayListButton.setEnabled( false );
+		saveReplayListButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				saveResultList();
+				saveReplayList();
 			} 
 		} );
-		resultListHandlerBox.add( saveResultListButton );
-		loadResultListButton.addActionListener( new ActionListener() {
+		resultListHandlerBox.add( saveReplayListButton );
+		loadReplayListButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				loadResultList( null );
+				loadReplayList( null );
 			} 
 		} );
-		resultListHandlerBox.add( loadResultListButton );
+		resultListHandlerBox.add( loadReplayListButton );
 		allButtonsWrapperPanel.add( Utils.wrapInPanel( resultListHandlerBox ) );
 		
 		contentBox.add( allButtonsWrapperPanel );
@@ -758,6 +762,16 @@ public class ReplaySearchTab extends Tab {
 		copyReplaysMenuItem  .addActionListener( copyMoveDeleteReplaysActionListener );
 		moveReplaysMenuItem  .addActionListener( copyMoveDeleteReplaysActionListener );
 		deleteReplaysMenuItem.addActionListener( copyMoveDeleteReplaysActionListener );
+		editCommentMenuItem.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				final String[] rowData = lastSearchResultRowsData.get( resultTable.getSelectedRow() );
+				final Object newComment = JOptionPane.showInputDialog( getContent(), "Enter comment for the replay file:", "Edit comment...", JOptionPane.QUESTION_MESSAGE, null, null, rowData[ RESULT_TABLE_COMMENT_COLUMN_INDEX ] );
+				if ( newComment != null ) {
+					rowData[ RESULT_TABLE_COMMENT_COLUMN_INDEX ] = ( (String) newComment ).replace( '\n', ' ' );
+					refreshResultTable();
+				}
+			}
+		} );
 		renameReplayMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				final File selectedFile = lastSearchResultFileList.get( resultTable.getSelectedRow() );
@@ -813,6 +827,7 @@ public class ReplaySearchTab extends Tab {
 				copyReplaysMenuItem       .setEnabled( selectedCount >  0 );
 				moveReplaysMenuItem       .setEnabled( selectedCount >  0 );
 				deleteReplaysMenuItem     .setEnabled( selectedCount >  0 );
+				editCommentMenuItem       .setEnabled( selectedCount == 1 );
 				renameReplayMenuItem      .setEnabled( selectedCount == 1 );
 				groupRenameReplaysMenuItem.setEnabled( selectedCount >  0 );
 				openInExplorerMenuItem    .setEnabled( selectedCount == 1 );
@@ -885,6 +900,7 @@ public class ReplaySearchTab extends Tab {
 		replayOperationsPopupMenu.add( moveReplaysMenuItem        );
 		replayOperationsPopupMenu.add( deleteReplaysMenuItem      );
 		replayOperationsPopupMenu.addSeparator();
+		replayOperationsPopupMenu.add( editCommentMenuItem        );
 		replayOperationsPopupMenu.add( renameReplayMenuItem       );
 		replayOperationsPopupMenu.add( groupRenameReplaysMenuItem );
 		replayOperationsPopupMenu.addSeparator();
@@ -903,6 +919,7 @@ public class ReplaySearchTab extends Tab {
 		copyReplaysMenuItem       .setEnabled( false );
 		moveReplaysMenuItem       .setEnabled( false );
 		deleteReplaysMenuItem     .setEnabled( false );
+		editCommentMenuItem       .setEnabled( false );
 		renameReplayMenuItem      .setEnabled( false );
 		groupRenameReplaysMenuItem.setEnabled( false );
 		openInExplorerMenuItem    .setEnabled( false );
@@ -1252,8 +1269,8 @@ public class ReplaySearchTab extends Tab {
 		repeatSearchButton          .setEnabled( false );
 		searchPreviousResultButton  .setEnabled( false );
 		stopSearchButton            .setEnabled( true  );
-		saveResultListButton        .setEnabled( false );
-		loadResultListButton        .setEnabled( false );
+		saveReplayListButton        .setEnabled( false );
+		loadReplayListButton        .setEnabled( false );
 		appendResultsToTableCheckBox.setEnabled( false );
 		
 		disableReplayOperationMenuItems();
@@ -1303,7 +1320,7 @@ public class ReplaySearchTab extends Tab {
 								lastSearchResultRowsData.add( new String[] {
 									ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate(),
 									replayHeader.mapName, replayHeader.getDurationString( true ), ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ], replayHeader.getPlayerNamesString(), SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ),
-									replayHeader.gameName, replayHeader.creatorName, replayFile.getAbsolutePath().toString()
+									replayHeader.gameName, replayHeader.creatorName, replayFile.getAbsolutePath().toString(), null
 								} );
 							}
 						}
@@ -1315,10 +1332,10 @@ public class ReplaySearchTab extends Tab {
 				finally {
 					updatedResultsCountLabel();
 					refreshResultTable();
-					saveResultListButton        .setEnabled( true );
+					saveReplayListButton        .setEnabled( true );
 					appendResultsToTableCheckBox.setEnabled( true );
-					loadResultListButton        .setEnabled( true  );
-					saveResultListButton        .setEnabled( true  );
+					loadReplayListButton        .setEnabled( true  );
+					saveReplayListButton        .setEnabled( true  );
 					stopSearchButton            .setEnabled( false );
 					selectFilesButton           .setEnabled( true  );
 					selectFoldersButton         .setEnabled( true  );
@@ -1494,12 +1511,12 @@ public class ReplaySearchTab extends Tab {
 	}
 	
 	/**
-	 * Saves the result list.<br>
+	 * Saves the replay list.<br>
 	 * First prompts the file to save to.
 	 */
-	private void saveResultList() {
+	private void saveReplayList() {
 		final JFileChooser fileChooser = new JFileChooser( mainFrame.generalSettingsTab.defaultReplayListsFolderTextField.getText() );
-		fileChooser.setTitle( "Save result list to..." );
+		fileChooser.setTitle( "Save replay list to..." );
 		
 		fileChooser.addChoosableFileFilter( Utils.SWING_TEXT_FILE_FILTER ); 
 		fileChooser.setExtensionFilters( new String[] { "*.txt", "*.*" }, new String[] { "Text files (*.txt)", "All files (*.*)" } );
@@ -1527,10 +1544,10 @@ public class ReplaySearchTab extends Tab {
 				}
 				
 				output.flush();
-				JOptionPane.showMessageDialog( getContent(), "Result list saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE );
+				JOptionPane.showMessageDialog( getContent(), "Replay list saved successfully.", "Success", JOptionPane.INFORMATION_MESSAGE );
 			}
 			catch ( final Exception e ) {
-				JOptionPane.showMessageDialog( getContent(), "Could not save result list!", "Error!", JOptionPane.ERROR_MESSAGE );
+				JOptionPane.showMessageDialog( getContent(), "Could not save replay list!", "Error!", JOptionPane.ERROR_MESSAGE );
 			}
 			finally {
 				if ( output != null )
@@ -1540,11 +1557,11 @@ public class ReplaySearchTab extends Tab {
 	}
 	
 	/**
-	 * Loads a result list from a file.<br>
+	 * Loads a replay list from a file.<br>
 	 * If the name of the list file is provided, error messages will not pop up.
 	 * @param listFileName name of the list file to load; can be <code>null</code> and then a file chooser dialog will be shown 
 	 */
-	private void loadResultList( final String listFileName ) {
+	private void loadReplayList( final String listFileName ) {
 		File listFile = null;
 		if ( listFileName == null ) {
 			final JFileChooser fileChooser = new JFileChooser( mainFrame.generalSettingsTab.defaultReplayListsFolderTextField.getText() );
@@ -1614,16 +1631,16 @@ public class ReplaySearchTab extends Tab {
 					}
 				}
 				
-				// We enable searching in previous results and saving result list.
+				// We enable searching in previous results and saving replay list.
 				searchPreviousResultButton.setEnabled( true  );
-				saveResultListButton      .setEnabled( true );
+				saveReplayListButton      .setEnabled( true );
 				
 				updatedResultsCountLabel();
 				refreshResultTable();
 			}
 			catch ( final Exception e ) {
 				if ( listFileName == null )
-					JOptionPane.showMessageDialog( getContent(), "Could not load result list!", "Error!", JOptionPane.ERROR_MESSAGE );
+					JOptionPane.showMessageDialog( getContent(), "Could not load replay list!", "Error!", JOptionPane.ERROR_MESSAGE );
 			}
 			finally {
 				if ( input != null )
@@ -1636,7 +1653,7 @@ public class ReplaySearchTab extends Tab {
 	public void initializationEnded() {
 		super.initializationEnded();
 		if ( mainFrame.generalSettingsTab.replayListToLoadOnStartupTextField.getText().length() > 0 )
-			loadResultList( mainFrame.generalSettingsTab.replayListToLoadOnStartupTextField.getText() );
+			loadReplayList( mainFrame.generalSettingsTab.replayListToLoadOnStartupTextField.getText() );
 	}
 	
 	@Override

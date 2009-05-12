@@ -26,6 +26,8 @@ public class IconResourceManager {
 	/** Blue pill icon.           */
 	public static final ImageIcon ICON_BLUE_PILL           = new ImageIcon( IconResourceManager.class.getResource( ICON_RESOURCE_BLUE_PILL ) );
 	
+	/** Wraith icon.              */
+	public static final ImageIcon ICON_WRAITH              = new ImageIcon( IconResourceManager.class.getResource( "wraith.png" ) );
 	/** Autoscan icon.            */
 	public static final ImageIcon ICON_AUTOSCAN            = new ImageIcon( IconResourceManager.class.getResource( "icons/report_magnify.png" ) );
 	/** Manual scan icon.         */
@@ -43,6 +45,8 @@ public class IconResourceManager {
 	/** About icon.               */
 	public static final ImageIcon ICON_ABOUT               = new ImageIcon( IconResourceManager.class.getResource( "icons/information.png" ) );
 	
+	/** Key icon.                 */
+	public static final ImageIcon ICON_LASTREPLAY          = new ImageIcon( IconResourceManager.class.getResource( "icons/resultset_last.png" ) );
 	/** Key icon.                 */
 	public static final ImageIcon ICON_KEY                 = new ImageIcon( IconResourceManager.class.getResource( "icons/key.png" ) );
 	/** Html icon.                */
@@ -99,11 +103,15 @@ public class IconResourceManager {
 	/** Charts icon.              */
 	public static final ImageIcon ICON_CHARTS              = new ImageIcon( IconResourceManager.class.getResource( ICON_RESOURCE_CHARTS ) );
 	/** Remove from list icon.    */
-	public static final ImageIcon ICON_REMOVE_FROM_LIST    = new ImageIcon( IconResourceManager.class.getResource( "icons/page_delete.png" ) );
+	public static final ImageIcon ICON_REMOVE_FROM_LIST    = new ImageIcon( IconResourceManager.class.getResource( "icons/table_row_delete.png" ) );
 	/** Copy replay icon.         */
 	public static final ImageIcon ICON_COPY_REPLAY         = new ImageIcon( IconResourceManager.class.getResource( "icons/page_copy.png" ) );
+	/** Move replay icon.         */
+	public static final ImageIcon ICON_MOVE_REPLAY         = new ImageIcon( IconResourceManager.class.getResource( "icons/page_go.png" ) );
 	/** Delete replay icon.       */
 	public static final ImageIcon ICON_DELETE_REPLAY       = new ImageIcon( IconResourceManager.class.getResource( "icons/cross.png" ) );
+	/** Edit comment replay icon. */
+	public static final ImageIcon ICON_EDIT_COMMENT_REPLAY = new ImageIcon( IconResourceManager.class.getResource( "icons/pencil.png" ) );
 	/** Group rename replay icon. */
 	public static final ImageIcon ICON_GROUP_RENAME_REPLAY = new ImageIcon( IconResourceManager.class.getResource( "icons/page_white_edit.png" ) );
 	/** Folder icon.              */
