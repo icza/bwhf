@@ -767,7 +767,7 @@ public class ReplaySearchTab extends Tab {
 				final String[] rowData = lastSearchResultRowsData.get( resultTable.getSelectedRow() );
 				final Object newComment = JOptionPane.showInputDialog( getContent(), "Enter comment for the replay file:", "Edit comment...", JOptionPane.QUESTION_MESSAGE, null, null, rowData[ RESULT_TABLE_COMMENT_COLUMN_INDEX ] );
 				if ( newComment != null ) {
-					rowData[ RESULT_TABLE_COMMENT_COLUMN_INDEX ] = ( (String) newComment ).replace( '\n', ' ' );
+					rowData[ RESULT_TABLE_COMMENT_COLUMN_INDEX ] = ( (String) newComment ).replace( '\n', ' ' ).replace( '\t', ' ' );
 					refreshResultTable();
 				}
 			}
