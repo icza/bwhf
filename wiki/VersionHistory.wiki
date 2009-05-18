@@ -6,7 +6,7 @@
 
 ----
 ===New features and changes in the upcoming new version:===
- *Some minor fix.
+ * Some minor fix.
 
 ----
 ===2.30 2009-05-12===
