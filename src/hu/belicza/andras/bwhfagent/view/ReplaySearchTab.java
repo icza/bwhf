@@ -936,7 +936,7 @@ public class ReplaySearchTab extends Tab {
 		
 		final JPanel columnsGrid = new JPanel( new GridLayout( columnModelIndices.length, 3 ) );
 		buildColumnsGrid( columnsGrid, columnModelIndicesClone );
-		dialog.add( columnsGrid, BorderLayout.CENTER );
+		dialog.add( Utils.wrapInPanel( columnsGrid ), BorderLayout.CENTER );
 		
 		final JPanel buttonsPanel = Utils.createWrapperPanel();
 		final JButton applyButton = new JButton( "Apply" );
