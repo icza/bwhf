@@ -1,0 +1,24 @@
+#BWHF Agent downloads
+
+= BWHF Agent downloads =
+
+BWHF Agent can be used on windows and linux.
+
+||Download BWHF Agent for windows:||[http://bwhf.googlecode.com/files/BWHFAgent%202.30%20windows.zip BWHF Agent 2.30 for windows]||
+||Download BWHF Agent for linux:||[http://bwhf.googlecode.com/files/BWHFAgent%202.30%20linux.zip BWHF Agent 2.30 for linux]||
+
+*BWHF Agent requires Java*
+
+To run BWHF Agent, you need the 32-bit Java installed on your system. You can download and install Java here: http://www.java.com/download
+
+*What's new in these releases?*
+
+Check out the [VersionHistory version history] page for a detailed list of new features and changes.
+
+*For developers:*
+
+Check out the BWHF Agent developer documentation:
+||A 50-page developer documentation of BWHF Agent in English:||[http://bwhf.googlecode.com/files/Starcraft%20Hacking%20Recognition.pdf Starcraft Hacking Recognition.pdf]||
+
+Looking for older releases? Check out this page:
+[http://code.google.com/p/bwhf/downloads/list All downloads]
