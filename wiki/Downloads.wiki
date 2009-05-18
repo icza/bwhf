@@ -23,5 +23,5 @@ Check out the [VersionHistory version history] page for a detailed list of new f
 Check out the BWHF Agent developer documentation:
 ||A 50-page developer documentation of BWHF Agent in English:||[http://bwhf.googlecode.com/files/Starcraft%20Hacking%20Recognition.pdf Starcraft Hacking Recognition.pdf]||
 
-Looking for older releases? Check out this page:
-[http://code.google.com/p/bwhf/downloads/list All downloads]
+===Looking for older releases?===
+Check out this page: [http://code.google.com/p/bwhf/downloads/list All downloads]
