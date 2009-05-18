@@ -7,9 +7,11 @@ BWHF Agent can be used on windows and linux.
 ||Download BWHF Agent for windows:||[http://bwhf.googlecode.com/files/BWHFAgent%202.30%20windows.zip BWHF Agent 2.30 for windows]||
 ||Download BWHF Agent for linux:||[http://bwhf.googlecode.com/files/BWHFAgent%202.30%20linux.zip BWHF Agent 2.30 for linux]||
 
+Basically all windows are supported where you can install the 32-bit version Java 6.0 or higher (Windows XP/Vista/Server).
+
 ===BWHF Agent requires Java===
 
-To run BWHF Agent, you need the 32-bit Java installed on your system. You can download and install Java here: http://www.java.com/download
+To run BWHF Agent, you need the 32-bit version of Java 6.0 or higher installed on your system. You can download and install Java here: http://www.java.com/download
 
 *If* you have trouble to get the 32-bit version of Java, you may check out this page: http://java.sun.com/javase/downloads/index.jsp.
 Proceed with the JRE, and you can choose your platform (platform without the 64 tag contains the 32-bit installation).
