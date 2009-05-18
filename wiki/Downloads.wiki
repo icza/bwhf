@@ -4,8 +4,8 @@
 
 BWHF Agent can be used on windows and linux.
 
-||Download latest BWHF Agent for windows:||http://lh3.ggpht.com/_jDMClHrENz8/ShFo6OThnSI/AAAAAAAAN1E/4LcVEUVjDwA/s800/windows_icon.png.jpg [http://bwhf.googlecode.com/files/BWHFAgent%202.30%20windows.zip BWHF Agent 2.30 for windows]||
-||Download latest BWHF Agent for linux:||http://lh5.ggpht.com/_jDMClHrENz8/ShFo6MbPePI/AAAAAAAAN1I/wdIE3RXg3zY/s800/linux_icon.png.jpg [http://bwhf.googlecode.com/files/BWHFAgent%202.30%20linux.zip BWHF Agent 2.30 for linux]||
+||Download latest BWHF Agent for windows:||[http://bwhf.googlecode.com/files/BWHFAgent%202.30%20windows.zip http://lh3.ggpht.com/_jDMClHrENz8/ShFo6OThnSI/AAAAAAAAN1E/4LcVEUVjDwA/s800/windows_icon.png.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%202.30%20windows.zip BWHF Agent 2.30 for windows]||
+||Download latest BWHF Agent for linux:||[ http://bwhf.googlecode.com/files/BWHFAgent%202.30%20linux.zip http://lh5.ggpht.com/_jDMClHrENz8/ShFo6MbPePI/AAAAAAAAN1I/wdIE3RXg3zY/s800/linux_icon.png.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%202.30%20linux.zip BWHF Agent 2.30 for linux]||
 
 Basically all windows are supported where you can install the 32-bit version Java 6.0 or higher (Windows XP/Vista/Server).
 
@@ -23,7 +23,7 @@ Check out the [VersionHistory version history] page for a detailed list of new f
 ===For developers:===
 
 Check out the BWHF Agent developer documentation:
-||A 50-page developer documentation of BWHF Agent in English:||http://lh6.ggpht.com/_jDMClHrENz8/ShFqXEs8FEI/AAAAAAAAN2E/4Gbx8JDIVDM/s800/pdf_icon.png.jpg [http://bwhf.googlecode.com/files/Starcraft%20Hacking%20Recognition.pdf Starcraft Hacking Recognition.pdf]||
+||A 50-page developer documentation of BWHF Agent in English:||[http://bwhf.googlecode.com/files/Starcraft%20Hacking%20Recognition.pdf http://lh6.ggpht.com/_jDMClHrENz8/ShFqXEs8FEI/AAAAAAAAN2E/4Gbx8JDIVDM/s800/pdf_icon.png.jpg] [http://bwhf.googlecode.com/files/Starcraft%20Hacking%20Recognition.pdf Starcraft Hacking Recognition.pdf]||
 
 ===Looking for older releases?===
 Check out this page: [http://code.google.com/p/bwhf/downloads/list All downloads]
