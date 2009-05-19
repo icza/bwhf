@@ -31,6 +31,6 @@ It can automatically convert your Starcraft PCX screenshots to known formats suc
 
 ===Miscellaneous===
  * Can be minimized to system tray. Can be started minimized to tray.
- * You can load a replay list on startup.
+ * You can set to auto-load a replay list on startup.
  * A replay can be passed as argument which will be opened on Charts tab.
  * Logs everything to text files.
