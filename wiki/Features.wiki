@@ -14,7 +14,7 @@ You can scan your old replays or entire folder of replays recursively. If hacker
 Players in the game lobby can be checked whether they have been previously reported to the hacker database. If hackers found in the game lobby, it will say out loudly: _"hacker at slot x"_. The player check can be issued by pressing the _Print Screen_ key on your keyboard (works only in the game lobby). You can define your own custom list of players to be checked.
 
 ===Charts===
-Draws various charts of replays like APM, Hotkeys, Build orders, Strategy, Overall APM. Lists the actions of players, you can search and filter the actions.
+Draws various charts of replays like APM, Hotkeys, Build orders, Strategy, Overall APM. Lists the actions of players, you can search, filter or export the actions.
 
 Check out the screenshots for example charts: [Screenshots]
 
