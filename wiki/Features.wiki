@@ -5,6 +5,8 @@
 ===Autoscan===
 It can autosave your replays. It can separate hacker replays to a different folder (duplicates them). It autoscans your replays after games, and if hackers are found in them, they are read out loudly, for example: "hacker blue protoss". If you have a key, it can autoreport hackers.
 
+More about the authorization keys: [AuthorizationKeys]
+
 ===Manual scan===
 You can scan your old replays or entire folder of replays recursively. If hacker replays are found, they can be flagged by appending 'hack' to the beginning or to the end of their names. A detailed HTML summary report can be generated at the end of scan.
 
@@ -16,6 +18,8 @@ Draws various charts of replays like APM, Hotkeys, Build orders, Strategy, Overa
 
 ===Replay search===
 You can search replays by *any* of the replay header fields. In case of text fields you can even define _regular expressions_. The result list of the search can be saved and loaded. Comments can be appended to replays (saved with the list). You can perform various operations on the replays such as extract game chat, show on charts, scan for hacks, move-delete-copy-rename them, group rename them etc.
+
+More about replay search: [ReplaySearchInBWHFAgent]
 
 ===Game chat===
 You can display or extract game chat and replay header informations from replays. Displaying will show them on your screen, extracting will save them to text files.
