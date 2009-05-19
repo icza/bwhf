@@ -16,6 +16,8 @@ Players in the game lobby can be checked whether they have been previously repor
 ===Charts===
 Draws various charts of replays like APM, Hotkeys, Build orders, Strategy, Overall APM. Lists the actions of players, you can search and filter the actions.
 
+Check out the screenshots for example charts: [Screenshots]
+
 ===Replay search===
 You can search replays by *any* of the replay header fields. In case of text fields you can even define _regular expressions_. The result list of the search can be saved and loaded. Comments can be appended to replays (saved with the list). You can perform various operations on the replays such as extract game chat, show on charts, scan for hacks, move-delete-copy-rename them, group rename them etc.
 
