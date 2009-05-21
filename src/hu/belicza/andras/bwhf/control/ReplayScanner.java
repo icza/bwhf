@@ -65,7 +65,7 @@ public class ReplayScanner {
 			// If the player had more than 10 actions at iteration 5, we take that as proof of hack nonetheless.
 			boolean hasActionAtIteration10 = false;
 			for ( int actionIndex = 0; actionIndex < actionsCount && playerActions[ actionIndex ].iteration <= 10; actionIndex++ )
-				if ( playerActions[ actionIndex ].iteration == 10 ) {
+				if ( playerActions[ actionIndex ].iteration == 10 && playerActions[ actionIndex ].actionNameIndex != Action.ACTION_NAME_INDEX_LEAVE ) {
 					hasActionAtIteration10 = true;
 					break;
 				}
