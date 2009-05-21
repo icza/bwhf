@@ -60,6 +60,7 @@ public class Action implements Comparable< Action > {
 	public static final byte ACTION_NAME_INDEX_UNLOAD_ALL   = (byte) 0x28;
 	public static final byte ACTION_NAME_INDEX_UNLOAD       = (byte) 0x29;
 	public static final byte ACTION_NAME_INDEX_MORPH        = (byte) 0x35;
+	public static final byte ACTION_NAME_INDEX_LEAVE        = (byte) 0x57;
 	
 	/** Action IDs we're interested in when parsing exported text by BWChart.<br>
 	 *  Parsing from exported BWChart text is no longer a goal. This might be inaccurate. */
