@@ -112,7 +112,7 @@ public class HackerDbServlet extends HttpServlet {
 				
 				final FiltersWrapper filtersWrapper = new FiltersWrapper();
 				// Parse parameters
-				filtersWrapper.name              = getStringParamValue( request, FILTER_NAME_NAME );
+				filtersWrapper.name              = getStringParamValue( request, FILTER_NAME_NAME ).toLowerCase();
 				filtersWrapper.gateways          = new boolean[ GATEWAYS.length ];
 				for ( int i = 0; i < filtersWrapper.gateways.length; i++ )
 					filtersWrapper.gateways[ i ] = request.getParameter( REQUEST_PARAMETER_FILTERS_PRESENT ) == null || request.getParameter( FILTER_NAME_GATEWAY + i ) != null;
