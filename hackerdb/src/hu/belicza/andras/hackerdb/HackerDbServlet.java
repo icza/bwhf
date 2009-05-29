@@ -1,6 +1,41 @@
 package hu.belicza.andras.hackerdb;
 
-import static hu.belicza.andras.hackerdb.ServerApiConsts.*;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_ASCENDANT_SORTING;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_GAME_ENGINE;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_GATEWAY;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_MAP_NAME;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_MIN_REPORT_COUNT;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_NAME;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_PAGE;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_PAGE_SIZE;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_REPORTED_WITH_KEY;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_SORT_BY;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_STEP_DIRECTION;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.GAME_ENGINES;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.GATEWAYS;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_CHECK;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_DOWNLOAD;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_LIST;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_REPORT;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_STATISTICS;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REPORT_ACCEPTED_MESSAGE;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_FILTERS_PRESENT;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_AGENT_VERSION;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_GAME_ENGINE;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_GATEWAY;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_KEY;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_MAP_NAME;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_OPERATION;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_PLAYER;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_FIRST_REPORTED;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_GATEWAY;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_LAST_REPORTED;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_NAME;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_REPORT_COUNT;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_FIRST;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_LAST;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_NEXT;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_PREVIOUS;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -283,7 +318,6 @@ public class HackerDbServlet extends HttpServlet {
 			// Header section
 			outputWriter.println( "<h2>BWHF Hacker database</h2>" );
 			outputWriter.println( "<p><table border=0><tr><td><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a><td>&nbsp;&nbsp;<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + "=" + OPERATION_STATISTICS + "'>Statistics</a><sup style='color:red;background:yellow;font-size:65%'>NEW!</sup>&nbsp;&nbsp;<td><a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help about this page (filters, sorting)</a></table></p>" );
-			//outputWriter.println( "<table border=0><tr><td><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a><td>&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help about this page (filters, sorting)</a></table>" );
 			
 			// Controls section
 			outputWriter.println( "<form id='" + FORM_ID + "' action='hackers' method='POST'>" );
@@ -291,7 +325,7 @@ public class HackerDbServlet extends HttpServlet {
 			
 			// Filters
 			outputWriter.println( "<b>Filters</b> <button type=button onclick=\"" + getJavaScriptForResetFilters( filtersWrapper ) + "\">Reset filters</button><table border=1>" );
-			outputWriter.println( "<tr><th>Hacker name:<td><input name='" + FILTER_NAME_NAME + "' type=text value='" + filtersWrapper.name + "' style='width:100%'>" );
+			outputWriter.println( "<tr><th>Hacker name:<td><input name='" + FILTER_NAME_NAME + "' type=text value='" + encodeHtmlString( filtersWrapper.name ) + "' style='width:100%'>" );
 			// Render gateways here
 			outputWriter.print  ( "<tr><th>Gateways:<td>" );
 			for ( int i = 0; i < GATEWAYS.length; i++ )
@@ -300,9 +334,9 @@ public class HackerDbServlet extends HttpServlet {
 			outputWriter.print  ( "<tr><th>Game engines:<td>" );
 			for ( int i = 0; i < GAME_ENGINES.length; i++ )
 				outputWriter.println( "<input name='" + FILTER_NAME_GAME_ENGINE + i + "' type=checkbox " + ( filtersWrapper.gameEngines[ i ] ? "checked" : "" ) + ">" + GAME_ENGINES[ i ] );
-			outputWriter.println( "<tr><th>Map name:<td><input name='" + FILTER_NAME_MAP_NAME + "' type=text value='" + filtersWrapper.mapName + "' style='width:100%'>" );
+			outputWriter.println( "<tr><th>Map name:<td><input name='" + FILTER_NAME_MAP_NAME + "' type=text value='" + encodeHtmlString( filtersWrapper.mapName ) + "' style='width:100%'>" );
 			outputWriter.println( "<tr><th>Min report count:<td><input name='" + FILTER_NAME_MIN_REPORT_COUNT +"' type=text value='" + filtersWrapper.minReportCount + "' style='width:100%'>" );
-			outputWriter.println( "<tr><th>Reported with key:<td><input name='" + FILTER_NAME_REPORTED_WITH_KEY +"' type=text value='" + filtersWrapper.reportedWithKey + "' style='width:100%'>" );
+			outputWriter.println( "<tr><th>Reported with key:<td><input name='" + FILTER_NAME_REPORTED_WITH_KEY +"' type=text value='" + encodeHtmlString( filtersWrapper.reportedWithKey ) + "' style='width:100%'>" );
 			outputWriter.println( "</table>" );
 			outputWriter.println( "<p><input type=submit value='Go / Refresh'></p>" );
 			
@@ -336,7 +370,7 @@ public class HackerDbServlet extends HttpServlet {
 				resultSet = statement.executeQuery();
 				while ( resultSet.next() ) {
 					final int gateway = resultSet.getInt( 2 );
-					outputWriter.println( "<tr class='gat" + ( gateway < GATEWAY_STYLES.length ? gateway : "Un" ) + "'><td align=right>" + (++recordNumber) + "<td>" + resultSet.getString( 1 ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td align=center>" + resultSet.getInt( 3 ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 4 ) ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 5 ) ) );
+					outputWriter.println( "<tr class='gat" + ( gateway < GATEWAY_STYLES.length ? gateway : "Un" ) + "'><td align=right>" + (++recordNumber) + "<td>" + encodeHtmlString( resultSet.getString( 1 ) ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td align=center>" + resultSet.getInt( 3 ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 4 ) ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 5 ) ) );
 				}
 			}
 			outputWriter.println( "</table>" );
@@ -955,6 +989,29 @@ public class HackerDbServlet extends HttpServlet {
 		response.setHeader( "Cache-Control", "no-cache" ); // For HTTP 1.1
 		response.setHeader( "Pragma"       , "no-cache" ); // For HTTP 1.0
 		response.setDateHeader( "Expires", -0 );           // For proxies
+	}
+	
+	/**
+	 * Encodes an input string for HTML rendering.
+	 * @param input input string to be encoded
+	 * @return an encoded string for HTML rendering
+	 */
+	private String encodeHtmlString( final String input ) {
+		final StringBuilder encodedHtml = new StringBuilder();
+		final int length = input.length();
+		
+		for ( int i = 0; i < length; i++ ) {
+			final char ch = input.charAt( i );
+			
+			if ( ch >= 'a' && ch <='z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' )
+				encodedHtml.append( ch ); // safe
+			else if ( Character.isISOControl( ch ) )
+				; // Not safe, do not include it in the output
+			else
+				encodedHtml.append( "&#" ).append( (int) ch ).append( ';' );
+		}
+		
+		return encodedHtml.toString();
 	}
 	
 }
