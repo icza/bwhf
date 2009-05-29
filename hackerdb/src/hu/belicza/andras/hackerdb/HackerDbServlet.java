@@ -633,11 +633,12 @@ public class HackerDbServlet extends HttpServlet {
 			}
 			
 			// Monthly reports chart URL
+			final int ADDED_LINES_GRANULARITY = 500; // Added lines in granularity of reports count 
 			final StringBuilder monthlyReportsChartUrlBuilder = new StringBuilder();
 			numberFormatter = new Formatter( monthlyReportsChartUrlBuilder );
 			monthlyReportsChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=bvs&amp;chbh=a&amp;chxt=y&amp;chxr=0,0," )
-				.append( maxMonthlyReportsCount ).append( ",100&amp;chg=0," );
-			numberFormatter.format( "%2.2f", 10000f / maxMonthlyReportsCount );
+				.append( maxMonthlyReportsCount ).append( "," ).append( ADDED_LINES_GRANULARITY ).append( "&amp;chg=0," );
+			numberFormatter.format( "%2.2f", ADDED_LINES_GRANULARITY * 100.0f / maxMonthlyReportsCount );
 			monthlyReportsChartUrlBuilder.append( "&amp;chs=" ).append( CHARTS_WIDTH ).append( 'x' ).append( CHARTS_HEIGHT )
 				.append( "&amp;chtt=BWHF+Monthly+reports+at+" ).append( DATE_FORMAT.format( currentDate ).replace( " ", "+" ) );
 			monthlyReportsChartUrlBuilder.append( "&amp;chd=t:" );
