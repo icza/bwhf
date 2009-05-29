@@ -791,13 +791,13 @@ public class HackerDbServlet extends HttpServlet {
 	
 	/**
 	 * Handles a report.
-	 * @param key         authorization key of the reporter
-	 * @param gateway     gateway of the reported players
-	 * @param gameEngine  game engine
-	 * @param mapName     map name
-	 * @param mapName     BWHF agent version
-	 * @param playerNames names of players being reported; only non-null values contain information
-	 * @param ip          ip of the reporter's computer
+	 * @param key          authorization key of the reporter
+	 * @param gateway      gateway of the reported players
+	 * @param gameEngine   game engine
+	 * @param mapName      map name
+	 * @param agentVersion BWHF agent version
+	 * @param playerNames  names of players being reported; only non-null values contain information
+	 * @param ip           ip of the reporter's computer
 	 * @return an error message if report fails; an empty string otherwise
 	 */
 	private String handleReport( final String key, final int gateway, final int gameEngine, final String mapName, final String agentVersion, final String[] playerNames, final String ip ) {
@@ -823,63 +823,65 @@ public class HackerDbServlet extends HttpServlet {
 			resultSet.close();
 			statement.close();
 			
-			// The rest has to be a transaction
-			connection.setAutoCommit( false );
-			
-			final Integer[] hackerIds = new Integer[ playerNames.length ];
-			
-			// Search existing hackers with the given names on the same gateways
-			statement = connection.prepareStatement( "SELECT id FROM hacker WHERE gateway=? AND name=?" );
-			for ( int i = 0; i < playerNames.length && playerNames[ i ] != null; i++ ) {
-				statement.setInt   ( 1, gateway          );
-				statement.setString( 2, playerNames[ i ] );
+			// We synchronize the rest so the same hacker will not be inserted twice!
+			synchronized ( HackerDbServlet.class ) {
+				// The rest has to be a transaction
+				connection.setAutoCommit( false );
 				
-				resultSet = statement.executeQuery();
-				if ( resultSet.next() ) {
-					// We found the hacker in the data base
-					hackerIds[ i ] = resultSet.getInt( 1 );
-				}
-				else {
-					// New hacker, add it first
-					statement2 = connection.prepareStatement( "INSERT INTO hacker (name,gateway) VALUES (?,?)" );
-					statement2.setString( 1, playerNames[ i ].toLowerCase() );
-					statement2.setInt   ( 2, gateway                        );
-					if ( statement2.executeUpdate() > 0 ) {
-						statement3 = connection.createStatement();
-						resultSet3 = statement3.executeQuery( "CALL IDENTITY()" );
-						if ( resultSet3.next() )
-							hackerIds[ i ] = resultSet3.getInt( 1 );
-						else
-							throw new SQLException( "Could not get id of newly inserted hacker." );
-						resultSet3.close();
-						statement3.close();
-					}
-					else
-						throw new SQLException( "Could not insert new hacker." );
+				final Integer[] hackerIds = new Integer[ playerNames.length ];
+				
+				// Search existing hackers with the given names on the same gateways
+				statement = connection.prepareStatement( "SELECT id FROM hacker WHERE gateway=? AND name=?" );
+				for ( int i = 0; i < playerNames.length && playerNames[ i ] != null; i++ ) {
+					statement.setInt   ( 1, gateway          );
+					statement.setString( 2, playerNames[ i ] );
 					
-					statement2.close();
+					resultSet = statement.executeQuery();
+					if ( resultSet.next() ) {
+						// We found the hacker in the data base
+						hackerIds[ i ] = resultSet.getInt( 1 );
+					}
+					else {
+						// New hacker, add it first
+						statement2 = connection.prepareStatement( "INSERT INTO hacker (name,gateway) VALUES (?,?)" );
+						statement2.setString( 1, playerNames[ i ].toLowerCase() );
+						statement2.setInt   ( 2, gateway                        );
+						if ( statement2.executeUpdate() > 0 ) {
+							statement3 = connection.createStatement();
+							resultSet3 = statement3.executeQuery( "CALL IDENTITY()" );
+							if ( resultSet3.next() )
+								hackerIds[ i ] = resultSet3.getInt( 1 );
+							else
+								throw new SQLException( "Could not get id of newly inserted hacker." );
+							resultSet3.close();
+							statement3.close();
+						}
+						else
+							throw new SQLException( "Could not insert new hacker." );
+						
+						statement2.close();
+					}
+					
+					resultSet.close();
 				}
+				statement.close();
 				
-				resultSet.close();
+				// Lastly insert the report records
+				statement = connection.prepareStatement( "INSERT INTO report (hacker,game_engine,map_name,agent_version,key,ip) VALUES (?,?,?,?,?,?)" );
+				statement.setInt   ( 2, gameEngine   );
+				statement.setString( 3, mapName      );
+				statement.setString( 4, agentVersion );
+				statement.setInt   ( 5, keyId        );
+				statement.setString( 6, ip           );
+				for ( int i = 0; i < hackerIds.length && hackerIds[ i ] != null; i++ ) {
+					statement.setInt( 1, hackerIds[ i ] );
+					if ( statement.executeUpdate() <= 0 )
+						throw new SQLException( "Could not insert report." );
+				}
+				statement.close();
+				
+				connection.commit();
 			}
-			statement.close();
-			
-			// Lastly insert the report records
-			statement = connection.prepareStatement( "INSERT INTO report (hacker,game_engine,map_name,agent_version,key,ip) VALUES (?,?,?,?,?,?)" );
-			statement.setInt   ( 2, gameEngine   );
-			statement.setString( 3, mapName      );
-			statement.setString( 4, agentVersion );
-			statement.setInt   ( 5, keyId        );
-			statement.setString( 6, ip           );
-			for ( int i = 0; i < hackerIds.length && hackerIds[ i ] != null; i++ ) {
-				statement.setInt( 1, hackerIds[ i ] );
-				if ( statement.executeUpdate() <= 0 )
-					throw new SQLException( "Could not insert report." );
-			}
-			statement.close();
-			
-			connection.commit();
-			connection.setAutoCommit( true );
 			
 			return REPORT_ACCEPTED_MESSAGE;
 		} catch ( final SQLException se ) {
@@ -889,6 +891,11 @@ public class HackerDbServlet extends HttpServlet {
 			return "Report processing error!";
 		}
 		finally {
+			try {
+				if ( !connection.getAutoCommit() )
+					connection.setAutoCommit( true );
+			} catch ( final SQLException se ) {
+			}
 			if ( resultSet3 != null ) try { resultSet3.close(); } catch ( final SQLException se ) {}
 			if ( statement3 != null ) try { statement3.close(); } catch ( final SQLException se ) {}
 			if ( statement2 != null ) try { statement2.close(); } catch ( final SQLException se ) {}
