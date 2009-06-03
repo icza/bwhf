@@ -18,7 +18,7 @@ Moreover I provide keys upon requests to admins of known Starcraft websites and 
 
 <font color="red">*NEW!*</font> *If you would like an authorization key, fill out the application form: [http://spreadsheets.google.com/viewform?hl=en&formkey=clNkSndGTTJFWU1uNi01QTZxTFlNaVE6MA.. Application form to get a BWHF Authorization Key]*
 
-There is no guarantee whatsoever that you eventually will be granted one. Be as descriptive as you can be. Give as many details as you can.
+There is no guarantee whatsoever that you eventually will be granted one. Be as descriptive as you can. Give as many details as you can.
 
 ==Key revocation==
 If I find that a key is used inappropriately, the key can be revocated at anytime without any warning. Revocation of a key means all reports that were done using that key will be excluded from all queries like they were never happened. Optionally those reports will be deleted forever.
