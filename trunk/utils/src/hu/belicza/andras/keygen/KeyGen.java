@@ -162,8 +162,10 @@ public class KeyGen extends JFrame {
 					emailMessageBuilder.append( "It's your own, don't give it to anyone. After you enter your key, check \"report hackers\" and you're good to go." );
 				}
 				else {
-					emailMessageBuilder.append( "Plz make sure that one key is only used by one person." );
+					emailMessageBuilder.append( "Plz make sure that one key is only used by one person (a unique key should be given to each person)." );
 				}
+				
+				emailMessageBuilder.append( "\n\nIf you have old hacker replays (only from 2009), send them and I add them in your name (with your key). Just reply to this email. Don't forget to indicate the gateway for the replays!" );
 				emailMessageBuilder.append( "\n\nCheers,\n    Dakota_Fanning" );
 				
 				emailMessageTextArea.setText( emailMessageBuilder.toString() );
