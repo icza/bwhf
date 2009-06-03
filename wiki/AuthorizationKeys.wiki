@@ -9,6 +9,8 @@ The key authenticates its owner toward the BWHF hacker database server. It's lik
 
 Only those who possess a valid authorization key can report hackers to the central hacker database. Reports with invalid keys are discarded.
 
+Only autoscan reports, manual scan does not report. However, if you have a key, you can send me your old hacker replays (only replays from 2009), and I can add them in your name (with your key).
+
 ==How can I get a key?==
 Keys cannot be purchased. I give keys for free to those who can be trusted. This includes my friends and people I play with on battle.net. Of course this is a very limited group of people.
 
