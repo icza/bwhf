@@ -6,6 +6,7 @@
 
 ----
 ===New features and changes in the upcoming new version:===
+ * New setting on the autoscan tab: 'Use short names for autosaved replays'.
  * Some minor fix.
 
 ----
