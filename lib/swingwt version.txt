@@ -1,1 +1,2 @@
 SwingWT VERSION 0.89
+win32/swt.jar downloaded from repository on 2009-06-11 (fixes some rendering bugs on Windows Vista)
