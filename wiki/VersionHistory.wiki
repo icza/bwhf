@@ -7,7 +7,8 @@
 ----
 ===New features and changes in the upcoming new version:===
  * New setting on the autoscan tab: 'Use short names for autosaved replays'.
- * Some minor fix.
+ * Fixed some rendering bugs wich occured on Windows Vista.
+ * Some other minor fix.
 
 ----
 ===2.30 2009-05-12===
