@@ -132,7 +132,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		settingsPanel.add( wrapperPanel );
 		
 		constraints.gridwidth = 1;
-		label = new JLabel( "Automatically update hacker list in every " );
+		label = new JLabel( "Automatically update hacker list cache in every " );
 		gridBagLayout.setConstraints( label, constraints );
 		settingsPanel.add( label );
 		constraints.gridwidth = 1;
@@ -144,7 +144,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		settingsPanel.add( label );
 		
 		constraints.gridwidth = 1;
-		label = new JLabel( "Hacker list last updated at:" );
+		label = new JLabel( "Hacker list cache last updated at:" );
 		gridBagLayout.setConstraints( label, constraints );
 		settingsPanel.add( label );
 		gridBagLayout.setConstraints( hackerListLastUpdatedLabel, constraints );
