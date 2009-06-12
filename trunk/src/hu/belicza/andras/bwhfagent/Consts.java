@@ -30,7 +30,7 @@ public class Consts {
 	/** URL of the BWHF hacker data base server.                               */
 	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL = "http://94.199.240.39/hackerdb/hackers";
 	/** URL of the Players' Network processor server.                          */
-	public static final String PLAYERS_NETWORK_DATA_BASE_URL    = "http://94.199.240.39/hackerdb/players";
+	public static final String PLAYERS_NETWORK_DATA_BASE_URL    = "http://94.199.240.39/hackerdb2/players";
 	
 	/** Name of the resource containing the about html template.               */
 	public static final String ABOUT_TEMLATE_RESOURCE_NAME      = "about_template.html";
