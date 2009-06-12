@@ -46,8 +46,10 @@ import swingwtx.swing.filechooser.FileFilter;
  */
 public class Utils {
 	
-	/** Date format to create timestamps for file names. */
-	public static final DateFormat DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd HH-mm-ss" );
+	/** Date format to create timestamps for file names.       */
+	public static final DateFormat DATE_FORMAT       = new SimpleDateFormat( "yyyy-MM-dd HH-mm-ss" );
+	/** Date format to create short timestamps for file names. */
+	public static final DateFormat SHORT_DATE_FORMAT = new SimpleDateFormat( "yyMMdd HHmmss" );
 	
 	/** Size of buffer to use to play wav files.  */
 	private static final int WAV_BUFFER_SIZE       = 64*1024;
