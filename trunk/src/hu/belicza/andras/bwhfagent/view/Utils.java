@@ -13,6 +13,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Properties;
@@ -461,6 +462,39 @@ public class Utils {
 				ie.printStackTrace();
 			}
 		}
+	}
+	
+	/**
+	 * Calculates the MD5 digest of a file.
+	 * @param file file whose MD5 to be calculated
+	 * @return the calculated MD5 digest of the file
+	 */
+	public static String calculateFileMd5( final File file ) {
+        FileInputStream input = null;
+        try {
+        	final MessageDigest md = MessageDigest.getInstance( "MD5" );
+        	
+        	input = new FileInputStream( file );
+        	final byte[] buffer = new byte[ 16*1024 ];
+        	
+        	int bytesRead;
+        	while ( ( bytesRead = input.read( buffer ) ) > 0 )
+        		md.update( buffer, 0, bytesRead );
+        	
+        	final byte[] md5Bytes = md.digest();
+        	final StringBuilder hexBuilder = new StringBuilder( md5Bytes.length * 2 );
+        	for ( final byte b : md5Bytes )
+        		hexBuilder.append( Integer.toHexString( ( b & 0xff ) >> 4 ) ).append( Integer.toHexString( b & 0x0f ) );
+        	
+	        return hexBuilder.toString();
+        }
+        catch ( final Exception e ) {
+        	return "";
+        }
+        finally {
+        	if ( input != null )
+				try { input.close(); } catch (IOException e) {}
+        }
 	}
 	
 }

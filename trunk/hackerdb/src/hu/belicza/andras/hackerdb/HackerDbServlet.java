@@ -66,9 +66,10 @@ import org.apache.commons.dbcp.BasicDataSource;
  * Servlet to serve hacker list related requests.<br>
  * These include:
  * <ul>
- * 	<li>Sending parts of the hacker list.
+ * 	<li>Sending parts of the hacker list as a formatted web page.
  * 	<li>Performing validation of authorization keys.
  * 	<li>Processing reports of hackers.
+ *  <li>Sending the hacker list as a minimized text file.
  * </ul>
  * 
  * @author Andras Belicza
@@ -945,15 +946,20 @@ public class HackerDbServlet extends HttpServlet {
 	 * @param message  message to be sent
 	 * @param response response to be used
 	 */
-	private void sendBackPlainMessage( final String message, final HttpServletResponse response ) {
+	private static void sendBackPlainMessage( final String message, final HttpServletResponse response ) {
 		response.setContentType( "text/plain" );
+		
+		PrintWriter output = null;
 		try {
-			final PrintWriter outputWriter = response.getWriter();
-			outputWriter.println( message );
-			outputWriter.flush();
-			outputWriter.close();
+			output = response.getWriter();
+			output.println( message );
+			output.flush();
 		} catch ( final IOException ie ) {
 			ie.printStackTrace();
+		}
+		finally {
+			if ( output != null )
+				 output.close();
 		}
 	}
 	
@@ -961,7 +967,7 @@ public class HackerDbServlet extends HttpServlet {
 	 * Sends back an error message to the client indicating a bad request.
 	 * @param response response to be used
 	 */
-	private void sendBackErrorMessage( final HttpServletResponse response ) {
+	private static void sendBackErrorMessage( final HttpServletResponse response ) {
 		sendBackErrorMessage( response, "Bad request!" );
 	}
 	
@@ -970,15 +976,20 @@ public class HackerDbServlet extends HttpServlet {
 	 * @param response response to be used
 	 * @param message  message to be sent back
 	 */
-	private void sendBackErrorMessage( final HttpServletResponse response, final String message ) {
+	private static void sendBackErrorMessage( final HttpServletResponse response, final String message ) {
 		response.setContentType( "text/html" );
+		
+		PrintWriter output = null;
 		try {
-			final PrintWriter outputWriter = response.getWriter();
-			outputWriter.println( message );
-			outputWriter.flush();
-			outputWriter.close();
+			output = response.getWriter();
+			output.println( message );
+			output.flush();
 		} catch ( final IOException ie ) {
 			ie.printStackTrace();
+		}
+		finally {
+			if ( output != null )
+				 output.close();
 		}
 	}
 	
@@ -986,7 +997,7 @@ public class HackerDbServlet extends HttpServlet {
 	 * Configures the response for no caching.
 	 * @param response response to be configured
 	 */
-	private void setNoCache( final HttpServletResponse response ) {
+	private static void setNoCache( final HttpServletResponse response ) {
 		response.setHeader( "Cache-Control", "no-cache" ); // For HTTP 1.1
 		response.setHeader( "Pragma"       , "no-cache" ); // For HTTP 1.0
 		response.setDateHeader( "Expires", -0 );           // For proxies
@@ -997,7 +1008,7 @@ public class HackerDbServlet extends HttpServlet {
 	 * @param input input string to be encoded
 	 * @return an encoded string for HTML rendering
 	 */
-	private String encodeHtmlString( final String input ) {
+	private static String encodeHtmlString( final String input ) {
 		final StringBuilder encodedHtml = new StringBuilder();
 		final int length = input.length();
 		

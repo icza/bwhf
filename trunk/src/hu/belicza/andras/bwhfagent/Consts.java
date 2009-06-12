@@ -24,11 +24,13 @@ public class Consts {
 	public static final String LATEST_STABLE_VERSION_TEXT_URL   = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version.txt";
 	/** Search help page url string.                                           */
 	public static final String SEARCH_HELP_PAGE_URL             = "http://code.google.com/p/bwhf/wiki/ReplaySearchInBWHFAgent";
-	/** Search help page url string.                                           */
-	public static final String PLAYERS_NETWORK_PAGE_URL         = "http://94.199.240.39/hackerdb/players";
+	/** Players' Network page url string.                                      */
+	public static final String PLAYERS_NETWORK_PAGE_URL         = "http://94.199.240.39/hackerdb/playersnetwork";
 	
 	/** URL of the BWHF hacker data base server.                               */
 	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL = "http://94.199.240.39/hackerdb/hackers";
+	/** URL of the Players' Network processor server.                          */
+	public static final String PLAYERS_NETWORK_DATA_BASE_URL    = "http://94.199.240.39/hackerdb/players";
 	
 	/** Name of the resource containing the about html template.               */
 	public static final String ABOUT_TEMLATE_RESOURCE_NAME      = "about_template.html";
