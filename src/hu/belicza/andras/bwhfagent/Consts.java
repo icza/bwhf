@@ -79,6 +79,8 @@ public class Consts {
 	public static final String PROPERTY_PCX_OUTPUT_FORMAT              = "pcxOutputFormat";
 	/** Include replay header property.          */
 	public static final String PROPERTY_INCLUDE_REPLAY_HEADER          = "includeReplayHeader";
+	/** Use short names for autosave property.   */
+	public static final String PROPERTY_USE_SHORT_NAMES_FOR_AUTOSAVE   = "useShortNamesForAutosave";
 	/** Play sound if found hackers property.    */
 	public static final String PROPERTY_PLAY_SOUND_IF_FOUND_HACKERS    = "playSoundIfFoundHackers";
 	/** Bring to front property.                 */
@@ -178,6 +180,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_CONVERT_PCX_ENABLED      , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PCX_OUTPUT_FORMAT             , "JPG" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_INCLUDE_REPLAY_HEADER         , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_USE_SHORT_NAMES_FOR_AUTOSAVE  , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAY_SOUND_IF_FOUND_HACKERS   , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_BRING_TO_FRONT                , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPORT_HACKERS                , "false" );
