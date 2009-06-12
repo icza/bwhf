@@ -74,6 +74,8 @@ public class MainFrame extends JFrame {
 	protected final ReplaySearchTab    replaySearchTab;
 	/** Reference to the game chat tab.        */
 	protected final GameChatTab        gameChatTab;
+	/** Reference to the players' network tab. */
+	protected final PlayersNetworkTab  playersNetworkTab;
 	/** Reference to the general settings tab. */
 	protected final GeneralSettingsTab generalSettingsTab;
 	
@@ -120,7 +122,8 @@ public class MainFrame extends JFrame {
 		chartsTab          = new ChartsTab();
 		replaySearchTab    = new ReplaySearchTab();
 		gameChatTab        = new GameChatTab();
-		tabs = new Tab[] { autoscanTab, manualScanTab, playerCheckerTab, chartsTab, replaySearchTab, gameChatTab, new PcxConverterTab(), generalSettingsTab, new AboutTab() };
+		playersNetworkTab  = new PlayersNetworkTab();
+		tabs = new Tab[] { autoscanTab, manualScanTab, playerCheckerTab, chartsTab, replaySearchTab, gameChatTab, new PcxConverterTab(), playersNetworkTab, generalSettingsTab, new AboutTab() };
 		
 		buildGUI();
 		

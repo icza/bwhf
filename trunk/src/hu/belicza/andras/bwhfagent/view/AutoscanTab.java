@@ -233,30 +233,32 @@ public class AutoscanTab extends LoggedTab {
 				final JTextField starcraftFolderTextField           = MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField;
 				final JCheckBox  skipLatterActionsOfHackersCheckBox = MainFrame.getInstance().generalSettingsTab.skipLatterActionsOfHackersCheckBox;
 				
-				Date autoscanEnabledTime       = null;
-				long lastModifiedOfLastChecked = 0l; // Last modified time of the LastReplay.rep that was checked lastly.
+				long lastModifiedOfLastChecked = new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ).lastModified(); // Last modified time of the LastReplay.rep that was checked lastly; this will be 0l if 'LastRepay.rep' does not yet exist.
 				while ( true ) {
 					try {
-						if ( autoscanEnabledCheckBox.isSelected() ) {
-							if ( autoscanEnabledTime == null ) {
-								autoscanEnabledTime       = new Date();
-								lastModifiedOfLastChecked = 0l;
-							}
+						final File lastReplayFile      = new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME );
+						long newLastReplayLastModified = lastReplayFile.lastModified();
+						
+						if ( newLastReplayLastModified != lastModifiedOfLastChecked ) {
+							sleep( 1500l ); // Wait a little for Starcraft to finish replay saving...
+							// lastModified property changes when replay saving finishes, so we query it again:
+							newLastReplayLastModified = lastReplayFile.lastModified();
+							lastModifiedOfLastChecked = newLastReplayLastModified;
 							
-							final File lastReplayFile      = new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME );
-							long newLastReplayLastModified = lastReplayFile.lastModified();
+							if ( MainFrame.getInstance().playersNetworkTab.autoSendInfoAboutLastReplayCheckBox.isSelected() )
+								new NormalThread() { // We send it in a new Thread to not block the autoscan process
+									@Override
+									public void run() {
+										MainFrame.getInstance().playersNetworkTab.sendFileInfo( lastReplayFile );
+									}
+								}.start();
 							
-							if ( newLastReplayLastModified >= autoscanEnabledTime.getTime() && newLastReplayLastModified != lastModifiedOfLastChecked ) {
-								sleep( 1500l ); // Wait a little for Starcraft to finish replay saving...
-								// lastModified property changes when replay saving finishes, so we query it again:
-								newLastReplayLastModified = lastReplayFile.lastModified();
-								
+							if ( autoscanEnabledCheckBox.isSelected() ) {
 								final String autosavedFileName = useShortNamesForAutosaveCheckBox.isSelected() ? Utils.SHORT_DATE_FORMAT.format( new Date() ) + ".rep" : Utils.DATE_FORMAT.format( new Date() ) + " LastRep.rep";
 								if ( saveAllRepsCheckBox.isSelected() )
 									Utils.copyFile( lastReplayFile, new File( allRepsDestinationTextField.getText() ), autosavedFileName );
 								
 								logMessage( "LastReplay.rep was modified - proceeding to scan..." );
-								lastModifiedOfLastChecked = newLastReplayLastModified;
 								
 								List< HackDescription > hackDescriptionList = null; 
 								final Replay replay = BinRepParser.parseReplay( lastReplayFile, true, false );
@@ -319,8 +321,6 @@ public class AutoscanTab extends LoggedTab {
 										logMessage( "Found no hacks in 'LastReplay.rep.'" );
 							}
 						}
-						else
-							autoscanEnabledTime = null;
 						
 						sleep( TIME_BETWEEN_CHECKS_FOR_NEW_REPLAY_MS );
 					}

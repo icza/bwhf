@@ -24,6 +24,8 @@ public class Consts {
 	public static final String LATEST_STABLE_VERSION_TEXT_URL   = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version.txt";
 	/** Search help page url string.                                           */
 	public static final String SEARCH_HELP_PAGE_URL             = "http://code.google.com/p/bwhf/wiki/ReplaySearchInBWHFAgent";
+	/** Search help page url string.                                           */
+	public static final String PLAYERS_NETWORK_PAGE_URL         = "http://94.199.240.39/hackerdb/players";
 	
 	/** URL of the BWHF hacker data base server.                               */
 	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL = "http://94.199.240.39/hackerdb/hackers";
@@ -167,6 +169,8 @@ public class Consts {
 	public static final String PROPERTY_EDITOR_PROGRAM                 = "editorProgram";
 	/** Replay column model indices property.    */
 	public static final String PROPERTY_REPLAY_COLUMN_MODEL_INDICES    = "replayColumnModelIndices";
+	/** Auto send info about lastrep property.   */
+	public static final String PROPERTY_AUTO_SEND_INFO_ABOUT_LAST_REP  = "autoSendInfoAboutLastRep";
 	
 	/** Properties holding the default settings. */
 	public static final Properties DEFAULT_SETTINGS_PROPERTIES = new Properties();
@@ -224,6 +228,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPLAY_LIST_TO_LOAD_ON_STARTUP, "" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_EDITOR_PROGRAM                , "notepad.exe" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPLAY_COLUMN_MODEL_INDICES   , "" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_SEND_INFO_ABOUT_LAST_REP , "true" );
 	}
 	
 }

@@ -94,7 +94,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 	
 	@Override
 	protected void buildGUI() {
-		final JButton openPreviousReportButton = new JButton( "Open a previous HTML report", IconResourceManager.ICON_HTML );
+		final JButton openPreviousReportButton = new JButton( "Open a previous HTML report...", IconResourceManager.ICON_HTML );
 		openPreviousReportButton.setMnemonic( 'h' );
 		openPreviousReportButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
