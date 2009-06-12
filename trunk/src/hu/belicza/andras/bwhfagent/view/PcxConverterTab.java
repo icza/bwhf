@@ -33,7 +33,7 @@ public class PcxConverterTab extends ProgressLoggedTab {
 	/** PCX file extension.                            */
 	private static final String PCX_FILE_EXTENSION                       = ".pcx";
 	/** Time between checking for new PCX files in ms. */
-	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_PCX_FILES_MS = 1500l;
+	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_PCX_FILES_MS = 1000l;
 	
 	/** PCX file filter. */
 	private static final FileFilter SWING_PCX_FILE_FILTER = new FileFilter() {
