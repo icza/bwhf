@@ -178,6 +178,7 @@ public class ReplaySearchTab extends Tab {
 	private final JMenuItem displayGameChatMenuItem    = new JMenuItem( "Display game chat", IconResourceManager.ICON_GAME_CHAT );
 	/** Menu item to extract game chat from selected replays.      */
 	private final JMenuItem extractGameChatMenuItem    = new JMenuItem( "Extract game chat", IconResourceManager.ICON_GAME_CHATS );
+	// TODO: add new menuitem: "Send to Players' Network"
 	/** Menu item to remove selected replays from the result list. */
 	private final JMenuItem removeFromListMenuItem     = new JMenuItem( "Remove from list", IconResourceManager.ICON_REMOVE_FROM_LIST );
 	/** Menu item to copy selected replay files.                   */

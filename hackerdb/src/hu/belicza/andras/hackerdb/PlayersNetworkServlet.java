@@ -6,7 +6,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -87,8 +86,6 @@ public class PlayersNetworkServlet extends HttpServlet {
 		PreparedStatement statement  = null;
 		ResultSet         resultSet  = null;
 		PreparedStatement statement2 = null;
-		Statement         statement3 = null;
-		ResultSet         resultSet3 = null;
 		
 		try {
 			connection = dataSource.getConnection();
@@ -108,38 +105,24 @@ public class PlayersNetworkServlet extends HttpServlet {
 				connection.setAutoCommit( false );
 				
 				// First create the players
-				int[] playerIds = new int[ playerNameList.size() ];
-				for ( int i = 0; i < playerIds.length; i++ ) {
+				for ( int i = 0; i < playerNameList.size(); i++ ) {
 					// Check if player already exists
 					statement = connection.prepareStatement( "SELECT id FROM player WHERE name=?" );
 					statement.setString( 1, playerNameList.get( i ) );
 					resultSet = statement.executeQuery();
-					if ( resultSet.next() ) {
-						// Player exists
-						playerIds[ i ] = resultSet.getInt( 1 );
-					}
-					else {
+					if ( !resultSet.next() ) {
 						// Player doesn't exist, let's create it
 						statement2 = connection.prepareStatement( "INSERT INTO player (name) VALUES (?)" );
 						statement2.setString( 1, playerNameList.get( i ) );
 						if ( statement2.executeUpdate() == 0 )
 							throw new Exception( "Could not insert player!" );
 						statement2.close();
-						statement3 = connection.createStatement();
-						resultSet3 = statement3.executeQuery( "CALL IDENTITY()" );
-						if ( resultSet3.next() )
-							playerIds[ i ] = resultSet.getInt( 1 );
-						else
-							throw new Exception( "Could not get ID for newly inserted player!" );
-						resultSet3.close();
-						statement3.close();
 					}
 					resultSet.close();
 					statement.close();
 				}
 				
 				// Players exist now. Let's insert the game now.
-				int gameId;
 				statement = connection.prepareStatement( "INSERT INTO game (engine,frames,save_time,name,map_width,map_height,speed,type,sub_type,creator_name,map_name,replay_md5,agent_version,ip) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)" );
 				int colCounter = 1;
 				statement.setInt      ( colCounter++, engine                    );
@@ -159,25 +142,20 @@ public class PlayersNetworkServlet extends HttpServlet {
 				if ( statement.executeUpdate() == 0 )
 					throw new Exception( "Could not insert game!" );
 				statement.close();
-				statement3 = connection.createStatement();
-				resultSet3 = statement3.executeQuery( "CALL IDENTITY()" );
-				if ( resultSet3.next() )
-					gameId = resultSet.getInt( 1 );
-				else
-					throw new Exception( "Could not get ID for newly inserted game!" );
-				resultSet3.close();
-				statement3.close();
 				
 				// Lastly insert the connections between the game and players
-				for ( int i = 0; i < playerIds.length; i++ ) {
-					statement = connection.prepareStatement( "INSERT INTO game_player (game,player,race,actions_count,color) VALUES (?,?,?,?,?)" );
+				statement = connection.prepareStatement( "INSERT INTO game_player (game,player,race,actions_count,color) VALUES ((select max(id) from game),(select id from player where name=?),?,?,?)" );
+				for ( int i = 0; i < playerNameList.size(); i++ ) {
 					colCounter = 1;
-					statement.setInt( colCounter++, gameId                     );
-					statement.setInt( colCounter++, playerIds[ i ]             );
-					statement.setInt( colCounter++, playerRaceList   .get( i ) );
-					statement.setInt( colCounter++, playerActionsList.get( i ) );
-					statement.setInt( colCounter++, playerColorList  .get( i ) );
+					statement.setString( colCounter++, playerNameList   .get( i ) );
+					statement.setInt   ( colCounter++, playerRaceList   .get( i ) );
+					statement.setInt   ( colCounter++, playerActionsList.get( i ) );
+					statement.setInt   ( colCounter++, playerColorList  .get( i ) );
+					
+					if ( statement.executeUpdate() == 0 )
+						throw new Exception( "Could not insert game_player!" );
 				}
+				statement.close();
 				
 				connection.commit();
 			}
@@ -195,8 +173,6 @@ public class PlayersNetworkServlet extends HttpServlet {
 					connection.setAutoCommit( true );
 			} catch ( final SQLException se ) {
 			}
-			if ( resultSet3 != null ) try { resultSet3.close(); } catch ( final SQLException se ) {}
-			if ( statement3 != null ) try { statement3.close(); } catch ( final SQLException se ) {}
 			if ( statement2 != null ) try { statement2.close(); } catch ( final SQLException se ) {}
 			if ( resultSet  != null ) try { resultSet .close(); } catch ( final SQLException se ) {}
 			if ( statement  != null ) try { statement .close(); } catch ( final SQLException se ) {}
