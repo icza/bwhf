@@ -86,4 +86,40 @@ public class ServerApiConsts {
 	/** Step direction value for first.    */
 	public static final String STEP_DIRECTION_LAST           = "Last";
 	
+	
+	/** Game param name for engine.        */
+	public static final String GAME_PARAM_ENGINE             = "engine";
+	/** Game param name for frames.        */
+	public static final String GAME_PARAM_FRAMES             = "frames";
+	/** Game param name for save time.     */
+	public static final String GAME_PARAM_SAVE_TIME          = "saveTime";
+	/** Game param name for name.          */
+	public static final String GAME_PARAM_NAME               = "name";
+	/** Game param name for map width.     */
+	public static final String GAME_PARAM_MAP_WIDTH          = "mapWidth";
+	/** Game param name for map height.    */
+	public static final String GAME_PARAM_MAP_HEIGHT         = "mapHeight";
+	/** Game param name for speed.         */
+	public static final String GAME_PARAM_SPEED              = "speed";
+	/** Game param name for type.          */
+	public static final String GAME_PARAM_TYPE               = "type";
+	/** Game param name for sub type.      */
+	public static final String GAME_PARAM_SUB_TYPE           = "subType";
+	/** Game param name for creator name.  */
+	public static final String GAME_PARAM_CREATOR_NAME       = "creatorName";
+	/** Game param name for map name.      */
+	public static final String GAME_PARAM_MAP_NAME           = "mapName";
+	/** Game param name for replay md5.    */
+	public static final String GAME_PARAM_REPLAY_MD5         = "replayMd5";
+	/** Game param name for agent version. */
+	public static final String GAME_PARAM_AGENT_VERSION      = "agentVersion";
+	/** Game param name for player name.   */
+	public static final String GAME_PARAM_PLAYER_NAME        = "playerName";
+	/** Game param name for player actions.*/
+	public static final String GAME_PARAM_PLAYER_ACTIONS     = "playerActions";
+	/** Game param name for player race.   */
+	public static final String GAME_PARAM_PLAYER_RACE        = "playerRace";
+	/** Game param name for player color.  */
+	public static final String GAME_PARAM_PLAYER_COLOR       = "playerColor";
+	
 }

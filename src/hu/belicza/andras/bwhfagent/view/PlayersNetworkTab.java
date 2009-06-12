@@ -2,9 +2,19 @@ package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhf.control.BinRepParser;
 import hu.belicza.andras.bwhf.model.Replay;
+import hu.belicza.andras.bwhf.model.ReplayHeader;
 import hu.belicza.andras.bwhfagent.Consts;
+import hu.belicza.andras.hackerdb.ServerApiConsts;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,9 +119,9 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 		
 		requestedToStop = false;
 		
-		selectFoldersButton .setEnabled( false );
-		selectFilesButton   .setEnabled( false );
-		stopSendingButton   .setEnabled( true  );
+		selectFoldersButton.setEnabled( false );
+		selectFilesButton  .setEnabled( false );
+		stopSendingButton  .setEnabled( true  );
 		
 		new NormalThread() {
 			/** List of replay files to be scanned. */
@@ -151,14 +161,14 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 					final long endNanoTime = System.nanoTime();
 					
 					logMessage( sendingMessage + " done in " + Utils.formatNanoTimeAmount( endNanoTime - startNanoTime ) );
-					logMessage( "\tSkipped " + skippedRepsCount + " replay" + ( skippedRepsCount == 1 ? "" : "s" ) + ".", false );
+					logMessage( "\tSkipped/failed " + skippedRepsCount + " replay" + ( skippedRepsCount == 1 ? "" : "s" ) + ".", false );
 				}
 				finally {
 					if ( requestedToStop )
 						logMessage( "Sending was manually aborted!" );
-					stopSendingButton   .setEnabled( false );
-					selectFilesButton   .setEnabled( true  );
-					selectFoldersButton .setEnabled( true  );
+					stopSendingButton  .setEnabled( false );
+					selectFilesButton  .setEnabled( true  );
+					selectFoldersButton.setEnabled( true  );
 				}
 			}
 			
@@ -200,15 +210,88 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 		logMessage( "Sending info about " + replayFileAbsolutePath + "..." );
 		
 		final Replay replay = BinRepParser.parseReplay( replayFile, true, false );
+		
 		if ( replay == null ) {
 			logMessage( "Could not parse " + replayFileAbsolutePath + "!" );
 			return false;
 		}
 		else {
-			logMessage( "Successfully sent " + replayFileAbsolutePath + "." );
-			return true;
+			OutputStreamWriter output = null; 
+			BufferedReader     input  = null;
+			try {
+				final URLConnection urlConnection = new URL( Consts.PLAYERS_NETWORK_DATA_BASE_URL ).openConnection();
+				urlConnection.setDoOutput( true );
+				urlConnection.setDoInput( true );
+				output = new OutputStreamWriter( urlConnection.getOutputStream() ); 
+				
+				final ReplayHeader  replayHeader = replay.replayHeader;
+				final StringBuilder infoBuilder  = new StringBuilder();
+				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_ENGINE       , Byte.toString( replayHeader.gameEngine ) );
+				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_FRAMES       , Integer.toString( replayHeader.gameFrames ) );
+				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_SAVE_TIME    , Long.toString( replayHeader.saveTime.getTime() ) );
+				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_NAME         , replayHeader.gameName );
+				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_MAP_WIDTH    , Short.toString( replayHeader.mapWidth ) );
+				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_MAP_HEIGHT   , Short.toString( replayHeader.mapHeight ) );
+				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_SPEED        , Short.toString( replayHeader.gameSpeed ) );
+				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_TYPE         , Short.toString( replayHeader.gameType ) );
+				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_SUB_TYPE     , Short.toString( replayHeader.gameSubType ) );
+				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_CREATOR_NAME , replayHeader.creatorName );
+				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_MAP_NAME     , replayHeader.mapName );
+				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_REPLAY_MD5   , Utils.calculateFileMd5( replayFile ) );
+				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_AGENT_VERSION, MainFrame.getInstance().applicationVersion );
+				
+				int playerCounter = 0;
+				for ( int i = 0; i < replayHeader.playerNames.length; i++ )
+					if ( replayHeader.playerNames[ i ] != null ) {
+						appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_PLAYER_NAME    + playerCounter, replayHeader.playerNames[ i ] );
+						appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_PLAYER_RACE    + playerCounter, Integer.toString( replayHeader.playerRaces[ i ] & 0xff ) );
+						appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_PLAYER_ACTIONS + playerCounter, Integer.toString( replayHeader.playerIdActionsCounts[ replayHeader.playerIds[ i ] ] ) );
+						appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_PLAYER_COLOR   + playerCounter, Integer.toString( replayHeader.playerColors[ i ] ) );
+						playerCounter++;
+					}
+				
+				output.write( infoBuilder.toString() );
+				output.flush();
+				
+				input = new BufferedReader( new InputStreamReader( urlConnection.getInputStream() ) );
+				final String message = input.readLine();
+				
+				output.close();
+				
+				if ( message.equals( ServerApiConsts.REPORT_ACCEPTED_MESSAGE ) ) {
+					logMessage( "Successfully sent " + replayFileAbsolutePath + "." );
+					return true;
+				}
+				else {
+					logMessage( "Rejected, cause: " + message );
+					return false;
+				}
+			} catch ( final Exception e ) {
+				logMessage( "Cound not send " + replayFileAbsolutePath + "." );
+				return false;
+			}
+			finally {
+				if ( output != null )
+					try { output.close(); } catch ( final IOException ie ) {}
+				if ( input != null )
+					try { input.close(); } catch ( final IOException ie ) {}
+			}
 		}
-		
+	}
+	
+	/**
+	 * Appends a key-value pair to a builder which will be transferred over HTTP.
+	 * @param builder builder to append to
+	 * @param key     key of the pair
+	 * @param value   value of the pair
+	 */
+	private static void appendKeyValue( final StringBuilder builder, final String key, final String value ) {
+		if ( builder.length() > 0 )
+			builder.append( '&' );
+		try {
+			builder.append( URLEncoder.encode( key, "UTF-8" ) ).append( '=' ).append( URLEncoder.encode( value, "UTF-8" ) );
+		} catch ( final UnsupportedEncodingException ue ) {
+		}
 	}
 	
 	@Override
