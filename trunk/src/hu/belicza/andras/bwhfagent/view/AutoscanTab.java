@@ -249,7 +249,7 @@ public class AutoscanTab extends LoggedTab {
 								new NormalThread() { // We send it in a new Thread to not block the autoscan process
 									@Override
 									public void run() {
-										MainFrame.getInstance().playersNetworkTab.sendFileInfo( lastReplayFile );
+										MainFrame.getInstance().playersNetworkTab.sendFileInfo( lastReplayFile, gatewayComboBox.getSelectedIndex() > 0 ? gatewayComboBox.getSelectedIndex() - 1 : null );
 									}
 								}.start();
 							
