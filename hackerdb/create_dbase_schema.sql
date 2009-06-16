@@ -86,6 +86,7 @@ CREATE CACHED TABLE game (
     map_name      VARCHAR,
     replay_md5    VARCHAR,
     agent_version VARCHAR,
+    gateway       INT,                   --optional
     ip            VARCHAR,               --IP of the reporter's computer.
     version       TIMESTAMP DEFAULT NOW
 );

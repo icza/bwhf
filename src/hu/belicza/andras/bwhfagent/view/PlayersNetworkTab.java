@@ -152,7 +152,7 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 						if ( requestedToStop )
 							return;
 						
-						if ( !sendFileInfo( replayFile ) );
+						if ( !sendFileInfo( replayFile, null ) );
 							skippedRepsCount++;
 						
 						progressBar.setValue( ++counter );
@@ -202,9 +202,10 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 	/**
 	 * Sends info about a file to the Players' Network.
 	 * @param replayFile file be sent info about
+	 * @param gateway    gateway where the game was played - optional
 	 * @return true if info sent successfully; false otherwise
 	 */
-	protected boolean sendFileInfo( final File replayFile ) {
+	protected boolean sendFileInfo( final File replayFile, final Integer gateway ) {
 		final String replayFileAbsolutePath = replayFile.getAbsolutePath();
 		
 		logMessage( "Sending info about " + replayFileAbsolutePath + "..." );

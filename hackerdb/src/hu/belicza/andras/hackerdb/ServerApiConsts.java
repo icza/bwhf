@@ -113,6 +113,8 @@ public class ServerApiConsts {
 	public static final String GAME_PARAM_REPLAY_MD5         = "replayMd5";
 	/** Game param name for agent version. */
 	public static final String GAME_PARAM_AGENT_VERSION      = "agentVersion";
+	/** Game param name for agent version. */
+	public static final String GAME_PARAM_GATEWAY            = "gateway";
 	/** Game param name for player name.   */
 	public static final String GAME_PARAM_PLAYER_NAME        = "playerName";
 	/** Game param name for player actions.*/

@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -49,6 +50,7 @@ public class PlayersNetworkServlet extends HttpServlet {
 		final List< Integer > playerRaceList    = new ArrayList< Integer >( 8 );
 		final List< Integer > playerActionsList = new ArrayList< Integer >( 8 );
 		final List< Integer > playerColorList   = new ArrayList< Integer >( 8 );
+		Integer gateway = null;
 		
 		try {
 			engine       = Integer.parseInt( request.getParameter( ServerApiConsts.GAME_PARAM_ENGINE ) );
@@ -64,6 +66,12 @@ public class PlayersNetworkServlet extends HttpServlet {
 			mapName      = request.getParameter( ServerApiConsts.GAME_PARAM_MAP_NAME      );
 			replayMd5    = request.getParameter( ServerApiConsts.GAME_PARAM_REPLAY_MD5    );
 			agentVersion = request.getParameter( ServerApiConsts.GAME_PARAM_AGENT_VERSION );
+			try {
+				gateway = Integer.parseInt( request.getParameter( ServerApiConsts.GAME_PARAM_GATEWAY ) );
+			}
+			catch ( final Exception e ) {
+				// Gateway is optional...
+			}
 			
 			int playerCounter = 0;
 			while ( request.getParameter( ServerApiConsts.GAME_PARAM_PLAYER_NAME + playerCounter ) != null ) {
@@ -122,8 +130,8 @@ public class PlayersNetworkServlet extends HttpServlet {
 					statement.close();
 				}
 				
-				// Players exist now. Let's insert the game now.
-				statement = connection.prepareStatement( "INSERT INTO game (engine,frames,save_time,name,map_width,map_height,speed,type,sub_type,creator_name,map_name,replay_md5,agent_version,ip) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)" );
+				// Players exist now. Let's insert the game.
+				statement = connection.prepareStatement( "INSERT INTO game (engine,frames,save_time,name,map_width,map_height,speed,type,sub_type,creator_name,map_name,replay_md5,agent_version,gateway,ip) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" );
 				int colCounter = 1;
 				statement.setInt      ( colCounter++, engine                    );
 				statement.setInt      ( colCounter++, frames                    );
@@ -138,6 +146,10 @@ public class PlayersNetworkServlet extends HttpServlet {
 				statement.setString   ( colCounter++, mapName                   );
 				statement.setString   ( colCounter++, replayMd5                 );
 				statement.setString   ( colCounter++, agentVersion              );
+				if ( gateway == null )
+					statement.setNull ( colCounter++, Types.INTEGER             );
+				else
+					statement.setInt  ( colCounter++, gateway                   );
 				statement.setString   ( colCounter++, request.getRemoteAddr()   );
 				if ( statement.executeUpdate() == 0 )
 					throw new Exception( "Could not insert game!" );
