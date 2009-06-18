@@ -113,7 +113,7 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 	 * Sends info about files and folders to the Players' Network.
 	 * @param files files and folders to be sent info about
 	 */
-	private void sendFileAndFolderInfo( final File[] files ) {
+	protected void sendFileAndFolderInfo( final File[] files ) {
 		if ( !selectFilesButton.isEnabled() )
 			return;
 		
@@ -152,7 +152,7 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 						if ( requestedToStop )
 							return;
 						
-						if ( !sendFileInfo( replayFile, null ) );
+						if ( !sendFileInfo( replayFile, null ) )
 							skippedRepsCount++;
 						
 						progressBar.setValue( ++counter );
@@ -264,7 +264,7 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 					return true;
 				}
 				else {
-					logMessage( "Rejected, cause: " + message );
+					logMessage( "Rejected, reason: " + message );
 					return false;
 				}
 			} catch ( final Exception e ) {
