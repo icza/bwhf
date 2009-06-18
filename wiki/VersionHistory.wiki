@@ -6,7 +6,7 @@
 
 ----
 ===New features and changes in the upcoming new version:===
- * A new *Players' Network* tab where you can add any old replays (or folder of replays recursively) to the Players' Network. You can enable/disable to autosend info about '!LastReplay.rep'. Sending twice exactly the same replay will only appear once in the database.
+ * A new *Players' Network* tab where you can add any old replays (or folder of replays recursively) to the Players' Network. You can enable/disable autosending info about '!LastReplay.rep'. Sending twice exactly the same replay will only appear once in the database.
  * New operation in the replay search tab's context menu: "Send to Players Network".
  * New setting on the autoscan tab: 'Use short names for autosaved replays'.
  * Fixed some rendering bugs wich occured on Windows Vista.
