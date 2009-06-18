@@ -171,30 +171,31 @@ public class ReplaySearchTab extends Tab {
 	/** The replay operations popup menu.                          */
 	private JPopupMenu replayOperationsPopupMenu;
 	/** Menu item to show selected replay on charts.               */
-	private final JMenuItem showOnChartsMenuItem       = new JMenuItem( "Show on charts", IconResourceManager.ICON_CHARTS );
+	private final JMenuItem showOnChartsMenuItem         = new JMenuItem( "Show on charts", IconResourceManager.ICON_CHARTS );
 	/** Menu item to scan selected replays for hacks.              */
-	private final JMenuItem scanForHacksMenuItem       = new JMenuItem( "Scan for hacks", IconResourceManager.ICON_MANUAL_SCAN );
+	private final JMenuItem scanForHacksMenuItem         = new JMenuItem( "Scan for hacks", IconResourceManager.ICON_MANUAL_SCAN );
 	/** Menu item to display game chat from selected replay.       */
-	private final JMenuItem displayGameChatMenuItem    = new JMenuItem( "Display game chat", IconResourceManager.ICON_GAME_CHAT );
+	private final JMenuItem displayGameChatMenuItem      = new JMenuItem( "Display game chat", IconResourceManager.ICON_GAME_CHAT );
 	/** Menu item to extract game chat from selected replays.      */
-	private final JMenuItem extractGameChatMenuItem    = new JMenuItem( "Extract game chat", IconResourceManager.ICON_GAME_CHATS );
-	// TODO: add new menuitem: "Send to Players' Network"
+	private final JMenuItem extractGameChatMenuItem      = new JMenuItem( "Extract game chat", IconResourceManager.ICON_GAME_CHATS );
+	/** Menu item to send to Players' Network.                     */
+	private final JMenuItem sendToPlayersNetworkMenuItem = new JMenuItem( "Send to Players' Network", IconResourceManager.ICON_PLAYERS_NETWORK );
 	/** Menu item to remove selected replays from the result list. */
-	private final JMenuItem removeFromListMenuItem     = new JMenuItem( "Remove from list", IconResourceManager.ICON_REMOVE_FROM_LIST );
+	private final JMenuItem removeFromListMenuItem       = new JMenuItem( "Remove from list", IconResourceManager.ICON_REMOVE_FROM_LIST );
 	/** Menu item to copy selected replay files.                   */
-	private final JMenuItem copyReplaysMenuItem        = new JMenuItem( "Copy replays...", IconResourceManager.ICON_COPY_REPLAY );
+	private final JMenuItem copyReplaysMenuItem          = new JMenuItem( "Copy replays...", IconResourceManager.ICON_COPY_REPLAY );
 	/** Menu item to move selected replay files.                   */
-	private final JMenuItem moveReplaysMenuItem        = new JMenuItem( "Move replays...", IconResourceManager.ICON_MOVE_REPLAY );
+	private final JMenuItem moveReplaysMenuItem          = new JMenuItem( "Move replays...", IconResourceManager.ICON_MOVE_REPLAY );
 	/** Menu item to delete selected replay files.                 */
-	private final JMenuItem deleteReplaysMenuItem      = new JMenuItem( "Delete replays...", IconResourceManager.ICON_DELETE_REPLAY );
+	private final JMenuItem deleteReplaysMenuItem        = new JMenuItem( "Delete replays...", IconResourceManager.ICON_DELETE_REPLAY );
 	/** Menu item to edit comment.                                 */
-	private final JMenuItem editCommentMenuItem       = new JMenuItem( "Edit comment...", IconResourceManager.ICON_EDIT_COMMENT_REPLAY );
+	private final JMenuItem editCommentMenuItem          = new JMenuItem( "Edit comment...", IconResourceManager.ICON_EDIT_COMMENT_REPLAY );
 	/** Menu item to rename replay.                                */
-	private final JMenuItem renameReplayMenuItem       = new JMenuItem( "Rename replay...", IconResourceManager.ICON_EDIT );
+	private final JMenuItem renameReplayMenuItem         = new JMenuItem( "Rename replay...", IconResourceManager.ICON_EDIT );
 	/** Menu item to rename replay.                                */
-	private final JMenuItem groupRenameReplaysMenuItem = new JMenuItem( "Group rename replays...", IconResourceManager.ICON_GROUP_RENAME_REPLAY );
+	private final JMenuItem groupRenameReplaysMenuItem   = new JMenuItem( "Group rename replays...", IconResourceManager.ICON_GROUP_RENAME_REPLAY );
 	/** Menu item to open replay's folder in explorer.             */
-	private final JMenuItem openInExplorerMenuItem     = new JMenuItem( "Open replay's folder in explorer", IconResourceManager.ICON_FOLDER );
+	private final JMenuItem openInExplorerMenuItem       = new JMenuItem( "Open replay's folder in explorer", IconResourceManager.ICON_FOLDER );
 	
 	/** Reference to the source files of the last search.            */
 	private       File[]           lastSearchSourceFiles;
@@ -720,6 +721,12 @@ public class ReplaySearchTab extends Tab {
 				mainFrame.gameChatTab.extractGameChatFromFiles( getSelectedResultFiles() );
 			}
 		} );
+		sendToPlayersNetworkMenuItem.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				mainFrame.selectTab( mainFrame.playersNetworkTab );
+				mainFrame.playersNetworkTab.sendFileAndFolderInfo( getSelectedResultFiles() );
+			}
+		} );
 		removeFromListMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				removeSelectedFromResultList();
@@ -820,18 +827,19 @@ public class ReplaySearchTab extends Tab {
 		resultTable.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
 			public void valueChanged( final ListSelectionEvent event ) {
 				final int selectedCount = resultTable.getSelectedRowCount();
-				showOnChartsMenuItem      .setEnabled( selectedCount >  0 );
-				scanForHacksMenuItem      .setEnabled( selectedCount >  0 );
-				displayGameChatMenuItem   .setEnabled( selectedCount == 1 );
-				extractGameChatMenuItem   .setEnabled( selectedCount >  0 );
-				removeFromListMenuItem    .setEnabled( selectedCount >  0 );
-				copyReplaysMenuItem       .setEnabled( selectedCount >  0 );
-				moveReplaysMenuItem       .setEnabled( selectedCount >  0 );
-				deleteReplaysMenuItem     .setEnabled( selectedCount >  0 );
-				editCommentMenuItem       .setEnabled( selectedCount == 1 );
-				renameReplayMenuItem      .setEnabled( selectedCount == 1 );
-				groupRenameReplaysMenuItem.setEnabled( selectedCount >  0 );
-				openInExplorerMenuItem    .setEnabled( selectedCount == 1 );
+				showOnChartsMenuItem        .setEnabled( selectedCount >  0 );
+				scanForHacksMenuItem        .setEnabled( selectedCount >  0 );
+				displayGameChatMenuItem     .setEnabled( selectedCount == 1 );
+				extractGameChatMenuItem     .setEnabled( selectedCount >  0 );
+				sendToPlayersNetworkMenuItem.setEnabled( selectedCount >  0 );
+				removeFromListMenuItem      .setEnabled( selectedCount >  0 );
+				copyReplaysMenuItem         .setEnabled( selectedCount >  0 );
+				moveReplaysMenuItem         .setEnabled( selectedCount >  0 );
+				deleteReplaysMenuItem       .setEnabled( selectedCount >  0 );
+				editCommentMenuItem         .setEnabled( selectedCount == 1 );
+				renameReplayMenuItem        .setEnabled( selectedCount == 1 );
+				groupRenameReplaysMenuItem  .setEnabled( selectedCount >  0 );
+				openInExplorerMenuItem      .setEnabled( selectedCount == 1 );
 			}
 		} );
 		rebuildReplayOperationsPopupMenu();
@@ -891,39 +899,41 @@ public class ReplaySearchTab extends Tab {
 	 */
 	private void rebuildReplayOperationsPopupMenu() {
 		replayOperationsPopupMenu = new JPopupMenu();
-		replayOperationsPopupMenu.add( showOnChartsMenuItem       );
-		replayOperationsPopupMenu.add( scanForHacksMenuItem       );
-		replayOperationsPopupMenu.add( displayGameChatMenuItem    );
-		replayOperationsPopupMenu.add( extractGameChatMenuItem    );
-		replayOperationsPopupMenu.add( removeFromListMenuItem     );
+		replayOperationsPopupMenu.add( showOnChartsMenuItem         );
+		replayOperationsPopupMenu.add( scanForHacksMenuItem         );
+		replayOperationsPopupMenu.add( displayGameChatMenuItem      );
+		replayOperationsPopupMenu.add( extractGameChatMenuItem      );
+		replayOperationsPopupMenu.add( sendToPlayersNetworkMenuItem );
+		replayOperationsPopupMenu.add( removeFromListMenuItem       );
 		replayOperationsPopupMenu.addSeparator();
-		replayOperationsPopupMenu.add( copyReplaysMenuItem        );
-		replayOperationsPopupMenu.add( moveReplaysMenuItem        );
-		replayOperationsPopupMenu.add( deleteReplaysMenuItem      );
+		replayOperationsPopupMenu.add( copyReplaysMenuItem          );
+		replayOperationsPopupMenu.add( moveReplaysMenuItem          );
+		replayOperationsPopupMenu.add( deleteReplaysMenuItem        );
 		replayOperationsPopupMenu.addSeparator();
-		replayOperationsPopupMenu.add( editCommentMenuItem        );
-		replayOperationsPopupMenu.add( renameReplayMenuItem       );
-		replayOperationsPopupMenu.add( groupRenameReplaysMenuItem );
+		replayOperationsPopupMenu.add( editCommentMenuItem          );
+		replayOperationsPopupMenu.add( renameReplayMenuItem         );
+		replayOperationsPopupMenu.add( groupRenameReplaysMenuItem   );
 		replayOperationsPopupMenu.addSeparator();
-		replayOperationsPopupMenu.add( openInExplorerMenuItem     );
+		replayOperationsPopupMenu.add( openInExplorerMenuItem       );
 	}
 	
 	/**
 	 * Disables the replay operation menu items.
 	 */
 	private void disableReplayOperationMenuItems() {
-		showOnChartsMenuItem      .setEnabled( false );
-		scanForHacksMenuItem      .setEnabled( false );
-		displayGameChatMenuItem   .setEnabled( false );
-		extractGameChatMenuItem   .setEnabled( false );
-		removeFromListMenuItem    .setEnabled( false );
-		copyReplaysMenuItem       .setEnabled( false );
-		moveReplaysMenuItem       .setEnabled( false );
-		deleteReplaysMenuItem     .setEnabled( false );
-		editCommentMenuItem       .setEnabled( false );
-		renameReplayMenuItem      .setEnabled( false );
-		groupRenameReplaysMenuItem.setEnabled( false );
-		openInExplorerMenuItem    .setEnabled( false );
+		showOnChartsMenuItem        .setEnabled( false );
+		scanForHacksMenuItem        .setEnabled( false );
+		displayGameChatMenuItem     .setEnabled( false );
+		extractGameChatMenuItem     .setEnabled( false );
+		sendToPlayersNetworkMenuItem.setEnabled( false );
+		removeFromListMenuItem      .setEnabled( false );
+		copyReplaysMenuItem         .setEnabled( false );
+		moveReplaysMenuItem         .setEnabled( false );
+		deleteReplaysMenuItem       .setEnabled( false );
+		editCommentMenuItem         .setEnabled( false );
+		renameReplayMenuItem        .setEnabled( false );
+		groupRenameReplaysMenuItem  .setEnabled( false );
+		openInExplorerMenuItem      .setEnabled( false );
 	}
 	
 	/**
