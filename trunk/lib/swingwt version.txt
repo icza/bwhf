@@ -1,2 +1,3 @@
 SwingWT VERSION 0.89
-win32/swt.jar downloaded from repository on 2009-06-11 (fixes some rendering bugs on Windows Vista)
+lib/win32/swt.jar version: revision 56 (fixes some rendering bugs on Windows Vista, but has popup menu icon display bug)
+lib/swingwt.jar revision 71 (from revision 72, file chooser opens up really slow...)
