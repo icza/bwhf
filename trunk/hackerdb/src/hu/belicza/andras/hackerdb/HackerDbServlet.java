@@ -141,14 +141,14 @@ public class HackerDbServlet extends BaseServlet {
 				for ( int i = 0; i < filtersWrapper.gameEngines.length; i++ )
 					filtersWrapper.gameEngines[ i ] = request.getParameter( REQUEST_PARAMETER_FILTERS_PRESENT ) == null || request.getParameter( FILTER_NAME_GAME_ENGINE + i ) != null;
 				filtersWrapper.mapName           = getStringParamValue( request, FILTER_NAME_MAP_NAME );
-				filtersWrapper.minReportCount    = getIntParamValue( request, FILTER_NAME_MIN_REPORT_COUNT, FILTER_DEFAULT_MIN_REPORT_COUNT );
+				filtersWrapper.minReportCount    = getIntParamValue   ( request, FILTER_NAME_MIN_REPORT_COUNT, FILTER_DEFAULT_MIN_REPORT_COUNT );
 				filtersWrapper.reportedWithKey   = getStringParamValue( request, FILTER_NAME_REPORTED_WITH_KEY );
 				filtersWrapper.sortByValue       = getStringParamValue( request, FILTER_NAME_SORT_BY );
 				if ( filtersWrapper.sortByValue.length() == 0 )
 					filtersWrapper.sortByValue   = SORT_BY_VALUE_LAST_REPORTED;
 				filtersWrapper.ascendantSorting  = request.getParameter( FILTER_NAME_ASCENDANT_SORTING ) == null ? FILTER_DEFAULT_ASCENDANT_SORTING_MAP.get( filtersWrapper.sortByValue ) : request.getParameter( FILTER_NAME_ASCENDANT_SORTING ).equalsIgnoreCase( "true" );
-				filtersWrapper.page              = getIntParamValue( request, FILTER_NAME_PAGE, FILTER_DEFAULT_PAGE );
-				filtersWrapper.pageSize          = getIntParamValue( request, FILTER_NAME_PAGE_SIZE, FILTER_DEFAULT_PAGE_SIZE );
+				filtersWrapper.page              = getIntParamValue    ( request, FILTER_NAME_PAGE, FILTER_DEFAULT_PAGE );
+				filtersWrapper.pageSize          = getIntParamValue    ( request, FILTER_NAME_PAGE_SIZE, FILTER_DEFAULT_PAGE_SIZE );
 				filtersWrapper.stepDirection     = request.getParameter( FILTER_NAME_STEP_DIRECTION );
 				
 				serveHackerList( filtersWrapper, response );
@@ -216,33 +216,6 @@ public class HackerDbServlet extends BaseServlet {
 		}
 		catch ( final BadRequestException bre ) {
 			sendBackErrorMessage( response );
-		}
-	}
-	
-	/**
-	 * Returns the value of a request parameter.
-	 * @param request   http request object
-	 * @param paramName name of the parameter whose value is to be returned
-	 * @return the value of a request parameter or an empty string if the parameter does not have a value
-	 */
-	private String getStringParamValue( final HttpServletRequest request, final String paramName ) {
-		final String paramValue = request.getParameter( paramName );
-		return paramValue == null ? "" : paramValue;
-	}
-	
-	/**
-	 * Returns the integer value parsed from a request parameter.
-	 * @param request   http request object
-	 * @param paramName name of the parameter whose value is to be returned
-	 * @param defaultValue
-	 * @return the value of a request parameter or <code>defaultValue</code> if the parameter does not have a value or it does not contain a valid integer
-	 */
-	private int getIntParamValue( final HttpServletRequest request, final String paramName, final int defaultValue ) {
-		try {
-			return Integer.parseInt( request.getParameter( paramName ) );
-		}
-		catch ( final Exception e ) {
-			return defaultValue;
 		}
 	}
 	

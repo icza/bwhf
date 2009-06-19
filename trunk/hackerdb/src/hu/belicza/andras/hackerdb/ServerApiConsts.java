@@ -91,14 +91,22 @@ public class ServerApiConsts {
 	// *********** PLAYERS' NETWORK ******************
 	// ***********************************************
 	
-	/** Name of the operation request parameter. */
-	public static final String PN_REQUEST_PARAM_NAME_OPERATION = "op";
-	/** Name of the entity request parameter.    */
-	public static final String PN_REQUEST_PARAM_NAME_ENTITY    = "what";
-	/** Name of the page request parameter.      */
-	public static final String PN_REQUEST_PARAM_NAME_PAGE      = "page";
-	/** Name of the entity id request parameter. */
-	public static final String PN_REQUEST_PARAM_NAME_ENTITY_ID = "id";
+	/** Name of the operation request parameter.          */
+	public static final String PN_REQUEST_PARAM_NAME_OPERATION     = "op";
+	/** Name of the entity request parameter.             */
+	public static final String PN_REQUEST_PARAM_NAME_ENTITY        = "what";
+	/** Name of the page request parameter.               */
+	public static final String PN_REQUEST_PARAM_NAME_PAGE          = "page";
+	/** Name of the entity id request parameter.          */
+	public static final String PN_REQUEST_PARAM_NAME_ENTITY_ID     = "id";
+	/** Name of the sorting index request parameter.      */
+	public static final String PN_REQUEST_PARAM_NAME_SORTING_INDEX = "sortidx";
+	/** Name of the descendant sorting request parameter. */
+	public static final String PN_REQUEST_PARAM_NAME_SORTING_DESC  = "sortdesc";
+	/** Name of the player 1 request parameter.           */
+	public static final String PN_REQUEST_PARAM_NAME_PLAYER1       = "player1";
+	/** Name of the player 2 request parameter.           */
+	public static final String PN_REQUEST_PARAM_NAME_PLAYER2       = "player2";
 	
 	/** Send game info operation value.   */
 	public static final String PN_OPERATION_SEND    = "send";

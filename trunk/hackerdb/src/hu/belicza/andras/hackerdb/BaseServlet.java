@@ -6,6 +6,7 @@ import java.io.PrintWriter;
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.dbcp.BasicDataSource;
@@ -116,6 +117,48 @@ public class BaseServlet extends HttpServlet {
 		}
 		
 		return encodedHtml.toString();
+	}
+	
+	/**
+	 * Returns the value of a request parameter.
+	 * @param request   http request object
+	 * @param paramName name of the parameter whose value is to be returned
+	 * @return the value of a request parameter or an empty string if the parameter does not have a value
+	 */
+	protected static String getStringParamValue( final HttpServletRequest request, final String paramName ) {
+		final String paramValue = request.getParameter( paramName );
+		return paramValue == null ? "" : paramValue;
+	}
+	
+	/**
+	 * Returns the integer value parsed from a request parameter.
+	 * @param request      http request object
+	 * @param paramName    name of the parameter whose value is to be returned
+	 * @param defaultValue default value to be returned if the param is missing or invalid (not an int)
+	 * @return the value of a request parameter or <code>defaultValue</code> if the parameter does not have a value or it does not contain a valid integer
+	 */
+	protected static int getIntParamValue( final HttpServletRequest request, final String paramName, final int defaultValue ) {
+		try {
+			return Integer.parseInt( request.getParameter( paramName ) );
+		}
+		catch ( final Exception e ) {
+			return defaultValue;
+		}
+	}
+	
+	/**
+	 * Returns the integer value parsed from a request parameter.
+	 * @param request   http request object
+	 * @param paramName name of the parameter whose value is to be returned
+	 * @return the value of a request parameter 
+	 */
+	protected static Integer getIntegerParamValue( final HttpServletRequest request, final String paramName ) {
+		try {
+			return Integer.valueOf( request.getParameter( paramName ) );
+		}
+		catch ( final Exception e ) {
+			return null;
+		}
 	}
 	
 }
