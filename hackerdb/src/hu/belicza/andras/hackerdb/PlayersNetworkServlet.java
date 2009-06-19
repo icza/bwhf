@@ -1,5 +1,7 @@
 package hu.belicza.andras.hackerdb;
 
+import static hu.belicza.andras.hackerdb.ServerApiConsts.*;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.sql.Connection;
@@ -11,30 +13,15 @@ import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.dbcp.BasicDataSource;
 
 /**
  * Servlet to handle adding new games to the Players' Network database.
  * 
  * @author Andras Belicza
  */
-public class PlayersNetworkServlet extends HttpServlet {
-	
-	/** URL of the Players' Network database. */
-	private static final String DATABASE_URL = "jdbc:hsqldb:hsql://localhost/hackers";
-	
-	/** Data source to provide pooled connections to the hacker database. */
-	private static final BasicDataSource dataSource = new BasicDataSource();
-	static {
-		dataSource.setDriverClassName( "org.hsqldb.jdbcDriver" );
-		dataSource.setUsername( "sa" );
-		dataSource.setPassword( "" );
-		dataSource.setUrl( DATABASE_URL );
-	}
+public class PlayersNetworkServlet extends BaseServlet {
 	
 	@Override
 	public void doPost( final HttpServletRequest request, final HttpServletResponse response ) {
@@ -43,6 +30,57 @@ public class PlayersNetworkServlet extends HttpServlet {
 	
 	@Override
 	public void doGet( final HttpServletRequest request, final HttpServletResponse response ) {
+		setNoCache( response );
+		
+		try {
+			String operation = request.getParameter( PN_REQUEST_PARAM_NAME_OPERATION );
+			if ( operation == null )
+				operation = PN_OPERATION_LIST;
+			
+			if ( operation.equals( PN_OPERATION_SEND ) ) {
+				handleSend( request, response );
+			} else if ( operation.equals( PN_OPERATION_LIST ) ) {
+				String entity = request.getParameter( PN_REQUEST_PARAM_NAME_ENTITY );
+				if ( entity == null )
+					entity = ENTITY_GAME;
+				
+				int page;
+				try {
+					page = Integer.parseInt( request.getParameter( PN_REQUEST_PARAM_NAME_PAGE ) );
+				}
+				catch ( final Exception e ) {
+					page = 0;
+				}
+				
+				handleList( response, entity, page );
+			} else if ( operation.equals( PN_OPERATION_DETAILS ) ) {
+				final String entity = request.getParameter( PN_REQUEST_PARAM_NAME_ENTITY );
+				if ( entity == null )
+					throw new BadRequestException();
+				
+				int entityId;
+				try {
+					entityId = Integer.parseInt( request.getParameter( PN_REQUEST_PARAM_NAME_ENTITY_ID ) );
+				}
+				catch ( final Exception e ) {
+					throw new BadRequestException();
+				}
+				
+				handleDetails( response, entity, entityId );
+			}
+		}
+		catch ( final BadRequestException bre ) {
+			sendBackErrorMessage( response );
+		}
+	}
+	
+	/**
+	 * Handles a send request.<br>
+	 * A send request sends info about a game.
+	 * @param request  http request
+	 * @param response http response
+	 */
+	private void handleSend( final HttpServletRequest request, final HttpServletResponse response ) {
 		int engine = 0, frames = 0, mapWidth = 0, mapHeight = 0, speed = 0, type = 0, subType = 0;
 		long saveTime = 0l;
 		String name = null, creatorName = null, mapName = null, replayMd5 = null, agentVersion = null;
@@ -63,7 +101,7 @@ public class PlayersNetworkServlet extends HttpServlet {
 			type         = Integer.parseInt( request.getParameter( ServerApiConsts.GAME_PARAM_TYPE       ) );
 			subType      = Integer.parseInt( request.getParameter( ServerApiConsts.GAME_PARAM_SUB_TYPE   ) );
 			creatorName  = request.getParameter( ServerApiConsts.GAME_PARAM_CREATOR_NAME  );
-			mapName      = request.getParameter( ServerApiConsts.GAME_PARAM_MAP_NAME      );
+			mapName      = request.getParameter( ServerApiConsts.GAME_PARAM_MAP_NAME      ).toLowerCase();
 			replayMd5    = request.getParameter( ServerApiConsts.GAME_PARAM_REPLAY_MD5    );
 			agentVersion = request.getParameter( ServerApiConsts.GAME_PARAM_AGENT_VERSION );
 			try {
@@ -75,7 +113,7 @@ public class PlayersNetworkServlet extends HttpServlet {
 			
 			int playerCounter = 0;
 			while ( request.getParameter( ServerApiConsts.GAME_PARAM_PLAYER_NAME + playerCounter ) != null ) {
-				playerNameList   .add( request.getParameter( ServerApiConsts.GAME_PARAM_PLAYER_NAME + playerCounter )                        );
+				playerNameList   .add( request.getParameter( ServerApiConsts.GAME_PARAM_PLAYER_NAME + playerCounter ).toLowerCase()          );
 				playerRaceList   .add( Integer.parseInt( request.getParameter( ServerApiConsts.GAME_PARAM_PLAYER_RACE    + playerCounter ) ) );
 				playerActionsList.add( Integer.parseInt( request.getParameter( ServerApiConsts.GAME_PARAM_PLAYER_ACTIONS + playerCounter ) ) );
 				playerColorList  .add( Integer.parseInt( request.getParameter( ServerApiConsts.GAME_PARAM_PLAYER_COLOR   + playerCounter ) ) );
@@ -172,6 +210,7 @@ public class PlayersNetworkServlet extends HttpServlet {
 				connection.commit();
 			}
 			
+			sendBackPlainMessage( ServerApiConsts.REPORT_ACCEPTED_MESSAGE, response );
 		}
 		catch ( final Exception e ) {
 			e.printStackTrace();
@@ -190,29 +229,78 @@ public class PlayersNetworkServlet extends HttpServlet {
 			if ( statement  != null ) try { statement .close(); } catch ( final SQLException se ) {}
 			if ( connection != null ) try { connection.close(); } catch ( final SQLException se ) {}
 		}
-		sendBackPlainMessage( ServerApiConsts.REPORT_ACCEPTED_MESSAGE, response );
 	}
 	
 	/**
-	 * Sends back a message as plain text.
-	 * @param message  message to be sent
-	 * @param response response to be used
+	 * Handles a list request.<br>
+	 * Lists some kind of entity.
+	 * @param response http response
+	 * @param entity   entity to be listed
+	 * @param page     page to be listed
 	 */
-	private void sendBackPlainMessage( final String message, final HttpServletResponse response ) {
-		response.setContentType( "text/plain" );
-		
-		PrintWriter output = null;
+	private void handleList( final HttpServletResponse response, final String entity, final int page ) {
+		PrintWriter outputWriter = null;
 		try {
-			output = response.getWriter();
-			output.println( message );
-			output.flush();
+			outputWriter = response.getWriter();
+			
+			renderHeader( outputWriter );
+			
+			renderFooter( outputWriter );
 		} catch ( final IOException ie ) {
 			ie.printStackTrace();
 		}
 		finally {
-			if ( output != null )
-				 output.close();
+			if ( outputWriter != null )
+				outputWriter.close();
 		}
+	}
+	
+	/**
+	 * Handles a details request.<br>
+	 * Sends details about an entity.
+	 * @param response http response
+	 * @param entity   entity to be detailed
+	 * @param entityId id of entity to be detailed
+	 */
+	private void handleDetails( final HttpServletResponse response, final String entity, final int entityId ) {
+		PrintWriter outputWriter = null;
+		try {
+			outputWriter = response.getWriter();
+			
+			renderHeader( outputWriter );
+			
+			renderFooter( outputWriter );
+		} catch ( final IOException ie ) {
+			ie.printStackTrace();
+		}
+		finally {
+			if ( outputWriter != null )
+				outputWriter.close();
+		}
+	}
+	
+	/**
+	 * Renders the header for the output pages.
+	 * @param outputWriter writer to be used to render
+	 */
+	private void renderHeader( final PrintWriter outputWriter ) {
+		outputWriter.println( "<html><head><title>BWHF Players' Network</title>" );
+		outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>" );
+		outputWriter.println( "</head><body><center>" );
+		outputWriter.println( "<h2>BWHF Players' Network</h2>" );
+		outputWriter.println( "<p><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a>&nbsp;&nbsp;<a href='hackers'>BWHF Hacker Database</a></p>" );
+		outputWriter.println( "<p><a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + "=" + PN_OPERATION_LIST + "&" + PN_REQUEST_PARAM_NAME_ENTITY + "=" + ENTITY_GAME   + "'>Game list</a>"
+				   + "&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + "=" + PN_OPERATION_LIST + "&" + PN_REQUEST_PARAM_NAME_ENTITY + "=" + ENTITY_PLAYER + "'>Player list</a>"
+				   + "&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + "=" + PN_OPERATION_LIST + "&" + PN_REQUEST_PARAM_NAME_ENTITY + "=" + ENTITY_AKA    + "'>AKA list</a></p>" );
+	}
+	
+	/**
+	 * Renders the footer for the output pages.
+	 * @param outputWriter writer to be used to render
+	 */
+	private void renderFooter( final PrintWriter outputWriter ) {
+		outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></p>" );
+		outputWriter.println( "</center></body></html>" );
 	}
 	
 }

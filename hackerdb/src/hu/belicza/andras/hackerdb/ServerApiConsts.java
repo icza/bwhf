@@ -87,41 +87,68 @@ public class ServerApiConsts {
 	public static final String STEP_DIRECTION_LAST           = "Last";
 	
 	
+	// ***********************************************
+	// *********** PLAYERS' NETWORK ******************
+	// ***********************************************
+	
+	/** Name of the operation request parameter. */
+	public static final String PN_REQUEST_PARAM_NAME_OPERATION = "op";
+	/** Name of the entity request parameter.    */
+	public static final String PN_REQUEST_PARAM_NAME_ENTITY    = "what";
+	/** Name of the page request parameter.      */
+	public static final String PN_REQUEST_PARAM_NAME_PAGE      = "page";
+	/** Name of the entity id request parameter. */
+	public static final String PN_REQUEST_PARAM_NAME_ENTITY_ID = "id";
+	
+	/** Send game info operation value.   */
+	public static final String PN_OPERATION_SEND    = "send";
+	/** List entity operation value.      */
+	public static final String PN_OPERATION_LIST    = "list";
+	/** Detail an entity operation value. */
+	public static final String PN_OPERATION_DETAILS = "details";
+	
+	/** Game entity value.   */
+	public static final String ENTITY_GAME   = "game";
+	/** Player entity value. */
+	public static final String ENTITY_PLAYER = "player";
+	/** Aka entity value.    */
+	public static final String ENTITY_AKA    = "aka";
+	
 	/** Game param name for engine.        */
-	public static final String GAME_PARAM_ENGINE             = "engine";
+	public static final String GAME_PARAM_ENGINE         = "engine";
 	/** Game param name for frames.        */
-	public static final String GAME_PARAM_FRAMES             = "frames";
+	public static final String GAME_PARAM_FRAMES         = "frames";
 	/** Game param name for save time.     */
-	public static final String GAME_PARAM_SAVE_TIME          = "saveTime";
+	public static final String GAME_PARAM_SAVE_TIME      = "saveTime";
 	/** Game param name for name.          */
-	public static final String GAME_PARAM_NAME               = "name";
+	public static final String GAME_PARAM_NAME           = "name";
 	/** Game param name for map width.     */
-	public static final String GAME_PARAM_MAP_WIDTH          = "mapWidth";
+	public static final String GAME_PARAM_MAP_WIDTH      = "mapWidth";
 	/** Game param name for map height.    */
-	public static final String GAME_PARAM_MAP_HEIGHT         = "mapHeight";
+	public static final String GAME_PARAM_MAP_HEIGHT     = "mapHeight";
 	/** Game param name for speed.         */
-	public static final String GAME_PARAM_SPEED              = "speed";
+	public static final String GAME_PARAM_SPEED          = "speed";
 	/** Game param name for type.          */
-	public static final String GAME_PARAM_TYPE               = "type";
+	public static final String GAME_PARAM_TYPE           = "type";
 	/** Game param name for sub type.      */
-	public static final String GAME_PARAM_SUB_TYPE           = "subType";
+	public static final String GAME_PARAM_SUB_TYPE       = "subType";
 	/** Game param name for creator name.  */
-	public static final String GAME_PARAM_CREATOR_NAME       = "creatorName";
+	public static final String GAME_PARAM_CREATOR_NAME   = "creatorName";
 	/** Game param name for map name.      */
-	public static final String GAME_PARAM_MAP_NAME           = "mapName";
+	public static final String GAME_PARAM_MAP_NAME       = "mapName";
 	/** Game param name for replay md5.    */
-	public static final String GAME_PARAM_REPLAY_MD5         = "replayMd5";
+	public static final String GAME_PARAM_REPLAY_MD5     = "replayMd5";
 	/** Game param name for agent version. */
-	public static final String GAME_PARAM_AGENT_VERSION      = "agentVersion";
+	public static final String GAME_PARAM_AGENT_VERSION  = "agentVersion";
 	/** Game param name for agent version. */
-	public static final String GAME_PARAM_GATEWAY            = "gateway";
+	public static final String GAME_PARAM_GATEWAY        = "gateway";
 	/** Game param name for player name.   */
-	public static final String GAME_PARAM_PLAYER_NAME        = "playerName";
+	public static final String GAME_PARAM_PLAYER_NAME    = "playerName";
 	/** Game param name for player actions.*/
-	public static final String GAME_PARAM_PLAYER_ACTIONS     = "playerActions";
+	public static final String GAME_PARAM_PLAYER_ACTIONS = "playerActions";
 	/** Game param name for player race.   */
-	public static final String GAME_PARAM_PLAYER_RACE        = "playerRace";
+	public static final String GAME_PARAM_PLAYER_RACE    = "playerRace";
 	/** Game param name for player color.  */
-	public static final String GAME_PARAM_PLAYER_COLOR       = "playerColor";
+	public static final String GAME_PARAM_PLAYER_COLOR   = "playerColor";
 	
 }

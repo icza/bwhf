@@ -220,7 +220,7 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 			OutputStreamWriter output = null; 
 			BufferedReader     input  = null;
 			try {
-				final URLConnection urlConnection = new URL( Consts.PLAYERS_NETWORK_DATA_BASE_URL ).openConnection();
+				final URLConnection urlConnection = new URL( Consts.PLAYERS_NETWORK_DATA_BASE_URL + '?' + ServerApiConsts.PN_REQUEST_PARAM_NAME_OPERATION + '=' + ServerApiConsts.PN_OPERATION_SEND ).openConnection();
 				urlConnection.setDoOutput( true );
 				urlConnection.setDoInput( true );
 				output = new OutputStreamWriter( urlConnection.getOutputStream() ); 
