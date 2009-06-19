@@ -109,6 +109,7 @@ public class ReplayHeader {
 	 * Converts the specified amount of frames to a human friendly time format.
 	 * @param frames amount of frames to be formatted
 	 * @param formatBuilder builder to be used to append the output to
+	 * @param longFormat tells if the required format is "hh:mm:ss" (no matter how short the game is)
 	 */
 	public static void formatFrames( final int frames, final StringBuilder formatBuilder, final boolean longFormat ) {
 		int seconds = convertFramesToSeconds( frames );

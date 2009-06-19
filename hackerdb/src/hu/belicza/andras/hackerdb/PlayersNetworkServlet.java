@@ -1,6 +1,20 @@
 package hu.belicza.andras.hackerdb;
 
-import static hu.belicza.andras.hackerdb.ServerApiConsts.*;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_AKA;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_GAME;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_PLAYER;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_DETAILS;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_LIST;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_SEND;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY_ID;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_OPERATION;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_PAGE;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_PLAYER1;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_PLAYER2;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_SORTING_DESC;
+
+import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -8,6 +22,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
@@ -22,6 +37,9 @@ import javax.servlet.http.HttpServletResponse;
  * @author Andras Belicza
  */
 public class PlayersNetworkServlet extends BaseServlet {
+	
+	/** Size of the list in one page. */
+	private static final int PAGE_SIZE = 25;
 	
 	@Override
 	public void doPost( final HttpServletRequest request, final HttpServletResponse response ) {
@@ -49,10 +67,10 @@ public class PlayersNetworkServlet extends BaseServlet {
 					page = Integer.parseInt( request.getParameter( PN_REQUEST_PARAM_NAME_PAGE ) );
 				}
 				catch ( final Exception e ) {
-					page = 0;
+					page = 1;
 				}
 				
-				handleList( response, entity, page );
+				handleList( request, response, entity, page );
 			} else if ( operation.equals( PN_OPERATION_DETAILS ) ) {
 				final String entity = request.getParameter( PN_REQUEST_PARAM_NAME_ENTITY );
 				if ( entity == null )
@@ -66,7 +84,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					throw new BadRequestException();
 				}
 				
-				handleDetails( response, entity, entityId );
+				handleDetails( request, response, entity, entityId );
 			}
 		}
 		catch ( final BadRequestException bre ) {
@@ -104,12 +122,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			mapName      = request.getParameter( ServerApiConsts.GAME_PARAM_MAP_NAME      ).toLowerCase();
 			replayMd5    = request.getParameter( ServerApiConsts.GAME_PARAM_REPLAY_MD5    );
 			agentVersion = request.getParameter( ServerApiConsts.GAME_PARAM_AGENT_VERSION );
-			try {
-				gateway = Integer.parseInt( request.getParameter( ServerApiConsts.GAME_PARAM_GATEWAY ) );
-			}
-			catch ( final Exception e ) {
-				// Gateway is optional...
-			}
+			try { gateway = Integer.parseInt( request.getParameter( ServerApiConsts.GAME_PARAM_GATEWAY ) ); } catch ( final Exception e ) {} // Gateway is optional...
 			
 			int playerCounter = 0;
 			while ( request.getParameter( ServerApiConsts.GAME_PARAM_PLAYER_NAME + playerCounter ) != null ) {
@@ -234,11 +247,120 @@ public class PlayersNetworkServlet extends BaseServlet {
 	/**
 	 * Handles a list request.<br>
 	 * Lists some kind of entity.
+	 * @param request  http request
 	 * @param response http response
 	 * @param entity   entity to be listed
 	 * @param page     page to be listed
 	 */
-	private void handleList( final HttpServletResponse response, final String entity, final int page ) {
+	private void handleList( final HttpServletRequest request, final HttpServletResponse response, final String entity, int page ) {
+		Connection  connection   = null;
+		PrintWriter outputWriter = null;
+		Statement   statement    = null;
+		ResultSet   resultSet    = null;
+		
+		try {
+			outputWriter = response.getWriter();
+			
+			connection = dataSource.getConnection();
+			
+			renderHeader( outputWriter );
+			
+			final StringBuilder pagerUrlBuilder = new StringBuilder( "players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + entity );
+			
+			if ( entity.equals( ENTITY_GAME ) ) {
+				final Integer player1 = getIntegerParamValue( request, PN_REQUEST_PARAM_NAME_PLAYER1 );
+				final Integer player2 = getIntegerParamValue( request, PN_REQUEST_PARAM_NAME_PLAYER2 );
+				
+				// Title section
+				outputWriter.print( "<h3>Game list" );
+				String countQuery;
+				if ( player1 != null ) {
+					pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PLAYER1 ).append( '=' ).append( player1 );
+					outputWriter.print( " of " );
+					outputWriter.print( getPlayerDetailsHtmlLink( player1, connection ) );
+					if ( player2 != null ) {
+						pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PLAYER2 ).append( '=' ).append( player2 );
+						countQuery = "SELECT COUNT(DISTINCT game) FROM game_player WHERE player=" + player1 + " OR player=" + player2 + " GORUP BY game HAVING COUNT(*)=2";
+						outputWriter.print( " and " );
+						outputWriter.print( getPlayerDetailsHtmlLink( player2, connection ) );
+					}
+					else
+						countQuery = "SELECT COUNT(*) FROM game_player WHERE game_player.player=" + player1; // No need distinct, 1 player is only once at the most in a game
+				}
+				else
+					countQuery = "SELECT COUNT(*) FROM game";
+				outputWriter.println( "</h3>" );
+				
+				// Pages count section
+				final int gamesCount = executeCountStatement( countQuery, connection );
+				outputWriter.println( "<p>Games count: <b>" + gamesCount + "</b><br>" );
+				
+				// Pager links section
+				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PAGE ).append( '=' );
+				final int maxPage = ( gamesCount - 1 ) / PAGE_SIZE + 1;
+				if ( page < 1 )
+					page = 1;
+				if ( page > maxPage )
+					page = maxPage;
+				renderPagerLinks( outputWriter, page, maxPage, pagerUrlBuilder.toString() );
+				outputWriter.println( "</p>" );
+				
+				outputWriter.flush();
+				
+				// Game data section
+				final String[] sortingColumns = new String[] { "", "save_time", "map_name", "frames", "type" };
+				int sortingIndex = getIntParamValue( request, PN_REQUEST_PARAM_NAME_PLAYER2, -1 );
+				if ( sortingIndex <= 0 || sortingIndex >= sortingColumns.length )
+					sortingIndex = sortingColumns.length - 1;
+				
+				int recordCounter = ( page - 1 ) * PAGE_SIZE;
+				String query = "SELECT id, engine, save_time, map_name, frames, type FROM game JOIN game_player on game.id=game_player.game ORDER BY " + sortingColumns[ sortingIndex ] 
+				             + ( getStringParamValue( request, PN_REQUEST_PARAM_NAME_SORTING_DESC ) != null ? " DESC" : "" )
+				             + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
+				
+				outputWriter.print( "<table border=1><tr><th>#<th>Engine<th>Map:<th>Duration:<th>Game type<th>Played on:<th>Players:" );
+				statement = connection.createStatement();
+				resultSet = statement.executeQuery( query );
+				final ReplayHeader replayHeader = new ReplayHeader();
+				int colCounter;
+				while ( resultSet.next() ) {
+					colCounter = 2;
+					replayHeader.gameEngine = (byte) resultSet.getInt( colCounter++ );
+					replayHeader.saveTime   = resultSet.getDate( colCounter++ );
+					replayHeader.mapName    = resultSet.getString( colCounter++ );
+					replayHeader.gameFrames = resultSet.getInt( colCounter++ );
+					replayHeader.gameType   = (short) resultSet.getInt( colCounter++ );
+					
+					//outputWriter.print( "<tr><td>" + (++recordCounter) );
+					//outputWriter.print( "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate() );
+					
+				}
+				outputWriter.println( "</table>" );
+				
+			}
+			
+			renderFooter( outputWriter );
+		} catch ( final IOException ie ) {
+			ie.printStackTrace();
+		} catch ( final SQLException se ) {
+		}
+		finally {
+			if ( resultSet != null ) try { resultSet.close(); } catch ( final SQLException se ) {}
+			if ( statement != null ) try { statement.close(); } catch ( final SQLException se ) {}
+			if ( connection != null ) try { connection.close(); } catch ( final SQLException se ) {}
+			if ( outputWriter != null ) outputWriter.close();
+		}
+	}
+	
+	/**
+	 * Handles a details request.<br>
+	 * Sends details about an entity.
+	 * @param request  http request
+	 * @param response http response
+	 * @param entity   entity to be detailed
+	 * @param entityId id of entity to be detailed
+	 */
+	private void handleDetails( final HttpServletRequest request, final HttpServletResponse response, final String entity, final int entityId ) {
 		PrintWriter outputWriter = null;
 		try {
 			outputWriter = response.getWriter();
@@ -256,27 +378,95 @@ public class PlayersNetworkServlet extends BaseServlet {
 	}
 	
 	/**
-	 * Handles a details request.<br>
-	 * Sends details about an entity.
-	 * @param response http response
-	 * @param entity   entity to be detailed
-	 * @param entityId id of entity to be detailed
+	 * Renders the pager link to the output.
+	 * @param outputWriter output writer to use
+	 * @param page         current page
+	 * @param maxPage      max page
+	 * @param pagerUrl     url to be used for the pager links; ends with '=' and only the target page number have to be appended
 	 */
-	private void handleDetails( final HttpServletResponse response, final String entity, final int entityId ) {
-		PrintWriter outputWriter = null;
+	private static void renderPagerLinks( final PrintWriter outputWriter, final int page, final int maxPage, final String pagerUrl ) {
+		if ( page > 1 ) {
+			outputWriter.print( "<a href='" + pagerUrl + "1'>First</a>&nbsp;&nbsp;" );
+			outputWriter.print( "<a href='" + pagerUrl + ( page - 1 ) + "'>Previous</a>" );
+		}
+		else {
+			outputWriter.print( "First&nbsp;&nbsp;Previous" );
+		}
+		outputWriter.print( "&nbsp;&nbsp;|&nbsp;&nbsp;Page <b>" + page + "</b> out of <b>" + maxPage + "</b>.&nbsp;&nbsp;|&nbsp;&nbsp;" );
+		if ( page < maxPage ) {
+			outputWriter.print( "<a href='" + pagerUrl + ( page + 1 ) + "'>Next</a>&nbsp;&nbsp;" );
+			outputWriter.print( "<a href='" + pagerUrl + maxPage + "'>Last</a>" );
+		}
+		else {
+			outputWriter.print( "Next&nbsp;&nbsp;Last" );
+		}
+	}
+	
+	/**
+	 * Executes a count statement and returns its result.<br>
+	 * If the query does not return anything, <code>0</code> is returned.
+	 * @param countQueyr the count SQL query
+	 * @param connection connection to be used
+	 * @return the result of the count query, or <code>0</code> if the query does not return anything
+	 * @throws SQLException if SQLException occurs
+	 */
+	private static int executeCountStatement( final String countQuery, final Connection connection ) throws SQLException {
+		Statement statement = null;
+		ResultSet resultSet = null;
+		
 		try {
-			outputWriter = response.getWriter();
-			
-			renderHeader( outputWriter );
-			
-			renderFooter( outputWriter );
-		} catch ( final IOException ie ) {
-			ie.printStackTrace();
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery( countQuery );
+			if ( resultSet.next() )
+				return resultSet.getInt( 1 );
+			else
+				return 0;
 		}
 		finally {
-			if ( outputWriter != null )
-				outputWriter.close();
+			if ( resultSet != null ) try { resultSet.close(); } catch ( final SQLException se ) {}
+			if ( statement != null ) try { statement.close(); } catch ( final SQLException se ) {}
 		}
+	}
+	
+	/**
+	 * Generates and returns an HTML link to the details page of a player.<br>
+	 * An HTML anchor tag will be returned whose text is the name of the player.
+	 * @param id         id of the player
+	 * @param connection connection to be used
+	 * @return an HTML link to the details page of the player
+	 * @throws SQLException if SQLException occurs
+	 */
+	private static String getPlayerDetailsHtmlLink( final int id, final Connection connection ) throws SQLException {
+		PreparedStatement statement = null;
+		ResultSet         resultSet = null;
+		
+		try {
+			statement = connection.prepareStatement( "SELECT name FROM player WHERE id=?" );
+			statement.setInt( 1, id );
+			resultSet = statement.executeQuery();
+			if ( resultSet.next() )
+				return "<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_DETAILS
+									 + '&' + PN_REQUEST_PARAM_NAME_ENTITY    + '=' + ENTITY_PLAYER
+									 + '&' + PN_REQUEST_PARAM_NAME_ENTITY_ID + '=' + id + "'>" + encodeHtmlString( resultSet.getString( 1 ) ) + "</a>"; 
+			else
+				return "";
+		}
+		finally {
+			if ( resultSet != null ) try { resultSet.close(); } catch ( final SQLException se ) {}
+			if ( statement != null ) try { statement.close(); } catch ( final SQLException se ) {}
+		}
+	}
+	
+	/**
+	 * Generates and returns an HTML link to the details page of a game.<br>
+	 * An HTML anchor tag will be returned whose text is 'Game details'.
+	 * @param id id of the game
+	 * @return an HTML link to the details page of the player
+	 */
+	private static String getGameDetailsHtmlLink( final int id ) {
+		return "<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_DETAILS
+							 + '&' + PN_REQUEST_PARAM_NAME_ENTITY    + '=' + ENTITY_GAME
+							 + '&' + PN_REQUEST_PARAM_NAME_ENTITY_ID + '=' + id + "'>Game details</a>"; 
 	}
 	
 	/**
@@ -285,13 +475,12 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 */
 	private void renderHeader( final PrintWriter outputWriter ) {
 		outputWriter.println( "<html><head><title>BWHF Players' Network</title>" );
-		outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>" );
+		outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'>" );
 		outputWriter.println( "</head><body><center>" );
 		outputWriter.println( "<h2>BWHF Players' Network</h2>" );
-		outputWriter.println( "<p><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a>&nbsp;&nbsp;<a href='hackers'>BWHF Hacker Database</a></p>" );
-		outputWriter.println( "<p><a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + "=" + PN_OPERATION_LIST + "&" + PN_REQUEST_PARAM_NAME_ENTITY + "=" + ENTITY_GAME   + "'>Game list</a>"
-				   + "&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + "=" + PN_OPERATION_LIST + "&" + PN_REQUEST_PARAM_NAME_ENTITY + "=" + ENTITY_PLAYER + "'>Player list</a>"
-				   + "&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + "=" + PN_OPERATION_LIST + "&" + PN_REQUEST_PARAM_NAME_ENTITY + "=" + ENTITY_AKA    + "'>AKA list</a></p>" );
+		outputWriter.println( "<p><a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_GAME   + "'>Game list</a>"
+				   + "&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_PLAYER + "'>Player list</a>"
+				   + "&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_AKA    + "'>AKA list</a></p>" );
 	}
 	
 	/**
@@ -299,7 +488,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * @param outputWriter writer to be used to render
 	 */
 	private void renderFooter( final PrintWriter outputWriter ) {
-		outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></p>" );
+		outputWriter.println( "<hr><table border=0 width='100%'><tr><td width='50%' align='left'><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a>&nbsp;&nbsp;<a href='hackers'>BWHF Hacker Database</a><td align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></table>" );
 		outputWriter.println( "</center></body></html>" );
 	}
 	
