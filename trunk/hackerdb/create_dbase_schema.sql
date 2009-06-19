@@ -9,6 +9,7 @@ DROP TABLE IF EXISTS key;
 DROP TABLE IF EXISTS person;
 
 
+-- Key owners
 CREATE CACHED TABLE person (
     id      IDENTITY,
     name    VARCHAR NOT NULL,
@@ -18,6 +19,7 @@ CREATE CACHED TABLE person (
 );
 
 
+-- Keys
 CREATE CACHED TABLE key (
     id        IDENTITY,
     value     VARCHAR NOT NULL,
@@ -30,6 +32,7 @@ CREATE CACHED TABLE key (
 );
 
 
+-- Hackers
 CREATE CACHED TABLE hacker (
     id      IDENTITY,
     name    VARCHAR,
@@ -38,6 +41,7 @@ CREATE CACHED TABLE hacker (
 );
 
 
+-- Hacker reports
 CREATE CACHED TABLE report (
     id            IDENTITY,
     hacker        INT,
@@ -53,6 +57,7 @@ CREATE CACHED TABLE report (
 );
 
 
+-- Hacker list download log
 CREATE CACHED TABLE download_log (
     id           IDENTITY,
     ip           VARCHAR,                --IP of the downloader's computer.
@@ -66,11 +71,12 @@ CREATE CACHED TABLE download_log (
 ---- Tables of the Players' Network -----
 -----------------------------------------
 
-DROP TABLE IF EXISTS player_aka;
 DROP TABLE IF EXISTS game_player;
 DROP TABLE IF EXISTS player;
+DROP TABLE IF EXISTS aka_group;
 DROP TABLE IF EXISTS game;
 
+-- Games
 CREATE CACHED TABLE game (
     id            IDENTITY,
     engine        INT,
@@ -92,13 +98,25 @@ CREATE CACHED TABLE game (
 );
 
 
-CREATE CACHED TABLE player (
+-- Groups of players' akas
+CREATE CACHED TABLE aka_group (
     id      IDENTITY,
-    name    VARCHAR,
+    comment VARCHAR,
     version TIMESTAMP DEFAULT NOW
 );
 
 
+-- Players of games
+CREATE CACHED TABLE player (
+    id        IDENTITY,
+    name      VARCHAR,
+    aka_group INT,
+    version   TIMESTAMP DEFAULT NOW,
+    FOREIGN KEY (aka_group) REFERENCES aka_group(id) ON DELETE CASCADE
+);
+
+
+-- Connections between players and games
 CREATE CACHED TABLE game_player (
     id            IDENTITY,
     game          INT,
@@ -109,15 +127,5 @@ CREATE CACHED TABLE game_player (
     version       TIMESTAMP DEFAULT NOW,
     FOREIGN KEY (game) REFERENCES game(id) ON DELETE CASCADE,
     FOREIGN KEY (player) REFERENCES player(id) ON DELETE CASCADE
-);
-
-
-CREATE CACHED TABLE player_aka (
-    id         IDENTITY,
-    player     INT,
-    player_aka INT,
-    version    TIMESTAMP DEFAULT NOW,
-    FOREIGN KEY (player) REFERENCES player(id) ON DELETE CASCADE,
-    FOREIGN KEY (player_aka) REFERENCES player(id) ON DELETE CASCADE
 );
 

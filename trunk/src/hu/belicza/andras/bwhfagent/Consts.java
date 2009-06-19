@@ -25,7 +25,7 @@ public class Consts {
 	/** Search help page url string.                                           */
 	public static final String SEARCH_HELP_PAGE_URL             = "http://code.google.com/p/bwhf/wiki/ReplaySearchInBWHFAgent";
 	/** Players' Network page url string.                                      */
-	public static final String PLAYERS_NETWORK_PAGE_URL         = "http://94.199.240.39/hackerdb/playersnetwork";
+	public static final String PLAYERS_NETWORK_PAGE_URL         = "http://94.199.240.39/hackerdb/players";
 	
 	/** URL of the BWHF hacker data base server.                               */
 	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL = "http://94.199.240.39/hackerdb/hackers";

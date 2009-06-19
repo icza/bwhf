@@ -56,11 +56,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.dbcp.BasicDataSource;
 
 /**
  * Servlet to serve hacker list related requests.<br>
@@ -74,10 +71,7 @@ import org.apache.commons.dbcp.BasicDataSource;
  * 
  * @author Andras Belicza
  */
-public class HackerDbServlet extends HttpServlet {
-	
-	/** URL of the hacker database. */
-	private static final String DATABASE_URL = "jdbc:hsqldb:hsql://localhost/hackers";
+public class HackerDbServlet extends BaseServlet {
 	
 	/** Date format to be used to format output dates. */
 	private static final DateFormat DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd HH:mm" );
@@ -118,15 +112,6 @@ public class HackerDbServlet extends HttpServlet {
 		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_REPORT_COUNT  , false );
 		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_FIRST_REPORTED, false );
 		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_LAST_REPORTED , false );
-	}
-	
-	/** Data source to provide pooled connections to the hacker database. */
-	private static final BasicDataSource dataSource = new BasicDataSource();
-	static {
-		dataSource.setDriverClassName( "org.hsqldb.jdbcDriver" );
-		dataSource.setUsername( "sa" );
-		dataSource.setPassword( "" );
-		dataSource.setUrl( DATABASE_URL );
 	}
 	
 	@Override
@@ -318,7 +303,10 @@ public class HackerDbServlet extends HttpServlet {
 			
 			// Header section
 			outputWriter.println( "<h2>BWHF Hacker database</h2>" );
-			outputWriter.println( "<p><table border=0><tr><td><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a><td>&nbsp;&nbsp;<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + "=" + OPERATION_STATISTICS + "'>Statistics</a><sup style='color:red;background:yellow;font-size:65%'>NEW!</sup>&nbsp;&nbsp;<td><a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help about this page (filters, sorting)</a></table></p>" );
+			outputWriter.println( "<p><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a>"
+					   + "&nbsp;&nbsp;<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + "=" + OPERATION_STATISTICS + "'>Statistics</a>"
+					   + "&nbsp;&nbsp;<a href='players?'>BWHF Players' Network</a><sup style='color:red;background:yellow;font-size:65%'>NEW!</sup>"
+					   + "&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help about this page (filters, sorting)</a></p>" );
 			
 			// Controls section
 			outputWriter.println( "<form id='" + FORM_ID + "' action='hackers' method='POST'>" );
@@ -939,91 +927,6 @@ public class HackerDbServlet extends HttpServlet {
 			if ( statement  != null ) try { statement .close(); } catch ( final SQLException se ) {}
 			if ( connection != null ) try { connection.close(); } catch ( final SQLException se ) {}
 		}
-	}
-	
-	/**
-	 * Sends back a message as plain text.
-	 * @param message  message to be sent
-	 * @param response response to be used
-	 */
-	private static void sendBackPlainMessage( final String message, final HttpServletResponse response ) {
-		response.setContentType( "text/plain" );
-		
-		PrintWriter output = null;
-		try {
-			output = response.getWriter();
-			output.println( message );
-			output.flush();
-		} catch ( final IOException ie ) {
-			ie.printStackTrace();
-		}
-		finally {
-			if ( output != null )
-				 output.close();
-		}
-	}
-	
-	/**
-	 * Sends back an error message to the client indicating a bad request.
-	 * @param response response to be used
-	 */
-	private static void sendBackErrorMessage( final HttpServletResponse response ) {
-		sendBackErrorMessage( response, "Bad request!" );
-	}
-	
-	/**
-	 * Sends back an error message to the client.
-	 * @param response response to be used
-	 * @param message  message to be sent back
-	 */
-	private static void sendBackErrorMessage( final HttpServletResponse response, final String message ) {
-		response.setContentType( "text/html" );
-		
-		PrintWriter output = null;
-		try {
-			output = response.getWriter();
-			output.println( message );
-			output.flush();
-		} catch ( final IOException ie ) {
-			ie.printStackTrace();
-		}
-		finally {
-			if ( output != null )
-				 output.close();
-		}
-	}
-	
-	/**
-	 * Configures the response for no caching.
-	 * @param response response to be configured
-	 */
-	private static void setNoCache( final HttpServletResponse response ) {
-		response.setHeader( "Cache-Control", "no-cache" ); // For HTTP 1.1
-		response.setHeader( "Pragma"       , "no-cache" ); // For HTTP 1.0
-		response.setDateHeader( "Expires", -0 );           // For proxies
-	}
-	
-	/**
-	 * Encodes an input string for HTML rendering.
-	 * @param input input string to be encoded
-	 * @return an encoded string for HTML rendering
-	 */
-	private static String encodeHtmlString( final String input ) {
-		final StringBuilder encodedHtml = new StringBuilder();
-		final int length = input.length();
-		
-		for ( int i = 0; i < length; i++ ) {
-			final char ch = input.charAt( i );
-			
-			if ( ch >= 'a' && ch <='z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' )
-				encodedHtml.append( ch ); // safe
-			else if ( Character.isISOControl( ch ) )
-				; // Not safe, do not include it in the output
-			else
-				encodedHtml.append( "&#" ).append( (int) ch ).append( ';' );
-		}
-		
-		return encodedHtml.toString();
 	}
 	
 }
