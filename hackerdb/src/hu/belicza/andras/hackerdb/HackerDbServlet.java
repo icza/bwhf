@@ -278,7 +278,7 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( "<h2>BWHF Hacker database</h2>" );
 			outputWriter.println( "<p><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a>"
 					   + "&nbsp;&nbsp;<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + "=" + OPERATION_STATISTICS + "'>Statistics</a>"
-					   + "&nbsp;&nbsp;<a href='players?'>BWHF Players' Network</a><sup style='color:red;background:yellow;font-size:65%'>NEW!</sup>"
+					   + "&nbsp;&nbsp;<a href='players'>BWHF Players' Network</a><sup style='color:red;background:yellow;font-size:65%'>NEW!</sup>"
 					   + "&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help about this page (filters, sorting)</a></p>" );
 			
 			// Controls section
