@@ -9,7 +9,6 @@ IF NOT EXIST %RELEASE_DIR% md %RELEASE_DIR%
 
 IF EXIST %RELEASE_DIR% goto copyfiles
 echo Cannot create directory: %RELEASE_DIR%!
-pause
 goto quit
 
 :copyfiles

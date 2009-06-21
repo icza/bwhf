@@ -25,6 +25,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,6 +40,8 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class PlayersNetworkServlet extends BaseServlet {
 	
+	/** Simple date format to format and parse replay save time. */
+	private static final DateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd" );
 	/** Size of the list in one page. */
 	private static final int PAGE_SIZE = 25;
 	
@@ -253,10 +257,12 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * @param page     page to be listed
 	 */
 	private void handleList( final HttpServletRequest request, final HttpServletResponse response, final String entity, int page ) {
-		Connection  connection   = null;
-		PrintWriter outputWriter = null;
-		Statement   statement    = null;
-		ResultSet   resultSet    = null;
+		Connection        connection   = null;
+		PrintWriter       outputWriter = null;
+		Statement         statement    = null;
+		ResultSet         resultSet    = null;
+		PreparedStatement statement2   = null;
+		ResultSet         resultSet2   = null;
 		
 		try {
 			outputWriter = response.getWriter();
@@ -269,7 +275,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			
 			if ( entity.equals( ENTITY_GAME ) ) {
 				final Integer player1 = getIntegerParamValue( request, PN_REQUEST_PARAM_NAME_PLAYER1 );
-				final Integer player2 = getIntegerParamValue( request, PN_REQUEST_PARAM_NAME_PLAYER2 );
+				final Integer player2 = player1 == null ? null : getIntegerParamValue( request, PN_REQUEST_PARAM_NAME_PLAYER2 );
 				
 				// Title section
 				outputWriter.print( "<h3>Game list" );
@@ -280,7 +286,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.print( getPlayerDetailsHtmlLink( player1, connection ) );
 					if ( player2 != null ) {
 						pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PLAYER2 ).append( '=' ).append( player2 );
-						countQuery = "SELECT COUNT(DISTINCT game) FROM game_player WHERE player=" + player1 + " OR player=" + player2 + " GORUP BY game HAVING COUNT(*)=2";
+						countQuery = "SELECT COUNT(*) FROM (SELECT game FROM game_player WHERE player=" + player1 + " OR player=" + player2 + " GROUP BY game HAVING COUNT(*)=2)";
 						outputWriter.print( " and " );
 						outputWriter.print( getPlayerDetailsHtmlLink( player2, connection ) );
 					}
@@ -314,27 +320,52 @@ public class PlayersNetworkServlet extends BaseServlet {
 					sortingIndex = sortingColumns.length - 1;
 				
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
-				String query = "SELECT id, engine, save_time, map_name, frames, type FROM game JOIN game_player on game.id=game_player.game ORDER BY " + sortingColumns[ sortingIndex ] 
-				             + ( getStringParamValue( request, PN_REQUEST_PARAM_NAME_SORTING_DESC ) != null ? " DESC" : "" )
-				             + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
+				String query;
+				if ( player1 == null )
+					query = "SELECT id, engine, save_time, map_name, frames, type FROM game";
+				else if ( player2 == null )
+					query = "SELECT game.id, engine, save_time, map_name, frames, type FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player=" + player1;
+				else
+					query = "SELECT DISTINCT game.id, engine, save_time, map_name, frames, type FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player=" + player1 + " OR game_player.player=" + player2 + " GROUP BY game.id, engine, save_time, map_name, frames, type HAVING COUNT(*)=2";
 				
-				outputWriter.print( "<table border=1><tr><th>#<th>Engine<th>Map:<th>Duration:<th>Game type<th>Played on:<th>Players:" );
+				query += " ORDER BY " + sortingColumns[ sortingIndex ] + ( getStringParamValue( request, PN_REQUEST_PARAM_NAME_SORTING_DESC ) != null ? " DESC" : "" )
+				       + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
+				
+				outputWriter.print( "<table border=1><tr><th>#<th>Engine<th>Map<th>Duration<th>Game type<th>Played on<th>Players" );
 				statement = connection.createStatement();
 				resultSet = statement.executeQuery( query );
 				final ReplayHeader replayHeader = new ReplayHeader();
 				int colCounter;
+				statement2 = connection.prepareStatement( "SELECT player.id, player.name FROM game_player JOIN player on game_player.player=player.id WHERE game_player.game=?" );
 				while ( resultSet.next() ) {
-					colCounter = 2;
+					colCounter = 1;
+					final int gameId = resultSet.getInt( colCounter++ );
 					replayHeader.gameEngine = (byte) resultSet.getInt( colCounter++ );
 					replayHeader.saveTime   = resultSet.getDate( colCounter++ );
 					replayHeader.mapName    = resultSet.getString( colCounter++ );
 					replayHeader.gameFrames = resultSet.getInt( colCounter++ );
 					replayHeader.gameType   = (short) resultSet.getInt( colCounter++ );
 					
-					//outputWriter.print( "<tr><td>" + (++recordCounter) );
-					//outputWriter.print( "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate() );
+					outputWriter.print( "<tr><td>" + (++recordCounter) + " " + getGameDetailsHtmlLink( gameId ) );
+					outputWriter.print( "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate() );
+					outputWriter.print( "<td>" + replayHeader.mapName );
+					outputWriter.print( "<td>" + replayHeader.getDurationString( true ) );
+					outputWriter.print( "<td>" + ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ] );
+					outputWriter.print( "<td>" + SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ) );
+					
+					statement2.setInt( 1, gameId );
+					resultSet2 = statement2.executeQuery();
+					final StringBuilder playersBuilder = new StringBuilder();
+					while ( resultSet2.next() ) {
+						if ( playersBuilder.length() > 0 )
+							playersBuilder.append( ", " );
+						getPlayerDetailsHtmlLink( resultSet2.getInt( 1 ), resultSet2.getString( 2 ), playersBuilder );
+					}
+					resultSet2.close();
+					outputWriter.print( "<td>" + playersBuilder.toString() );
 					
 				}
+				statement2.close();
 				outputWriter.println( "</table>" );
 				
 			}
@@ -345,6 +376,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 		} catch ( final SQLException se ) {
 		}
 		finally {
+			if ( resultSet2 != null ) try { resultSet2.close(); } catch ( final SQLException se ) {}
+			if ( statement2 != null ) try { statement2.close(); } catch ( final SQLException se ) {}
 			if ( resultSet != null ) try { resultSet.close(); } catch ( final SQLException se ) {}
 			if ( statement != null ) try { statement.close(); } catch ( final SQLException se ) {}
 			if ( connection != null ) try { connection.close(); } catch ( final SQLException se ) {}
@@ -445,9 +478,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			statement.setInt( 1, id );
 			resultSet = statement.executeQuery();
 			if ( resultSet.next() )
-				return "<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_DETAILS
-									 + '&' + PN_REQUEST_PARAM_NAME_ENTITY    + '=' + ENTITY_PLAYER
-									 + '&' + PN_REQUEST_PARAM_NAME_ENTITY_ID + '=' + id + "'>" + encodeHtmlString( resultSet.getString( 1 ) ) + "</a>"; 
+				return getPlayerDetailsHtmlLink( id, resultSet.getString( 1 ), null ).toString();
 			else
 				return "";
 		}
@@ -458,15 +489,35 @@ public class PlayersNetworkServlet extends BaseServlet {
 	}
 	
 	/**
+	 * Generates and returns an HTML link to the details page of a player.<br>
+	 * An HTML anchor tag will be returned whose text is the name of the player.<br>
+	 * If <code>builder</code> is null, a new <code>StringBuilder</code> will be created and returned.
+	 * @param id         id of the player
+	 * @param playerName name of the player
+	 * @param builder    builder to use to build the link
+	 * @return the builder used to build the an HTML link to the details page of the player
+	 */
+	private static StringBuilder getPlayerDetailsHtmlLink( final int id, final String playerName, StringBuilder builder ) {
+		if ( builder == null )
+			builder = new StringBuilder();
+		
+		builder.append( "<a href='players?" ).append( PN_REQUEST_PARAM_NAME_OPERATION ).append( '=' ).append( PN_OPERATION_DETAILS )
+							   .append( '&' ).append( PN_REQUEST_PARAM_NAME_ENTITY    ).append( '=' ).append( ENTITY_PLAYER )
+							   .append( '&' ).append( PN_REQUEST_PARAM_NAME_ENTITY_ID ).append( '=' ).append( id ).append( "'>" ).append( encodeHtmlString( playerName ) ).append( "</a>" );
+		
+		return builder;
+	}
+	
+	/**
 	 * Generates and returns an HTML link to the details page of a game.<br>
-	 * An HTML anchor tag will be returned whose text is 'Game details'.
+	 * An HTML anchor tag will be returned whose text is 'details'.
 	 * @param id id of the game
 	 * @return an HTML link to the details page of the player
 	 */
 	private static String getGameDetailsHtmlLink( final int id ) {
 		return "<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_DETAILS
 							 + '&' + PN_REQUEST_PARAM_NAME_ENTITY    + '=' + ENTITY_GAME
-							 + '&' + PN_REQUEST_PARAM_NAME_ENTITY_ID + '=' + id + "'>Game details</a>"; 
+							 + '&' + PN_REQUEST_PARAM_NAME_ENTITY_ID + '=' + id + "'>details</a>"; 
 	}
 	
 	/**
