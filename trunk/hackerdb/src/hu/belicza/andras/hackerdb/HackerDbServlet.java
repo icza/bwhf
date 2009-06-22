@@ -635,7 +635,7 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( "<h3>Hacker distribution between gateways</h3>" );
 			outputWriter.println( "<table border=0><tr><td>" );
 			outputWriter.println( "<tr><td><img src='" + gatewayDistributionChartUrlBuilder.toString() + "' width=" + CHARTS_WIDTH + " height=" + CHARTS_HEIGHT + " title='Hacker distribution between gateways'></img>" );
-			outputWriter.println( "<td><table border=1><tr><th>Gatway:<th>Hackers:" );
+			outputWriter.println( "<td><table border=1 cellspacing=0 cellpadding=2><tr><th>Gatway:<th>Hackers:" );
 			// Add gateways with no hackers
 			for ( int gateway = 0; gateway < GATEWAYS.length; gateway++ ) {
 				boolean gatewayIncluded = false;
@@ -656,7 +656,7 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( "<h3>Monthly reports</h3>" );
 			outputWriter.println( "<table border=0><tr><td>" );
 			outputWriter.println( "<tr><td><img src='" + monthlyReportsChartUrlBuilder.toString() + "' width=" + CHARTS_WIDTH + " height=" + CHARTS_HEIGHT + " title='Monthly reports'></img>" );
-			outputWriter.println( "<td><table border=1><tr><th>Month:<th>Reports:" );
+			outputWriter.println( "<td><table border=1 cellspacing=0 cellpadding=2><tr><th>Month:<th>Reports:" );
 			Collections.reverse( monthlyReportsList );
 			monthlyReportsList.add( 0, new Object[] { "Total:", reportsCount} );
 			for ( final Object[] monthlyReports : monthlyReportsList )
