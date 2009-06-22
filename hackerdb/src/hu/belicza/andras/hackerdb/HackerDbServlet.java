@@ -286,7 +286,7 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( "<input name='" + REQUEST_PARAMETER_FILTERS_PRESENT + "' type=hidden value='yes'>" ); // We might use default values if this is not present (for example gateways and game engines). 
 			
 			// Filters
-			outputWriter.println( "<b>Filters</b> <button type=button onclick=\"" + getJavaScriptForResetFilters( filtersWrapper ) + "\">Reset filters</button><table border=1>" );
+			outputWriter.println( "<b>Filters</b> <button type=button onclick=\"" + getJavaScriptForResetFilters( filtersWrapper ) + "\">Reset filters</button><table border=1 cellspacing=0 cellpadding=2>" );
 			outputWriter.println( "<tr><th>Hacker name:<td><input name='" + FILTER_NAME_NAME + "' type=text value='" + encodeHtmlString( filtersWrapper.name ) + "' style='width:100%'>" );
 			// Render gateways here
 			outputWriter.print  ( "<tr><th>Gateways:<td>" );
@@ -320,7 +320,7 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.flush();
 			
 			// Hackers table section
-			outputWriter.println( "<table border=1>" );
+			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
 			outputWriter.println( "<tr><th>#<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_NAME          , filtersWrapper ) + "\">Name"           + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME           ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
 										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_GATEWAY       , filtersWrapper ) + "\">Gateway"        + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_GATEWAY        ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
 										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_REPORT_COUNT  , filtersWrapper ) + "\">Report count"   + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_REPORT_COUNT   ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )

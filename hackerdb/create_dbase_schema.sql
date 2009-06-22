@@ -67,6 +67,15 @@ CREATE CACHED TABLE download_log (
 );
 
 
+DROP INDEX idx_hacker_name IF EXISTS;
+DROP INDEX idx_hacker_gateway IF EXISTS;
+DROP INDEX idx_report_version IF EXISTS;
+
+CREATE INDEX idx_hacker_name ON hacker (name);
+CREATE INDEX idx_hacker_gateway ON hacker (gateway);
+CREATE INDEX idx_report_version ON report (version);
+
+
 -----------------------------------------
 ---- Tables of the Players' Network -----
 -----------------------------------------
@@ -129,3 +138,15 @@ CREATE CACHED TABLE game_player (
     FOREIGN KEY (player) REFERENCES player(id) ON DELETE CASCADE
 );
 
+
+DROP INDEX idx_player_name IF EXISTS;
+DROP INDEX idx_game_frames IF EXISTS;
+DROP INDEX idx_game_map IF EXISTS;
+DROP INDEX idx_game_type IF EXISTS;
+DROP INDEX idx_game_save_time IF EXISTS;
+
+CREATE INDEX idx_player_name ON player (name);
+CREATE INDEX idx_game_frames ON game (frames);
+CREATE INDEX idx_game_map ON game (map_name);
+CREATE INDEX idx_game_type ON game (type);
+CREATE INDEX idx_game_save_time ON game (save_time);
