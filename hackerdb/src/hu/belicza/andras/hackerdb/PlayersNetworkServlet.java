@@ -1,20 +1,6 @@
 package hu.belicza.andras.hackerdb;
 
-import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_AKA;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_GAME;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_PLAYER;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.GATEWAYS;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_DETAILS;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_LIST;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_SEND;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY_ID;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_OPERATION;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_PAGE;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_PLAYER1;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_PLAYER2;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_SORTING_DESC;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_SORTING_INDEX;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.*;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.IOException;
@@ -326,6 +312,9 @@ public class PlayersNetworkServlet extends BaseServlet {
 				if ( player2 != null )
 					pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PLAYER2 ).append( '=' ).append( player2 );
 			}
+			final boolean includeAkas = request.getParameter( PN_REQUEST_PARAM_NAME_INCLUDE_AKAS ) != null;
+			if ( includeAkas)
+				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_INCLUDE_AKAS );
 			final String pagerUrlWithoutSorting = pagerUrlBuilder.toString(); // For table headers to add proper sortings
 			int sortingIndex = getIntParamValue( request, PN_REQUEST_PARAM_NAME_SORTING_INDEX, -1 );
 			boolean sortingDesc = request.getParameter( PN_REQUEST_PARAM_NAME_SORTING_DESC ) != null;
@@ -338,25 +327,55 @@ public class PlayersNetworkServlet extends BaseServlet {
 			if ( sortingDesc )
 				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_SORTING_DESC );
 			
+			String akaIdList1 = null;
+			String akaIdList2 = null;
+			String akaIdList  = null;
+			boolean hasAka    = false;
+			if ( includeAkas && player1 != null ) {
+				akaIdList1 = getPlayerAkaIdList( player1, connection );
+				akaIdList2 = player2 == null ? null : getPlayerAkaIdList( player2, connection );
+				akaIdList = akaIdList1 == null ? akaIdList2 : akaIdList2 == null ? akaIdList1 : akaIdList1 + ',' + akaIdList2;
+				hasAka = akaIdList != null;
+			}
+			
 			if ( entity.equals( ENTITY_GAME ) ) {
 				
 				// Title section
 				outputWriter.print( "<h3>Game list" );
 				String countQuery;
+				String player1Name = null, player2Name = null;
 				if ( player1 != null ) {
 					outputWriter.print( " of " );
-					outputWriter.print( getPlayerDetailsHtmlLink( player1, getPlayerName( player1, connection ), null ) );
+					outputWriter.print( getPlayerDetailsHtmlLink( player1, player1Name = getPlayerName( player1, connection ), null ) );
 					if ( player2 != null ) {
-						countQuery = "SELECT COUNT(*) FROM (SELECT game FROM game_player WHERE player=" + player1 + " OR player=" + player2 + " GROUP BY game HAVING COUNT(*)=2)";
+						countQuery = "SELECT COUNT(*) FROM (SELECT game FROM game_player WHERE player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR player=" + player2 ) + " GROUP BY game HAVING COUNT(*)=2)";
 						outputWriter.print( " and " );
-						outputWriter.print( getPlayerDetailsHtmlLink( player2, getPlayerName( player2, connection ), null ) );
+						outputWriter.print( getPlayerDetailsHtmlLink( player2, player2Name = getPlayerName( player2, connection ), null ) );
 					}
 					else
-						countQuery = "SELECT COUNT(*) FROM game_player WHERE game_player.player=" + player1; // No need distinct, 1 player is only once at the most in a game
+						countQuery = "SELECT COUNT(*) FROM game_player WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 ); // No need distinct, 1 player is only once at the most in a game
 				}
 				else
 					countQuery = "SELECT COUNT(*) FROM game";
 				outputWriter.println( "</h3>" );
+				if ( hasAka ) {
+					statement = connection.createStatement();
+					outputWriter.print( "<p>AKAs included " );
+					if ( akaIdList1 != null ) {
+						outputWriter.print( "from <b>" + player1Name + "</b>: " );
+						resultSet = statement.executeQuery( "SELECT id, name FROM player WHERE id IN (" + akaIdList1 + ") AND id!=" + player1 );
+						outputWriter.print( generatePlayerHtmlLinkListFromResultSet( resultSet ) );
+						resultSet.close();
+					}
+					if ( akaIdList2 != null ) {
+						outputWriter.print( ( player1Name == null ? "" : "; " ) + "from <b>" + player2Name + "</b>: " );
+						resultSet = statement.executeQuery( "SELECT id, name FROM player WHERE id IN (" + akaIdList2 + ") AND id!=" + player2 );
+						outputWriter.print( generatePlayerHtmlLinkListFromResultSet( resultSet ) );
+						resultSet.close();
+					}
+					statement.close();
+					outputWriter.print( "</p>" );
+				}
 				
 				// Pages count section
 				final int gamesCount = executeCountStatement( countQuery, connection );
@@ -380,9 +399,9 @@ public class PlayersNetworkServlet extends BaseServlet {
 				if ( player1 == null )
 					query = "SELECT id, engine, save_time, map_name, frames, type FROM game";
 				else if ( player2 == null )
-					query = "SELECT game.id, engine, save_time, map_name, frames, type FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player=" + player1;
+					query = "SELECT game.id, engine, save_time, map_name, frames, type FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 );
 				else
-					query = "SELECT DISTINCT game.id, engine, save_time, map_name, frames, type FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player=" + player1 + " OR game_player.player=" + player2 + " GROUP BY game.id, engine, save_time, map_name, frames, type HAVING COUNT(*)=2";
+					query = "SELECT DISTINCT game.id, engine, save_time, map_name, frames, type FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR game_player.player=" + player2 ) + " GROUP BY game.id, engine, save_time, map_name, frames, type HAVING COUNT(*)=2";
 				
 				query += " ORDER BY " + GAME_TABLE_HEADER.sortingColumns[ sortingIndex ] + ( sortingDesc ? " DESC" : "" )
 				       + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
@@ -464,11 +483,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 				statement = connection.createStatement();
 				resultSet = statement.executeQuery( query );
 				while ( resultSet.next() ) {
-					outputWriter.print( "<tr><td>" + (++recordCounter) );
+					outputWriter.print( "<tr><td align=right>" + (++recordCounter) );
 					final int playerId = resultSet.getInt( 1 );
 					outputWriter.print( "<td>" + getPlayerDetailsHtmlLink( playerId, resultSet.getString( 2 ), null ) );
-					outputWriter.print( "<td align=center>" + ( player1 == null ? getGameListOfPlayerHtmlLink ( playerId, Integer.toString( resultSet.getInt( 3 ) ) )
-							                                                    : getGameListOfPlayersHtmlLink( player1, playerId, Integer.toString( resultSet.getInt( 3 ) ) ) ) );
+					outputWriter.print( "<td align=center>" + ( player1 == null ? getGameListOfPlayerHtmlLink ( playerId, Integer.toString( resultSet.getInt( 3 ) ), false )
+							                                                    : getGameListOfPlayersHtmlLink( player1, playerId, Integer.toString( resultSet.getInt( 3 ) ), false ) ) );
 					outputWriter.print( "<td>" + SIMPLE_DATE_FORMAT.format( resultSet.getDate( 4 ) ) );
 					outputWriter.print( "<td>" + SIMPLE_DATE_FORMAT.format( resultSet.getDate( 5 ) ) );
 				}
@@ -698,7 +717,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			} else if ( entity.equals( ENTITY_PLAYER ) ) {
 				
 				final String playerNameHtml = encodeHtmlString( getPlayerName( entityId, connection ) );
-				outputWriter.println( "<h3>Details of player " + playerNameHtml + " </h3>" );
+				outputWriter.println( "<h3>Details of player " + playerNameHtml + "</h3>" );
 				
 				statement  = connection.createStatement();
 				resultSet  = statement.executeQuery( "SELECT COUNT(*), MIN(save_time), MAX(save_time) FROM game_player JOIN game on game.id=game_player.game WHERE player=" + entityId );
@@ -707,7 +726,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				if ( hasAka ) {
 					statement2 = connection.createStatement();
 					resultSet2 = statement.executeQuery( "SELECT id, name FROM player WHERE id IN (" + akaIdList + ") AND id!=" + entityId );
-					outputWriter.println( "<h4>AKAs: " + generatePlayerHtmlLinkListFromResultSet( resultSet2 ) + "</h4>" );
+					outputWriter.println( "<p>AKAs: " + generatePlayerHtmlLinkListFromResultSet( resultSet2 ) + "</p>" );
 					resultSet2.close();
 					
 					resultSet2 = statement.executeQuery( "SELECT COUNT(*), MIN(save_time), MAX(save_time) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ")" );
@@ -730,12 +749,10 @@ public class PlayersNetworkServlet extends BaseServlet {
 					if ( hasAka ) outputWriter.print( "<td>" + formatDays( days2 ) );
 					outputWriter.print( "<tr><th align=left>Average games per day:<td>" + new Formatter().format( "%.2f", ( resultSet.getInt( 1 ) / (float) days ) ) );
 					if ( hasAka ) outputWriter.print( "<td>" + new Formatter().format( "%.2f", ( resultSet2.getInt( 1 ) / (float) days2 ) ) );
-					outputWriter.print( "<tr><th align=left>Game list:<td>" + getGameListOfPlayerHtmlLink( entityId, "Games of " + playerNameHtml ) );
-					// TODO: aka to request parameter name
-					if ( hasAka ) outputWriter.print( "<td>" + getGameListOfPlayerHtmlLink( entityId, "Games with AKAs included") );
-					outputWriter.print( "<tr><th align=left>Player list:<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Who played with " + playerNameHtml + "?" ) );
-					// TODO: aka to request parameter name
-					if ( hasAka ) outputWriter.print( "<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Players with AKAs included" ) );
+					outputWriter.print( "<tr><th align=left>Game list:<td>" + getGameListOfPlayerHtmlLink( entityId, "Games of " + playerNameHtml, false ) );
+					if ( hasAka ) outputWriter.print( "<td>" + getGameListOfPlayerHtmlLink( entityId, "Games with AKAs included", true ) );
+					outputWriter.print( "<tr><th align=left>Player list:<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Who played with " + playerNameHtml + "?", false ) );
+					if ( hasAka ) outputWriter.print( "<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Players with AKAs included", true ) );
 					outputWriter.print( "</table>" );
 				}
 				else
@@ -902,42 +919,48 @@ public class PlayersNetworkServlet extends BaseServlet {
 	/**
 	 * Generates and returns an HTML link to the game list of a player.<br>
 	 * An HTML anchor tag will be returned whose text is the value of <code>text</code>.
-	 * @param playerId id of the player
-	 * @param text     text to appear in the link
+	 * @param playerId    id of the player
+	 * @param text        text to appear in the link
+	 * @param includeAkas tells if akas should be included (adds an extra parameter
 	 * @return an HTML link to the game list of a player
 	 */
-	private static String getGameListOfPlayerHtmlLink( final int playerId, final String text ) {
+	private static String getGameListOfPlayerHtmlLink( final int playerId, final String text, final boolean includeAkas ) {
 		return "<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST
 							 + '&' + PN_REQUEST_PARAM_NAME_ENTITY    + '=' + ENTITY_GAME
-							 + '&' + PN_REQUEST_PARAM_NAME_PLAYER1   + '=' + playerId + "'>" + text + "</a>";
+							 + '&' + PN_REQUEST_PARAM_NAME_PLAYER1   + '=' + playerId
+							 + ( includeAkas ? '&' + PN_REQUEST_PARAM_NAME_INCLUDE_AKAS : "" ) + "'>" + text + "</a>";
 	}
 	
 	/**
 	 * Generates and returns an HTML link to the game list of 2 players.<br>
 	 * An HTML anchor tag will be returned whose text is the value of <code>text</code>.
-	 * @param player1Id id of player #1
-	 * @param player2Id id of player #2
-	 * @param text text to appear in the link
+	 * @param player1Id   id of player #1
+	 * @param player2Id   id of player #2
+	 * @param text text   to appear in the link
+	 * @param includeAkas tells if akas should be included (adds an extra parameter
 	 * @return an HTML link to the game list of a player
 	 */
-	private static String getGameListOfPlayersHtmlLink( final int player1Id, final int player2Id, final String text ) {
+	private static String getGameListOfPlayersHtmlLink( final int player1Id, final int player2Id, final String text, final boolean includeAkas ) {
 		return "<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST
 							 + '&' + PN_REQUEST_PARAM_NAME_ENTITY    + '=' + ENTITY_GAME
 							 + '&' + PN_REQUEST_PARAM_NAME_PLAYER1   + '=' + player1Id
-							 + '&' + PN_REQUEST_PARAM_NAME_PLAYER2   + '=' + player2Id + "'>" + text + "</a>";
+							 + '&' + PN_REQUEST_PARAM_NAME_PLAYER2   + '=' + player2Id
+							 + ( includeAkas ? '&' + PN_REQUEST_PARAM_NAME_INCLUDE_AKAS : "" ) + "'>" + text + "</a>";
 	}
 	
 	/**
 	 * Generates and returns an HTML link to the player list who played with a player.<br>
 	 * An HTML anchor tag will be returned whose text is the value of <code>text</code>.
-	 * @param playerId id of the player who's mates are searched for
-	 * @param text     text to appear in the link
+	 * @param playerId    id of the player who's mates are searched for
+	 * @param text        text to appear in the link
+	 * @param includeAkas tells if akas should be included (adds an extra parameter
 	 * @return an HTML link to the player list who played with a player
 	 */
-	private static String getPlayerListWhoPlayedWithAPlayerHtmlLink( final int playerId, final String text ) {
+	private static String getPlayerListWhoPlayedWithAPlayerHtmlLink( final int playerId, final String text, final boolean includeAkas ) {
 		return "<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST
 							 + '&' + PN_REQUEST_PARAM_NAME_ENTITY    + '=' + ENTITY_PLAYER
-							 + '&' + PN_REQUEST_PARAM_NAME_PLAYER1   + '=' + playerId + "'>" + text + "</a>";
+							 + '&' + PN_REQUEST_PARAM_NAME_PLAYER1   + '=' + playerId
+							 + ( includeAkas ? '&' + PN_REQUEST_PARAM_NAME_INCLUDE_AKAS : "" ) + "'>" + text + "</a>";
 	}
 	
 	/**
