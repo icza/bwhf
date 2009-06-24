@@ -25,7 +25,7 @@ Every link in the Players Network can be cached. For example you can send links 
  * you can list players who played with a specific player (with or without his/her AKAs included)
 
 ==Game list==
-You can list the games that are added to the Players' Network. You can sort them by version, date, map name, duration etc. by clicking on the columns.
+You can list the games that are added to the Players' Network. You can sort them by version, date, map name, duration etc. by clicking on the columns header.
 
 ==Game details==
 You can see the details of a game if you click on its number. The game details page gives you other information of the game, and lists the players in it with other details like race, APM, actions and colors.
@@ -33,13 +33,15 @@ You can see the details of a game if you click on its number. The game details p
 ==Player list==
 You can list the players that are in the Players' Network. You can sort them by name, games count, first/last game and total time in games.
 
-If you click on a games count, then it will list you the games where the player was in it.
+*If you click on a games count, then it will list you the games where the player was in it.*
 
 ==Player details==
 If you click on a name of a player anywhere, it will take you to the players profile.
-The players profile gives you statistical information about the player such as total games, first/last game date, presence over time, total time in games, average games per day, race distribution, and a link to list the games of the player, and another link to list the playres who played with him/her.
+The players profile gives you statistical information about the player such as total games, first/last game date, presence over time, total time in games, average games per day, race distribution, and a link to list the games of the player, and another link to list the players who played with him/her.
 
 If the player has registered akas, they will be listed, and all the mentioned details will be shown when all the akas are included in the calculation.
+
+If you click on the "Who played with ..." link, it will take you to the player list page where only players are listed who played with the source player. *Now if you click a games count link on this page, it will show the common games of the 2 players.* If on the profiles page you clicked on the link which includes AKAs, then the player list page will also show links leading to commong games list which also includes games played by any of the 2 players' AKAs.
 
 ==AKA list==
 On this page you can check the registered AKAs. Every player being in the same AKA group denotes the same person behind the accounts of the group.
