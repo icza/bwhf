@@ -10,6 +10,8 @@ COMING SOON!
 
 The Players' Network automatically recognizes connections between replays where the same name is used for players. With BWHF Agent you can automatically send info about every game you play, and you can send any old replays or entire folder of replays recursively.
 
+Private or sensitive data is not stored on the server. For example replays and game chat are not stored, they are not even sent to the server. Only public header information of games are sent.
+
 ==Game list==
 You can list the games that are added to the Players' Network. You can sort them by version, date, map name, duration etc. by clicking on the columns.
 
