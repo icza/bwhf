@@ -1,4 +1,4 @@
-#summary Description of Players' Network
+#summary Describes the Players' Network
 
 =Players' Network=
 
