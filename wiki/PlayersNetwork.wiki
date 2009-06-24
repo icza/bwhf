@@ -12,7 +12,7 @@ The Players' Network automatically recognizes connections between replays where 
 
 Private or sensitive data is not stored on the server. For example replays and game chat are not stored, they are not even sent to the server. Only public header information of games are sent.
 
-Every link in the Players Network can be cached. For example you can send links of players, games, common game lists to others via email, or you can publish the links in forums. Everyone who opens the link will see the same page.
+*Every link in the Players Network can be cached.* For example you can send links of players, games, common game lists to others via email, or you can publish the links in forums. Everyone who opens the link will see the same page.
 
 ==Summary of what you can do with Players' Network==
  * you can list all games
