@@ -11,3 +11,14 @@ COMING SOON!
 The Players' Network automatically recognizes connections between replays where the same name is used for players. With BWHF Agent you can automatically send info about every game you play, and you can send any old replays or entire folder of replays recursively.
 
 ==Game list==
+You can list the games that are added to the Players' Network. You can sort them by version, date, map name, duration etc. clicking on the columns.
+
+==Game details==
+You can see the details of a game if you click on its number. The game details page gives you other information of the game, and lists the players in it with other details like race, APM, actions and colors.
+
+==Player list==
+You can list the players that are in the Players' Network. You can sort them by name, games count, first/last game and total time in games.
+
+If you click on a games count, then it will list you the games where the player was in it.
+
+==Player details, Player profile==
