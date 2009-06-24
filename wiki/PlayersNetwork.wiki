@@ -4,7 +4,7 @@
 
 <wiki:toc max_depth="2" />
 
-Players' Network builds a network of Starcraft Broodwar players.
+Players' Network builds a network of Starcraft Broodwar players based on replays.
 It has a web interface:
 COMING SOON!
 
