@@ -12,6 +12,16 @@ The Players' Network automatically recognizes connections between replays where 
 
 Private or sensitive data is not stored on the server. For example replays and game chat are not stored, they are not even sent to the server. Only public header information of games are sent.
 
+==Summary of what you can do with Players' Network==
+ * you can list all games
+ * you can list all players
+ * you can list all AKA groups
+ * you can view the details of a game (with detailed info of its players)
+ * you can view the details and statistics of a player, also know as the player profile
+ * you can list the games of a player (with or without his/her AKAs included)
+ * you can list the common games of 2 players (with or without their AKAs included)
+ * you can list players who played with a specific player (with or without his/her AKAs included)
+
 ==Game list==
 You can list the games that are added to the Players' Network. You can sort them by version, date, map name, duration etc. by clicking on the columns.
 
