@@ -3,6 +3,7 @@
 =Players' Network=
 
 Players' Network builds a network of Starcraft Broodwar players.
-It has a web interface: [COMING SOON]
+It has a web interface:
+COMING SOON!
 
 The Players' Network automatically recognizes connections between replays where the same name is used for players.
