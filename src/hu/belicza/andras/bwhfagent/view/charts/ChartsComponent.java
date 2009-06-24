@@ -1061,11 +1061,10 @@ public class ChartsComponent extends JPanel {
 			graphics.setColor( CHART_AXIS_LABEL_COLOR );
 			graphics.setFont( CHART_AXIS_LABEL_FONT );
 			for ( int j = 0; j <= TIME_LABELS_COUNT; j++ ) {
-				final StringBuilder timeBuilder = new StringBuilder();
-				ReplayHeader.formatFrames( frames * j / TIME_LABELS_COUNT, timeBuilder, false );
+				final String timeString = ReplayHeader.formatFrames( frames * j / TIME_LABELS_COUNT, new StringBuilder(), false ).toString();
 				final int x = chartsParams.x1 + ( chartsParams.maxXInChart * j / TIME_LABELS_COUNT )
-								- ( j == 0 ? 0 : ( j == TIME_LABELS_COUNT ? timeBuilder.length() * 7 : timeBuilder.length() * 7 / 2 ) );
-				graphics.drawString( timeBuilder.toString(), x, y1 + chartsParams.maxYInChart + 1 );
+								- ( j == 0 ? 0 : ( j == TIME_LABELS_COUNT ? timeString.length() * 7 : timeString.length() * 7 / 2 ) );
+				graphics.drawString( timeString, x, y1 + chartsParams.maxYInChart + 1 );
 			}
 		}
 	}

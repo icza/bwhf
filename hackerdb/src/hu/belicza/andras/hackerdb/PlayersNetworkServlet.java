@@ -65,9 +65,9 @@ public class PlayersNetworkServlet extends BaseServlet {
 	);
 	/** Header of the game table. */
 	private static final TableHeader PLAYER_TABLE_HEADER = new TableHeader(
-			new String[]  { null , "player.name", "COUNT(player.id)", "MIN(game.save_time)", "MAX(game.save_time)" },
-			new String[]  { "#"  , "Player"     , "Games count"     , "First game"         , "Last game"           },
-			new boolean[] { false, false        , true              , true                 , true                  },
+			new String[]  { null , "player.name", "COUNT(player.id)", "MIN(game.save_time)", "MAX(game.save_time)", "SUM(game.frames)"    },
+			new String[]  { "#"  , "Player"     , "Games count"     , "First game"         , "Last game"          , "Total time in games" },
+			new boolean[] { false, false        , true              , true                 , true                 , true                  },
 			2
 	);
 	/** Header of the AKA groups table. */
@@ -330,12 +330,20 @@ public class PlayersNetworkServlet extends BaseServlet {
 			String akaIdList1 = null;
 			String akaIdList2 = null;
 			String akaIdList  = null;
+			boolean hasAka1   = false;
+			boolean hasAka2   = false;
 			boolean hasAka    = false;
 			if ( includeAkas && player1 != null ) {
 				akaIdList1 = getPlayerAkaIdList( player1, connection );
 				akaIdList2 = player2 == null ? null : getPlayerAkaIdList( player2, connection );
-				akaIdList = akaIdList1 == null ? akaIdList2 : akaIdList2 == null ? akaIdList1 : akaIdList1 + ',' + akaIdList2;
-				hasAka = akaIdList != null;
+				hasAka1 = akaIdList1 != null;
+				hasAka2 = akaIdList2 != null;
+				hasAka = hasAka1 || hasAka2;
+				if ( akaIdList1 == null )
+					akaIdList1 = Integer.toString( player1 );
+				if ( player2 != null && akaIdList2 == null )
+					akaIdList2 = Integer.toString( player2 );
+				akaIdList = player2 == null ? akaIdList1 : akaIdList1 + ',' + akaIdList2;
 			}
 			
 			if ( entity.equals( ENTITY_GAME ) ) {
@@ -361,14 +369,14 @@ public class PlayersNetworkServlet extends BaseServlet {
 				if ( hasAka ) {
 					statement = connection.createStatement();
 					outputWriter.print( "<p>AKAs included " );
-					if ( akaIdList1 != null ) {
-						outputWriter.print( "from <b>" + player1Name + "</b>: " );
+					if ( hasAka1 ) {
+						outputWriter.print( "from <b>" + encodeHtmlString( player1Name ) + "</b>: " );
 						resultSet = statement.executeQuery( "SELECT id, name FROM player WHERE id IN (" + akaIdList1 + ") AND id!=" + player1 );
 						outputWriter.print( generatePlayerHtmlLinkListFromResultSet( resultSet ) );
 						resultSet.close();
 					}
-					if ( akaIdList2 != null ) {
-						outputWriter.print( ( player1Name == null ? "" : "; " ) + "from <b>" + player2Name + "</b>: " );
+					if ( hasAka2 ) {
+						outputWriter.print( ( player1Name == null ? "" : "; " ) + "from <b>" + encodeHtmlString( player2Name ) + "</b>: " );
 						resultSet = statement.executeQuery( "SELECT id, name FROM player WHERE id IN (" + akaIdList2 + ") AND id!=" + player2 );
 						outputWriter.print( generatePlayerHtmlLinkListFromResultSet( resultSet ) );
 						resultSet.close();
@@ -416,6 +424,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				while ( resultSet.next() ) {
 					colCounter = 1;
 					final int gameId = resultSet.getInt( colCounter++ );
+					replayHeader.guessedVersion = null; // This is cached so I have to clear it...
 					replayHeader.gameEngine = (byte) resultSet.getInt( colCounter++ );
 					replayHeader.saveTime   = resultSet.getDate( colCounter++ );
 					replayHeader.mapName    = resultSet.getString( colCounter++ );
@@ -442,14 +451,24 @@ public class PlayersNetworkServlet extends BaseServlet {
 				
 				outputWriter.print( "<h3>Player list" );
 				String countQuery;
+				String player1Name = null;
 				if ( player1 != null ) {
 					outputWriter.print( " who played with " );
-					outputWriter.print( getPlayerDetailsHtmlLink( player1, getPlayerName( player1, connection ), null ) );
-					countQuery = "SELECT COUNT(DISTINCT player) FROM game_player WHERE player!=" + player1 + " AND game IN (SELECT game FROM game_player WHERE player=" + player1 + ")";
+					outputWriter.print( getPlayerDetailsHtmlLink( player1, player1Name = getPlayerName( player1, connection ), null ) );
+					countQuery = "SELECT COUNT(DISTINCT player) FROM game_player WHERE player" + ( hasAka1 ? " NOT IN (" + akaIdList1 + ")" : "!=" + player1 ) + " AND game IN (SELECT game FROM game_player WHERE player" + ( hasAka1 ? " IN (" + akaIdList1 + ")" : "=" + player1 ) + ")";
 				}
 				else
 					countQuery = "SELECT COUNT(*) FROM player";
 				outputWriter.println( "</h3>" );
+				if ( hasAka1 ) {
+					statement = connection.createStatement();
+					outputWriter.print( "<p>AKAs included: " );
+					resultSet = statement.executeQuery( "SELECT id, name FROM player WHERE id IN (" + akaIdList1 + ") AND id!=" + player1 );
+					outputWriter.print( generatePlayerHtmlLinkListFromResultSet( resultSet ) );
+					resultSet.close();
+					statement.close();
+					outputWriter.print( "</p>" );
+				}
 				
 				// Pages count section
 				final int playersCount = executeCountStatement( countQuery, connection );
@@ -471,9 +490,9 @@ public class PlayersNetworkServlet extends BaseServlet {
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
 				String query;
 				if ( player1 == null )
-					query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game GROUP BY player.id, player.name";
+					query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time), SUM(game.frames) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game GROUP BY player.id, player.name";
 				else
-					query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game WHERE game_player.player!=" + player1 + " AND game_player.game IN (SELECT game FROM game_player WHERE player=" + player1 + ") GROUP BY player.id, player.name";
+					query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time), SUM(game.frames) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game WHERE game_player.player" + ( hasAka1 ? " NOT IN (" + akaIdList1 + ")" : "!=" + player1 ) + " AND game_player.game IN (SELECT game FROM game_player WHERE player" + ( hasAka1 ? " IN (" + akaIdList1 + ")" : "=" + player1 ) + ") GROUP BY player.id, player.name";
 				
 				query += " ORDER BY " + PLAYER_TABLE_HEADER.sortingColumns[ sortingIndex ] + ( sortingDesc ? " DESC" : "" )
 				       + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
@@ -487,11 +506,14 @@ public class PlayersNetworkServlet extends BaseServlet {
 					final int playerId = resultSet.getInt( 1 );
 					outputWriter.print( "<td>" + getPlayerDetailsHtmlLink( playerId, resultSet.getString( 2 ), null ) );
 					outputWriter.print( "<td align=center>" + ( player1 == null ? getGameListOfPlayerHtmlLink ( playerId, Integer.toString( resultSet.getInt( 3 ) ), false )
-							                                                    : getGameListOfPlayersHtmlLink( player1, playerId, Integer.toString( resultSet.getInt( 3 ) ), false ) ) );
+							                                                    : getGameListOfPlayersHtmlLink( player1, playerId, Integer.toString( resultSet.getInt( 3 ) ), includeAkas ) + ( hasAka1 ? " *" : "" ) ) );
 					outputWriter.print( "<td>" + SIMPLE_DATE_FORMAT.format( resultSet.getDate( 4 ) ) );
 					outputWriter.print( "<td>" + SIMPLE_DATE_FORMAT.format( resultSet.getDate( 5 ) ) );
+					outputWriter.print( "<td align=center>" + ReplayHeader.formatFrames( resultSet.getInt( 6 ), new StringBuilder(), true ) );
 				}
 				outputWriter.println( "</table>" );
+				if ( hasAka1 )
+					outputWriter.println( "<i>(* AKAs from the listed player are not included, only from " + encodeHtmlString( player1Name ) + ", the actual games count might be higher)</i>" );
 			}
 			else if ( entity.equals( ENTITY_AKA ) ) {
 				
@@ -720,7 +742,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				outputWriter.println( "<h3>Details of player " + playerNameHtml + "</h3>" );
 				
 				statement  = connection.createStatement();
-				resultSet  = statement.executeQuery( "SELECT COUNT(*), MIN(save_time), MAX(save_time) FROM game_player JOIN game on game.id=game_player.game WHERE player=" + entityId );
+				resultSet  = statement.executeQuery( "SELECT COUNT(*), MIN(save_time), MAX(save_time), SUM(frames) FROM game_player JOIN game on game.id=game_player.game WHERE player=" + entityId );
 				final String akaIdList = getPlayerAkaIdList( entityId, connection );
 				final boolean hasAka = akaIdList != null;
 				if ( hasAka ) {
@@ -729,7 +751,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.println( "<p>AKAs: " + generatePlayerHtmlLinkListFromResultSet( resultSet2 ) + "</p>" );
 					resultSet2.close();
 					
-					resultSet2 = statement.executeQuery( "SELECT COUNT(*), MIN(save_time), MAX(save_time) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ")" );
+					resultSet2 = statement.executeQuery( "SELECT COUNT(*), MIN(save_time), MAX(save_time), SUM(frames) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ")" );
 				}
 				
 				if ( resultSet.next() ) {
@@ -747,6 +769,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 					int days2 = 0; if ( hasAka ) days2 = 1 + (int) ( ( resultSet2.getDate( 3 ).getTime() - resultSet2.getDate( 2 ).getTime() ) / (1000l*60l*60l*24l) );
 					outputWriter.print( "<tr><th align=left>Presence:<td>" + formatDays( days ) );
 					if ( hasAka ) outputWriter.print( "<td>" + formatDays( days2 ) );
+					outputWriter.print( "<tr><th align=left>Total time in games:<td>" + ReplayHeader.formatFrames( resultSet.getInt( 4 ), new StringBuilder(), true ) );
+					if ( hasAka ) outputWriter.print( "<td>" + ReplayHeader.formatFrames( resultSet2.getInt( 4 ), new StringBuilder(), true ) );
 					outputWriter.print( "<tr><th align=left>Average games per day:<td>" + new Formatter().format( "%.2f", ( resultSet.getInt( 1 ) / (float) days ) ) );
 					if ( hasAka ) outputWriter.print( "<td>" + new Formatter().format( "%.2f", ( resultSet2.getInt( 1 ) / (float) days2 ) ) );
 					outputWriter.print( "<tr><th align=left>Game list:<td>" + getGameListOfPlayerHtmlLink( entityId, "Games of " + playerNameHtml, false ) );

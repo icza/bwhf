@@ -94,7 +94,7 @@ public class ReplayHeader {
 	 * @return the specified amount of frames in seconds
 	 */
 	public static int convertFramesToSeconds( final int frames ) {
-		return frames * 42 / 1000; 
+		return (int) (frames * 42l / 1000l); // Might overflow at around 600 hours (when calculating total times from many games); this works up to about 24000 hours
 	}
 	
 	/**
@@ -110,8 +110,9 @@ public class ReplayHeader {
 	 * @param frames amount of frames to be formatted
 	 * @param formatBuilder builder to be used to append the output to
 	 * @param longFormat tells if the required format is "hh:mm:ss" (no matter how short the game is)
+	 * @return the format builder used to append the result
 	 */
-	public static void formatFrames( final int frames, final StringBuilder formatBuilder, final boolean longFormat ) {
+	public static StringBuilder formatFrames( final int frames, final StringBuilder formatBuilder, final boolean longFormat ) {
 		int seconds = convertFramesToSeconds( frames );
 		
 		final int hours = seconds / 3600;
@@ -131,6 +132,8 @@ public class ReplayHeader {
 		if ( seconds < 10 )
 			formatBuilder.append( 0 );
 		formatBuilder.append( seconds );
+		
+		return formatBuilder;
 	}
 	
 	/**
@@ -138,9 +141,7 @@ public class ReplayHeader {
 	 * @return the duration as a human friendly string
 	 */
 	public String getDurationString( final boolean longFormat ) {
-		final StringBuilder formatBuilder = new StringBuilder();
-		formatFrames( gameFrames, formatBuilder, longFormat );
-		return formatBuilder.toString();
+		return formatFrames( gameFrames, new StringBuilder(), longFormat ).toString();
 	}
 	
 	/**
@@ -277,7 +278,7 @@ public class ReplayHeader {
 	}
 	
 	/** We store guessed version once it has been determined. */
-	private String guessedVersion;
+	public String guessedVersion;
 	
 	/**
 	 * Guesses the replay Starcraft version from the save date.
