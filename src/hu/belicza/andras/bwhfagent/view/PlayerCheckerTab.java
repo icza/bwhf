@@ -311,7 +311,7 @@ public class PlayerCheckerTab extends LoggedTab {
 	 * The returned array contains lowercased player names.<br>
 	 * The method only generates permutations for the first 5 'l's because player names can be up 15 (or something) chars,
 	 * and if all is 'l', it could define a really big amount of permutations.
-	 * @param playerName player name to permutate
+	 * @param playerName player name to be permutated
 	 * @return an array of possible player name permutations
 	 */
 	private static String[] generatePlayerNamePermutations( final String playerName ) {
@@ -329,7 +329,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		// Let's find the indices of 'l's
 		final int[] lsIndices = new int[ lsCount ];
 		int counter = 0;
-		for ( int i = playerName.length() - 1; i >= 0; i-- )
+		for ( int i = playerName.length() - 1; i >= 0 && counter < lsCount; i-- )
 			if ( playerName.charAt( i ) == 'l' )
 				lsIndices[ counter++ ] = i;
 		
