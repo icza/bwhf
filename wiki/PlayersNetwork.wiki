@@ -2,8 +2,12 @@
 
 =Players' Network=
 
+<wiki:toc max_depth="2" />
+
 Players' Network builds a network of Starcraft Broodwar players.
 It has a web interface:
 COMING SOON!
 
-The Players' Network automatically recognizes connections between replays where the same name is used for players.
+The Players' Network automatically recognizes connections between replays where the same name is used for players. With BWHF Agent you can automatically send info about every game you play, and you can send any old replays or entire folder of replays recursively.
+
+==Game list==
