@@ -11,7 +11,7 @@ COMING SOON!
 The Players' Network automatically recognizes connections between replays where the same name is used for players. With BWHF Agent you can automatically send info about every game you play, and you can send any old replays or entire folder of replays recursively.
 
 ==Game list==
-You can list the games that are added to the Players' Network. You can sort them by version, date, map name, duration etc. clicking on the columns.
+You can list the games that are added to the Players' Network. You can sort them by version, date, map name, duration etc. by clicking on the columns.
 
 ==Game details==
 You can see the details of a game if you click on its number. The game details page gives you other information of the game, and lists the players in it with other details like race, APM, actions and colors.
@@ -28,4 +28,4 @@ The players profile gives you statistical information about the player such as t
 If the player has registered akas, they will be listed, and all the mentioned details will be shown when all the akas are included in the calculation.
 
 ==AKA list==
-On this page you can check the registered AKAs. Every player being in the same AKA group denotes the same person behind the accounts.
+On this page you can check the registered AKAs. Every player being in the same AKA group denotes the same person behind the accounts of the group.
