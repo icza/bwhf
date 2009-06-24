@@ -952,7 +952,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * An HTML anchor tag will be returned whose text is the value of <code>text</code>.
 	 * @param playerId    id of the player
 	 * @param text        text to appear in the link
-	 * @param includeAkas tells if akas should be included (adds an extra parameter
+	 * @param includeAkas tells if akas should be included (adds an extra parameter)
 	 * @return an HTML link to the game list of a player
 	 */
 	private static String getGameListOfPlayerHtmlLink( final int playerId, final String text, final boolean includeAkas ) {
@@ -968,7 +968,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * @param player1Id   id of player #1
 	 * @param player2Id   id of player #2
 	 * @param text text   to appear in the link
-	 * @param includeAkas tells if akas should be included (adds an extra parameter
+	 * @param includeAkas tells if akas should be included (adds an extra parameter)
 	 * @return an HTML link to the game list of a player
 	 */
 	private static String getGameListOfPlayersHtmlLink( final int player1Id, final int player2Id, final String text, final boolean includeAkas ) {
@@ -984,7 +984,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * An HTML anchor tag will be returned whose text is the value of <code>text</code>.
 	 * @param playerId    id of the player who's mates are searched for
 	 * @param text        text to appear in the link
-	 * @param includeAkas tells if akas should be included (adds an extra parameter
+	 * @param includeAkas tells if akas should be included (adds an extra parameter)
 	 * @return an HTML link to the player list who played with a player
 	 */
 	private static String getPlayerListWhoPlayedWithAPlayerHtmlLink( final int playerId, final String text, final boolean includeAkas ) {
@@ -1003,9 +1003,10 @@ public class PlayersNetworkServlet extends BaseServlet {
 		outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'>" );
 		outputWriter.println( "</head><body><center>" );
 		outputWriter.println( "<h2>BWHF Players' Network</h2>" );
-		outputWriter.println( "<p><a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_GAME   + "'>Game list</a>"
-				   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_PLAYER + "'>Player list</a>"
-				   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_AKA    + "'>AKA list</a></p>" );
+		outputWriter.println(           "<p><a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_GAME   + "'>Game list</a>"
+				+ "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_PLAYER + "'>Player list</a>"
+				+ "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_AKA    + "'>AKA list</a>"
+				+ "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/PlayersNetwork'>Help</a></p>" );
 	}
 	
 	/**
