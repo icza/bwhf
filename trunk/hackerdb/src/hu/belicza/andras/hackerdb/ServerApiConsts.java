@@ -109,6 +109,8 @@ public class ServerApiConsts {
 	public static final String PN_REQUEST_PARAM_NAME_PLAYER2       = "player2";
 	/** Name of the include akas request parameter.       */
 	public static final String PN_REQUEST_PARAM_NAME_INCLUDE_AKAS  = "includeakas";
+	/** Name of the include akas request parameter.       */
+	public static final String PN_REQUEST_PARAM_NAME_NAME_FILTER   = "namefilter";
 	
 	/** Send game info operation value.   */
 	public static final String PN_OPERATION_SEND    = "send";
