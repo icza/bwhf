@@ -267,7 +267,7 @@ public class HackerDbServlet extends BaseServlet {
 			
 			outputWriter = response.getWriter();
 			
-			outputWriter.println( "<html><head><title>BWHF Hacker database</title>" );
+			outputWriter.println( "<html><head><title>BWHF Hacker Database</title>" );
 			outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>" );
 			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
 				outputWriter.println( ".gat" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
@@ -275,11 +275,11 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( ".sortCol {cursor:pointer;}</style></head><body style='background:#f7f7f7'><center>" );
 			
 			// Header section
-			outputWriter.println( "<h2>BWHF Hacker database</h2>" );
+			outputWriter.println( "<h2>BWHF Hacker Database</h2>" );
 			outputWriter.println( "<p><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a>"
 					   + "&nbsp;&nbsp;<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + "=" + OPERATION_STATISTICS + "'>Statistics</a>"
 					   + "&nbsp;&nbsp;<a href='players'>BWHF Players' Network</a><sup style='color:red;background:yellow;font-size:65%'>NEW!</sup>"
-					   + "&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help about this page (filters, sorting)</a></p>" );
+					   + "&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help (filters, sorting)</a></p>" );
 			
 			// Controls section
 			outputWriter.println( "<form id='" + FORM_ID + "' action='hackers' method='POST'>" );

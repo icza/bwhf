@@ -5,6 +5,7 @@ import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -315,7 +316,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			final boolean includeAkas = request.getParameter( PN_REQUEST_PARAM_NAME_INCLUDE_AKAS ) != null;
 			if ( includeAkas)
 				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_INCLUDE_AKAS );
-			final String pagerUrlWithoutSorting = pagerUrlBuilder.toString(); // For table headers to add proper sortings
+			String pagerUrlWithoutSorting = pagerUrlBuilder.toString(); // For table headers to add proper sortings
 			int sortingIndex = getIntParamValue( request, PN_REQUEST_PARAM_NAME_SORTING_INDEX, -1 );
 			boolean sortingDesc = request.getParameter( PN_REQUEST_PARAM_NAME_SORTING_DESC ) != null;
 			final TableHeader tableHeader = entity.equals( ENTITY_GAME ) ? GAME_TABLE_HEADER : entity.equals( ENTITY_PLAYER ) ? PLAYER_TABLE_HEADER : null;
@@ -326,6 +327,15 @@ public class PlayersNetworkServlet extends BaseServlet {
 			pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_SORTING_INDEX ).append( '=' ).append( sortingIndex );
 			if ( sortingDesc )
 				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_SORTING_DESC );
+			String nameFilter = request.getParameter( PN_REQUEST_PARAM_NAME_NAME_FILTER );
+			if ( nameFilter != null && nameFilter.length() == 0 )
+				nameFilter = null;
+			final String pagerUrlWithoutNameFilter = pagerUrlBuilder.toString(); // For adding new name filter
+			if ( nameFilter != null ) {
+				final String nameFilterParam = '&' + PN_REQUEST_PARAM_NAME_NAME_FILTER + '=' + URLEncoder.encode( nameFilter, "UTF-8" );
+				pagerUrlBuilder.append( nameFilterParam );
+				pagerUrlWithoutSorting += nameFilterParam;
+			}
 			
 			String akaIdList1 = null;
 			String akaIdList2 = null;
@@ -449,16 +459,21 @@ public class PlayersNetworkServlet extends BaseServlet {
 			}
 			else if ( entity.equals( ENTITY_PLAYER ) ) {
 				
+				String queryParam = nameFilter == null ? null : '%' + nameFilter + '%';
 				outputWriter.print( "<h3>Player list" );
 				String countQuery;
 				String player1Name = null;
 				if ( player1 != null ) {
 					outputWriter.print( " who played with " );
 					outputWriter.print( getPlayerDetailsHtmlLink( player1, player1Name = getPlayerName( player1, connection ), null ) );
-					countQuery = "SELECT COUNT(DISTINCT player) FROM game_player WHERE player" + ( hasAka1 ? " NOT IN (" + akaIdList1 + ")" : "!=" + player1 ) + " AND game IN (SELECT game FROM game_player WHERE player" + ( hasAka1 ? " IN (" + akaIdList1 + ")" : "=" + player1 ) + ")";
+					if ( nameFilter == null )
+						countQuery = "SELECT COUNT(DISTINCT player) FROM game_player WHERE player" + ( hasAka1 ? " NOT IN (" + akaIdList1 + ")" : "!=" + player1 ) + " AND game IN (SELECT game FROM game_player WHERE player" + ( hasAka1 ? " IN (" + akaIdList1 + ")" : "=" + player1 ) + ")";
+					else
+						countQuery = "SELECT COUNT(DISTINCT player) FROM game_player JOIN player on game_player.player=player.id WHERE player.name LIKE ? AND player" + ( hasAka1 ? " NOT IN (" + akaIdList1 + ")" : "!=" + player1 ) + " AND game IN (SELECT game FROM game_player WHERE player" + ( hasAka1 ? " IN (" + akaIdList1 + ")" : "=" + player1 ) + ")";
 				}
 				else
-					countQuery = "SELECT COUNT(*) FROM player";
+					countQuery = "SELECT COUNT(*) FROM player" + ( nameFilter == null ? "" : " WHERE name LIKE ?" );
+				
 				outputWriter.println( "</h3>" );
 				if ( hasAka1 ) {
 					statement = connection.createStatement();
@@ -470,17 +485,22 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.print( "</p>" );
 				}
 				
-				// Pages count section
-				final int playersCount = executeCountStatement( countQuery, connection );
-				outputWriter.println( "<p>Players count: <b>" + playersCount + "</b><br>" );
+				outputWriter.println( "<p>" );
 				
-				// Pager links section
-				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PAGE ).append( '=' );
+				// Pages count section
+				final int playersCount = queryParam == null ? executeCountStatement( countQuery, connection ) : executeCountStatement( countQuery, queryParam, connection );
 				final int maxPage = ( playersCount - 1 ) / PAGE_SIZE + 1;
 				if ( page < 1 )
 					page = 1;
 				if ( page > maxPage )
 					page = maxPage;
+				outputWriter.println( "Players count: <b>" + playersCount + "</b><br>" );
+				
+				// Filter section
+				outputWriter.println( "Filter by name: <input type=text id='8347'" + ( nameFilter == null ? "" : " value='" + encodeHtmlString( nameFilter ) + "'" ) + "> <a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "&" + PN_REQUEST_PARAM_NAME_NAME_FILTER + "='+escape(document.getElementById('8347').value);\">Apply filter</a><br>" );
+				
+				// Pager links section
+				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PAGE ).append( '=' );
 				renderPagerLinks( outputWriter, page, maxPage, pagerUrlBuilder.toString() );
 				outputWriter.println( "</p>" );
 				
@@ -490,17 +510,24 @@ public class PlayersNetworkServlet extends BaseServlet {
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
 				String query;
 				if ( player1 == null )
-					query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time), SUM(game.frames) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game GROUP BY player.id, player.name";
+					query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time), SUM(game.frames) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game" + ( nameFilter == null ? "" : " WHERE player.name LIKE ?" ) + " GROUP BY player.id, player.name";
 				else
-					query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time), SUM(game.frames) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game WHERE game_player.player" + ( hasAka1 ? " NOT IN (" + akaIdList1 + ")" : "!=" + player1 ) + " AND game_player.game IN (SELECT game FROM game_player WHERE player" + ( hasAka1 ? " IN (" + akaIdList1 + ")" : "=" + player1 ) + ") GROUP BY player.id, player.name";
+					query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time), SUM(game.frames) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game WHERE game_player.player" + ( hasAka1 ? " NOT IN (" + akaIdList1 + ")" : "!=" + player1 ) + " AND game_player.game IN (SELECT game FROM game_player WHERE player" + ( hasAka1 ? " IN (" + akaIdList1 + ")" : "=" + player1 ) + ")" + ( nameFilter == null ? "" : " AND player.name LIKE ?" ) + " GROUP BY player.id, player.name";
 				
 				query += " ORDER BY " + PLAYER_TABLE_HEADER.sortingColumns[ sortingIndex ] + ( sortingDesc ? " DESC" : "" )
 				       + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
 				
 				outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
 				renderSortingTableHeaderRow( outputWriter, PLAYER_TABLE_HEADER, pagerUrlWithoutSorting, sortingIndex, sortingDesc, page );
-				statement = connection.createStatement();
-				resultSet = statement.executeQuery( query );
+				if ( queryParam == null ) {
+					statement = connection.createStatement();
+					resultSet = statement.executeQuery( query );
+				}
+				else {
+					statement2 = connection.prepareStatement( query );
+					statement2.setString( 1, queryParam );
+					resultSet = statement2.executeQuery();
+				}
 				while ( resultSet.next() ) {
 					outputWriter.print( "<tr><td align=right>" + (++recordCounter) );
 					final int playerId = resultSet.getInt( 1 );
@@ -511,6 +538,10 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.print( "<td>" + SIMPLE_DATE_FORMAT.format( resultSet.getDate( 5 ) ) );
 					outputWriter.print( "<td align=center>" + ReplayHeader.formatFrames( resultSet.getInt( 6 ), new StringBuilder(), true ) );
 				}
+				if ( queryParam == null )
+					statement.close();
+				else
+					statement2.close();
 				outputWriter.println( "</table>" );
 				if ( hasAka1 )
 					outputWriter.println( "<i>(* AKAs from the listed player are not included, only from " + encodeHtmlString( player1Name ) + ", the actual games count might be higher)</i>" );
@@ -866,7 +897,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	/**
 	 * Executes a count statement and returns its result.<br>
 	 * If the query does not return anything, <code>0</code> is returned.
-	 * @param countQueyr the count SQL query
+	 * @param countQuery the count SQL query
 	 * @param connection connection to be used
 	 * @return the result of the count query, or <code>0</code> if the query does not return anything
 	 * @throws SQLException if SQLException occurs
@@ -878,6 +909,34 @@ public class PlayersNetworkServlet extends BaseServlet {
 		try {
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery( countQuery );
+			if ( resultSet.next() )
+				return resultSet.getInt( 1 );
+			else
+				return 0;
+		}
+		finally {
+			if ( resultSet != null ) try { resultSet.close(); } catch ( final SQLException se ) {}
+			if ( statement != null ) try { statement.close(); } catch ( final SQLException se ) {}
+		}
+	}
+	
+	/**
+	 * Executes a count statement and returns its result.<br>
+	 * If the query does not return anything, <code>0</code> is returned.
+	 * @param countQuery the count SQL query
+	 * @param queryParam query parameter
+	 * @param connection connection to be used
+	 * @return the result of the count query, or <code>0</code> if the query does not return anything
+	 * @throws SQLException if SQLException occurs
+	 */
+	private static int executeCountStatement( final String countQuery, final String queryParam, final Connection connection ) throws SQLException {
+		PreparedStatement statement = null;
+		ResultSet         resultSet = null;
+		
+		try {
+			statement = connection.prepareStatement( countQuery );
+			statement.setString( 1, queryParam );
+			resultSet = statement.executeQuery();
 			if ( resultSet.next() )
 				return resultSet.getInt( 1 );
 			else
