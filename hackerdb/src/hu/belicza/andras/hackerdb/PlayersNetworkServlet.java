@@ -498,7 +498,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				outputWriter.println( "Players count: <b>" + playersCount + "</b><br>" );
 				
 				// Filter section
-				outputWriter.println( "Filter by name: <input type=text id='8347'" + ( nameFilter == null ? "" : " value='" + encodeHtmlString( nameFilter ) + "'" ) + "> <a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "&" + PN_REQUEST_PARAM_NAME_NAME_FILTER + "='+escape(document.getElementById('8347').value);\">Apply</a>&nbsp;&nbsp;<a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "'\">Clear</a><br>" );
+				renderFiltersSection( outputWriter, nameFilter, page, pagerUrlWithoutNameFilter );
 				
 				// Pager links section
 				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PAGE ).append( '=' );
@@ -565,7 +565,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				outputWriter.println( "AKA groups count: <b>" + akaGroupsCount + "</b><br>" );
 				
 				// Filter section
-				outputWriter.println( "Filter by name: <input type=text id='8347'" + ( nameFilter == null ? "" : " value='" + encodeHtmlString( nameFilter ) + "'" ) + "> <a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "&" + PN_REQUEST_PARAM_NAME_NAME_FILTER + "='+escape(document.getElementById('8347').value);\">Apply</a>&nbsp;&nbsp;<a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "'\">Clear</a><br>" );
+				renderFiltersSection( outputWriter, nameFilter, page, pagerUrlWithoutNameFilter );
 				
 				// Pager links section
 				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PAGE ).append( '=' );
@@ -895,6 +895,23 @@ public class PlayersNetworkServlet extends BaseServlet {
 	}
 	
 	/**
+	 * Renders the filter section.
+	 * @param outputWriter output writer to use
+	 * @param nameFilter   value of the name filter
+	 * @param page         current page
+	 * @param maxPage      max page
+	 * @param pagerUrl     url to be used for the pager links; ends with '=' and only the target page number have to be appended
+	 */
+	private static void renderFiltersSection( final PrintWriter outputWriter, final String nameFilter, final int page, final String pagerUrlWithoutNameFilter ) {
+		outputWriter.println( "Filter by name: <input type=text id='8347'"
+				+ ( nameFilter == null ? "" : " value='" + encodeHtmlString( nameFilter ) + "'" )
+				+ "> <a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter
+				+ '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page
+				+ "&" + PN_REQUEST_PARAM_NAME_NAME_FILTER + "='+escape(document.getElementById('8347').value);\">Apply</a>&nbsp;&nbsp;<a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter
+				+ '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "'\">Clear</a><br>" );
+	}
+	
+	/**
 	 * Renders the pager link to the output.
 	 * @param outputWriter output writer to use
 	 * @param page         current page
@@ -904,7 +921,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	private static void renderPagerLinks( final PrintWriter outputWriter, final int page, final int maxPage, final String pagerUrl ) {
 		if ( page > 1 ) {
 			outputWriter.print( "<a href='" + pagerUrl + "1'>First</a>&nbsp;&nbsp;" );
-			outputWriter.print( "<a href='" + pagerUrl + ( page - 1 ) + "'>Previous</a>" );
+			outputWriter.print( "<a href='" + pagerUrl + ( page - 1 ) + "'>Prev</a>" );
 		}
 		else {
 			outputWriter.print( "First&nbsp;&nbsp;Previous" );
@@ -917,6 +934,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 		else {
 			outputWriter.print( "Next&nbsp;&nbsp;Last" );
 		}
+		outputWriter.print( "&nbsp;&nbsp;|&nbsp;&nbsp;To page: <input id='2130' type=text size=1> <a href='#' onclick=\"javascript:window.location='"
+				+ pagerUrl + "'+escape(document.getElementById('2130').value);\">Jump</a>" );
 	}
 	
 	/**
