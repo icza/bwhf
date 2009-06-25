@@ -297,6 +297,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 		ResultSet         resultSet    = null;
 		PreparedStatement statement2   = null;
 		ResultSet         resultSet2   = null;
+		PreparedStatement statement3   = null;
 		
 		try {
 			outputWriter = response.getWriter();
@@ -330,6 +331,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			String nameFilter = request.getParameter( PN_REQUEST_PARAM_NAME_NAME_FILTER );
 			if ( nameFilter != null && nameFilter.length() == 0 )
 				nameFilter = null;
+			final String queryParam = nameFilter == null ? null : '%' + nameFilter + '%';
 			final String pagerUrlWithoutNameFilter = pagerUrlBuilder.toString(); // For adding new name filter
 			if ( nameFilter != null ) {
 				final String nameFilterParam = '&' + PN_REQUEST_PARAM_NAME_NAME_FILTER + '=' + URLEncoder.encode( nameFilter, "UTF-8" );
@@ -459,7 +461,6 @@ public class PlayersNetworkServlet extends BaseServlet {
 			}
 			else if ( entity.equals( ENTITY_PLAYER ) ) {
 				
-				String queryParam = nameFilter == null ? null : '%' + nameFilter + '%';
 				outputWriter.print( "<h3>Player list" );
 				String countQuery;
 				String player1Name = null;
@@ -497,11 +498,12 @@ public class PlayersNetworkServlet extends BaseServlet {
 				outputWriter.println( "Players count: <b>" + playersCount + "</b><br>" );
 				
 				// Filter section
-				outputWriter.println( "Filter by name: <input type=text id='8347'" + ( nameFilter == null ? "" : " value='" + encodeHtmlString( nameFilter ) + "'" ) + "> <a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "&" + PN_REQUEST_PARAM_NAME_NAME_FILTER + "='+escape(document.getElementById('8347').value);\">Apply</a> <a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "'\">Clear</a><br>" );
+				outputWriter.println( "Filter by name: <input type=text id='8347'" + ( nameFilter == null ? "" : " value='" + encodeHtmlString( nameFilter ) + "'" ) + "> <a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "&" + PN_REQUEST_PARAM_NAME_NAME_FILTER + "='+escape(document.getElementById('8347').value);\">Apply</a>&nbsp;&nbsp;<a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "'\">Clear</a><br>" );
 				
 				// Pager links section
 				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PAGE ).append( '=' );
 				renderPagerLinks( outputWriter, page, maxPage, pagerUrlBuilder.toString() );
+				
 				outputWriter.println( "</p>" );
 				
 				outputWriter.flush();
@@ -551,30 +553,47 @@ public class PlayersNetworkServlet extends BaseServlet {
 				outputWriter.print( "<h3>Registered AKA list" );
 				outputWriter.println( "</h3>" );
 				
-				// Pages count section
-				final int akaGroupsCount = executeCountStatement( "SELECT COUNT(*) FROM aka_group", connection );
-				outputWriter.println( "<p>AKA groups count: <b>" + akaGroupsCount + "</b><br>" );
+				outputWriter.println( "<p>" );
 				
-				// Pager links section
-				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PAGE ).append( '=' );
+				// Pages count section
+				final int akaGroupsCount = nameFilter == null ? executeCountStatement( "SELECT COUNT(*) FROM aka_group", connection ) : executeCountStatement( "SELECT COUNT(DISTINCT aka_group.id) FROM aka_group JOIN player on aka_group.id=player.aka_group WHERE player.name LIKE ?", queryParam, connection );
 				final int maxPage = ( akaGroupsCount - 1 ) / PAGE_SIZE + 1;
 				if ( page < 1 )
 					page = 1;
 				if ( page > maxPage )
 					page = maxPage;
+				outputWriter.println( "AKA groups count: <b>" + akaGroupsCount + "</b><br>" );
+				
+				// Filter section
+				outputWriter.println( "Filter by name: <input type=text id='8347'" + ( nameFilter == null ? "" : " value='" + encodeHtmlString( nameFilter ) + "'" ) + "> <a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "&" + PN_REQUEST_PARAM_NAME_NAME_FILTER + "='+escape(document.getElementById('8347').value);\">Apply</a>&nbsp;&nbsp;<a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "'\">Clear</a><br>" );
+				
+				// Pager links section
+				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PAGE ).append( '=' );
 				renderPagerLinks( outputWriter, page, maxPage, pagerUrlBuilder.toString() );
+				
 				outputWriter.println( "</p>" );
 				
 				outputWriter.flush();
 				
 				// Aka group data section
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
-				String query = "SELECT id FROM aka_group WHERE 1=1 LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
+				String query;
+				if ( nameFilter == null )
+					query = "SELECT id FROM aka_group WHERE 1=1 LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
+				else
+					query = "SELECT DISTINCT id FROM aka_group JOIN player on aka_group.id=player.aka_group WHERE player.name LIKE ? LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
 				
 				outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
 				renderSortingTableHeaderRow( outputWriter, AKA_GROUPS_TABLE_HEADER, pagerUrlWithoutSorting, sortingIndex, sortingDesc, page );
-				statement = connection.createStatement();
-				resultSet = statement.executeQuery( query );
+				if ( nameFilter == null ) {
+					statement = connection.createStatement();
+					resultSet = statement.executeQuery( query );
+				}
+				else {
+					statement3 = connection.prepareStatement( query );
+					statement3.setString( 1, queryParam );
+					resultSet = statement3.executeQuery();
+				}
 				statement2 = connection.prepareStatement( "SELECT id, name FROM player WHERE aka_group=?" );
 				while ( resultSet.next() ) {
 					outputWriter.print( "<tr><td align=right>" + (++recordCounter) );
@@ -586,6 +605,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 					resultSet2.close();
 				}
 				statement2.close();
+				resultSet.close();
+				if ( nameFilter == null )
+					statement.close();
+				else
+					statement3.close();
 				outputWriter.println( "</table>" );
 				
 			}
@@ -598,6 +622,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 		catch ( final SQLException se ) {
 		}
 		finally {
+			if ( statement3 != null ) try { statement3.close(); } catch ( final SQLException se ) {}
 			if ( resultSet2 != null ) try { resultSet2.close(); } catch ( final SQLException se ) {}
 			if ( statement2 != null ) try { statement2.close(); } catch ( final SQLException se ) {}
 			if ( resultSet != null ) try { resultSet.close(); } catch ( final SQLException se ) {}

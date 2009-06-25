@@ -621,7 +621,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Generate HTML output
 			outputWriter = response.getWriter();
 			
-			outputWriter.println( "<html><head><title>BWHF Hacker database statistics</title>" );
+			outputWriter.println( "<html><head><title>BWHF Hacker Database Statistics</title>" );
 			outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>" );
 			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
 				outputWriter.println( ".gat" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
@@ -629,7 +629,7 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( "</style></head><body style='background:#f7f7f7'><center>" );
 			
 			// Header section
-			outputWriter.println( "<h2>BWHF Hacker database statistics</h2>" );
+			outputWriter.println( "<h2>BWHF Hacker Database Statistics</h2>" );
 			outputWriter.println( "<table border=0><tr><td><a href='hackers'>Back to the hacker list</a><td>&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></table>" );
 			
 			outputWriter.println( "<h3>Hacker distribution between gateways</h3>" );
