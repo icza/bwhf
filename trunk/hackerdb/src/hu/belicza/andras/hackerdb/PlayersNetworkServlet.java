@@ -497,7 +497,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				outputWriter.println( "Players count: <b>" + playersCount + "</b><br>" );
 				
 				// Filter section
-				outputWriter.println( "Filter by name: <input type=text id='8347'" + ( nameFilter == null ? "" : " value='" + encodeHtmlString( nameFilter ) + "'" ) + "> <a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "&" + PN_REQUEST_PARAM_NAME_NAME_FILTER + "='+escape(document.getElementById('8347').value);\">Apply filter</a><br>" );
+				outputWriter.println( "Filter by name: <input type=text id='8347'" + ( nameFilter == null ? "" : " value='" + encodeHtmlString( nameFilter ) + "'" ) + "> <a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "&" + PN_REQUEST_PARAM_NAME_NAME_FILTER + "='+escape(document.getElementById('8347').value);\">Apply</a> <a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter + '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "'\">Clear</a><br>" );
 				
 				// Pager links section
 				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PAGE ).append( '=' );
