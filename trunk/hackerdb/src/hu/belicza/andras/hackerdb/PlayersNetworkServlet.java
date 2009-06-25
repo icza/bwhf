@@ -834,8 +834,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 					if ( hasAka ) outputWriter.print( "<td>" + ReplayHeader.formatFrames( resultSet2.getInt( 4 ), new StringBuilder(), true ) );
 					outputWriter.print( "<tr><th align=left>Average games per day:<td>" + new Formatter().format( "%.2f", ( resultSet.getInt( 1 ) / (float) days ) ) );
 					if ( hasAka ) outputWriter.print( "<td>" + new Formatter().format( "%.2f", ( resultSet2.getInt( 1 ) / (float) days2 ) ) );
-					outputWriter.print( "<tr><th align=left>Race distribution:<td>Zerg: " + new Formatter().format( "%.2f", ( resultSet.getInt( 5 ) / (float) gamesCount ) ) + "%, Terran: " + new Formatter().format( "%.2f", ( resultSet.getInt( 6 ) / (float) gamesCount ) ) + "%, Protoss: " + new Formatter().format( "%.2f", ( resultSet.getInt( 7 ) / (float) gamesCount ) ) + "%" );
-					if ( hasAka ) outputWriter.print( "<td>Zerg: " + new Formatter().format( "%.2f", ( resultSet2.getInt( 5 ) / (float) gamesCount2 ) ) + "%, Terran: " + new Formatter().format( "%.2f", ( resultSet2.getInt( 6 ) / (float) gamesCount2 ) ) + "%, Protoss: " + new Formatter().format( "%.2f", ( resultSet2.getInt( 7 ) / (float) gamesCount2 ) ) + "%" );
+					outputWriter.print( "<tr><th align=left>Race distribution:<td>Zerg: " + ( resultSet.getInt( 5 ) * 100 / gamesCount ) + "%, Terran: " + ( resultSet.getInt( 6 ) * 100 / gamesCount ) + "%, Protoss: " + ( resultSet.getInt( 7 ) * 100 / gamesCount ) + "%" );
+					if ( hasAka ) outputWriter.print( "<td>Zerg: " + ( resultSet2.getInt( 5 ) * 100 / gamesCount2 ) + "%, Terran: " + ( resultSet2.getInt( 6 ) * 100 / gamesCount2 ) + "%, Protoss: " + ( resultSet2.getInt( 7 ) * 100 / gamesCount2 ) + "%" );
 					outputWriter.print( "<tr><th align=left>Game list:<td>" + getGameListOfPlayerHtmlLink( entityId, "Games of " + playerNameHtml, false ) );
 					if ( hasAka ) outputWriter.print( "<td>" + getGameListOfPlayerHtmlLink( entityId, "Games with AKAs included", true ) );
 					outputWriter.print( "<tr><th align=left>Player list:<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Who played with " + playerNameHtml + "?", false ) );
@@ -1084,7 +1084,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 */
 	private void renderHeader( final PrintWriter outputWriter ) {
 		outputWriter.println( "<html><head><title>BWHF Players' Network</title>" );
-		outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'>" );
+		outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>p,h2,h3 {margin:6;padding:0;}</style>" );
 		outputWriter.println( "</head><body><center>" );
 		outputWriter.println( "<h2>BWHF Players' Network</h2>" );
 		outputWriter.println(           "<p><a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_GAME   + "'>Game list</a>"

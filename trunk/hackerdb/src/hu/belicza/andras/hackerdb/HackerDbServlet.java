@@ -268,7 +268,7 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter = response.getWriter();
 			
 			outputWriter.println( "<html><head><title>BWHF Hacker Database</title>" );
-			outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>" );
+			outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>p,h2,h3 {margin:6;padding:0;}" );
 			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
 				outputWriter.println( ".gat" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
 			outputWriter.println( ".gatUn {" + UNKNOWN_GATEWAY_STYLE + "}" );
@@ -622,7 +622,7 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter = response.getWriter();
 			
 			outputWriter.println( "<html><head><title>BWHF Hacker Database Statistics</title>" );
-			outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>" );
+			outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>p,h2,h3 {margin:6;padding:0;}" );
 			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
 				outputWriter.println( ".gat" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
 			outputWriter.println( ".gatUn {" + UNKNOWN_GATEWAY_STYLE + "}" );
