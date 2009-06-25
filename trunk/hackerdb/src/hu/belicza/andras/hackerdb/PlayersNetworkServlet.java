@@ -321,7 +321,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			int sortingIndex = getIntParamValue( request, PN_REQUEST_PARAM_NAME_SORTING_INDEX, -1 );
 			boolean sortingDesc = request.getParameter( PN_REQUEST_PARAM_NAME_SORTING_DESC ) != null;
 			final TableHeader tableHeader = entity.equals( ENTITY_GAME ) ? GAME_TABLE_HEADER : entity.equals( ENTITY_PLAYER ) ? PLAYER_TABLE_HEADER : null;
-			if ( tableHeader != null && ( sortingIndex <= 0 || sortingIndex >= tableHeader.sortingColumns.length ) ) {
+			if ( tableHeader != null && ( sortingIndex <= 0 || sortingIndex >= tableHeader.sortingColumns.length || tableHeader.sortingColumns[ sortingIndex ] == null ) ) {
 				sortingIndex = tableHeader.defaultSortingIndex;
 				sortingDesc  = tableHeader.sortingDefaultDescs[ sortingIndex ];
 			}
