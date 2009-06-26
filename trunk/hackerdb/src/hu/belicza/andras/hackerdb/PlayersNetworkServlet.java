@@ -401,6 +401,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				// Pages count section
 				final int gamesCount = executeCountStatement( countQuery, connection );
 				outputWriter.println( "<p>Games count: <b>" + gamesCount + "</b><br>" );
+				outputWriter.flush();
 				
 				// Pager links section
 				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PAGE ).append( '=' );
@@ -411,8 +412,6 @@ public class PlayersNetworkServlet extends BaseServlet {
 					page = maxPage;
 				renderPagerLinks( outputWriter, page, maxPage, pagerUrlBuilder.toString() );
 				outputWriter.println( "</p>" );
-				
-				outputWriter.flush();
 				
 				// Game data section
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
@@ -497,6 +496,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				if ( page > maxPage )
 					page = maxPage;
 				outputWriter.println( "Players count: <b>" + playersCount + "</b><br>" );
+				outputWriter.flush();
 				
 				// Filter section
 				renderFiltersSection( outputWriter, nameFilter, page, pagerUrlWithoutNameFilter );
@@ -506,8 +506,6 @@ public class PlayersNetworkServlet extends BaseServlet {
 				renderPagerLinks( outputWriter, page, maxPage, pagerUrlBuilder.toString() );
 				
 				outputWriter.println( "</p>" );
-				
-				outputWriter.flush();
 				
 				// Player data section
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
@@ -564,6 +562,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				if ( page > maxPage )
 					page = maxPage;
 				outputWriter.println( "AKA groups count: <b>" + akaGroupsCount + "</b><br>" );
+				outputWriter.flush();
 				
 				// Filter section
 				renderFiltersSection( outputWriter, nameFilter, page, pagerUrlWithoutNameFilter );
@@ -573,8 +572,6 @@ public class PlayersNetworkServlet extends BaseServlet {
 				renderPagerLinks( outputWriter, page, maxPage, pagerUrlBuilder.toString() );
 				
 				outputWriter.println( "</p>" );
-				
-				outputWriter.flush();
 				
 				// Aka group data section
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
@@ -645,7 +642,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 */
 	private static void renderSortingTableHeaderRow( final PrintWriter outputWriter, final TableHeader tableHeader, String pagerUrlWithoutSorting, final int sortingIndex, final boolean sortingDesc, final int currentPage ) {
 		pagerUrlWithoutSorting += '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + currentPage;
-		outputWriter.print( "<tr>" );
+		outputWriter.print( "<tr style='background:#cccccc'>" );
 		
 		for ( int i = 0; i < tableHeader.headers.length; i++ )
 			if ( tableHeader.sortingColumns[ i ] == null )
@@ -926,7 +923,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			outputWriter.print( "<a href='" + pagerUrl + ( page - 1 ) + "'>Prev</a>" );
 		}
 		else {
-			outputWriter.print( "First&nbsp;&nbsp;Previous" );
+			outputWriter.print( "First&nbsp;&nbsp;Prev" );
 		}
 		outputWriter.print( "&nbsp;&nbsp;|&nbsp;&nbsp;Page <b>" + page + "</b> out of <b>" + maxPage + "</b>.&nbsp;&nbsp;|&nbsp;&nbsp;" );
 		if ( page < maxPage ) {
