@@ -150,3 +150,7 @@ CREATE INDEX idx_game_frames ON game (frames);
 CREATE INDEX idx_game_map ON game (map_name);
 CREATE INDEX idx_game_type ON game (type);
 CREATE INDEX idx_game_save_time ON game (save_time);
+--
+DROP INDEX idx_game_player_game_player IF EXISTS;
+CREATE INDEX idx_game_player_game_player ON game_player (game,player);
+CREATE INDEX idx_player_id_name ON player (id,name);
