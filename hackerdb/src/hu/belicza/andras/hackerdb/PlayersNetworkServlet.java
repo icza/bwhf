@@ -300,6 +300,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 		PreparedStatement statement3   = null;
 		
 		try {
+			response.setCharacterEncoding( "UTF-8" );
 			outputWriter = response.getWriter();
 			
 			connection = dataSource.getConnection();
@@ -727,6 +728,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 		try {
 			connection = dataSource.getConnection();
 			
+			response.setCharacterEncoding( "UTF-8" );
 			outputWriter = response.getWriter();
 			
 			renderHeader( outputWriter );
@@ -834,8 +836,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 					if ( hasAka ) outputWriter.print( "<td>" + ReplayHeader.formatFrames( resultSet2.getInt( 4 ), new StringBuilder(), true ) );
 					outputWriter.print( "<tr><th align=left>Average games per day:<td>" + new Formatter().format( "%.2f", ( resultSet.getInt( 1 ) / (float) days ) ) );
 					if ( hasAka ) outputWriter.print( "<td>" + new Formatter().format( "%.2f", ( resultSet2.getInt( 1 ) / (float) days2 ) ) );
-					outputWriter.print( "<tr><th align=left>Race distribution:<td>Zerg: " + ( resultSet.getInt( 5 ) * 100 / gamesCount ) + "%, Terran: " + ( resultSet.getInt( 6 ) * 100 / gamesCount ) + "%, Protoss: " + ( resultSet.getInt( 7 ) * 100 / gamesCount ) + "%" );
-					if ( hasAka ) outputWriter.print( "<td>Zerg: " + ( resultSet2.getInt( 5 ) * 100 / gamesCount2 ) + "%, Terran: " + ( resultSet2.getInt( 6 ) * 100 / gamesCount2 ) + "%, Protoss: " + ( resultSet2.getInt( 7 ) * 100 / gamesCount2 ) + "%" );
+					outputWriter.print( "<tr><th align=left>Race distribution:<td>Zerg: " + (int) ( resultSet.getInt( 5 ) * 100.0f / gamesCount + 0.5f ) + "%, Terran: " + (int) ( resultSet.getInt( 6 ) * 100.0f / gamesCount + 0.5f ) + "%, Protoss: " + (int) ( resultSet.getInt( 7 ) * 100.0f / gamesCount + 0.5f ) + "%" );
+					if ( hasAka ) outputWriter.print( "<td>Zerg: " + (int) ( resultSet2.getInt( 5 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Terran: " + (int) ( resultSet2.getInt( 6 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Protoss: " + (int) ( resultSet2.getInt( 7 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
 					outputWriter.print( "<tr><th align=left>Game list:<td>" + getGameListOfPlayerHtmlLink( entityId, "Games of " + playerNameHtml, false ) );
 					if ( hasAka ) outputWriter.print( "<td>" + getGameListOfPlayerHtmlLink( entityId, "Games with AKAs included", true ) );
 					outputWriter.print( "<tr><th align=left>Player list:<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Who played with " + playerNameHtml + "?", false ) );
@@ -1102,7 +1104,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * @param outputWriter writer to be used to render
 	 */
 	private void renderHeader( final PrintWriter outputWriter ) {
-		outputWriter.println( "<html><head><title>BWHF Players' Network</title>" );
+		outputWriter.println( "<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"><title>BWHF Players' Network</title>" );
 		outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>p,h2,h3 {margin:6;padding:0;}</style>" );
 		outputWriter.println( "</head><body><center>" );
 		outputWriter.println( "<h2>BWHF Players' Network</h2>" );
