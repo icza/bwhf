@@ -24,10 +24,12 @@ import javax.servlet.http.HttpServletResponse;
 
 /**
  * Servlet to handle adding new games to the Players' Network database.
- * 
  * @author Andras Belicza
  */
 public class PlayersNetworkServlet extends BaseServlet {
+	
+	// TODO: gateway => useast; invalid date, what to do about it?
+	
 	
 	/** Simple date format to format and parse replay save time. */
 	private static final DateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd" );
