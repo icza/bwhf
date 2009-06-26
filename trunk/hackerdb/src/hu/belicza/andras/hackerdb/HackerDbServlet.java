@@ -227,6 +227,7 @@ public class HackerDbServlet extends BaseServlet {
 	private void serveHackerList( final FiltersWrapper filtersWrapper, final HttpServletResponse response ) {
 		setNoCache( response );
 		response.setContentType( "text/html" );
+		response.setCharacterEncoding( "UTF-8" );
 		
 		Connection        connection = null;
 		PreparedStatement statement  = null;
@@ -267,7 +268,7 @@ public class HackerDbServlet extends BaseServlet {
 			
 			outputWriter = response.getWriter();
 			
-			outputWriter.println( "<html><head><title>BWHF Hacker Database</title>" );
+			outputWriter.println( "<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"><title>BWHF Hacker Database</title>" );
 			outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>p,h2,h3 {margin:6;padding:0;}" );
 			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
 				outputWriter.println( ".gat" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
@@ -504,6 +505,7 @@ public class HackerDbServlet extends BaseServlet {
 	private void serveStatistics( final HttpServletResponse response ) {
 		setNoCache( response );
 		response.setContentType( "text/html" );
+		response.setCharacterEncoding( "UTF-8" );
 		
 		Connection connection = null;
 		Statement  statement  = null;
@@ -621,7 +623,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Generate HTML output
 			outputWriter = response.getWriter();
 			
-			outputWriter.println( "<html><head><title>BWHF Hacker Database Statistics</title>" );
+			outputWriter.println( "<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"><title>BWHF Hacker Database Statistics</title>" );
 			outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>p,h2,h3 {margin:6;padding:0;}" );
 			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
 				outputWriter.println( ".gat" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
