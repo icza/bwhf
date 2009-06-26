@@ -273,7 +273,7 @@ public class HackerDbServlet extends BaseServlet {
 			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
 				outputWriter.println( ".gat" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
 			outputWriter.println( ".gatUn {" + UNKNOWN_GATEWAY_STYLE + "}" );
-			outputWriter.println( ".sortCol {cursor:pointer;}</style></head><body style='background:#f7f7f7'><center>" );
+			outputWriter.println( ".sortCol {cursor:pointer;}</style></head><body><center>" );
 			
 			// Header section
 			outputWriter.println( "<h2>BWHF Hacker Database</h2>" );
@@ -628,7 +628,7 @@ public class HackerDbServlet extends BaseServlet {
 			for ( int i = 0; i < GATEWAY_STYLES.length; i++ )
 				outputWriter.println( ".gat" + i + " {" + GATEWAY_STYLES[ i ] + "}" );
 			outputWriter.println( ".gatUn {" + UNKNOWN_GATEWAY_STYLE + "}" );
-			outputWriter.println( "</style></head><body style='background:#f7f7f7'><center>" );
+			outputWriter.println( "</style></head><body><center>" );
 			
 			// Header section
 			outputWriter.println( "<h2>BWHF Hacker Database Statistics</h2>" );

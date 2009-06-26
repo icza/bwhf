@@ -305,7 +305,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			
 			connection = dataSource.getConnection();
 			
-			renderHeader( outputWriter );
+			renderHeader( request, outputWriter );
 			
 			final StringBuilder pagerUrlBuilder = new StringBuilder( "players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + entity );
 			final Integer player1 = getIntegerParamValue( request, PN_REQUEST_PARAM_NAME_PLAYER1 );
@@ -612,7 +612,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				
 			}
 			
-			renderFooter( outputWriter );
+			renderFooter( request, outputWriter );
 		}
 		catch ( final IOException ie ) {
 			ie.printStackTrace();
@@ -728,7 +728,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			response.setCharacterEncoding( "UTF-8" );
 			outputWriter = response.getWriter();
 			
-			renderHeader( outputWriter );
+			renderHeader( request, outputWriter );
 			
 			if ( entity.equals( ENTITY_GAME ) ) {
 				
@@ -853,7 +853,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				
 			}
 			
-			renderFooter( outputWriter );
+			renderFooter( request, outputWriter );
 		}
 		catch ( final IOException ie ) {
 			ie.printStackTrace();
@@ -1098,9 +1098,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 	
 	/**
 	 * Renders the header for the output pages.
+	 * @param request      http request
 	 * @param outputWriter writer to be used to render
 	 */
-	private void renderHeader( final PrintWriter outputWriter ) {
+	private static void renderHeader( final HttpServletRequest request, final PrintWriter outputWriter ) {
+		request.setAttribute( "startTimeNanos", System.nanoTime() ); 
 		outputWriter.println( "<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"><title>BWHF Players' Network</title>" );
 		outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>p,h2,h3 {margin:6;padding:0;}</style>" );
 		outputWriter.println( "</head><body><center>" );
@@ -1113,10 +1115,15 @@ public class PlayersNetworkServlet extends BaseServlet {
 	
 	/**
 	 * Renders the footer for the output pages.
+	 * @param request      http request
 	 * @param outputWriter writer to be used to render
 	 */
-	private void renderFooter( final PrintWriter outputWriter ) {
-		outputWriter.println( "<hr><table border=0 width='100%'><tr><td width='50%' align='left'><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a>&nbsp;&nbsp;<a href='hackers'>BWHF Hacker Database</a><td align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></table>" );
+	private static void renderFooter( final HttpServletRequest request, final PrintWriter outputWriter ) {
+		final int  executionMs = (int) ( ( System.nanoTime() - (Long) request.getAttribute( "startTimeNanos" ) ) / 1000000l );
+		
+		outputWriter.println( "<hr><table border=0 width='100%'><tr><td width='40%' align='left'><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a>&nbsp;&nbsp;<a href='hackers'>BWHF Hacker Database</a>"
+							+ "<td align=center width='20%'><i>served in " + (executionMs / 1000) + " sec, " + (executionMs % 1000) + " ms</i>"
+							+ "<td align=right widht='40%'><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></table>" );
 		outputWriter.println( "</center></body></html>" );
 	}
 	
