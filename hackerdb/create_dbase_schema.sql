@@ -117,10 +117,14 @@ CREATE CACHED TABLE aka_group (
 
 -- Players of games
 CREATE CACHED TABLE player (
-    id        IDENTITY,
-    name      VARCHAR,
-    aka_group INT,
-    version   TIMESTAMP DEFAULT NOW,
+    id           IDENTITY,
+    name         VARCHAR,
+    aka_group    INT,
+    games_count  INT DEFAULT 0, -- redundant data to speed up player listing
+    first_game   TIMESTAMP,     -- time of first game, redundant data to speed up player listing
+    last_game    TIMESTAMP,     -- time of last game, redundant data to speed up player listing
+    total_frames INT DEFAULT 0, -- total frames in games, redundant data to speed up player listing
+    version      TIMESTAMP DEFAULT NOW,
     FOREIGN KEY (aka_group) REFERENCES aka_group(id) ON DELETE CASCADE
 );
 
@@ -139,18 +143,9 @@ CREATE CACHED TABLE game_player (
 );
 
 
-DROP INDEX idx_player_name IF EXISTS;
-DROP INDEX idx_game_frames IF EXISTS;
-DROP INDEX idx_game_map IF EXISTS;
-DROP INDEX idx_game_type IF EXISTS;
-DROP INDEX idx_game_save_time IF EXISTS;
-
-CREATE INDEX idx_player_name ON player (name);
-CREATE INDEX idx_game_frames ON game (frames);
-CREATE INDEX idx_game_map ON game (map_name);
-CREATE INDEX idx_game_type ON game (type);
-CREATE INDEX idx_game_save_time ON game (save_time);
---
-DROP INDEX idx_game_player_game_player IF EXISTS;
-CREATE INDEX idx_game_player_game_player ON game_player (game,player);
-CREATE INDEX idx_player_id_name ON player (id,name);
+DROP INDEX idx_player__name IF EXISTS;
+DROP INDEX idx_player__id_name IF EXISTS;
+DROP INDEX idx_game_player__game_player IF EXISTS;
+CREATE INDEX idx_player__name ON player (name);
+CREATE INDEX idx_player__id_name ON player (id,name);
+CREATE INDEX idx_game_player__game_player ON game_player (game,player);

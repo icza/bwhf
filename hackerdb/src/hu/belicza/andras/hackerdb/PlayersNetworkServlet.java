@@ -41,7 +41,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * @author Andras Belicza
 	 */
 	private static class TableHeader {
-		/** Defines which columns are sortable; <code>null</code> values specifies columns which cannot be bases of sorting. */
+		/** Defines which columns are sortable; <code>null</code> values specify columns which cannot be bases of sorting. */
 		public final String[]  sortingColumns;
 		/** Text values of the header cells. */
 		public final String[]  headers;
@@ -59,15 +59,22 @@ public class PlayersNetworkServlet extends BaseServlet {
 	}
 	
 	/** Header of the game table. */
-	private static final TableHeader GAME_TABLE_HEADER   = new TableHeader(
+	private static final TableHeader GAME_TABLE_HEADER = new TableHeader(
 			new String[]  { null     , "save_time", "map_name", "frames"  , "type"     , "save_time", null      },
 			new String[]  { "Details", "Engine"   , "Map"     , "Duration", "Game type", "Played on", "Players" },
 			new boolean[] { false    , true       , false     , true      , false      , true       , false     },
 			5
 			
 	);
-	/** Header of the game table. */
+	/** Header of the player table. */
 	private static final TableHeader PLAYER_TABLE_HEADER = new TableHeader(
+			new String[]  { null , "name"       , "games_count"     , "first_game"         , "last_game"          , "total_frames"        },
+			new String[]  { "#"  , "Player"     , "Games count"     , "First game"         , "Last game"          , "Total time in games" },
+			new boolean[] { false, false        , true              , true                 , true                 , true                  },
+			2
+	);
+	/** Header of the player table with player. */
+	private static final TableHeader PLAYER_TABLE_PLAYER_HEADER = new TableHeader(
 			new String[]  { null , "player.name", "COUNT(player.id)", "MIN(game.save_time)", "MAX(game.save_time)", "SUM(game.frames)"    },
 			new String[]  { "#"  , "Player"     , "Games count"     , "First game"         , "Last game"          , "Total time in games" },
 			new boolean[] { false, false        , true              , true                 , true                 , true                  },
@@ -204,15 +211,15 @@ public class PlayersNetworkServlet extends BaseServlet {
 				connection.setAutoCommit( false );
 				
 				// First create the players
-				for ( int i = 0; i < playerNameList.size(); i++ ) {
+				for ( final String playerName : playerNameList ) {
 					// Check if player already exists
 					statement = connection.prepareStatement( "SELECT id FROM player WHERE name=?" );
-					statement.setString( 1, playerNameList.get( i ) );
+					statement.setString( 1, playerName );
 					resultSet = statement.executeQuery();
 					if ( !resultSet.next() ) {
 						// Player doesn't exist, let's create it
 						statement2 = connection.prepareStatement( "INSERT INTO player (name) VALUES (?)" );
-						statement2.setString( 1, playerNameList.get( i ) );
+						statement2.setString( 1, playerName );
 						if ( statement2.executeUpdate() == 0 )
 							throw new Exception( "Could not insert player!" );
 						statement2.close();
@@ -246,7 +253,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					throw new Exception( "Could not insert game!" );
 				statement.close();
 				
-				// Lastly insert the connections between the game and players
+				// Insert the connections between the game and players
 				statement = connection.prepareStatement( "INSERT INTO game_player (game,player,race,actions_count,color) VALUES ((select max(id) from game),(select id from player where name=?),?,?,?)" );
 				for ( int i = 0; i < playerNameList.size(); i++ ) {
 					colCounter = 1;
@@ -260,6 +267,21 @@ public class PlayersNetworkServlet extends BaseServlet {
 				}
 				statement.close();
 				
+				// Lastly update redundant data
+				statement = connection.prepareStatement( "UPDATE player SET games_count=games_count+1, first_game=CASE WHEN ?<first_game THEN first_game ELSE ? END, last_game=CASE WHEN ?>last_game THEN last_game ELSE ? END, total_frames=total_frames+? WHERE name=?" );
+				for ( final String playerName : playerNameList ) {
+					colCounter = 1;
+					statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
+					statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
+					statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
+					statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
+					statement.setInt      ( colCounter++, frames                    );
+					statement.setString   ( colCounter++, playerName                );
+					
+					if ( statement.executeUpdate() == 0 )
+						throw new Exception( "Could not update player: " + playerName + "!" );
+				}
+				statement.close();
 				connection.commit();
 			}
 			
@@ -323,7 +345,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			String pagerUrlWithoutSorting = pagerUrlBuilder.toString(); // For table headers to add proper sortings
 			int sortingIndex = getIntParamValue( request, PN_REQUEST_PARAM_NAME_SORTING_INDEX, -1 );
 			boolean sortingDesc = request.getParameter( PN_REQUEST_PARAM_NAME_SORTING_DESC ) != null;
-			final TableHeader tableHeader = entity.equals( ENTITY_GAME ) ? GAME_TABLE_HEADER : entity.equals( ENTITY_PLAYER ) ? PLAYER_TABLE_HEADER : null;
+			final TableHeader tableHeader = entity.equals( ENTITY_GAME ) ? GAME_TABLE_HEADER : entity.equals( ENTITY_PLAYER ) ? ( player1 == null ? PLAYER_TABLE_HEADER : PLAYER_TABLE_PLAYER_HEADER ) : entity.equals( ENTITY_AKA ) ? AKA_GROUPS_TABLE_HEADER : null;
 			if ( tableHeader != null && ( sortingIndex <= 0 || sortingIndex >= tableHeader.sortingColumns.length || tableHeader.sortingColumns[ sortingIndex ] == null ) ) {
 				sortingIndex = tableHeader.defaultSortingIndex;
 				sortingDesc  = tableHeader.sortingDefaultDescs[ sortingIndex ];
@@ -425,11 +447,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 				else
 					query = "SELECT DISTINCT game.id, engine, save_time, map_name, frames, type FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR game_player.player=" + player2 ) + " GROUP BY game.id, engine, save_time, map_name, frames, type HAVING COUNT(*)=2";
 				
-				query += " ORDER BY " + GAME_TABLE_HEADER.sortingColumns[ sortingIndex ] + ( sortingDesc ? " DESC" : "" )
+				query += " ORDER BY " + tableHeader.sortingColumns[ sortingIndex ] + ( sortingDesc ? " DESC" : "" )
 				       + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
 				
 				outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
-				renderSortingTableHeaderRow( outputWriter, GAME_TABLE_HEADER, pagerUrlWithoutSorting, sortingIndex, sortingDesc, page );
+				renderSortingTableHeaderRow( outputWriter, tableHeader, pagerUrlWithoutSorting, sortingIndex, sortingDesc, page );
 				statement = connection.createStatement();
 				resultSet = statement.executeQuery( query );
 				final ReplayHeader replayHeader = new ReplayHeader();
@@ -513,15 +535,16 @@ public class PlayersNetworkServlet extends BaseServlet {
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
 				String query;
 				if ( player1 == null )
-					query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time), SUM(game.frames) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game" + ( nameFilter == null ? "" : " WHERE player.name LIKE ?" ) + " GROUP BY player.id, player.name";
+					query = "SELECT id, name, games_count, first_game, last_game, total_frames FROM player" + ( nameFilter == null ? "" : " WHERE player.name LIKE ?" );
+					//query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time), SUM(game.frames) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game" + ( nameFilter == null ? "" : " WHERE player.name LIKE ?" ) + " GROUP BY player.id, player.name";
 				else
 					query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time), SUM(game.frames) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game WHERE game_player.player" + ( hasAka1 ? " NOT IN (" + akaIdList1 + ")" : "!=" + player1 ) + " AND game_player.game IN (SELECT game FROM game_player WHERE player" + ( hasAka1 ? " IN (" + akaIdList1 + ")" : "=" + player1 ) + ")" + ( nameFilter == null ? "" : " AND player.name LIKE ?" ) + " GROUP BY player.id, player.name";
 				
-				query += " ORDER BY " + PLAYER_TABLE_HEADER.sortingColumns[ sortingIndex ] + ( sortingDesc ? " DESC" : "" )
+				query += " ORDER BY " + tableHeader.sortingColumns[ sortingIndex ] + ( sortingDesc ? " DESC" : "" )
 				       + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
 				
 				outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
-				renderSortingTableHeaderRow( outputWriter, PLAYER_TABLE_HEADER, pagerUrlWithoutSorting, sortingIndex, sortingDesc, page );
+				renderSortingTableHeaderRow( outputWriter, tableHeader, pagerUrlWithoutSorting, sortingIndex, sortingDesc, page );
 				if ( queryParam == null ) {
 					statement = connection.createStatement();
 					resultSet = statement.executeQuery( query );
@@ -584,7 +607,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					query = "SELECT DISTINCT id FROM aka_group JOIN player on aka_group.id=player.aka_group WHERE player.name LIKE ? LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
 				
 				outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
-				renderSortingTableHeaderRow( outputWriter, AKA_GROUPS_TABLE_HEADER, pagerUrlWithoutSorting, sortingIndex, sortingDesc, page );
+				renderSortingTableHeaderRow( outputWriter, tableHeader, pagerUrlWithoutSorting, sortingIndex, sortingDesc, page );
 				if ( nameFilter == null ) {
 					statement = connection.createStatement();
 					resultSet = statement.executeQuery( query );
@@ -737,7 +760,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				outputWriter.println( "<h3>Details of game id=" + entityId + " </h3>" );
 				
 				statement = connection.createStatement();
-				resultSet = statement.executeQuery( "SELECT engine, frames, save_time, name, map_width, map_height, type, creator_name, map_name, gateway FROM game WHERE id=" + entityId );
+				resultSet = statement.executeQuery( "SELECT engine, frames, save_time, name, map_width, map_height, type, creator_name, map_name, COALESCE(gateway,-1) FROM game WHERE id=" + entityId );
 				
 				if ( resultSet.next() ) {
 					final ReplayHeader replayHeader = new ReplayHeader();
@@ -751,7 +774,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					replayHeader.gameType    = (short) resultSet.getInt( colCounter++ );
 					replayHeader.creatorName = resultSet.getString( colCounter++ );
 					replayHeader.mapName     = resultSet.getString( colCounter++ );
-					final Integer gateway    = resultSet.getInt( colCounter++ );
+					final int gateway        = resultSet.getInt( colCounter++ );
 					
 					outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
 					outputWriter.println( "<tr><th align=left>Game engine:<td>" + replayHeader.getGameEngineString() );
@@ -763,7 +786,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.println( "<tr><th align=left>Map size:<td>" + replayHeader.getMapSize() );
 					outputWriter.println( "<tr><th align=left>Creator name:<td>" + replayHeader.creatorName );
 					outputWriter.println( "<tr><th align=left>Game type:<td>" + ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ] );
-					if ( gateway != null && gateway >= 0 && gateway < GATEWAYS.length )
+					if ( gateway >= 0 && gateway < GATEWAYS.length )
 						outputWriter.print( "<tr><th align=left>Reported gateway:<td>" + GATEWAYS[ gateway ] );
 					
 					final int seconds = replayHeader.getDurationSeconds();
@@ -1124,7 +1147,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 		final int  executionMs = (int) ( ( System.nanoTime() - (Long) request.getAttribute( "startTimeNanos" ) ) / 1000000l );
 		
 		outputWriter.println( "<hr><table border=0 width='100%'><tr><td width='40%' align='left'><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a>&nbsp;&nbsp;<a href='hackers'>BWHF Hacker Database</a>"
-							+ "<td align=center width='20%'><i>served in " + (executionMs / 1000) + " sec, " + (executionMs % 1000) + " ms</i>"
+							+ "<td align=center width='20%'><i>Served in " + (executionMs / 1000) + " sec, " + (executionMs % 1000) + " ms</i>"
 							+ "<td align=right widht='40%'><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></table>" );
 		outputWriter.println( "</center></body></html>" );
 	}
