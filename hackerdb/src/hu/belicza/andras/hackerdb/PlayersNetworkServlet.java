@@ -1,6 +1,22 @@
 package hu.belicza.andras.hackerdb;
 
-import static hu.belicza.andras.hackerdb.ServerApiConsts.*;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_AKA;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_GAME;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_PLAYER;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.GATEWAYS;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_DETAILS;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_LIST;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_SEND;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY_ID;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_INCLUDE_AKAS;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_NAME_FILTER;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_OPERATION;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_PAGE;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_PLAYER1;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_PLAYER2;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_SORTING_DESC;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_SORTING_INDEX;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.IOException;
@@ -14,8 +30,10 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Formatter;
 import java.util.List;
 
@@ -33,6 +51,18 @@ public class PlayersNetworkServlet extends BaseServlet {
 	
 	/** Simple date format to format and parse replay save time. */
 	private static final DateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd" );
+	/** Earliest date of the replays. */
+	private static final long       EARLIEST_REPLAY_DATE; 
+	static {
+		try {
+			// Version 1.08 introduced replay which was released on 2001-05-18. -2 day for time zone issues.
+			EARLIEST_REPLAY_DATE = SIMPLE_DATE_FORMAT.parse( "2001-05-16" ).getTime();
+		} catch ( final ParseException pe ) {
+			throw new RuntimeException( pe );
+		}
+	}
+	/** Cached string for the "<unkown>" html string. */
+	private static final String UNKOWN_HTML_STRING = encodeHtmlString( "<unknown>" );
 	/** Size of the list in one page. */
 	private static final int PAGE_SIZE = 25;
 	
@@ -147,7 +177,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 */
 	private void handleSend( final HttpServletRequest request, final HttpServletResponse response ) {
 		int engine = 0, frames = 0, mapWidth = 0, mapHeight = 0, speed = 0, type = 0, subType = 0;
-		long saveTime = 0l;
+		Long saveTime = null;
 		String name = null, creatorName = null, mapName = null, replayMd5 = null, agentVersion = null;
 		final List< String  > playerNameList    = new ArrayList< String  >( 8 );
 		final List< Integer > playerRaceList    = new ArrayList< Integer >( 8 );
@@ -158,7 +188,9 @@ public class PlayersNetworkServlet extends BaseServlet {
 		try {
 			engine       = Integer.parseInt( request.getParameter( ServerApiConsts.GAME_PARAM_ENGINE ) );
 			frames       = Integer.parseInt( request.getParameter( ServerApiConsts.GAME_PARAM_FRAMES ) );
-			saveTime     = Long.parseLong( request.getParameter( ServerApiConsts.GAME_PARAM_SAVE_TIME ) );
+			saveTime     = Long.valueOf( request.getParameter( ServerApiConsts.GAME_PARAM_SAVE_TIME ) );
+			if ( saveTime < EARLIEST_REPLAY_DATE || saveTime > new Date().getTime() + 48*60*60*1000l ) // Allowing 2 days for time zone issues...
+				saveTime = null;
 			name         = request.getParameter( ServerApiConsts.GAME_PARAM_NAME );
 			mapWidth     = Integer.parseInt( request.getParameter( ServerApiConsts.GAME_PARAM_MAP_WIDTH  ) );
 			mapHeight    = Integer.parseInt( request.getParameter( ServerApiConsts.GAME_PARAM_MAP_HEIGHT ) );
@@ -268,7 +300,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				statement.close();
 				
 				// Lastly update redundant data
-				statement = connection.prepareStatement( "UPDATE player SET games_count=games_count+1, first_game=CASE WHEN ?<first_game THEN first_game ELSE ? END, last_game=CASE WHEN ?>last_game THEN last_game ELSE ? END, total_frames=total_frames+? WHERE name=?" );
+				statement = connection.prepareStatement( "UPDATE player SET games_count=games_count+1, first_game=CASE WHEN ?>first_game THEN first_game ELSE ? END, last_game=CASE WHEN ?<last_game THEN last_game ELSE ? END, total_frames=total_frames+? WHERE name=?" );
 				for ( final String playerName : playerNameList ) {
 					colCounter = 1;
 					statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
@@ -468,11 +500,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 					replayHeader.gameType   = (short) resultSet.getInt( colCounter++ );
 					
 					outputWriter.print( "<tr><td align=right>" + getGameDetailsHtmlLink( gameId, Integer.toString( ++recordCounter ) ) + "&nbsp;" );
-					outputWriter.print( "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate() );
+					outputWriter.print( "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + ( replayHeader.saveTime == null ? "" : replayHeader.guessVersionFromDate() ) );
 					outputWriter.print( "<td>" + replayHeader.mapName );
 					outputWriter.print( "<td>" + replayHeader.getDurationString( true ) );
 					outputWriter.print( "<td>" + ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ] );
-					outputWriter.print( "<td>" + SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ) );
+					outputWriter.print( "<td>" + ( replayHeader.saveTime == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ) ) );
 					
 					statement2.setInt( 1, gameId );
 					resultSet2 = statement2.executeQuery();
@@ -536,7 +568,6 @@ public class PlayersNetworkServlet extends BaseServlet {
 				String query;
 				if ( player1 == null )
 					query = "SELECT id, name, games_count, first_game, last_game, total_frames FROM player" + ( nameFilter == null ? "" : " WHERE player.name LIKE ?" );
-					//query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time), SUM(game.frames) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game" + ( nameFilter == null ? "" : " WHERE player.name LIKE ?" ) + " GROUP BY player.id, player.name";
 				else
 					query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time), SUM(game.frames) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game WHERE game_player.player" + ( hasAka1 ? " NOT IN (" + akaIdList1 + ")" : "!=" + player1 ) + " AND game_player.game IN (SELECT game FROM game_player WHERE player" + ( hasAka1 ? " IN (" + akaIdList1 + ")" : "=" + player1 ) + ")" + ( nameFilter == null ? "" : " AND player.name LIKE ?" ) + " GROUP BY player.id, player.name";
 				
@@ -560,8 +591,10 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.print( "<td>" + getPlayerDetailsHtmlLink( playerId, resultSet.getString( 2 ), null ) );
 					outputWriter.print( "<td align=center>" + ( player1 == null ? getGameListOfPlayerHtmlLink ( playerId, Integer.toString( resultSet.getInt( 3 ) ), false )
 							                                                    : getGameListOfPlayersHtmlLink( player1, playerId, Integer.toString( resultSet.getInt( 3 ) ), includeAkas ) + ( hasAka1 ? " *" : "" ) ) );
-					outputWriter.print( "<td>" + SIMPLE_DATE_FORMAT.format( resultSet.getDate( 4 ) ) );
-					outputWriter.print( "<td>" + SIMPLE_DATE_FORMAT.format( resultSet.getDate( 5 ) ) );
+					final Date firstGameDate = resultSet.getDate( 4 );
+					final Date lastGameDate  = resultSet.getDate( 5 );
+					outputWriter.print( "<td>" + ( firstGameDate == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( firstGameDate ) ) );
+					outputWriter.print( "<td>" + ( lastGameDate  == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( lastGameDate  ) ) );
 					outputWriter.print( "<td align=center>" + ReplayHeader.formatFrames( resultSet.getInt( 6 ), new StringBuilder(), true ) );
 				}
 				if ( queryParam == null )
@@ -780,7 +813,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.println( "<tr><th align=left>Game engine:<td>" + replayHeader.getGameEngineString() );
 					outputWriter.println( "<tr><th align=left>Version:<td>" + replayHeader.guessVersionFromDate() );
 					outputWriter.println( "<tr><th align=left>Duration:<td>" + replayHeader.getDurationString( false ) );
-					outputWriter.println( "<tr><th align=left>Saved on:<td>" + replayHeader.saveTime );
+					outputWriter.println( "<tr><th align=left>Saved on:<td>" + ( replayHeader.saveTime == null ? UNKOWN_HTML_STRING : replayHeader.saveTime ) );
 					outputWriter.println( "<tr><th align=left>Game name:<td>" + replayHeader.gameName );
 					outputWriter.println( "<tr><th align=left>Map name:<td>" + replayHeader.mapName );
 					outputWriter.println( "<tr><th align=left>Map size:<td>" + replayHeader.getMapSize() );
@@ -801,7 +834,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 							colorName = ReplayHeader.IN_GAME_COLOR_NAMES[ resultSet2.getInt( 5 ) ];
 						}
 						catch ( final Exception e ) {
-							colorName = "<unknown>";
+							colorName = UNKOWN_HTML_STRING;
 						}
 						outputWriter.print( "<td>" + ReplayHeader.RACE_NAMES[ resultSet2.getInt( 3 ) ] );
 						outputWriter.print( "<td align=right>" + resultSet2.getInt( 4 ) );
@@ -845,19 +878,26 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.print( "<tr><th align=left>Games count:<td>" + gamesCount );
 					if ( hasAka ) outputWriter.print( "<td>" + gamesCount2 );
 					
-					outputWriter.print( "<tr><th align=left>First game:<td>" + SIMPLE_DATE_FORMAT.format( resultSet.getDate( 2 ) ) );
-					if ( hasAka ) outputWriter.print( "<td>" + SIMPLE_DATE_FORMAT.format( resultSet2.getDate( 2 ) ) );
-					outputWriter.print( "<tr><th align=left>Last game:<td>" + SIMPLE_DATE_FORMAT.format( resultSet.getDate( 3 ) ) );
-					if ( hasAka ) outputWriter.print( "<td>" + SIMPLE_DATE_FORMAT.format( resultSet2.getDate( 3 ) ) );
-					final int days  = 1 + (int) ( ( resultSet.getDate( 3 ).getTime() - resultSet.getDate( 2 ).getTime() ) / (1000l*60l*60l*24l) );
-					final int days2 = hasAka ? 1 + (int) ( ( resultSet2.getDate( 3 ).getTime() - resultSet2.getDate( 2 ).getTime() ) / (1000l*60l*60l*24l) ) : 0;
-					outputWriter.print( "<tr><th align=left>Presence:<td>" + formatDays( days ) );
-					if ( hasAka ) outputWriter.print( "<td>" + formatDays( days2 ) );
+					final Date firstGameDate = resultSet.getDate( 2 );
+					outputWriter.print( "<tr><th align=left>First game:<td>" + ( firstGameDate == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( firstGameDate ) ) );
+					Date firstGameDate2 = null;
+					if ( hasAka ) { firstGameDate2 = resultSet2.getDate( 2 ); outputWriter.print( "<td>" + ( firstGameDate2 == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( firstGameDate2 ) ) ); }
+					final Date lastGameDate = resultSet.getDate( 3 );
+					outputWriter.print( "<tr><th align=left>Last game:<td>" + ( lastGameDate == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( lastGameDate ) ) );
+					Date lastGameDate2 = null;
+					if ( hasAka ) { lastGameDate2 = resultSet2.getDate( 3 ); outputWriter.print( "<td>" + ( lastGameDate2 == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( lastGameDate2 ) ) ); }
+					int days = 0, days2 = 0;
+					if ( firstGameDate != null )  // if first game date not null => last not null
+						days  = 1 + (int) ( ( lastGameDate.getTime() - firstGameDate.getTime() ) / (1000l*60l*60l*24l) );
+					if ( firstGameDate2 != null ) // if first game date not null => last not null
+						days2 = hasAka ? 1 + (int) ( ( lastGameDate2.getTime() - firstGameDate2.getTime() ) / (1000l*60l*60l*24l) ) : 0;
+					outputWriter.print( "<tr><th align=left>Presence:<td>" + ( firstGameDate == null ? UNKOWN_HTML_STRING : formatDays( days ) ) );
+					if ( hasAka ) outputWriter.print( "<td>" + ( firstGameDate2 == null ? UNKOWN_HTML_STRING : formatDays( days2 ) ) );
 					
 					outputWriter.print( "<tr><th align=left>Total time in games:<td>" + ReplayHeader.formatFrames( resultSet.getInt( 4 ), new StringBuilder(), true ) );
 					if ( hasAka ) outputWriter.print( "<td>" + ReplayHeader.formatFrames( resultSet2.getInt( 4 ), new StringBuilder(), true ) );
-					outputWriter.print( "<tr><th align=left>Average games per day:<td>" + new Formatter().format( "%.2f", ( resultSet.getInt( 1 ) / (float) days ) ) );
-					if ( hasAka ) outputWriter.print( "<td>" + new Formatter().format( "%.2f", ( resultSet2.getInt( 1 ) / (float) days2 ) ) );
+					outputWriter.print( "<tr><th align=left>Average games per day:<td>" + ( firstGameDate == null ? UNKOWN_HTML_STRING : new Formatter().format( "%.2f", ( resultSet.getInt( 1 ) / (float) days ) ) ) );
+					if ( hasAka ) outputWriter.print( "<td>" + ( firstGameDate2 == null ? UNKOWN_HTML_STRING : new Formatter().format( "%.2f", ( resultSet2.getInt( 1 ) / (float) days2 ) ) ) );
 					outputWriter.print( "<tr><th align=left>Race distribution:<td>Zerg: " + (int) ( resultSet.getInt( 5 ) * 100.0f / gamesCount + 0.5f ) + "%, Terran: " + (int) ( resultSet.getInt( 6 ) * 100.0f / gamesCount + 0.5f ) + "%, Protoss: " + (int) ( resultSet.getInt( 7 ) * 100.0f / gamesCount + 0.5f ) + "%" );
 					if ( hasAka ) outputWriter.print( "<td>Zerg: " + (int) ( resultSet2.getInt( 5 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Terran: " + (int) ( resultSet2.getInt( 6 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Protoss: " + (int) ( resultSet2.getInt( 7 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
 					outputWriter.print( "<tr><th align=left>Game list:<td>" + getGameListOfPlayerHtmlLink( entityId, "Games of " + playerNameHtml, false ) );

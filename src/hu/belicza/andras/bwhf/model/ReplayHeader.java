@@ -190,8 +190,9 @@ public class ReplayHeader {
 		if ( playerIndex < 0 )
 			return null;
 		
-		final Integer apm = playerIdActionsCounts[ playerIds[ playerIndex ] ] * 60 / Math.max( getDurationSeconds(), 1 );
-		return playerNames[ playerIndex ] + " (" + RACE_CHARACTERS[ playerRaces[ playerIndex ] ] + "), actions: " + playerIdActionsCounts[ playerIds[ playerIndex ] ] + ", APM: " + apm;
+		final int actionsCount = playerIds[ playerIndex ] < playerIdActionsCounts.length ? playerIdActionsCounts[ playerIds[ playerIndex ] ] : 0;
+		final Integer apm =  actionsCount * 60 / Math.max( getDurationSeconds(), 1 );
+		return playerNames[ playerIndex ] + " (" + RACE_CHARACTERS[ playerRaces[ playerIndex ] ] + "), actions: " + actionsCount + ", APM: " + apm;
 	}
 	
 	/**
@@ -233,10 +234,11 @@ public class ReplayHeader {
 				catch ( final Exception e ) {
 					colorName = "<unknown>";
 				}
+				final int actionsCount = playerIds[ i ] < playerIdActionsCounts.length ? playerIdActionsCounts[ playerIds[ i ] ] : 0;
 				final String playerDescription = "    " + playerNames[ i ] + " (" + RACE_CHARACTERS[ playerRaces[ i ] ] 
-				                + "), color: " + colorName + ", actions: " + playerIdActionsCounts[ playerIds[ i ] ] 
-				                + ", APM: " + ( playerIdActionsCounts[ playerIds[ i ] ] * 60 / seconds );
-				playerDescriptionList.add( new Object[] { playerIdActionsCounts[ playerIds[ i ] ], playerDescription } );
+				                + "), color: " + colorName + ", actions: " + actionsCount 
+				                + ", APM: " + ( actionsCount * 60 / seconds );
+				playerDescriptionList.add( new Object[] { actionsCount, playerDescription } );
 			}
 		
 		Collections.sort( playerDescriptionList, new Comparator< Object[] >() {

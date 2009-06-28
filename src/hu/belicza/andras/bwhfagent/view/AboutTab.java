@@ -53,20 +53,28 @@ public class AboutTab extends Tab {
 	 */
 	private void buildGUI() {
 		final JPanel buttonsPanel = Utils.createWrapperPanel();
-		final JButton homePageButton = new JButton( "Visit home page", IconResourceManager.ICON_WORLD_GO );
-		homePageButton.addActionListener( new ActionListener() {
+		JButton button = new JButton( "Visit home page", IconResourceManager.ICON_WORLD_GO );
+		button.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				Utils.showURLInBrowser( Consts.HOME_PAGE_URL );
 			}
 		} );
-		buttonsPanel.add( homePageButton );
-		final JButton databaseButton = new JButton( "View online hacker database", IconResourceManager.ICON_WORLD_GO );
-		databaseButton.addActionListener( new ActionListener() {
+		buttonsPanel.add( button );
+		button = new JButton( "View online hacker database", IconResourceManager.ICON_WORLD_GO );
+		button.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				Utils.showURLInBrowser( Consts.BWHF_HACKER_DATA_BASE_SERVER_URL );
 			}
 		} );
-		buttonsPanel.add( databaseButton );
+		buttonsPanel.add( button );
+		buttonsPanel.add( button );
+		button = new JButton( "Visit Players' Network", IconResourceManager.ICON_WORLD_GO );
+		button.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				Utils.showURLInBrowser( Consts.PLAYERS_NETWORK_PAGE_URL );
+			}
+		} );
+		buttonsPanel.add( button );
 		contentBox.add( buttonsPanel );
 		
 		if ( SwingWTUtils.isWindows() ) {
