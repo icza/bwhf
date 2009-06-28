@@ -233,6 +233,7 @@ public class AutoscanTab extends LoggedTab {
 				final JTextField starcraftFolderTextField           = MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField;
 				final JCheckBox  skipLatterActionsOfHackersCheckBox = MainFrame.getInstance().generalSettingsTab.skipLatterActionsOfHackersCheckBox;
 				
+				Date autoscanEnabledTime       = null;
 				long lastModifiedOfLastChecked = new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ).lastModified(); // Last modified time of the LastReplay.rep that was checked lastly; this will be 0l if 'LastRepay.rep' does not yet exist.
 				while ( true ) {
 					try {
@@ -254,6 +255,16 @@ public class AutoscanTab extends LoggedTab {
 								}.start();
 							
 							if ( autoscanEnabledCheckBox.isSelected() ) {
+								if ( autoscanEnabledTime == null )
+									autoscanEnabledTime = new Date();
+							}
+							else
+								autoscanEnabledTime = null;
+							
+							if ( autoscanEnabledTime != null && newLastReplayLastModified >= autoscanEnabledTime.getTime() ) {
+								if ( autoscanEnabledTime == null )
+									autoscanEnabledTime = new Date();
+								
 								final String autosavedFileName = useShortNamesForAutosaveCheckBox.isSelected() ? Utils.SHORT_DATE_FORMAT.format( new Date() ) + ".rep" : Utils.DATE_FORMAT.format( new Date() ) + " LastRep.rep";
 								if ( saveAllRepsCheckBox.isSelected() )
 									Utils.copyFile( lastReplayFile, new File( allRepsDestinationTextField.getText() ), autosavedFileName );

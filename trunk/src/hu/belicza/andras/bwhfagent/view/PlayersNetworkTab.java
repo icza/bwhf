@@ -246,7 +246,7 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 					if ( replayHeader.playerNames[ i ] != null ) {
 						appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_PLAYER_NAME    + playerCounter, replayHeader.playerNames[ i ] );
 						appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_PLAYER_RACE    + playerCounter, Integer.toString( replayHeader.playerRaces[ i ] & 0xff ) );
-						appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_PLAYER_ACTIONS + playerCounter, Integer.toString( replayHeader.playerIdActionsCounts[ replayHeader.playerIds[ i ] ] ) );
+						appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_PLAYER_ACTIONS + playerCounter, Integer.toString( replayHeader.playerIds[ i ] < replayHeader.playerIdActionsCounts.length ? replayHeader.playerIdActionsCounts[ replayHeader.playerIds[ i ] ] : 0 ) );
 						appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_PLAYER_COLOR   + playerCounter, Integer.toString( replayHeader.playerColors[ i ] ) );
 						playerCounter++;
 					}
