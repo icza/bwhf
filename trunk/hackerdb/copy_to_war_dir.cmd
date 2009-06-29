@@ -3,7 +3,7 @@
 %~d0
 cd "%~dp0"
 
-SET WAR_DIR="T:\hackerdb2"
+SET WAR_DIR="T:\hackerdb"
 
 IF NOT EXIST %WAR_DIR% md %WAR_DIR%
 

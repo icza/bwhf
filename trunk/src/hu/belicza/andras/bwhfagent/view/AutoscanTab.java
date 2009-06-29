@@ -240,7 +240,7 @@ public class AutoscanTab extends LoggedTab {
 						final File lastReplayFile      = new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME );
 						long newLastReplayLastModified = lastReplayFile.lastModified();
 						
-						if ( newLastReplayLastModified != lastModifiedOfLastChecked ) {
+						if ( newLastReplayLastModified != lastModifiedOfLastChecked && newLastReplayLastModified > 0l ) {
 							sleep( 1500l ); // Wait a little for Starcraft to finish saving replay...
 							// lastModified property changes when replay saving finishes, so we query it again:
 							newLastReplayLastModified = lastReplayFile.lastModified();
