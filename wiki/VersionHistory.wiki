@@ -10,7 +10,7 @@
 
 ----
 ===2.41 2009-06-29===
- * Autosending info about last replay did not include gateway information. This is fixed now.
+ * Autosending info about last replay did not include gateway information. It is added now.
 
 ----
 ===2.40 2009-06-29===
