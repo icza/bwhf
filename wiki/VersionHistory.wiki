@@ -5,8 +5,13 @@
 <wiki:toc max_depth="3" />
 
 ----
+===2.42 2009-06-29===
+ * Replay autosave function (and therefore autoscan and report) was not working properly in version 2.40 and 2.41. This is fixed now.
+
+----
 ===2.41 2009-06-29===
  * Autosending info about last replay did not include gateway information. This is fixed now.
+
 ----
 ===2.40 2009-06-29===
  * A new *Players' Network* tab where you can add any old replays (or folder of replays recursively) to the Players' Network. You can enable/disable autosending info about '!LastReplay.rep'. Sending twice exactly the same replay will only appear in the database once.
