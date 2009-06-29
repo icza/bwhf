@@ -386,8 +386,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 			if ( sortingDesc )
 				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_SORTING_DESC );
 			String nameFilter = request.getParameter( PN_REQUEST_PARAM_NAME_NAME_FILTER );
-			if ( nameFilter != null && nameFilter.length() == 0 )
-				nameFilter = null;
+			if ( nameFilter != null )
+				nameFilter = nameFilter.length() == 0 ? null : nameFilter.toLowerCase();
 			final String queryParam = nameFilter == null ? null : '%' + nameFilter + '%';
 			final String pagerUrlWithoutNameFilter = pagerUrlBuilder.toString(); // For adding new name filter
 			if ( nameFilter != null ) {
