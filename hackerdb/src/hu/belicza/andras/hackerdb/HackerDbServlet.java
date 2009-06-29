@@ -278,9 +278,9 @@ public class HackerDbServlet extends BaseServlet {
 			// Header section
 			outputWriter.println( "<h2>BWHF Hacker Database</h2>" );
 			outputWriter.println( "<p><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a>"
-					   + "&nbsp;&nbsp;<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + "=" + OPERATION_STATISTICS + "'>Statistics</a>"
-					   + "&nbsp;&nbsp;<a href='players'>BWHF Players' Network</a><sup style='color:red;background:yellow;font-size:65%'>NEW!</sup>"
-					   + "&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help (filters, sorting)</a></p>" );
+					   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + "=" + OPERATION_STATISTICS + "'>Statistics</a>"
+					   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players'>BWHF Players' Network</a><sup style='color:red;background:yellow;font-size:65%'>NEW!</sup>"
+					   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help (filters, sorting)</a></p>" );
 			
 			// Controls section
 			outputWriter.println( "<form id='" + FORM_ID + "' action='hackers' method='POST'>" );
@@ -632,7 +632,7 @@ public class HackerDbServlet extends BaseServlet {
 			
 			// Header section
 			outputWriter.println( "<h2>BWHF Hacker Database Statistics</h2>" );
-			outputWriter.println( "<table border=0><tr><td><a href='hackers'>Back to the hacker list</a><td>&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></table>" );
+			outputWriter.println( "<table border=0><tr><td><a href='hackers'>Back to the hacker list</a><td>&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></table>" );
 			
 			outputWriter.println( "<h3>Hacker distribution between gateways</h3>" );
 			outputWriter.println( "<table border=0><tr><td>" );
