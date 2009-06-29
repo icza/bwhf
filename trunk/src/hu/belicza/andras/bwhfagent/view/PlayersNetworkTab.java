@@ -240,6 +240,8 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_MAP_NAME     , replayHeader.mapName );
 				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_REPLAY_MD5   , Utils.calculateFileMd5( replayFile ) );
 				appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_AGENT_VERSION, MainFrame.getInstance().applicationVersion );
+				if ( gateway != null )
+					appendKeyValue( infoBuilder, ServerApiConsts.GAME_PARAM_GATEWAY, Integer.toString( gateway ) );
 				
 				int playerCounter = 0;
 				for ( int i = 0; i < replayHeader.playerNames.length; i++ )
