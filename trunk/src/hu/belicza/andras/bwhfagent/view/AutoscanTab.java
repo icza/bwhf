@@ -237,6 +237,13 @@ public class AutoscanTab extends LoggedTab {
 				long lastModifiedOfLastChecked = new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ).lastModified(); // Last modified time of the LastReplay.rep that was checked lastly; this will be 0l if 'LastRepay.rep' does not yet exist.
 				while ( true ) {
 					try {
+						if ( autoscanEnabledCheckBox.isSelected() ) {
+							if ( autoscanEnabledTime == null )
+								autoscanEnabledTime = new Date();
+						}
+						else
+							autoscanEnabledTime = null;
+						
 						final File lastReplayFile      = new File( starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME );
 						long newLastReplayLastModified = lastReplayFile.lastModified();
 						
@@ -254,14 +261,8 @@ public class AutoscanTab extends LoggedTab {
 									}
 								}.start();
 							
-							if ( autoscanEnabledCheckBox.isSelected() ) {
-								if ( autoscanEnabledTime == null )
-									autoscanEnabledTime = new Date();
-							}
-							else
-								autoscanEnabledTime = null;
-							
 							if ( autoscanEnabledTime != null && newLastReplayLastModified >= autoscanEnabledTime.getTime() ) {
+								System.out.println( "ch3" );
 								if ( autoscanEnabledTime == null )
 									autoscanEnabledTime = new Date();
 								
