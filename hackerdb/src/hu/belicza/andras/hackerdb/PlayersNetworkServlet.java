@@ -265,7 +265,10 @@ public class PlayersNetworkServlet extends BaseServlet {
 				int colCounter = 1;
 				statement.setInt      ( colCounter++, engine                    );
 				statement.setInt      ( colCounter++, frames                    );
-				statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
+				if ( saveTime == null )
+					statement.setNull( colCounter++, Types.TIMESTAMP );
+				else
+					statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
 				statement.setString   ( colCounter++, name                      );
 				statement.setInt      ( colCounter++, mapWidth                  );
 				statement.setInt      ( colCounter++, mapHeight                 );
@@ -300,13 +303,17 @@ public class PlayersNetworkServlet extends BaseServlet {
 				statement.close();
 				
 				// Lastly update redundant data
-				statement = connection.prepareStatement( "UPDATE player SET games_count=games_count+1, first_game=CASE WHEN ?>first_game THEN first_game ELSE ? END, last_game=CASE WHEN ?<last_game THEN last_game ELSE ? END, total_frames=total_frames+? WHERE name=?" );
+				statement = connection.prepareStatement( 
+						saveTime == null ? "UPDATE player SET games_count=games_count+1, total_frames=total_frames+? WHERE name=?"
+										 : "UPDATE player SET games_count=games_count+1, first_game=CASE WHEN ?>first_game THEN first_game ELSE ? END, last_game=CASE WHEN ?<last_game THEN last_game ELSE ? END, total_frames=total_frames+? WHERE name=?" );
 				for ( final String playerName : playerNameList ) {
 					colCounter = 1;
-					statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
-					statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
-					statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
-					statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
+					if ( saveTime != null ) {
+						statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
+						statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
+						statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
+						statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
+					}
 					statement.setInt      ( colCounter++, frames                    );
 					statement.setString   ( colCounter++, playerName                );
 					
