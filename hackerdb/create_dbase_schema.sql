@@ -3,10 +3,11 @@
 ---- Tables of the hacker registry -----
 ----------------------------------------
 
-DROP TABLE IF EXISTS report;
-DROP TABLE IF EXISTS hacker;
-DROP TABLE IF EXISTS key;
-DROP TABLE IF EXISTS person;
+DROP TABLE download_log IF EXISTS;
+DROP TABLE report IF EXISTS;
+DROP TABLE hacker IF EXISTS;
+DROP TABLE key IF EXISTS;
+DROP TABLE person IF EXISTS;
 
 
 -- Key owners
@@ -27,7 +28,7 @@ CREATE CACHED TABLE key (
     person    INT NOT NULL,
     comment   VARCHAR,
     version   TIMESTAMP DEFAULT NOW,
-	UNIQUE (value),
+    UNIQUE (value),
     FOREIGN KEY (person) REFERENCES person(id) ON DELETE CASCADE
 );
 
@@ -80,10 +81,10 @@ CREATE INDEX idx_report_version ON report (version);
 ---- Tables of the Players' Network -----
 -----------------------------------------
 
-DROP TABLE IF EXISTS game_player;
-DROP TABLE IF EXISTS player;
-DROP TABLE IF EXISTS aka_group;
-DROP TABLE IF EXISTS game;
+DROP TABLE game_player IF EXISTS;
+DROP TABLE player IF EXISTS;
+DROP TABLE aka_group IF EXISTS;
+DROP TABLE game IF EXISTS;
 
 -- Games
 CREATE CACHED TABLE game (
