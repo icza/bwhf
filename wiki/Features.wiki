@@ -29,6 +29,9 @@ You can display or extract game chat and replay header informations from replays
 ===PCX converter===
 It can automatically convert your Starcraft PCX screenshots to known formats such as JPG, PNG, GIF, BMP. If autoconvert is enabled, you will find the converted screenshot images in your Starcraft folder as if Starcraft would've saved them in that format in the first place. You can manually convert any PCX files.
 
+===Players' Network===
+You can enable/disable to auto-add last replays to the Players' Network. You can also add any of your saved replays to the Players' Network.
+
 ===Miscellaneous===
  * Can be minimized to system tray. Can be started minimized to tray.
  * You can set to auto-load a replay list on startup.
