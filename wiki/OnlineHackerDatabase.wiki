@@ -15,7 +15,7 @@ On that page you can list, search, filter, sort existing hackers. The hackers ar
 ||Europe||Green <font color="#00ff00">Green</font>||
 ||Asia||Yellow <font color="#ffff00">Yellow</font>||
 ||iCCup||Black <font color="#000000">Black</font>||
-||Other||White <font color="#ffffff">White</font>||
+||Other||White <font color="#f080f0">White</font>||
 
 ==Filtering==
 
