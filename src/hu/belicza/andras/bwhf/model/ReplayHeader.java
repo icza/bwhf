@@ -237,7 +237,7 @@ public class ReplayHeader {
 				final int actionsCount = playerIds[ i ] < playerIdActionsCounts.length ? playerIdActionsCounts[ playerIds[ i ] ] : 0;
 				final String playerDescription = "    " + playerNames[ i ] + " (" + RACE_CHARACTERS[ playerRaces[ i ] ] 
 				                + "), color: " + colorName + ", actions: " + actionsCount 
-				                + ", APM: " + ( actionsCount * 60 / seconds );
+				                + ", APM: " + ( actionsCount * 60 / Math.max( seconds, 1 ) );
 				playerDescriptionList.add( new Object[] { actionsCount, playerDescription } );
 			}
 		
