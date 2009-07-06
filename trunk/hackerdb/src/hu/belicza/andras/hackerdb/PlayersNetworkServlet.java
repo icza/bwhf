@@ -845,7 +845,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 						}
 						outputWriter.print( "<td>" + ReplayHeader.RACE_NAMES[ resultSet2.getInt( 3 ) ] );
 						outputWriter.print( "<td align=right>" + resultSet2.getInt( 4 ) );
-						outputWriter.println( "<td align=right>" + resultSet2.getInt( 4 ) * 60 / seconds + "<td>" + colorName );
+						outputWriter.println( "<td align=right>" + resultSet2.getInt( 4 ) * 60 / Math.max( seconds, 1 ) + "<td>" + colorName );
 					}
 					outputWriter.println( "</table>" );
 					resultSet2.close();
