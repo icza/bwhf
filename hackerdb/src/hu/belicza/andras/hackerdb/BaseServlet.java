@@ -19,21 +19,30 @@ import org.apache.commons.dbcp.BasicDataSource;
 public class BaseServlet extends HttpServlet {
 	
 	/** Gateway colors.                                              */
-	protected static final String[] GATEWAY_COLORS             = new String[] { "ff5050", "00ffff", "00ff00", "ffff00", "000000", "f080f0" };
+	protected static final String[] GATEWAY_COLORS                = new String[] { "ff5050", "00ffff", "00ff00", "ffff00", "000000", "f080f0" };
 	/** Gateway foreground colors.                                   */
-	protected static final String[] GATEWAY_FOREGROUND_COLORS  = new String[] { "000000", "000000", "000000", "000000", "ffffff", "000000" };
+	protected static final String[] GATEWAY_FOREGROUND_COLORS     = new String[] { "000000", "000000", "000000", "000000", "ffffff", "000000" };
 	/** Style for unknown gateway.                                   */
-	protected static final String   UNKNOWN_GATEWAY_STYLE      = "background:#ffffff;color:#000000";
+	protected static final String   UNKNOWN_GATEWAY_STYLE         = "background:#ffffff;color:#000000";
 	/** Names of the gateway styles.                                 */
 	protected static final String[] GATEWAY_STYLE_NAMES;
 	/** Style for unknown gateway.                                   */
-	protected static final String   UNKNOWN_GATEWAY_STYLE_NAME = "gatUn";
+	protected static final String   UNKNOWN_GATEWAY_STYLE_NAME    = "gatUn";
+	/** Style for table headers.                                     */
+	protected static final String   TABLE_HEADER_STYLE_NAME       = "ths";
+	/** Style for sorting columns.                                   */
+	protected static final String   SORTING_COLUMN_STYLE_NAME     = "sortCol";
+	/** Style for sorting columns.                                   */
+	protected static final String   NON_SORTING_COLUMN_STYLE_NAME = "nonSortCol";
 	/** Common header HTML elements.                                 */
 	protected static final String   COMMON_HTML_HEADER_ELEMENTS;
 	static {
 		final StringBuilder commonHtmlHeaderElementsBuilder = new StringBuilder( "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n" );
-		commonHtmlHeaderElementsBuilder.append( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'>\n" );
-		commonHtmlHeaderElementsBuilder.append( "<style>p,h2,h3 {margin:6;padding:0}\n" );
+		commonHtmlHeaderElementsBuilder.append( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'>\n" )
+			.append( "<style>p,h2,h3 {margin:6;padding:0}\n." )
+			.append( SORTING_COLUMN_STYLE_NAME ).append( " {cursor:pointer}\n." )
+			.append( NON_SORTING_COLUMN_STYLE_NAME ).append( " {cursor:default}\n." )
+			.append( TABLE_HEADER_STYLE_NAME ).append( " {background:#cccccc}\n" );
 		
 		GATEWAY_STYLE_NAMES = new String[ GATEWAY_COLORS.length ];
 		for ( int i = 0; i < GATEWAY_COLORS.length; i++ ) {
