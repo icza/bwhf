@@ -6,7 +6,8 @@
 
 Players' Network builds a network of Starcraft Broodwar players based on replays.
 It has a web interface:
-COMING SOON!
+
+[http://94.199.240.39/hackerdb/hackers]
 
 The Players' Network automatically recognizes connections between replays where the same name is used for players. With BWHF Agent you can automatically send info about every game you play, and you can send any old replays or entire folder of replays recursively.
 
