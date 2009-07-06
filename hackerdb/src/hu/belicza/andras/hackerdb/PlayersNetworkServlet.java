@@ -46,9 +46,6 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class PlayersNetworkServlet extends BaseServlet {
 	
-	// TODO: gateway => useast; invalid date, what to do about it?
-	
-	
 	/** Simple date format to format and parse replay save time. */
 	private static final DateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd" );
 	/** Earliest date of the replays. */
@@ -480,11 +477,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
 				String query;
 				if ( player1 == null )
-					query = "SELECT id, engine, save_time, map_name, frames, type FROM game";
+					query = "SELECT id, engine, save_time, map_name, frames, type, COALESCE(gateway,99) FROM game";
 				else if ( player2 == null )
-					query = "SELECT game.id, engine, save_time, map_name, frames, type FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 );
+					query = "SELECT game.id, engine, save_time, map_name, frames, type, COALESCE(gateway,99) FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 );
 				else
-					query = "SELECT DISTINCT game.id, engine, save_time, map_name, frames, type FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR game_player.player=" + player2 ) + " GROUP BY game.id, engine, save_time, map_name, frames, type HAVING COUNT(*)=2";
+					query = "SELECT DISTINCT game.id, engine, save_time, map_name, frames, type, COALESCE(gateway,99) FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR game_player.player=" + player2 ) + " GROUP BY game.id, engine, save_time, map_name, frames, type HAVING COUNT(*)=2";
 				
 				query += " ORDER BY " + tableHeader.sortingColumns[ sortingIndex ] + ( sortingDesc ? " DESC" : "" )
 				       + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
@@ -506,7 +503,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 					replayHeader.gameFrames = resultSet.getInt( colCounter++ );
 					replayHeader.gameType   = (short) resultSet.getInt( colCounter++ );
 					
-					outputWriter.print( "<tr><td align=right>" + getGameDetailsHtmlLink( gameId, Integer.toString( ++recordCounter ) ) + "&nbsp;" );
+					final Integer gateway = resultSet.getInt( 7 );
+					outputWriter.print( "<tr><td align=right class='" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "'>" + getGameDetailsHtmlLink( gameId, Integer.toString( ++recordCounter ) ) + "&nbsp;" );
 					outputWriter.print( "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + ( replayHeader.saveTime == null ? "" : replayHeader.guessVersionFromDate() ) );
 					outputWriter.print( "<td>" + replayHeader.mapName );
 					outputWriter.print( "<td>" + replayHeader.getDurationString( true ) );
@@ -818,7 +816,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					
 					outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
 					outputWriter.println( "<tr><th align=left>Game engine:<td>" + replayHeader.getGameEngineString() );
-					outputWriter.println( "<tr><th align=left>Version:<td>" + replayHeader.guessVersionFromDate() );
+					outputWriter.println( "<tr><th align=left>Version:<td>" + ( replayHeader.saveTime == null ? UNKOWN_HTML_STRING : replayHeader.guessVersionFromDate() ) );
 					outputWriter.println( "<tr><th align=left>Duration:<td>" + replayHeader.getDurationString( false ) );
 					outputWriter.println( "<tr><th align=left>Saved on:<td>" + ( replayHeader.saveTime == null ? UNKOWN_HTML_STRING : replayHeader.saveTime ) );
 					outputWriter.println( "<tr><th align=left>Game name:<td>" + replayHeader.gameName );
@@ -827,7 +825,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.println( "<tr><th align=left>Creator name:<td>" + replayHeader.creatorName );
 					outputWriter.println( "<tr><th align=left>Game type:<td>" + ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ] );
 					if ( gateway >= 0 && gateway < GATEWAYS.length )
-						outputWriter.print( "<tr><th align=left>Reported gateway:<td>" + GATEWAYS[ gateway ] );
+						outputWriter.print( "<tr><th align=left>Reported gateway:<td class='" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "'>" + GATEWAYS[ gateway ] );
 					
 					final int seconds = replayHeader.getDurationSeconds();
 					statement2 = connection.createStatement();
@@ -1168,6 +1166,12 @@ public class PlayersNetworkServlet extends BaseServlet {
 							 + ( includeAkas ? '&' + PN_REQUEST_PARAM_NAME_INCLUDE_AKAS : "" ) + "'>" + text + "</a>";
 	}
 	
+	/** Menu HTML code to be sent. */
+	private static final String MENU_HTML = "<p><a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_GAME   + "'>Game list</a>"
+					+ "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_PLAYER + "'>Player list</a>"
+					+ "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_AKA    + "'>AKA list</a>"
+					+ "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/PlayersNetwork'>Help</a></p>";
+	
 	/**
 	 * Renders the header for the output pages.
 	 * @param request      http request
@@ -1175,14 +1179,12 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 */
 	private static void renderHeader( final HttpServletRequest request, final PrintWriter outputWriter ) {
 		request.setAttribute( "startTimeNanos", System.nanoTime() ); 
-		outputWriter.println( "<html><head><meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\"><title>BWHF Players' Network</title>" );
-		outputWriter.println( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'><style>p,h2,h3 {margin:6;padding:0;}</style>" );
+		outputWriter.println( "<html><head>" );
+		outputWriter.println( COMMON_HTML_HEADER_ELEMENTS );
+		outputWriter.println( "<title>BWHF Players' Network</title>" );
 		outputWriter.println( "</head><body><center>" );
 		outputWriter.println( "<h2>BWHF Players' Network</h2>" );
-		outputWriter.println(           "<p><a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_GAME   + "'>Game list</a>"
-				+ "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_PLAYER + "'>Player list</a>"
-				+ "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_AKA    + "'>AKA list</a>"
-				+ "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/PlayersNetwork'>Help</a></p>" );
+		outputWriter.println( MENU_HTML );
 	}
 	
 	/**
@@ -1191,9 +1193,9 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * @param outputWriter writer to be used to render
 	 */
 	private static void renderFooter( final HttpServletRequest request, final PrintWriter outputWriter ) {
-		final int  executionMs = (int) ( ( System.nanoTime() - (Long) request.getAttribute( "startTimeNanos" ) ) / 1000000l );
+		final int executionMs = (int) ( ( System.nanoTime() - (Long) request.getAttribute( "startTimeNanos" ) ) / 1000000l );
 		
-		outputWriter.println( "<hr><table border=0 width='100%'><tr><td width='40%' align='left'><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a>&nbsp;&nbsp;<a href='hackers'>BWHF Hacker Database</a>"
+		outputWriter.println( "<hr><table border=0 width='100%'><tr><td width='40%' align='left'><a href='http://code.google.com/p/bwhf/'>BWHF Agent home page</a>&nbsp;&nbsp;<a href='hackers'>BWHF Hacker Database</a>"
 							+ "<td align=center width='20%'><i>Served in " + (executionMs / 1000) + " sec, " + (executionMs % 1000) + " ms</i>"
 							+ "<td align=right widht='40%'><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></table>" );
 		outputWriter.println( "</center></body></html>" );

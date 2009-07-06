@@ -18,6 +18,35 @@ import org.apache.commons.dbcp.BasicDataSource;
  */
 public class BaseServlet extends HttpServlet {
 	
+	/** Gateway colors.                                              */
+	protected static final String[] GATEWAY_COLORS             = new String[] { "ff5050", "00ffff", "00ff00", "ffff00", "000000", "f080f0" };
+	/** Gateway foreground colors.                                   */
+	protected static final String[] GATEWAY_FOREGROUND_COLORS  = new String[] { "000000", "000000", "000000", "000000", "ffffff", "000000" };
+	/** Style for unknown gateway.                                   */
+	protected static final String   UNKNOWN_GATEWAY_STYLE      = "background:#ffffff;color:#000000";
+	/** Names of the gateway styles.                                 */
+	protected static final String[] GATEWAY_STYLE_NAMES;
+	/** Style for unknown gateway.                                   */
+	protected static final String   UNKNOWN_GATEWAY_STYLE_NAME = "gatUn";
+	/** Common header HTML elements.                                 */
+	protected static final String   COMMON_HTML_HEADER_ELEMENTS;
+	static {
+		final StringBuilder commonHtmlHeaderElementsBuilder = new StringBuilder( "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n" );
+		commonHtmlHeaderElementsBuilder.append( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'>\n" );
+		commonHtmlHeaderElementsBuilder.append( "<style>p,h2,h3 {margin:6;padding:0}\n" );
+		
+		GATEWAY_STYLE_NAMES = new String[ GATEWAY_COLORS.length ];
+		for ( int i = 0; i < GATEWAY_COLORS.length; i++ ) {
+			GATEWAY_STYLE_NAMES[ i ] = "gat" + i;
+			commonHtmlHeaderElementsBuilder.append( '.' ).append( GATEWAY_STYLE_NAMES[ i ] )
+				.append( " {background:#" ).append( GATEWAY_COLORS[ i ] )
+				.append( ";color:#" ).append( GATEWAY_FOREGROUND_COLORS[ i ] ).append( "}\n" );
+		}
+		commonHtmlHeaderElementsBuilder.append( '.' ).append( UNKNOWN_GATEWAY_STYLE_NAME ).append( " {" ).append( UNKNOWN_GATEWAY_STYLE ).append( "}</style>" );
+		
+		COMMON_HTML_HEADER_ELEMENTS = commonHtmlHeaderElementsBuilder.toString();
+	}
+	
 	/** URL of the database. */
 	private static final String DATABASE_URL = "jdbc:hsqldb:hsql://localhost/hackers";
 	
