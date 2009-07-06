@@ -261,7 +261,6 @@ public class HackerDbServlet extends BaseServlet {
 			
 			outputWriter.println( "<html><head>" );
 			outputWriter.println( COMMON_HTML_HEADER_ELEMENTS );
-			outputWriter.println( "<style>.sortCol {cursor:pointer}</style>" );
 			outputWriter.println( "<title>BWHF Hacker Database</title>" );
 			outputWriter.println( "</head><body><center>" );
 			
@@ -309,18 +308,20 @@ public class HackerDbServlet extends BaseServlet {
 			
 			// Hackers table section
 			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
-			outputWriter.println( "<tr><th>#<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_NAME          , filtersWrapper ) + "\">Name"           + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME           ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
-										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_GATEWAY       , filtersWrapper ) + "\">Gateway"        + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_GATEWAY        ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
-										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_REPORT_COUNT  , filtersWrapper ) + "\">Report count"   + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_REPORT_COUNT   ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
-										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_FIRST_REPORTED, filtersWrapper ) + "\">First reported" + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_FIRST_REPORTED ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
-										 + "<th class='sortCol' onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_LAST_REPORTED , filtersWrapper ) + "\">Last reported"  + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_LAST_REPORTED  ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" ) );
+			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME
+								+ "><th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">#"
+								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_NAME          , filtersWrapper ) + "\">Name"           + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME           ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
+								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_GATEWAY       , filtersWrapper ) + "\">Gateway"        + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_GATEWAY        ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
+								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_REPORT_COUNT  , filtersWrapper ) + "\">Report count"   + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_REPORT_COUNT   ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
+								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_FIRST_REPORTED, filtersWrapper ) + "\">First reported" + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_FIRST_REPORTED ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
+								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_LAST_REPORTED , filtersWrapper ) + "\">Last reported"  + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_LAST_REPORTED  ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" ) );
 			if ( matchingRecordsCount > 0 ) {
 				int recordNumber = ( filtersWrapper.page - 1 )* filtersWrapper.pageSize;
 				statement = buildHackersQueryStatement( filtersWrapper, false, connection );
 				resultSet = statement.executeQuery();
 				while ( resultSet.next() ) {
 					final int gateway = resultSet.getInt( 2 );
-					outputWriter.println( "<tr class='" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "'><td align=right>" + (++recordNumber) + "<td>" + encodeHtmlString( resultSet.getString( 1 ) ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td align=center>" + resultSet.getInt( 3 ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 4 ) ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 5 ) ) );
+					outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++recordNumber) + "<td>" + encodeHtmlString( resultSet.getString( 1 ) ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td align=center>" + resultSet.getInt( 3 ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 4 ) ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 5 ) ) );
 				}
 			}
 			outputWriter.println( "</table>" );
@@ -622,7 +623,7 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( "<h3>Hacker distribution between gateways</h3>" );
 			outputWriter.println( "<table border=0><tr><td>" );
 			outputWriter.println( "<tr><td><img src='" + gatewayDistributionChartUrlBuilder.toString() + "' width=" + CHARTS_WIDTH + " height=" + CHARTS_HEIGHT + " title='Hacker distribution between gateways'></img>" );
-			outputWriter.println( "<td><table border=1 cellspacing=0 cellpadding=2><tr><th>Gateway:<th>Hackers:" );
+			outputWriter.println( "<td><table border=1 cellspacing=0 cellpadding=2><tr class=" + TABLE_HEADER_STYLE_NAME + "><th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Gateway:<th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Hackers:" );
 			// Add gateways with no hackers
 			for ( int gateway = 0; gateway < GATEWAYS.length; gateway++ ) {
 				boolean gatewayIncluded = false;
@@ -634,16 +635,16 @@ public class HackerDbServlet extends BaseServlet {
 				if ( !gatewayIncluded )
 					gatewayDistributionList.add( new int[] { gateway, 0 } );
 			}
-			outputWriter.println( "<tr class='gatUn'><td>Total:<td align=right>" + hackersCount );
+			outputWriter.println( "<tr class=" + UNKNOWN_GATEWAY_STYLE_NAME + "><td>Total:<td align=right>" + hackersCount );
 			for ( final int[] gatewayDistribution : gatewayDistributionList )
-				outputWriter.println( "<tr class='" + ( gatewayDistribution[ 0 ] < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gatewayDistribution[ 0 ] ]: UNKNOWN_GATEWAY_STYLE_NAME ) + "'><td>" + GATEWAYS[ gatewayDistribution[ 0 ] ] + "<td align=right>" + gatewayDistribution[ 1 ] );
+				outputWriter.println( "<tr class=" + ( gatewayDistribution[ 0 ] < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gatewayDistribution[ 0 ] ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td>" + GATEWAYS[ gatewayDistribution[ 0 ] ] + "<td align=right>" + gatewayDistribution[ 1 ] );
 			outputWriter.println( "</table></table>" );
 			outputWriter.flush();
 			
 			outputWriter.println( "<h3>Monthly reports</h3>" );
 			outputWriter.println( "<table border=0><tr><td>" );
 			outputWriter.println( "<tr><td><img src='" + monthlyReportsChartUrlBuilder.toString() + "' width=" + CHARTS_WIDTH + " height=" + CHARTS_HEIGHT + " title='Monthly reports'></img>" );
-			outputWriter.println( "<td><table border=1 cellspacing=0 cellpadding=2><tr><th>Month:<th>Reports:" );
+			outputWriter.println( "<td><table border=1 cellspacing=0 cellpadding=2><tr class=" + TABLE_HEADER_STYLE_NAME + "><th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Month:<th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Reports:" );
 			Collections.reverse( monthlyReportsList );
 			monthlyReportsList.add( 0, new Object[] { "Total:", reportsCount} );
 			for ( final Object[] monthlyReports : monthlyReportsList )

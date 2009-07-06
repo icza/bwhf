@@ -504,7 +504,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					replayHeader.gameType   = (short) resultSet.getInt( colCounter++ );
 					
 					final Integer gateway = resultSet.getInt( 7 );
-					outputWriter.print( "<tr><td align=right class='" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "'>" + getGameDetailsHtmlLink( gameId, Integer.toString( ++recordCounter ) ) + "&nbsp;" );
+					outputWriter.print( "<tr><td align=right class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + ">" + getGameDetailsHtmlLink( gameId, Integer.toString( ++recordCounter ) ) + "&nbsp;" );
 					outputWriter.print( "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + ( replayHeader.saveTime == null ? "" : replayHeader.guessVersionFromDate() ) );
 					outputWriter.print( "<td>" + replayHeader.mapName );
 					outputWriter.print( "<td>" + replayHeader.getDurationString( true ) );
@@ -705,13 +705,13 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 */
 	private static void renderSortingTableHeaderRow( final PrintWriter outputWriter, final TableHeader tableHeader, String pagerUrlWithoutSorting, final int sortingIndex, final boolean sortingDesc, final int currentPage ) {
 		pagerUrlWithoutSorting += '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + currentPage;
-		outputWriter.print( "<tr style='background:#cccccc'>" );
+		outputWriter.print( "<tr class=" + TABLE_HEADER_STYLE_NAME + ">" );
 		
 		for ( int i = 0; i < tableHeader.headers.length; i++ )
 			if ( tableHeader.sortingColumns[ i ] == null )
-				outputWriter.print( "<th style='cursor:default;'>" + tableHeader.headers[ i ] );
+				outputWriter.print( "<th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">" + tableHeader.headers[ i ] );
 			else {
-				outputWriter.print( "<th style='cursor:pointer;' onclick=\"javascript:window.location='" 
+				outputWriter.print( "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"javascript:window.location='" 
 						+ pagerUrlWithoutSorting + '&' + PN_REQUEST_PARAM_NAME_SORTING_INDEX + "=" + i + ( sortingIndex == i && !sortingDesc || sortingIndex != i && tableHeader.sortingDefaultDescs[ i ] ? '&' + PN_REQUEST_PARAM_NAME_SORTING_DESC : "" )
 						+ "'\">" + tableHeader.headers[ i ] );
 				if ( sortingIndex == i )
@@ -825,7 +825,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.println( "<tr><th align=left>Creator name:<td>" + replayHeader.creatorName );
 					outputWriter.println( "<tr><th align=left>Game type:<td>" + ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ] );
 					if ( gateway >= 0 && gateway < GATEWAYS.length )
-						outputWriter.print( "<tr><th align=left>Reported gateway:<td class='" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "'>" + GATEWAYS[ gateway ] );
+						outputWriter.print( "<tr><th align=left>Reported gateway:<td class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + ">" + GATEWAYS[ gateway ] );
 					
 					final int seconds = replayHeader.getDurationSeconds();
 					statement2 = connection.createStatement();
