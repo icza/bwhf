@@ -57,16 +57,16 @@ public class BaseServlet extends HttpServlet {
 	}
 	
 	/** URL of the database. */
-	private static final String DATABASE_URL = "jdbc:hsqldb:hsql://localhost/hackers";
+	private static final String DATABASE_URL = "jdbc:postgresql://localhost/hackers";
 	
 	/** Data source to provide pooled connections to the hacker database. */
 	protected final BasicDataSource dataSource = new BasicDataSource();
 	
 	@Override
 	public void init( final ServletConfig config ) throws ServletException {
-		dataSource.setDriverClassName( "org.hsqldb.jdbcDriver" );
-		dataSource.setUsername( "sa" );
-		dataSource.setPassword( "" );
+		dataSource.setDriverClassName( "org.postgresql.Driver" );
+		dataSource.setUsername( "postgres" );
+		dataSource.setPassword( "a" );
 		dataSource.setUrl( DATABASE_URL );
 		
 		super.init( config );

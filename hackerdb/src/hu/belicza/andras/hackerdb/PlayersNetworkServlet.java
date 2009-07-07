@@ -87,24 +87,24 @@ public class PlayersNetworkServlet extends BaseServlet {
 	
 	/** Header of the game table. */
 	private static final TableHeader GAME_TABLE_HEADER = new TableHeader(
-			new String[]  { null     , "save_time", "map_name", "frames"  , "type"     , "save_time", null      },
-			new String[]  { "Details", "Engine"   , "Map"     , "Duration", "Game type", "Played on", "Players" },
-			new boolean[] { false    , true       , false     , true      , false      , true       , false     },
+			new String[]  { "COALESCE(gateway,99)", "COALESCE(save_time,'1998-01-01')", "map_name", "frames"  , "type"     , "COALESCE(save_time,'1998-01-01')", null      },
+			new String[]  { "Details"             , "Engine"                          , "Map"     , "Duration", "Game type", "Played on"                       , "Players" },
+			new boolean[] { false                 , true                              , false     , true      , false      , true                              , false     },
 			5
 			
 	);
 	/** Header of the player table. */
 	private static final TableHeader PLAYER_TABLE_HEADER = new TableHeader(
-			new String[]  { null , "name"       , "games_count"     , "first_game"         , "last_game"          , "total_frames"        },
-			new String[]  { "#"  , "Player"     , "Games count"     , "First game"         , "Last game"          , "Total time in games" },
-			new boolean[] { false, false        , true              , true                 , true                 , true                  },
+			new String[]  { null , "name"       , "games_count"     , "COALESCE(first_game,'1998-01-01')"         , "COALESCE(last_game,'1998-01-01')"          , "total_frames"        },
+			new String[]  { "#"  , "Player"     , "Games count"     , "First game"                                , "Last game"                                 , "Total time in games" },
+			new boolean[] { false, false        , true              , true                                        , true                                        , true                  },
 			2
 	);
 	/** Header of the player table with player. */
 	private static final TableHeader PLAYER_TABLE_PLAYER_HEADER = new TableHeader(
-			new String[]  { null , "player.name", "COUNT(player.id)", "MIN(game.save_time)", "MAX(game.save_time)", "SUM(game.frames)"    },
-			new String[]  { "#"  , "Player"     , "Games count"     , "First game"         , "Last game"          , "Total time in games" },
-			new boolean[] { false, false        , true              , true                 , true                 , true                  },
+			new String[]  { null , "player.name", "COUNT(player.id)", "COALESCE(MIN(game.save_time),'1998-01-01')", "COALESCE(MAX(game.save_time),'1998-01-01')", "SUM(game.frames)"    },
+			new String[]  { "#"  , "Player"     , "Games count"     , "First game"                                , "Last game"                                 , "Total time in games" },
+			new boolean[] { false, false        , true              , true                                        , true                                        , true                  },
 			2
 	);
 	/** Header of the AKA groups table. */
@@ -382,7 +382,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			int sortingIndex = getIntParamValue( request, PN_REQUEST_PARAM_NAME_SORTING_INDEX, -1 );
 			boolean sortingDesc = request.getParameter( PN_REQUEST_PARAM_NAME_SORTING_DESC ) != null;
 			final TableHeader tableHeader = entity.equals( ENTITY_GAME ) ? GAME_TABLE_HEADER : entity.equals( ENTITY_PLAYER ) ? ( player1 == null ? PLAYER_TABLE_HEADER : PLAYER_TABLE_PLAYER_HEADER ) : entity.equals( ENTITY_AKA ) ? AKA_GROUPS_TABLE_HEADER : null;
-			if ( tableHeader != null && ( sortingIndex <= 0 || sortingIndex >= tableHeader.sortingColumns.length || tableHeader.sortingColumns[ sortingIndex ] == null ) ) {
+			if ( tableHeader != null && ( sortingIndex < 0 || sortingIndex >= tableHeader.sortingColumns.length || tableHeader.sortingColumns[ sortingIndex ] == null ) ) {
 				sortingIndex = tableHeader.defaultSortingIndex;
 				sortingDesc  = tableHeader.sortingDefaultDescs[ sortingIndex ];
 			}
@@ -429,7 +429,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.print( " of " );
 					outputWriter.print( getPlayerDetailsHtmlLink( player1, player1Name = getPlayerName( player1, connection ), null ) );
 					if ( player2 != null ) {
-						countQuery = "SELECT COUNT(*) FROM (SELECT game FROM game_player WHERE player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR player=" + player2 ) + " GROUP BY game HAVING COUNT(*)=2)";
+						countQuery = "SELECT COUNT(*) FROM (SELECT game FROM game_player WHERE player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR player=" + player2 ) + " GROUP BY game HAVING COUNT(*)=2) as foo";
 						outputWriter.print( " and " );
 						outputWriter.print( getPlayerDetailsHtmlLink( player2, player2Name = getPlayerName( player2, connection ), null ) );
 					}
@@ -477,11 +477,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
 				String query;
 				if ( player1 == null )
-					query = "SELECT id, engine, save_time, map_name, frames, type, COALESCE(gateway,99) FROM game";
+					query = "SELECT id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99) FROM game";
 				else if ( player2 == null )
-					query = "SELECT game.id, engine, save_time, map_name, frames, type, COALESCE(gateway,99) FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 );
+					query = "SELECT game.id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99) FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 );
 				else
-					query = "SELECT DISTINCT game.id, engine, save_time, map_name, frames, type, COALESCE(gateway,99) FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR game_player.player=" + player2 ) + " GROUP BY game.id, engine, save_time, map_name, frames, type HAVING COUNT(*)=2";
+					query = "SELECT DISTINCT game.id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99) FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR game_player.player=" + player2 ) + " GROUP BY game.id, engine, save_time, map_name, frames, type, gateway HAVING COUNT(*)=2";
 				
 				query += " ORDER BY " + tableHeader.sortingColumns[ sortingIndex ] + ( sortingDesc ? " DESC" : "" )
 				       + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
@@ -499,6 +499,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 					replayHeader.guessedVersion = null; // This is cached so I have to clear it...
 					replayHeader.gameEngine = (byte) resultSet.getInt( colCounter++ );
 					replayHeader.saveTime   = resultSet.getDate( colCounter++ );
+					if ( replayHeader.saveTime.getTime() < EARLIEST_REPLAY_DATE )
+						replayHeader.saveTime = null;
 					replayHeader.mapName    = resultSet.getString( colCounter++ );
 					replayHeader.gameFrames = resultSet.getInt( colCounter++ );
 					replayHeader.gameType   = (short) resultSet.getInt( colCounter++ );
@@ -853,6 +855,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 				}
 				else
 					outputWriter.println( "<p><b><i><font color='red'>The referred game could not be found!</font></i></b></p>" );
+				resultSet.close();
+				statement.close();
 				
 			} else if ( entity.equals( ENTITY_PLAYER ) ) {
 				
@@ -865,11 +869,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 				final boolean hasAka = akaIdList != null;
 				if ( hasAka ) {
 					statement2 = connection.createStatement();
-					resultSet2 = statement.executeQuery( "SELECT id, name FROM player WHERE id IN (" + akaIdList + ") AND id!=" + entityId );
+					resultSet2 = statement2.executeQuery( "SELECT id, name FROM player WHERE id IN (" + akaIdList + ") AND id!=" + entityId );
 					outputWriter.println( "<p>AKAs: " + generatePlayerHtmlLinkListFromResultSet( resultSet2 ) + "</p>" );
 					resultSet2.close();
 					
-					resultSet2 = statement.executeQuery( "SELECT COUNT(*), MIN(save_time), MAX(save_time), SUM(frames), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ")" );
+					resultSet2 = statement2.executeQuery( "SELECT COUNT(*), MIN(save_time), MAX(save_time), SUM(frames), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ")" );
 				}
 				
 				if ( resultSet.next() ) {
