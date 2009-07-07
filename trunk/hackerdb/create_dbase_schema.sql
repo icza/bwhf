@@ -1,152 +1,285 @@
-
-----------------------------------------
----- Tables of the hacker registry -----
-----------------------------------------
-
-DROP TABLE download_log IF EXISTS;
-DROP TABLE report IF EXISTS;
-DROP TABLE hacker IF EXISTS;
-DROP TABLE key IF EXISTS;
-DROP TABLE person IF EXISTS;
+CREATE DATABASE hackers
+  WITH OWNER = postgres
+       ENCODING = 'UTF8'
+       LC_COLLATE = 'English, United States'
+       LC_CTYPE = 'English, United States'
+       CONNECTION LIMIT = -1;
 
 
--- Key owners
-CREATE CACHED TABLE person (
-    id      IDENTITY,
-    name    VARCHAR NOT NULL,
-    email   VARCHAR,
-    comment VARCHAR,
-    version TIMESTAMP DEFAULT NOW
+
+-- Table: person
+
+-- DROP TABLE person;
+
+CREATE TABLE person
+(
+  id serial NOT NULL,
+  "name" character varying NOT NULL,
+  email character varying,
+  "comment" character varying,
+  "version" timestamp without time zone DEFAULT now(),
+  CONSTRAINT person_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
 );
+ALTER TABLE person OWNER TO postgres;
 
 
--- Keys
-CREATE CACHED TABLE key (
-    id        IDENTITY,
-    value     VARCHAR NOT NULL,
-    revocated BOOLEAN DEFAULT FALSE NOT NULL,
-    person    INT NOT NULL,
-    comment   VARCHAR,
-    version   TIMESTAMP DEFAULT NOW,
-    UNIQUE (value),
-    FOREIGN KEY (person) REFERENCES person(id) ON DELETE CASCADE
+-- Table: "key"
+
+-- DROP TABLE "key";
+
+CREATE TABLE "key"
+(
+  id serial NOT NULL,
+  "value" character varying NOT NULL,
+  revocated boolean NOT NULL DEFAULT false,
+  person integer NOT NULL,
+  "comment" character varying,
+  "version" timestamp without time zone DEFAULT now(),
+  CONSTRAINT key_pkey PRIMARY KEY (id),
+  CONSTRAINT key_person_fkey FOREIGN KEY (person)
+      REFERENCES person (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT key_value_key UNIQUE (value)
+)
+WITH (
+  OIDS=FALSE
 );
+ALTER TABLE "key" OWNER TO postgres;
 
 
--- Hackers
-CREATE CACHED TABLE hacker (
-    id      IDENTITY,
-    name    VARCHAR,
-    gateway INT,
-    version TIMESTAMP DEFAULT NOW
+-- Table: hacker
+
+-- DROP TABLE hacker;
+
+CREATE TABLE hacker
+(
+  id serial NOT NULL,
+  "name" character varying,
+  gateway integer,
+  "version" timestamp without time zone DEFAULT now(),
+  CONSTRAINT hacker_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
 );
+ALTER TABLE hacker OWNER TO postgres;
+
+-- Index: idx_hacker_gateway
+
+-- DROP INDEX idx_hacker_gateway;
+
+CREATE INDEX idx_hacker_gateway
+  ON hacker
+  USING btree
+  (gateway);
+
+-- Index: idx_hacker_name
+
+-- DROP INDEX idx_hacker_name;
+
+CREATE INDEX idx_hacker_name
+  ON hacker
+  USING btree
+  (name);
 
 
--- Hacker reports
-CREATE CACHED TABLE report (
-    id            IDENTITY,
-    hacker        INT,
-    game_engine   INT,
-    map_name      VARCHAR,
-    agent_version VARCHAR,
-    key           INT,
-    ip            VARCHAR,               --IP of the reporter's computer.
-    version       TIMESTAMP DEFAULT NOW,
-    comment       VARCHAR,
-    FOREIGN KEY (key) REFERENCES key(id) ON DELETE CASCADE,
-    FOREIGN KEY (hacker) REFERENCES hacker(id) ON DELETE CASCADE
+-- Table: report
+
+-- DROP TABLE report;
+
+CREATE TABLE report
+(
+  id serial NOT NULL,
+  hacker integer,
+  game_engine integer,
+  map_name character varying,
+  agent_version character varying,
+  "key" integer,
+  ip character varying,
+  "version" timestamp without time zone DEFAULT now(),
+  "comment" character varying,
+  CONSTRAINT report_pkey PRIMARY KEY (id),
+  CONSTRAINT report_hacker_fkey FOREIGN KEY (hacker)
+      REFERENCES hacker (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT report_key_fkey FOREIGN KEY ("key")
+      REFERENCES "key" (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE CASCADE
+)
+WITH (
+  OIDS=FALSE
 );
+ALTER TABLE report OWNER TO postgres;
+
+-- Index: idx_report_version
+
+-- DROP INDEX idx_report_version;
+
+CREATE INDEX idx_report_version
+  ON report
+  USING btree
+  (version);
 
 
--- Hacker list download log
-CREATE CACHED TABLE download_log (
-    id           IDENTITY,
-    ip           VARCHAR,                --IP of the downloader's computer.
-    success      BOOLEAN,
-    exec_time_ms INT,                    --Execution time in ms.
-    version      TIMESTAMP DEFAULT NOW
+
+-- Table: download_log
+
+-- DROP TABLE download_log;
+
+CREATE TABLE download_log
+(
+  id serial NOT NULL,
+  ip character varying,
+  success boolean,
+  exec_time_ms integer,
+  "version" timestamp without time zone DEFAULT now(),
+  CONSTRAINT download_log_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
 );
+ALTER TABLE download_log OWNER TO postgres;
 
 
-DROP INDEX idx_hacker_name IF EXISTS;
-DROP INDEX idx_hacker_gateway IF EXISTS;
-DROP INDEX idx_report_version IF EXISTS;
+-- Table: aka_group
 
-CREATE INDEX idx_hacker_name ON hacker (name);
-CREATE INDEX idx_hacker_gateway ON hacker (gateway);
-CREATE INDEX idx_report_version ON report (version);
+-- DROP TABLE aka_group;
 
-
------------------------------------------
----- Tables of the Players' Network -----
------------------------------------------
-
-DROP TABLE game_player IF EXISTS;
-DROP TABLE player IF EXISTS;
-DROP TABLE aka_group IF EXISTS;
-DROP TABLE game IF EXISTS;
-
--- Games
-CREATE CACHED TABLE game (
-    id            IDENTITY,
-    engine        INT,
-    frames        INT,
-    save_time     TIMESTAMP,
-    name          VARCHAR,
-    map_width     INT,
-    map_height    INT,
-    speed         INT,
-    type          INT,
-    sub_type      INT,
-    creator_name  VARCHAR,
-    map_name      VARCHAR,
-    replay_md5    VARCHAR,
-    agent_version VARCHAR,
-    gateway       INT,                   --optional
-    ip            VARCHAR,               --IP of the reporter's computer.
-    version       TIMESTAMP DEFAULT NOW
+CREATE TABLE aka_group
+(
+  id serial NOT NULL,
+  "comment" character varying,
+  "version" timestamp without time zone DEFAULT now(),
+  CONSTRAINT aka_group_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
 );
+ALTER TABLE aka_group OWNER TO postgres;
 
 
--- Groups of players' akas
-CREATE CACHED TABLE aka_group (
-    id      IDENTITY,
-    comment VARCHAR,
-    version TIMESTAMP DEFAULT NOW
+-- Table: game
+
+-- DROP TABLE game;
+
+CREATE TABLE game
+(
+  id serial NOT NULL,
+  engine integer,
+  frames integer,
+  save_time timestamp without time zone,
+  "name" character varying,
+  map_width integer,
+  map_height integer,
+  speed integer,
+  "type" integer,
+  sub_type integer,
+  creator_name character varying,
+  map_name character varying,
+  replay_md5 character varying,
+  agent_version character varying,
+  gateway integer,
+  ip character varying,
+  "version" timestamp without time zone DEFAULT now(),
+  CONSTRAINT game_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
 );
+ALTER TABLE game OWNER TO postgres;
+
+-- Index: idx_game__replay_md5
+
+-- DROP INDEX idx_game__replay_md5;
+
+CREATE INDEX idx_game__replay_md5
+  ON game
+  USING btree
+  (replay_md5);
 
 
--- Players of games
-CREATE CACHED TABLE player (
-    id           IDENTITY,
-    name         VARCHAR,
-    aka_group    INT,
-    games_count  INT DEFAULT 0, -- redundant data to speed up player listing
-    first_game   TIMESTAMP,     -- time of first game, redundant data to speed up player listing
-    last_game    TIMESTAMP,     -- time of last game, redundant data to speed up player listing
-    total_frames INT DEFAULT 0, -- total frames in games, redundant data to speed up player listing
-    version      TIMESTAMP DEFAULT NOW,
-    FOREIGN KEY (aka_group) REFERENCES aka_group(id) ON DELETE CASCADE
+
+
+-- Table: player
+
+-- DROP TABLE player;
+
+CREATE TABLE player
+(
+  id serial NOT NULL,
+  "name" character varying,
+  aka_group integer,
+  games_count integer DEFAULT 0,
+  first_game timestamp without time zone,
+  last_game timestamp without time zone,
+  total_frames integer DEFAULT 0,
+  "version" timestamp without time zone DEFAULT now(),
+  CONSTRAINT player_pkey PRIMARY KEY (id),
+  CONSTRAINT player_aka_group_fkey FOREIGN KEY (aka_group)
+      REFERENCES aka_group (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE CASCADE
+)
+WITH (
+  OIDS=FALSE
 );
+ALTER TABLE player OWNER TO postgres;
+
+-- Index: idx_player__id_name
+
+-- DROP INDEX idx_player__id_name;
+
+CREATE INDEX idx_player__id_name
+  ON player
+  USING btree
+  (id, name);
+
+-- Index: idx_player__name
+
+-- DROP INDEX idx_player__name;
+
+CREATE INDEX idx_player__name
+  ON player
+  USING btree
+  (name);
 
 
--- Connections between players and games
-CREATE CACHED TABLE game_player (
-    id            IDENTITY,
-    game          INT,
-    player        INT,
-    race          INT,
-    actions_count INT,
-    color         INT,
-    version       TIMESTAMP DEFAULT NOW,
-    FOREIGN KEY (game) REFERENCES game(id) ON DELETE CASCADE,
-    FOREIGN KEY (player) REFERENCES player(id) ON DELETE CASCADE
+
+-- Table: game_player
+
+-- DROP TABLE game_player;
+
+CREATE TABLE game_player
+(
+  id serial NOT NULL,
+  game integer,
+  player integer,
+  race integer,
+  actions_count integer,
+  color integer,
+  "version" timestamp without time zone DEFAULT now(),
+  CONSTRAINT game_player_pkey PRIMARY KEY (id),
+  CONSTRAINT game_player_game_fkey FOREIGN KEY (game)
+      REFERENCES game (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT game_player_player_fkey FOREIGN KEY (player)
+      REFERENCES player (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE CASCADE
+)
+WITH (
+  OIDS=FALSE
 );
+ALTER TABLE game_player OWNER TO postgres;
+
+-- Index: idx_game_player__game_player
+
+-- DROP INDEX idx_game_player__game_player;
+
+CREATE INDEX idx_game_player__game_player
+  ON game_player
+  USING btree
+  (game, player);
 
 
-DROP INDEX idx_player__name IF EXISTS;
-DROP INDEX idx_player__id_name IF EXISTS;
-DROP INDEX idx_game_player__game_player IF EXISTS;
-CREATE INDEX idx_player__name ON player (name);
-CREATE INDEX idx_player__id_name ON player (id,name);
-CREATE INDEX idx_game_player__game_player ON game_player (game,player);

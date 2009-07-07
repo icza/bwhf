@@ -456,7 +456,7 @@ public class HackerDbServlet extends BaseServlet {
 		queryBuilder.append( " GROUP BY h.name, h.gateway HAVING COUNT(h.gateway)>=" ).append( filtersWrapper.minReportCount );
 		
 		if ( countOnly )
-			queryBuilder.append( ')' );
+			queryBuilder.append( ") as foo" );
 		else {
 			queryBuilder.append( " ORDER BY " );
 			if ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_LAST_REPORTED ) )
@@ -526,7 +526,7 @@ public class HackerDbServlet extends BaseServlet {
 			statement = connection.createStatement();
 			
 			final List< Object[] > monthlyReportsList = new ArrayList< Object[] >();
-			final PreparedStatement preparedStatement = connection.prepareStatement( "SELECT COUNT(*) FROM report JOIN key on report.key=key.id WHERE key.revocated=FALSE AND version>=? and version<?" );
+			final PreparedStatement preparedStatement = connection.prepareStatement( "SELECT COUNT(*) FROM report JOIN key on report.key=key.id WHERE key.revocated=FALSE AND report.version>=? and report.version<?" );
 			statement = preparedStatement; // Store it to the statement variable to close it in case of exception
 			final DateFormat monthDateFormat = new SimpleDateFormat( "MMMMM, yyyy" );
 			final GregorianCalendar calendar1 = new GregorianCalendar( 2008, Calendar.DECEMBER, 1 );
@@ -790,7 +790,7 @@ public class HackerDbServlet extends BaseServlet {
 		PreparedStatement statement  = null;
 		ResultSet         resultSet  = null;
 		PreparedStatement statement2 = null;
-		Statement         statement3 = null;
+		PreparedStatement statement3 = null;
 		ResultSet         resultSet3 = null;
 		
 		try {
@@ -829,11 +829,13 @@ public class HackerDbServlet extends BaseServlet {
 					else {
 						// New hacker, add it first
 						statement2 = connection.prepareStatement( "INSERT INTO hacker (name,gateway) VALUES (?,?)" );
-						statement2.setString( 1, playerNames[ i ].toLowerCase() );
-						statement2.setInt   ( 2, gateway                        );
+						statement2.setString( 1, playerNames[ i ] );
+						statement2.setInt   ( 2, gateway          );
 						if ( statement2.executeUpdate() > 0 ) {
-							statement3 = connection.createStatement();
-							resultSet3 = statement3.executeQuery( "CALL IDENTITY()" );
+							statement3 = connection.prepareStatement( "SELECT id FROM hacker WHERE name=? AND gateway=?" );
+							statement3.setString( 1, playerNames[ i ] );
+							statement3.setInt   ( 2, gateway          );
+							resultSet3 = statement3.executeQuery();
 							if ( resultSet3.next() )
 								hackerIds[ i ] = resultSet3.getInt( 1 );
 							else
