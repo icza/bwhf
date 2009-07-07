@@ -9,7 +9,7 @@ BWHF Agent can be used on windows and linux.
 
 Basically all windows are supported where you can install the 32-bit version Java 6.0 or higher (Windows XP/Vista/Server).
 
-*Remember* that if you were using a previous version and you download a new verison, you have to reenter your key and set again all your settings *OR* alternatively you can copy your old `settings.properties` file to keep all the old settings (along with the key).
+*Remember that if you were using a previous version and you download a new verison, you have to reenter your key and set again all your settings OR alternatively you can copy your old `settings.properties` file to keep all the old settings (along with the key).*
 
 ===BWHF Agent requires Java http://lh5.ggpht.com/_jDMClHrENz8/ShFo6deSQUI/AAAAAAAAN1M/fXeoqQNXNxc/s800/java16x16.png.jpg===
 
