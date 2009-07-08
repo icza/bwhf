@@ -46,3 +46,12 @@ If you click on the "Who played with ..." link, it will take you to the player l
 
 ==AKA list==
 On this page you can check the registered AKAs. Every player being in the same AKA group denotes the same person behind the accounts of the group.
+
+==Filter by name...==
+There is a *Filter by name...* option on some pages. This can be used to filter the entities listed on the page to players whose name contains this text. A player will be included in the filter process if his/her name contains the text entered here.
+
+For example: filter="ota" includes names like "ota", "otawe", "dakota", "dakota_fanning".
+
+You can use special characters to filter. The character *'_'* can match any character. For example: filter="b_ta" matches the names: "bota", "albbta".
+
+You can use the character *'%'* to match any character sequence. For example filter="ako%ing" matches the names: "dakota_fanning", "ako23inga", "akoing".
