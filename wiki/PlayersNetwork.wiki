@@ -26,10 +26,10 @@ The Players' Network automatically recognizes connections between replays where 
  * you can list players who played with a specific player (with or without his/her AKAs included)
 
 ==Game list==
-You can list the games that are added to the Players' Network. You can sort them by version, date, map name, duration etc. by clicking on the columns header.
+You can list the games that are added to the Players' Network. You can sort them by version, date, map name, duration etc. by clicking on the columns header. The colored background in the Details column indicates the reported gateway of the game. Sorting by the Details column will sort by gateway.
 
 ==Game details==
-You can see the details of a game if you click on its number. The game details page gives you other information of the game, and lists the players in it with other details like race, APM, actions and colors. The colored background in the Details column indicates the reported gateway of the game. Sorting by the Details column will sort by gateway.
+You can see the details of a game if you click on its number. The game details page gives you other information of the game, and lists the players in it with other details like race, APM, actions and colors.
 
 ==Player list==
 You can list the players and filter them by name that are in the Players' Network. You can sort them by name, games count, first/last game and total time in games.
