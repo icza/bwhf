@@ -29,7 +29,7 @@ The Players' Network automatically recognizes connections between replays where 
 You can list the games that are added to the Players' Network. You can sort them by version, date, map name, duration etc. by clicking on the columns header.
 
 ==Game details==
-You can see the details of a game if you click on its number. The game details page gives you other information of the game, and lists the players in it with other details like race, APM, actions and colors.
+You can see the details of a game if you click on its number. The game details page gives you other information of the game, and lists the players in it with other details like race, APM, actions and colors. The colored background in the Details column indicates the reported gateway of the game. Sorting by the Details column will sort by gateway.
 
 ==Player list==
 You can list the players and filter them by name that are in the Players' Network. You can sort them by name, games count, first/last game and total time in games.
