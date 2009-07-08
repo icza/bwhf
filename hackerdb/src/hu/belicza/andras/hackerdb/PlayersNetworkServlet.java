@@ -644,7 +644,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				if ( nameFilter == null )
 					query = "SELECT id FROM aka_group WHERE 1=1 LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
 				else
-					query = "SELECT DISTINCT id FROM aka_group JOIN player on aka_group.id=player.aka_group WHERE player.name LIKE ? LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
+					query = "SELECT DISTINCT aka_group.id FROM aka_group JOIN player on aka_group.id=player.aka_group WHERE player.name LIKE ? LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
 				
 				outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
 				renderSortingTableHeaderRow( outputWriter, tableHeader, pagerUrlWithoutSorting, sortingIndex, sortingDesc, page );
