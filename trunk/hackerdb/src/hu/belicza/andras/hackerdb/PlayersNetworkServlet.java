@@ -527,7 +527,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					final Integer gateway = resultSet.getInt( 7 );
 					outputWriter.print( "<tr><td align=right class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + ">" + getGameDetailsHtmlLink( gameId, Integer.toString( ++recordCounter ) ) + "&nbsp;" );
 					outputWriter.print( "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + ( replayHeader.saveTime == null ? "" : replayHeader.guessVersionFromDate() ) );
-					outputWriter.print( "<td>" + getGameListWithMapHtmlLink( replayHeader.mapName, replayHeader.mapName, null, false ) );
+					outputWriter.print( "<td>" + getGameListWithMapHtmlLink( replayHeader.mapName, replayHeader.mapName, player1, player2, includeAkas) );
 					outputWriter.print( "<td>" + replayHeader.getDurationString( true ) );
 					outputWriter.print( "<td>" + ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ] );
 					outputWriter.print( "<td>" + ( replayHeader.saveTime == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ) ) );
@@ -846,7 +846,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.println( "<tr><th align=left>Duration:<td>" + replayHeader.getDurationString( false ) );
 					outputWriter.println( "<tr><th align=left>Saved on:<td>" + ( replayHeader.saveTime == null ? UNKOWN_HTML_STRING : replayHeader.saveTime ) );
 					outputWriter.println( "<tr><th align=left>Game name:<td>" + replayHeader.gameName );
-					outputWriter.println( "<tr><th align=left>Map name:<td>" + getGameListWithMapHtmlLink( replayHeader.mapName, replayHeader.mapName, null, false ) );
+					outputWriter.println( "<tr><th align=left>Map name:<td>" + getGameListWithMapHtmlLink( replayHeader.mapName, replayHeader.mapName, null, null, false ) );
 					outputWriter.println( "<tr><th align=left>Map size:<td>" + replayHeader.getMapSize() );
 					outputWriter.println( "<tr><th align=left>Creator name:<td>" + replayHeader.creatorName );
 					outputWriter.println( "<tr><th align=left>Game type:<td>" + ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ] );
@@ -958,16 +958,16 @@ public class PlayersNetworkServlet extends BaseServlet {
 				outputWriter.println( "<tr><th align=left>Top " + TOP_COUNT + " maps:<td valign=top><table border=0 width=100%>" );
 				int rowCounter = 0;
 				while ( resultSet.next() ) {
-					outputWriter.println( "<tr" + ( (rowCounter++ & 0x01) == 0 ? " style='background:#cacaca'" : "" ) + "><td>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), resultSet.getString( 1 ), null, false ) );
-					outputWriter.println( "<td align=right>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), Integer.toString( resultSet.getInt( 2 ) ), entityId, false ) + "<td align=right>" + (int) ( resultSet.getInt( 2 ) * 100.0f / gamesCount + 0.5f ) + "%" );
+					outputWriter.println( "<tr" + ( (rowCounter++ & 0x01) == 0 ? " style='background:#cacaca'" : "" ) + "><td>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), resultSet.getString( 1 ), null, null, false ) );
+					outputWriter.println( "<td align=right>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), Integer.toString( resultSet.getInt( 2 ) ), entityId, null, false ) + "<td align=right>" + (int) ( resultSet.getInt( 2 ) * 100.0f / gamesCount + 0.5f ) + "%" );
 				}
 				outputWriter.println( "</table>" );
 				if ( hasAka ) {
 					outputWriter.println( "<td valign=top><table border=0 width=100%>" );
 					rowCounter = 0;
 					while ( resultSet2.next() ) {
-						outputWriter.println( "<tr" + ( (rowCounter++ & 0x01) == 0 ? " style='background:#cacaca'" : "" ) + "><td>" + getGameListWithMapHtmlLink( resultSet2.getString( 1 ), resultSet2.getString( 1 ), null, false ) );
-						outputWriter.println( "<td align=right>" + getGameListWithMapHtmlLink( resultSet2.getString( 1 ), Integer.toString( resultSet2.getInt( 2 ) ), entityId, true ) + "<td align=right>" + (int) ( resultSet2.getInt( 2 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
+						outputWriter.println( "<tr" + ( (rowCounter++ & 0x01) == 0 ? " style='background:#cacaca'" : "" ) + "><td>" + getGameListWithMapHtmlLink( resultSet2.getString( 1 ), resultSet2.getString( 1 ), null, null, false ) );
+						outputWriter.println( "<td align=right>" + getGameListWithMapHtmlLink( resultSet2.getString( 1 ), Integer.toString( resultSet2.getInt( 2 ) ), entityId, null, true ) + "<td align=right>" + (int) ( resultSet2.getInt( 2 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
 					}
 					outputWriter.println( "</table>" );
 				}
@@ -1153,15 +1153,18 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * An HTML anchor tag will be returned whose text is <code>text</code>.
 	 * @param mapName     name of the map
 	 * @param text        text to appear in the link
-	 * @param playerId    optional id of the player, if specified, link to the player's games
+	 * @param player1     optional id of the player, if specified, link to the player's games
+	 * @param player2     optional id of the player, if specified, link to the player's games (common games of player1 and player 2)
 	 * @param includeAkas tells if akas should be included (adds an extra parameter), only used if playerId is provided
 	 * @return an HTML link to the details page of the player
 	 */
-	private static String getGameListWithMapHtmlLink( final String mapName, final String text, final Integer playerId, final boolean includeAkas ) {
+	private static String getGameListWithMapHtmlLink( final String mapName, final String text, final Integer player1, final Integer player2, final boolean includeAkas ) {
 		try {
 			return "<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION   + '=' + PN_OPERATION_LIST
 								 + '&' + PN_REQUEST_PARAM_NAME_ENTITY      + '=' + ENTITY_GAME
-								 + ( playerId == null ? "" : '&' + PN_REQUEST_PARAM_NAME_PLAYER1 + '=' + playerId + ( includeAkas ? '&' + PN_REQUEST_PARAM_NAME_INCLUDE_AKAS : "" ) )
+								 + ( player1 == null ? "" : '&' + PN_REQUEST_PARAM_NAME_PLAYER1 + '=' + player1
+										 + ( player2 == null ? "" : '&' + PN_REQUEST_PARAM_NAME_PLAYER2 + '=' + player2 )
+										 + ( includeAkas ? '&' + PN_REQUEST_PARAM_NAME_INCLUDE_AKAS : "" ) )
 								 + '&' + PN_REQUEST_PARAM_NAME_NAME_FILTER + '=' + URLEncoder.encode( '"' + mapName + '"', "UTF-8" ) + "'>" + encodeHtmlString( text ) + "</a>";
 		} catch ( final UnsupportedEncodingException use ) {
 			// This will never happen.
