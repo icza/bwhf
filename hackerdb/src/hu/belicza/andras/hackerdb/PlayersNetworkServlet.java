@@ -21,6 +21,7 @@ import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -392,7 +393,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			String nameFilter = request.getParameter( PN_REQUEST_PARAM_NAME_NAME_FILTER );
 			if ( nameFilter != null )
 				nameFilter = nameFilter.length() == 0 ? null : nameFilter.toLowerCase();
-			final String queryParam = nameFilter == null ? null : '%' + nameFilter + '%';
+			final String queryParam = nameFilter == null ? null : nameFilter.length() > 1 && nameFilter.charAt( 0 ) == '"' && nameFilter.charAt( nameFilter.length() - 1 ) == '"' ? nameFilter.substring( 1, nameFilter.length() - 1 ) : '%' + nameFilter + '%';
 			final String pagerUrlWithoutNameFilter = pagerUrlBuilder.toString(); // For adding new name filter
 			if ( nameFilter != null ) {
 				final String nameFilterParam = '&' + PN_REQUEST_PARAM_NAME_NAME_FILTER + '=' + URLEncoder.encode( nameFilter, "UTF-8" );
@@ -429,15 +430,22 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.print( " of " );
 					outputWriter.print( getPlayerDetailsHtmlLink( player1, player1Name = getPlayerName( player1, connection ), null ) );
 					if ( player2 != null ) {
-						countQuery = "SELECT COUNT(*) FROM (SELECT game FROM game_player WHERE player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR player=" + player2 ) + " GROUP BY game HAVING COUNT(*)=2) as foo";
+						if ( nameFilter == null )
+							countQuery = "SELECT COUNT(*) FROM (SELECT game FROM game_player WHERE player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR player=" + player2 ) + " GROUP BY game HAVING COUNT(*)=2) as foo";
+						else
+							countQuery = "SELECT COUNT(*) FROM (SELECT game FROM game_player JOIN game on game.id=game_player.game WHERE player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR player=" + player2 ) + " AND map_name LIKE ? GROUP BY game HAVING COUNT(*)=2) as foo";
 						outputWriter.print( " and " );
 						outputWriter.print( getPlayerDetailsHtmlLink( player2, player2Name = getPlayerName( player2, connection ), null ) );
 					}
-					else
-						countQuery = "SELECT COUNT(*) FROM game_player WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 ); // No need distinct, 1 player is only once at the most in a game
+					else {
+						if ( nameFilter == null )
+							countQuery = "SELECT COUNT(*) FROM game_player WHERE player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 ); // No need distinct, 1 player is only once at the most in a game
+						else
+							countQuery = "SELECT COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 ) + " AND map_name LIKE ?"; // No need distinct, 1 player is only once at the most in a game
+					}
 				}
 				else
-					countQuery = "SELECT COUNT(*) FROM game";
+					countQuery = "SELECT COUNT(*) FROM game" + ( nameFilter == null ? "" : " WHERE map_name LIKE ?" );
 				outputWriter.println( "</h3>" );
 				if ( hasAka ) {
 					statement = connection.createStatement();
@@ -459,9 +467,12 @@ public class PlayersNetworkServlet extends BaseServlet {
 				}
 				
 				// Pages count section
-				final int gamesCount = executeCountStatement( countQuery, connection );
+				final int gamesCount = queryParam == null ? executeCountStatement( countQuery, connection ) : executeCountStatement( countQuery, queryParam, connection );
 				outputWriter.println( "<p>Games count: <b>" + gamesCount + "</b><br>" );
 				outputWriter.flush();
+				
+				// Filter section
+				renderFiltersSection( outputWriter, "Filter by map name", nameFilter, page, pagerUrlWithoutNameFilter );
 				
 				// Pager links section
 				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PAGE ).append( '=' );
@@ -477,19 +488,27 @@ public class PlayersNetworkServlet extends BaseServlet {
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
 				String query;
 				if ( player1 == null )
-					query = "SELECT id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99) FROM game";
+					query = "SELECT id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99) FROM game" + ( nameFilter == null ? "" : " WHERE map_name LIKE ?" );
 				else if ( player2 == null )
-					query = "SELECT game.id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99) FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 );
+					query = "SELECT game.id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99) FROM game JOIN game_player on game.id=game_player.game WHERE " + ( nameFilter == null ? "" : "map_name LIKE ? AND " ) + "game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 );
 				else
-					query = "SELECT DISTINCT game.id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99) FROM game JOIN game_player on game.id=game_player.game WHERE game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR game_player.player=" + player2 ) + " GROUP BY game.id, engine, save_time, map_name, frames, type, gateway HAVING COUNT(*)=2";
+					query = "SELECT DISTINCT game.id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99) FROM game JOIN game_player on game_player.game=game.id WHERE " + ( nameFilter == null ? "" : "map_name LIKE ? AND " ) + "(game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR game_player.player=" + player2 ) + ") GROUP BY game.id, engine, save_time, map_name, frames, type, gateway HAVING COUNT(*)=2";
 				
 				query += " ORDER BY " + tableHeader.sortingColumns[ sortingIndex ] + ( sortingDesc ? " DESC" : "" )
 				       + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
 				
+				if ( queryParam == null ) {
+					statement = connection.createStatement();
+					resultSet = statement.executeQuery( query );
+				}
+				else {
+					statement3 = connection.prepareStatement( query );
+					statement3.setString( 1, queryParam );
+					resultSet = statement3.executeQuery();
+				}
+				
 				outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
 				renderSortingTableHeaderRow( outputWriter, tableHeader, pagerUrlWithoutSorting, sortingIndex, sortingDesc, page );
-				statement = connection.createStatement();
-				resultSet = statement.executeQuery( query );
 				final ReplayHeader replayHeader = new ReplayHeader();
 				int colCounter;
 				statement2 = connection.prepareStatement( "SELECT player.id, player.name FROM game_player JOIN player on game_player.player=player.id WHERE game_player.game=?" );
@@ -508,7 +527,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					final Integer gateway = resultSet.getInt( 7 );
 					outputWriter.print( "<tr><td align=right class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + ">" + getGameDetailsHtmlLink( gameId, Integer.toString( ++recordCounter ) ) + "&nbsp;" );
 					outputWriter.print( "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + ( replayHeader.saveTime == null ? "" : replayHeader.guessVersionFromDate() ) );
-					outputWriter.print( "<td>" + replayHeader.mapName );
+					outputWriter.print( "<td>" + getGameListWithMapHtmlLink( replayHeader.mapName, replayHeader.mapName, null, false ) );
 					outputWriter.print( "<td>" + replayHeader.getDurationString( true ) );
 					outputWriter.print( "<td>" + ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ] );
 					outputWriter.print( "<td>" + ( replayHeader.saveTime == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ) ) );
@@ -520,6 +539,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 				}
 				statement2.close();
 				outputWriter.println( "</table>" );
+				
+				if ( queryParam == null )
+					statement.close();
+				else
+					statement3.close();
 				
 			}
 			else if ( entity.equals( ENTITY_PLAYER ) ) {
@@ -562,7 +586,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				outputWriter.flush();
 				
 				// Filter section
-				renderFiltersSection( outputWriter, nameFilter, page, pagerUrlWithoutNameFilter );
+				renderFiltersSection( outputWriter, "Filter by name", nameFilter, page, pagerUrlWithoutNameFilter );
 				
 				// Pager links section
 				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PAGE ).append( '=' );
@@ -630,7 +654,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				outputWriter.flush();
 				
 				// Filter section
-				renderFiltersSection( outputWriter, nameFilter, page, pagerUrlWithoutNameFilter );
+				renderFiltersSection( outputWriter, "Filter by name", nameFilter, page, pagerUrlWithoutNameFilter );
 				
 				// Pager links section
 				pagerUrlBuilder.append( '&' ).append( PN_REQUEST_PARAM_NAME_PAGE ).append( '=' );
@@ -822,7 +846,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.println( "<tr><th align=left>Duration:<td>" + replayHeader.getDurationString( false ) );
 					outputWriter.println( "<tr><th align=left>Saved on:<td>" + ( replayHeader.saveTime == null ? UNKOWN_HTML_STRING : replayHeader.saveTime ) );
 					outputWriter.println( "<tr><th align=left>Game name:<td>" + replayHeader.gameName );
-					outputWriter.println( "<tr><th align=left>Map name:<td>" + replayHeader.mapName );
+					outputWriter.println( "<tr><th align=left>Map name:<td>" + getGameListWithMapHtmlLink( replayHeader.mapName, replayHeader.mapName, null, false ) );
 					outputWriter.println( "<tr><th align=left>Map size:<td>" + replayHeader.getMapSize() );
 					outputWriter.println( "<tr><th align=left>Creator name:<td>" + replayHeader.creatorName );
 					outputWriter.println( "<tr><th align=left>Game type:<td>" + ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ] );
@@ -931,19 +955,19 @@ public class PlayersNetworkServlet extends BaseServlet {
 				if ( akaIdList != null )
 					resultSet2  = statement2.executeQuery( "SELECT map_name, COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ") GROUP BY map_name ORDER BY COUNT(*) DESC LIMIT " + TOP_COUNT );
 				
-				outputWriter.println( "<tr><th align=left>Top " + TOP_COUNT + " maps<td valign=top><table border=0 width=100%>" );
+				outputWriter.println( "<tr><th align=left>Top " + TOP_COUNT + " maps:<td valign=top><table border=0 width=100%>" );
 				int rowCounter = 0;
 				while ( resultSet.next() ) {
-					outputWriter.println( "<tr" + ( (rowCounter++ & 0x01) == 0 ? " style='background:#cacaca'" : "" ) + "><td>" + encodeHtmlString( resultSet.getString( 1 ) ) );
-					outputWriter.println( "<td align=right>" + resultSet.getInt( 2 ) + "<td align=right>" + (int) ( resultSet.getInt( 2 ) * 100.0f / gamesCount + 0.5f ) + "%" );
+					outputWriter.println( "<tr" + ( (rowCounter++ & 0x01) == 0 ? " style='background:#cacaca'" : "" ) + "><td>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), resultSet.getString( 1 ), null, false ) );
+					outputWriter.println( "<td align=right>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), Integer.toString( resultSet.getInt( 2 ) ), entityId, false ) + "<td align=right>" + (int) ( resultSet.getInt( 2 ) * 100.0f / gamesCount + 0.5f ) + "%" );
 				}
 				outputWriter.println( "</table>" );
 				if ( hasAka ) {
 					outputWriter.println( "<td valign=top><table border=0 width=100%>" );
 					rowCounter = 0;
 					while ( resultSet2.next() ) {
-						outputWriter.println( "<tr" + ( (rowCounter++ & 0x01) == 0 ? " style='background:#cacaca'" : "" ) + "><td>" + encodeHtmlString( resultSet2.getString( 1 ) ) );
-						outputWriter.println( "<td align=right>" + resultSet2.getInt( 2 ) + "<td align=right>" + (int) ( resultSet2.getInt( 2 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
+						outputWriter.println( "<tr" + ( (rowCounter++ & 0x01) == 0 ? " style='background:#cacaca'" : "" ) + "><td>" + getGameListWithMapHtmlLink( resultSet2.getString( 1 ), resultSet2.getString( 1 ), null, false ) );
+						outputWriter.println( "<td align=right>" + getGameListWithMapHtmlLink( resultSet2.getString( 1 ), Integer.toString( resultSet2.getInt( 2 ) ), entityId, true ) + "<td align=right>" + (int) ( resultSet2.getInt( 2 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
 					}
 					outputWriter.println( "</table>" );
 				}
@@ -1003,13 +1027,14 @@ public class PlayersNetworkServlet extends BaseServlet {
 	/**
 	 * Renders the filter section.
 	 * @param outputWriter output writer to use
+	 * @param displayText  display text to render for the filter
 	 * @param nameFilter   value of the name filter
 	 * @param page         current page
 	 * @param maxPage      max page
 	 * @param pagerUrl     url to be used for the pager links; ends with '=' and only the target page number have to be appended
 	 */
-	private static void renderFiltersSection( final PrintWriter outputWriter, final String nameFilter, final int page, final String pagerUrlWithoutNameFilter ) {
-		outputWriter.println( "Filter by name: <input type=text id='8347' onkeydown=\"javascritp:if(event.keyCode==13) document.getElementById('4358').onclick()\""
+	private static void renderFiltersSection( final PrintWriter outputWriter, final String displayText, final String nameFilter, final int page, final String pagerUrlWithoutNameFilter ) {
+		outputWriter.println( displayText + ": <input type=text id='8347' onkeydown=\"javascritp:if(event.keyCode==13) document.getElementById('4358').onclick()\""
 				+ ( nameFilter == null ? "" : " value='" + encodeHtmlString( nameFilter ) + "'" )
 				+ "> <a id='4358' href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter
 				+ '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page
@@ -1120,6 +1145,27 @@ public class PlayersNetworkServlet extends BaseServlet {
 		finally {
 			if ( resultSet != null ) try { resultSet.close(); } catch ( final SQLException se ) {}
 			if ( statement != null ) try { statement.close(); } catch ( final SQLException se ) {}
+		}
+	}
+	
+	/**
+	 * Generates and returns an HTML link to the game list page of a map (and optionally of a player optionally akas included).<br>
+	 * An HTML anchor tag will be returned whose text is <code>text</code>.
+	 * @param mapName     name of the map
+	 * @param text        text to appear in the link
+	 * @param playerId    optional id of the player, if specified, link to the player's games
+	 * @param includeAkas tells if akas should be included (adds an extra parameter), only used if playerId is provided
+	 * @return an HTML link to the details page of the player
+	 */
+	private static String getGameListWithMapHtmlLink( final String mapName, final String text, final Integer playerId, final boolean includeAkas ) {
+		try {
+			return "<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION   + '=' + PN_OPERATION_LIST
+								 + '&' + PN_REQUEST_PARAM_NAME_ENTITY      + '=' + ENTITY_GAME
+								 + ( playerId == null ? "" : '&' + PN_REQUEST_PARAM_NAME_PLAYER1 + '=' + playerId + ( includeAkas ? '&' + PN_REQUEST_PARAM_NAME_INCLUDE_AKAS : "" ) )
+								 + '&' + PN_REQUEST_PARAM_NAME_NAME_FILTER + '=' + URLEncoder.encode( '"' + mapName + '"', "UTF-8" ) + "'>" + encodeHtmlString( text ) + "</a>";
+		} catch ( final UnsupportedEncodingException use ) {
+			// This will never happen.
+			throw new RuntimeException( "Unsupported UTF-8 encoding?" ); 
 		}
 	}
 	
