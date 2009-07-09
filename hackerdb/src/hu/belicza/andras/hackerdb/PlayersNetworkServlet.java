@@ -876,14 +876,17 @@ public class PlayersNetworkServlet extends BaseServlet {
 					resultSet2 = statement2.executeQuery( "SELECT COUNT(*), MIN(save_time), MAX(save_time), SUM(frames), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ")" );
 				}
 				
+				outputWriter.print( "<table border=1 cellspacing=0 cellpadding=2>" );
+				if ( hasAka ) outputWriter.print( "<tr><td><th>Details of " + playerNameHtml + "<th>Details with AKAs included" );
+				
+				int gamesCount  = 1;
+				int gamesCount2 = 1;
 				if ( resultSet.next() ) {
 					if ( hasAka )
 						resultSet2.next();
-					outputWriter.print( "<table border=1 cellspacing=0 cellpadding=2>" );
-					if ( hasAka ) outputWriter.print( "<tr><td><th>Details of " + playerNameHtml + "<th>Details with AKAs included" );
 					
-					final int gamesCount  = resultSet.getInt( 1 );
-					final int gamesCount2 = hasAka ? resultSet2.getInt( 1 ) : 0;
+					gamesCount  = resultSet.getInt( 1 );
+					gamesCount2 = hasAka ? resultSet2.getInt( 1 ) : 0;
 					outputWriter.print( "<tr><th align=left>Games count:<td>" + gamesCount );
 					if ( hasAka ) outputWriter.print( "<td>" + gamesCount2 );
 					
@@ -913,16 +916,46 @@ public class PlayersNetworkServlet extends BaseServlet {
 					if ( hasAka ) outputWriter.print( "<td>" + getGameListOfPlayerHtmlLink( entityId, "Games with AKAs included", true ) );
 					outputWriter.print( "<tr><th align=left>Player list:<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Who played with " + playerNameHtml + "?", false ) );
 					if ( hasAka ) outputWriter.print( "<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Players with AKAs included", true ) );
-					outputWriter.print( "</table>" );
 				}
 				else
 					outputWriter.println( "<p><b><i><font color='red'>The referred player could not be found!</font></i></b></p>" );
 				
-				if ( akaIdList != null ) {
+				if ( hasAka )
 					resultSet2.close();
-					statement2.close();
-				}
 				resultSet.close();
+				
+				outputWriter.flush();
+				
+				final int TOP_COUNT = 10;
+				resultSet  = statement.executeQuery( "SELECT map_name, COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player=" + entityId + " GROUP BY map_name ORDER BY COUNT(*) DESC LIMIT " + TOP_COUNT );
+				if ( akaIdList != null )
+					resultSet2  = statement2.executeQuery( "SELECT map_name, COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ") GROUP BY map_name ORDER BY COUNT(*) DESC LIMIT " + TOP_COUNT );
+				
+				outputWriter.println( "<tr><th align=left>Top " + TOP_COUNT + " maps<td valign=top><table border=0 width=100%>" );
+				int rowCounter = 0;
+				while ( resultSet.next() ) {
+					outputWriter.println( "<tr" + ( (rowCounter++ & 0x01) == 0 ? " style='background:#cacaca'" : "" ) + "><td>" + encodeHtmlString( resultSet.getString( 1 ) ) );
+					outputWriter.println( "<td align=right>" + resultSet.getInt( 2 ) + "<td align=right>" + (int) ( resultSet.getInt( 2 ) * 100.0f / gamesCount + 0.5f ) + "%" );
+				}
+				outputWriter.println( "</table>" );
+				if ( hasAka ) {
+					outputWriter.println( "<td valign=top><table border=0 width=100%>" );
+					rowCounter = 0;
+					while ( resultSet2.next() ) {
+						outputWriter.println( "<tr" + ( (rowCounter++ & 0x01) == 0 ? " style='background:#cacaca'" : "" ) + "><td>" + encodeHtmlString( resultSet2.getString( 1 ) ) );
+						outputWriter.println( "<td align=right>" + resultSet2.getInt( 2 ) + "<td align=right>" + (int) ( resultSet2.getInt( 2 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
+					}
+					outputWriter.println( "</table>" );
+				}
+				
+				if ( hasAka )
+					resultSet2.close();
+				resultSet.close();
+				
+				outputWriter.print( "</table>" );
+				
+				if ( hasAka )
+					statement2.close();
 				statement.close();
 				
 			}
