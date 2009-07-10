@@ -24,6 +24,7 @@ The Players' Network automatically recognizes connections between replays where 
  * you can list the games of a player (with or without his/her AKAs included)
  * you can list the common games of 2 players (with or without their AKAs included)
  * you can list players who played with a specific player (with or without his/her AKAs included)
+ * you can filter the players and AKA groups by player name, and you can filter games by map name
 
 ==Game list==
 You can list the games that are added to the Players' Network. You can sort them by version, date, map name, duration etc. by clicking on the columns header. The colored background in the Details column indicates the reported gateway of the game. Sorting by the Details column will sort by gateway.
