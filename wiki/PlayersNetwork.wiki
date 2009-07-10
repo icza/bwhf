@@ -57,3 +57,6 @@ You can use special characters to filter. The character `_` can match any charac
 You can use the character % to match any character sequence. For example filter="ako%ing" matches the names: "dakota_fanning", "ako23inga", "akoing".
 
 If the filter text itself is in quotes, then a full phrase filtering is performed (full match not partial). Special characters can still be used.
+
+*Search tips:*
+Some map names contains invisible, so called _control characters_ which results in making their name appear in colors. If you type a name, you will not be able to enter these characters. For example: "neo the lost temple". If you enter that map name filter, you probably won't get any result. That is because there is a control character before and after the "neo" word. You can still list all the "neo the lost temple" maps if you insert the % special character to substitute any characters including the control characters: "neo%the lost temple".
