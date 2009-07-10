@@ -39,6 +39,7 @@ import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_PREVIOUS
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -107,6 +108,12 @@ public class HackerDbServlet extends BaseServlet {
 	@Override
 	public void doGet( final HttpServletRequest request, final HttpServletResponse response ) {
 		setNoCache( response );
+		try {
+			request.setCharacterEncoding( "UTF-8" );
+		} catch (UnsupportedEncodingException e1) {
+			// This will never happen.
+			throw new RuntimeException( "Unsupported UTF-8 encoding?" ); 
+		}
 		
 		try {
 			String operation = request.getParameter( REQUEST_PARAMETER_NAME_OPERATION );
