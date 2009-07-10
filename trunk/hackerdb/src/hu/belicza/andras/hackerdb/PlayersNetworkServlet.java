@@ -124,6 +124,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	@Override
 	public void doGet( final HttpServletRequest request, final HttpServletResponse response ) {
 		setNoCache( response );
+		response.setCharacterEncoding( "UTF-8" );
 		try {
 			request.setCharacterEncoding( "UTF-8" );
 		} catch (UnsupportedEncodingException e1) {
@@ -367,7 +368,6 @@ public class PlayersNetworkServlet extends BaseServlet {
 		PreparedStatement statement3   = null;
 		
 		try {
-			response.setCharacterEncoding( "UTF-8" );
 			outputWriter = response.getWriter();
 			
 			connection = dataSource.getConnection();
@@ -820,7 +820,6 @@ public class PlayersNetworkServlet extends BaseServlet {
 		try {
 			connection = dataSource.getConnection();
 			
-			response.setCharacterEncoding( "UTF-8" );
 			outputWriter = response.getWriter();
 			
 			renderHeader( request, outputWriter );
@@ -917,8 +916,9 @@ public class PlayersNetworkServlet extends BaseServlet {
 					
 					gamesCount  = resultSet.getInt( 1 );
 					gamesCount2 = hasAka ? resultSet2.getInt( 1 ) : 0;
-					outputWriter.print( "<tr><th align=left>Games count:<td>" + gamesCount );
-					if ( hasAka ) outputWriter.print( "<td>" + gamesCount2 );
+					
+					outputWriter.print( "<tr><th align=left>Games count:<td>" + getGameListOfPlayerHtmlLink ( entityId, Integer.toString( gamesCount ), false ) );
+					if ( hasAka ) outputWriter.print( "<td>" + getGameListOfPlayerHtmlLink ( entityId, Integer.toString( gamesCount2 ), true ) );
 					
 					final Date firstGameDate = resultSet.getDate( 2 );
 					outputWriter.print( "<tr><th align=left>First game:<td>" + ( firstGameDate == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( firstGameDate ) ) );
