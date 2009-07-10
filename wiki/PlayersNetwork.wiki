@@ -28,6 +28,8 @@ The Players' Network automatically recognizes connections between replays where 
 ==Game list==
 You can list the games that are added to the Players' Network. You can sort them by version, date, map name, duration etc. by clicking on the columns header. The colored background in the Details column indicates the reported gateway of the game. Sorting by the Details column will sort by gateway.
 
+The map names appear as links. If you click one of the map names, it will filter you the games to that map. If the game list is already filtered to a player's games or to the common games of 2 players, then clicking on the map name will filter to games of the players which was played on that map.
+
 ==Game details==
 You can see the details of a game if you click on its number. The game details page gives you other information of the game, and lists the players in it with other details like race, APM, actions and colors.
 
@@ -43,6 +45,8 @@ The players profile gives you statistical information about the player such as t
 If the player has registered akas, they will be listed, and all the mentioned details will be shown when all the akas are included in the calculation.
 
 If you click on the "Who played with ..." link, it will take you to the player list page where only players are listed who played with the source player. *Now if you click a games count link on this page, it will show the common games of the 2 players.* If on the profiles page you clicked on the link which includes AKAs, then the player list page will also show links leading to commong games list which also includes games played by any of the 2 players' AKAs.
+
+You can see the *Top 10 maps* of the player's games. If you click on the games count here, it will show you the games that the player was in it and were played on that map.
 
 ==AKA list==
 On this page you can check the registered AKAs. Every player being in the same AKA group denotes the same person behind the accounts of the group.
