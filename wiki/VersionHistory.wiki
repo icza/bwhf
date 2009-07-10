@@ -5,6 +5,10 @@
 <wiki:toc max_depth="3" />
 
 ----
+===New features and changes in the upcoming release===
+ * Minor bugfixes.
+
+----
 ===2.42 2009-06-29===
  * Replay autosave function (and therefore autoscan and report) was not working properly in version 2.40 and 2.41. This is fixed now.
 
