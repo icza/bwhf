@@ -124,6 +124,12 @@ public class PlayersNetworkServlet extends BaseServlet {
 	@Override
 	public void doGet( final HttpServletRequest request, final HttpServletResponse response ) {
 		setNoCache( response );
+		try {
+			request.setCharacterEncoding( "UTF-8" );
+		} catch (UnsupportedEncodingException e1) {
+			// This will never happen.
+			throw new RuntimeException( "Unsupported UTF-8 encoding?" ); 
+		}
 		
 		try {
 			String operation = request.getParameter( PN_REQUEST_PARAM_NAME_OPERATION );
