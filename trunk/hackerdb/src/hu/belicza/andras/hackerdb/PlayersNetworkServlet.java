@@ -34,8 +34,10 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -47,8 +49,10 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class PlayersNetworkServlet extends BaseServlet {
 	
-	/** Simple date format to format and parse replay save time. */
-	private static final DateFormat SIMPLE_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd" );
+	/** Simple date format to format and parse replay save time.   */
+	private static final DateFormat SIMPLE_DATE_FORMAT   = new SimpleDateFormat( "yyyy-MM-dd" );
+	/** Simple date format to format dates for the activity chart. */
+	private static final DateFormat ACTIVITY_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM" );
 	/** Earliest date of the replays. */
 	private static final long       EARLIEST_REPLAY_DATE; 
 	static {
@@ -60,9 +64,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 		}
 	}
 	/** Cached string for the "<unkown>" html string. */
-	private static final String UNKOWN_HTML_STRING = encodeHtmlString( "<unknown>" );
+	private static final String UNKOWN_HTML_STRING = encodeHtmlString( "N/A" );
 	/** Size of the list in one page. */
 	private static final int PAGE_SIZE = 25;
+	/** Limit for short games to be excluded from some statistics (2 min). */
+	private static final int SHORT_GAME_FRAME_LIMIT = (int) ( 1000.0f / 42 * 120 );
 	
 	/**
 	 * Defines the header of a table.<br>
@@ -889,11 +895,14 @@ public class PlayersNetworkServlet extends BaseServlet {
 				
 			} else if ( entity.equals( ENTITY_PLAYER ) ) {
 				
-				final String playerNameHtml = encodeHtmlString( getPlayerName( entityId, connection ) );
+				final String playerName     = getPlayerName( entityId, connection );
+				final String playerNameHtml = encodeHtmlString( playerName );
 				outputWriter.println( "<h3>Details of player " + playerNameHtml + "</h3>" );
 				
 				statement  = connection.createStatement();
-				resultSet  = statement.executeQuery( "SELECT COUNT(*), MIN(save_time), MAX(save_time), SUM(frames), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END) FROM game_player JOIN game on game.id=game_player.game WHERE player=" + entityId );
+				String query = "SELECT COUNT(*), MIN(save_time), MAX(save_time), SUM(frames), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " THEN frames END) FROM game_player JOIN game on game.id=game_player.game";
+				
+				resultSet  = statement.executeQuery( query + " WHERE player=" + entityId );
 				final String akaIdList = getPlayerAkaIdList( entityId, connection );
 				final boolean hasAka = akaIdList != null;
 				if ( hasAka ) {
@@ -902,9 +911,10 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.println( "<p>AKAs: " + generatePlayerHtmlLinkListFromResultSet( resultSet2 ) + "</p>" );
 					resultSet2.close();
 					
-					resultSet2 = statement2.executeQuery( "SELECT COUNT(*), MIN(save_time), MAX(save_time), SUM(frames), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ")" );
+					resultSet2 = statement2.executeQuery( query + " WHERE player IN (" + akaIdList + ")" );
 				}
 				
+				// Player statistics table
 				outputWriter.print( "<table border=1 cellspacing=0 cellpadding=2>" );
 				if ( hasAka ) outputWriter.print( "<tr><td><th>Details of " + playerNameHtml + "<th>Details with AKAs included" );
 				
@@ -919,6 +929,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 					
 					outputWriter.print( "<tr><th align=left>Games count:<td>" + getGameListOfPlayerHtmlLink ( entityId, Integer.toString( gamesCount ), false ) );
 					if ( hasAka ) outputWriter.print( "<td>" + getGameListOfPlayerHtmlLink ( entityId, Integer.toString( gamesCount2 ), true ) );
+					outputWriter.print( "<tr><th align=left>Player list:<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Who played with " + playerNameHtml + "?", false ) );
+					if ( hasAka ) outputWriter.print( "<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Players with AKAs included", true ) );
 					
 					final Date firstGameDate = resultSet.getDate( 2 );
 					outputWriter.print( "<tr><th align=left>First game:<td>" + ( firstGameDate == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( firstGameDate ) ) );
@@ -942,10 +954,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 					if ( hasAka ) outputWriter.print( "<td>" + ( firstGameDate2 == null ? UNKOWN_HTML_STRING : new Formatter().format( "%.2f", ( resultSet2.getInt( 1 ) / (float) days2 ) ) ) );
 					outputWriter.print( "<tr><th align=left>Race distribution:<td>Zerg: " + (int) ( resultSet.getInt( 5 ) * 100.0f / gamesCount + 0.5f ) + "%, Terran: " + (int) ( resultSet.getInt( 6 ) * 100.0f / gamesCount + 0.5f ) + "%, Protoss: " + (int) ( resultSet.getInt( 7 ) * 100.0f / gamesCount + 0.5f ) + "%" );
 					if ( hasAka ) outputWriter.print( "<td>Zerg: " + (int) ( resultSet2.getInt( 5 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Terran: " + (int) ( resultSet2.getInt( 6 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Protoss: " + (int) ( resultSet2.getInt( 7 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
-					outputWriter.print( "<tr><th align=left>Game list:<td>" + getGameListOfPlayerHtmlLink( entityId, "Games of " + playerNameHtml, false ) );
-					if ( hasAka ) outputWriter.print( "<td>" + getGameListOfPlayerHtmlLink( entityId, "Games with AKAs included", true ) );
-					outputWriter.print( "<tr><th align=left>Player list:<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Who played with " + playerNameHtml + "?", false ) );
-					if ( hasAka ) outputWriter.print( "<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Players with AKAs included", true ) );
+					outputWriter.print( "<tr><th align=left>Average game length:<td>" + ( resultSet.getInt( 8 ) > 0 ? ReplayHeader.formatFrames( resultSet.getInt( 9 ) /  resultSet.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
+					if ( hasAka ) outputWriter.print( "<td>" + ( resultSet2.getInt( 8 ) > 0 ? ReplayHeader.formatFrames( resultSet2.getInt( 9 ) /  resultSet2.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
 				}
 				else
 					outputWriter.println( "<p><b><i><font color='red'>The referred player could not be found!</font></i></b></p>" );
@@ -956,24 +966,27 @@ public class PlayersNetworkServlet extends BaseServlet {
 				
 				outputWriter.flush();
 				
-				final int TOP_COUNT = 10;
+				// Top maps section
+				final int TOP_COUNT = 15;
 				resultSet  = statement.executeQuery( "SELECT map_name, COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player=" + entityId + " GROUP BY map_name ORDER BY COUNT(*) DESC LIMIT " + TOP_COUNT );
 				if ( akaIdList != null )
 					resultSet2  = statement2.executeQuery( "SELECT map_name, COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ") GROUP BY map_name ORDER BY COUNT(*) DESC LIMIT " + TOP_COUNT );
 				
 				outputWriter.println( "<tr><th align=left>Top " + TOP_COUNT + " maps:<td valign=top><table border=0 width=100%>" );
-				int rowCounter = 0;
+				int rowCounter = 1;
 				while ( resultSet.next() ) {
-					outputWriter.println( "<tr" + ( (rowCounter++ & 0x01) == 0 ? " style='background:#cacaca'" : "" ) + "><td>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), resultSet.getString( 1 ), null, null, false ) );
+					outputWriter.println( "<tr" + ( (rowCounter & 0x01) == 1 ? " style='background:#cacaca'" : "" ) + "><td align=right>" + rowCounter + "<td>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), resultSet.getString( 1 ), null, null, false ) );
 					outputWriter.println( "<td align=right>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), Integer.toString( resultSet.getInt( 2 ) ), entityId, null, false ) + "<td align=right>" + (int) ( resultSet.getInt( 2 ) * 100.0f / gamesCount + 0.5f ) + "%" );
+					rowCounter++;
 				}
 				outputWriter.println( "</table>" );
 				if ( hasAka ) {
 					outputWriter.println( "<td valign=top><table border=0 width=100%>" );
-					rowCounter = 0;
+					rowCounter = 1;
 					while ( resultSet2.next() ) {
-						outputWriter.println( "<tr" + ( (rowCounter++ & 0x01) == 0 ? " style='background:#cacaca'" : "" ) + "><td>" + getGameListWithMapHtmlLink( resultSet2.getString( 1 ), resultSet2.getString( 1 ), null, null, false ) );
+						outputWriter.println( "<tr" + ( (rowCounter & 0x01) == 1 ? " style='background:#cacaca'" : "" ) + "><td align=right>" + rowCounter + "<td>" + getGameListWithMapHtmlLink( resultSet2.getString( 1 ), resultSet2.getString( 1 ), null, null, false ) );
 						outputWriter.println( "<td align=right>" + getGameListWithMapHtmlLink( resultSet2.getString( 1 ), Integer.toString( resultSet2.getInt( 2 ) ), entityId, null, true ) + "<td align=right>" + (int) ( resultSet2.getInt( 2 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
+						rowCounter++;
 					}
 					outputWriter.println( "</table>" );
 				}
@@ -982,7 +995,108 @@ public class PlayersNetworkServlet extends BaseServlet {
 					resultSet2.close();
 				resultSet.close();
 				
-				outputWriter.print( "</table>" );
+				outputWriter.println( "</table>" );
+				outputWriter.println( "<i>(* games with less than 2 minutes are excluded)</i>" );
+				
+				outputWriter.flush();
+				
+				// Player activity chart 
+				resultSet = statement.executeQuery( "SELECT date_trunc('month',game.save_time), COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player=" + entityId + "AND game.save_time IS NOT NULL GROUP BY date_trunc('month',game.save_time) ORDER BY date_trunc('month',game.save_time)" );
+				if ( hasAka )
+					resultSet2 = statement2.executeQuery( "SELECT date_trunc('month',game.save_time), COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ") AND game.save_time IS NOT NULL GROUP BY date_trunc('month',game.save_time) ORDER BY date_trunc('month',game.save_time)" ); 
+				
+				final List< Object[] > chartData  = new ArrayList< Object[] >();
+				final List< Object[] > chartData2 = new ArrayList< Object[] >();
+				while ( resultSet.next() )
+					chartData.add( new Object[] { resultSet.getDate( 1 ), resultSet.getInt( 2 ) } );
+				if ( hasAka ) {
+					while ( resultSet2.next() )
+						chartData2.add( new Object[] { resultSet2.getDate( 1 ), resultSet2.getInt( 2 ) } );
+					// First and last date must match in both lines...
+					if ( ( (Date) chartData2.get( 0 )[ 0 ] ).before( (Date) chartData.get( 0 )[ 0 ] ) )
+						chartData.add( 0, new Object[] { chartData2.get( 0 )[ 0 ], 0 } );
+					if ( ( (Date) chartData2.get( chartData2.size() - 1 )[ 0 ] ).after( (Date) chartData.get( chartData.size() - 1 )[ 0 ] ) )
+						chartData.add( new Object[] { chartData2.get( chartData2.size() - 1 )[ 0 ], 0 } );
+				}
+				
+				if ( hasAka )
+					resultSet2.close();
+				resultSet.close();
+				
+				if ( chartData.isEmpty() && chartData2.isEmpty() )
+					outputWriter.println( "<p>A player activity chart is not available for this player!</p>" );
+				else {
+					final int CHART_WIDTH  = 900;
+					final int CHART_HEIGHT = 333;
+					final String playerNameChartEncoded = playerName.replace( " ", "+" ).replace( "|", "" );
+					final StringBuilder activityChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=lc&amp;chdlp=t&amp;chs=" );
+					activityChartUrlBuilder.append( CHART_WIDTH ).append( 'x' ).append( CHART_HEIGHT ).append( "&amp;chtt=BHWF+Activity+of+player+" ).append( playerNameChartEncoded );
+					if ( hasAka )
+						activityChartUrlBuilder.append( "&amp;chdl=" + playerNameChartEncoded + "|with+AKAs" );
+					activityChartUrlBuilder.append( "&amp;chd=t:" );
+					int maxMonthGamesCount = 0;
+					int monthsCount = 1;
+					for ( final List< Object[] > dataList : hasAka ? new List[] { chartData, chartData2 } : new List[] { chartData } ) {
+						if ( dataList == chartData2 )
+							activityChartUrlBuilder.append( '|' );
+						
+						if ( !hasAka && chartData.size() == 1 || hasAka && chartData2.size() == 1 ) // If presence is less than 1 month, make chart look nicer...
+							activityChartUrlBuilder.append( "0,0,0," );
+						
+						GregorianCalendar calendar = null;
+						for ( final Object[] data : dataList ) {
+							if ( calendar != null ) {
+								calendar.add( Calendar.MONTH, 1 );
+								if ( dataList == chartData ) monthsCount++;
+								activityChartUrlBuilder.append( ',' );
+								final Date nextMonth = (Date) data[ 0 ];
+								while ( calendar.getTime().before( nextMonth ) ) { // Fill up empty months
+									activityChartUrlBuilder.append( "0," );
+									calendar.add( Calendar.MONTH, 1 );
+									if ( dataList == chartData ) monthsCount++;
+								}
+							}
+							else {
+								calendar = new GregorianCalendar();
+								calendar.setTime( (Date) data[ 0 ] );
+							}
+							final int monthGamesCount = (Integer) data[ 1 ];
+							if ( monthGamesCount > maxMonthGamesCount )
+								maxMonthGamesCount = monthGamesCount;
+							activityChartUrlBuilder.append( monthGamesCount );
+						}
+						
+						if ( !hasAka && chartData.size() == 1 || hasAka && chartData2.size() == 1 ) // If presence is less than 1 month, make chart look nicer...
+							activityChartUrlBuilder.append( ",0,0,0" );
+					}
+					activityChartUrlBuilder.append( "&amp;chds=0," ).append( maxMonthGamesCount );
+					if ( hasAka ) 
+						activityChartUrlBuilder.append( ",0," ).append( maxMonthGamesCount );
+					
+					activityChartUrlBuilder.append( "&amp;chco=FF0000" );
+					if ( hasAka )
+						activityChartUrlBuilder.append( ",0000FF" );
+					
+					activityChartUrlBuilder.append( "&amp;chxt=x,y&amp;chxl=0:|" );
+					final GregorianCalendar calendar = new GregorianCalendar();
+					calendar.setTime( (Date) chartData.get( 0 )[ 0 ] );
+					final int monthsJump = monthsCount / 15 + 1;
+					for ( int i = 0; i < monthsCount; i += monthsJump ) {
+						activityChartUrlBuilder.append( ACTIVITY_DATE_FORMAT.format( calendar.getTime() ) ).append( '|' );
+						calendar.add( Calendar.MONTH, monthsJump );
+					}
+					activityChartUrlBuilder.append( "1:" );
+					for ( int i = 0; i <= 10; i++ )
+						activityChartUrlBuilder.append( '|' ).append( maxMonthGamesCount * i / 10 );
+					
+					
+					activityChartUrlBuilder.append( "&amp;chxp=0" );
+					for ( int i = 0; i < monthsCount; i += monthsJump ) {
+						activityChartUrlBuilder.append( ',' ).append( monthsCount == 1 ? 50 : i * 100 / ( monthsCount - 1 ) ); // If one month only, put it in center
+					}
+					
+					outputWriter.println( "<p><img src='" + activityChartUrlBuilder.toString() + "' width=" + CHART_WIDTH + " height=" + CHART_HEIGHT + " title='BWHF Activity of player " + playerNameHtml + "'></p>");
+				}
 				
 				if ( hasAka )
 					statement2.close();
