@@ -900,7 +900,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				outputWriter.println( "<h3>Details of player " + playerNameHtml + "</h3>" );
 				
 				statement  = connection.createStatement();
-				String query = "SELECT COUNT(*), MIN(save_time), MAX(save_time), SUM(frames), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " THEN frames END) FROM game_player JOIN game on game.id=game_player.game";
+				String query = "SELECT COUNT(*), MIN(save_time), MAX(save_time), SUM(frames), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " THEN frames END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " THEN actions_count END) FROM game_player JOIN game on game.id=game_player.game";
 				
 				resultSet  = statement.executeQuery( query + " WHERE player=" + entityId );
 				final String akaIdList = getPlayerAkaIdList( entityId, connection );
@@ -956,6 +956,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 					if ( hasAka ) outputWriter.print( "<td>Zerg: " + (int) ( resultSet2.getInt( 5 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Terran: " + (int) ( resultSet2.getInt( 6 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Protoss: " + (int) ( resultSet2.getInt( 7 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
 					outputWriter.print( "<tr><th align=left>Average game length:<td>" + ( resultSet.getInt( 8 ) > 0 ? ReplayHeader.formatFrames( resultSet.getInt( 9 ) /  resultSet.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
 					if ( hasAka ) outputWriter.print( "<td>" + ( resultSet2.getInt( 8 ) > 0 ? ReplayHeader.formatFrames( resultSet2.getInt( 9 ) /  resultSet2.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
+					outputWriter.print( "<tr><th align=left>Average APM:<td>" + ( resultSet.getInt( 9 ) > 0 ? ( resultSet.getInt( 10 ) * 60l /  ReplayHeader.convertFramesToSeconds( resultSet.getInt( 9 ) ) ) + " *" : UNKOWN_HTML_STRING ) );
+					if ( hasAka ) outputWriter.print( "<td>" + ( resultSet2.getInt( 9 ) > 0 ? ( resultSet2.getInt( 10 ) * 60l /  ReplayHeader.convertFramesToSeconds( resultSet2.getInt( 9 ) ) ) + " *" : UNKOWN_HTML_STRING ) );
 				}
 				else
 					outputWriter.println( "<p><b><i><font color='red'>The referred player could not be found!</font></i></b></p>" );
@@ -1028,11 +1030,10 @@ public class PlayersNetworkServlet extends BaseServlet {
 				else {
 					final int CHART_WIDTH  = 900;
 					final int CHART_HEIGHT = 333;
-					final String playerNameChartEncoded = playerName.replace( " ", "+" ).replace( "|", "" );
 					final StringBuilder activityChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=lc&amp;chdlp=t&amp;chs=" );
-					activityChartUrlBuilder.append( CHART_WIDTH ).append( 'x' ).append( CHART_HEIGHT ).append( "&amp;chtt=BHWF+Activity+of+player+" ).append( playerNameChartEncoded );
+					activityChartUrlBuilder.append( CHART_WIDTH ).append( 'x' ).append( CHART_HEIGHT ).append( "&amp;chtt=BHWF+Activity+of+player+" ).append( playerNameHtml );
 					if ( hasAka )
-						activityChartUrlBuilder.append( "&amp;chdl=" + playerNameChartEncoded + "|with+AKAs" );
+						activityChartUrlBuilder.append( "&amp;chdl=" + playerNameHtml + "|with+AKAs" );
 					activityChartUrlBuilder.append( "&amp;chd=t:" );
 					int maxMonthGamesCount = 0;
 					int monthsCount = 1;
@@ -1075,7 +1076,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					
 					activityChartUrlBuilder.append( "&amp;chco=FF0000" );
 					if ( hasAka )
-						activityChartUrlBuilder.append( ",0000FF" );
+						activityChartUrlBuilder.append( ",00BB00" );
 					
 					activityChartUrlBuilder.append( "&amp;chxt=x,y&amp;chxl=0:|" );
 					final GregorianCalendar calendar = new GregorianCalendar();
