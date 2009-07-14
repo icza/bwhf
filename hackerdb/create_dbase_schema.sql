@@ -245,6 +245,14 @@ CREATE INDEX idx_player__name
   USING btree
   (name);
 
+-- Index: idx_player__aka_group
+
+-- DROP INDEX idx_player__aka_group;
+
+CREATE INDEX idx_player__aka_group
+  ON player
+  USING btree
+  (aka_group);
 
 
 -- Table: game_player
@@ -282,4 +290,20 @@ CREATE INDEX idx_game_player__game_player
   USING btree
   (game, player);
 
+-- Index: idx_game_player__player
 
+-- DROP INDEX idx_game_player__player;
+
+CREATE INDEX idx_game_player__player
+  ON game_player
+  USING btree
+  (player);
+
+-- Index: idx_game_player__game
+
+-- DROP INDEX idx_game_player__game;
+
+CREATE INDEX idx_game_player__game
+  ON game_player
+  USING btree
+  (game);
