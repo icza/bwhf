@@ -45,9 +45,24 @@ The players profile gives you statistical information about the player such as t
 
 If the player has registered akas, they will be listed, and all the mentioned details will be shown when all the akas are included in the calculation.
 
+The games count link shows you the games of the player.
+
 If you click on the "Who played with ..." link, it will take you to the player list page where only players are listed who played with the source player. *Now if you click a games count link on this page, it will show the common games of the 2 players.* If on the profiles page you clicked on the link which includes AKAs, then the player list page will also show links leading to commong games list which also includes games played by any of the 2 players' AKAs.
 
+The *average APM* is a weighted average. Longer games weight more in the average than short ones. For example taking 2 games: 10 min 100 APM and 20 min 200 APM, the weighted average of these 2 games are not 150 but 166.
+
+*Random-o-meter* shows the race distribution of the games of the player. It shows maximum value if all races are used equally, shows minimum value, if only 1 race is used. The exact value between 0 and 100 is calculated with my formula:
+{{{
+Randomness = 100 - ( abs(zergGames/gamesCount - 1/3) + abs(terranGames/gamesCount -1/3) + abs(protossGames/gamesCount - 1/3) ) * 75;
+}}}
+
 You can see the *Top 10 maps* of the player's games. If you click on the games count here, it will show you the games that the player was in it and were played on that map.
+
+The *Activity chart* shows the player activity, the games/month value over time.
+
+The *APM development chart* shows the development of the average APM of the player over time.
+
+The *Race distribution charts* show the race distribution of the player over time.
 
 ==AKA list==
 On this page you can check the registered AKAs. Every player being in the same AKA group denotes the same person behind the accounts of the group.
