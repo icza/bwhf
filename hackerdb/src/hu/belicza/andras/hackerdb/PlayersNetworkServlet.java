@@ -684,7 +684,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				else
 					query = "SELECT DISTINCT aka_group.id FROM aka_group JOIN player on aka_group.id=player.aka_group WHERE player.name LIKE ? LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
 				
-				outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
+				outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2 width=600>" );
 				renderSortingTableHeaderRow( outputWriter, tableHeader, pagerUrlWithoutSorting, sortingIndex, sortingDesc, page );
 				if ( nameFilter == null ) {
 					statement = connection.createStatement();
@@ -922,6 +922,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 				
 				int gamesCount  = 1;
 				int gamesCount2 = 1;
+				int averageApm  = 0;
+				int averageApm2 = 0;
 				if ( resultSet.next() ) {
 					if ( hasAka )
 						resultSet2.next();
@@ -958,8 +960,12 @@ public class PlayersNetworkServlet extends BaseServlet {
 					if ( hasAka ) outputWriter.print( "<td>Zerg: " + (int) ( resultSet2.getInt( 5 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Terran: " + (int) ( resultSet2.getInt( 6 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Protoss: " + (int) ( resultSet2.getInt( 7 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
 					outputWriter.print( "<tr><th align=left>Average game length:<td>" + ( resultSet.getInt( 8 ) > 0 ? ReplayHeader.formatFrames( resultSet.getInt( 9 ) /  resultSet.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
 					if ( hasAka ) outputWriter.print( "<td>" + ( resultSet2.getInt( 8 ) > 0 ? ReplayHeader.formatFrames( resultSet2.getInt( 9 ) /  resultSet2.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
-					outputWriter.print( "<tr><th align=left>Average APM:<td>" + ( resultSet.getInt( 10 ) > 0 ? ( resultSet.getInt( 11 ) * 60l /  ReplayHeader.convertFramesToSeconds( resultSet.getInt( 10 ) ) ) + " **" : UNKOWN_HTML_STRING ) );
-					if ( hasAka ) outputWriter.print( "<td>" + ( resultSet2.getInt( 10 ) > 0 ? ( resultSet2.getInt( 11 ) * 60l /  ReplayHeader.convertFramesToSeconds( resultSet2.getInt( 10 ) ) ) + " **" : UNKOWN_HTML_STRING ) );
+					averageApm = (int) (resultSet.getInt( 10 ) > 0 ? ( resultSet.getInt( 11 ) * 60l /  ReplayHeader.convertFramesToSeconds( resultSet.getInt( 10 ) ) ) : 0l );
+					outputWriter.print( "<tr><th align=left>Average APM:<td>" + ( averageApm > 0 ? averageApm + " **" : UNKOWN_HTML_STRING ) );
+					if ( hasAka ) {
+						averageApm2 = (int) (resultSet2.getInt( 10 ) > 0 ? ( resultSet2.getInt( 11 ) * 60l /  ReplayHeader.convertFramesToSeconds( resultSet2.getInt( 10 ) ) ) : 0l );
+						outputWriter.print( "<td>" + ( averageApm2 > 0 ? averageApm2 + " **" : UNKOWN_HTML_STRING ) );
+					}
 				}
 				else
 					outputWriter.println( "<p><b><i><font color='red'>The referred player could not be found!</font></i></b></p>" );
@@ -1005,72 +1011,86 @@ public class PlayersNetworkServlet extends BaseServlet {
 				
 				outputWriter.flush();
 				
-				// Player activity chart 
-				resultSet = statement.executeQuery( "SELECT date_trunc('month',game.save_time), COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player=" + entityId + "AND game.save_time IS NOT NULL GROUP BY date_trunc('month',game.save_time) ORDER BY date_trunc('month',game.save_time)" );
+				// Player activity and race distribution over time charts
+				resultSet = statement.executeQuery( "SELECT date_trunc('month',game.save_time), COUNT(*), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN frames END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN actions_count END) FROM game_player JOIN game on game.id=game_player.game WHERE player=" + entityId + "AND game.save_time IS NOT NULL GROUP BY date_trunc('month',game.save_time) ORDER BY date_trunc('month',game.save_time)" );
 				if ( hasAka )
-					resultSet2 = statement2.executeQuery( "SELECT date_trunc('month',game.save_time), COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ") AND game.save_time IS NOT NULL GROUP BY date_trunc('month',game.save_time) ORDER BY date_trunc('month',game.save_time)" ); 
+					resultSet2 = statement2.executeQuery( "SELECT date_trunc('month',game.save_time), COUNT(*), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN frames END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN actions_count END) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ") AND game.save_time IS NOT NULL GROUP BY date_trunc('month',game.save_time) ORDER BY date_trunc('month',game.save_time)" ); 
 				
 				final List< Object[] > chartData  = new ArrayList< Object[] >();
 				final List< Object[] > chartData2 = new ArrayList< Object[] >();
 				while ( resultSet.next() )
-					chartData.add( new Object[] { resultSet.getDate( 1 ), resultSet.getInt( 2 ) } );
+					chartData.add( new Object[] { resultSet.getDate( 1 ), resultSet.getInt( 2 ), resultSet.getInt( 3 ), resultSet.getInt( 4 ), resultSet.getInt( 5 ), resultSet.getInt( 6 ), resultSet.getInt( 7 ) } );
 				if ( hasAka ) {
 					while ( resultSet2.next() )
-						chartData2.add( new Object[] { resultSet2.getDate( 1 ), resultSet2.getInt( 2 ) } );
-					// First and last date must match in both lines...
+						chartData2.add( new Object[] { resultSet2.getDate( 1 ), resultSet2.getInt( 2 ), resultSet2.getInt( 3 ), resultSet2.getInt( 4 ), resultSet2.getInt( 5 ), resultSet2.getInt( 6 ), resultSet2.getInt( 7 ) } );
+					// First and last date must match in both data lists...
 					if ( ( (Date) chartData2.get( 0 )[ 0 ] ).before( (Date) chartData.get( 0 )[ 0 ] ) )
-						chartData.add( 0, new Object[] { chartData2.get( 0 )[ 0 ], 0 } );
+						chartData.add( 0, new Object[] { chartData2.get( 0 )[ 0 ], 0, 0, 0, 0, 0, 0 } );
 					if ( ( (Date) chartData2.get( chartData2.size() - 1 )[ 0 ] ).after( (Date) chartData.get( chartData.size() - 1 )[ 0 ] ) )
-						chartData.add( new Object[] { chartData2.get( chartData2.size() - 1 )[ 0 ], 0 } );
+						chartData.add( new Object[] { chartData2.get( chartData2.size() - 1 )[ 0 ], 0, 0, 0, 0, 0, 0 } );
 				}
 				
 				if ( hasAka )
 					resultSet2.close();
 				resultSet.close();
 				
+				// Fill up empty months...
+				int monthsCount = 1;
+				for ( final List< Object[] > dataList : hasAka ? new List[] { chartData, chartData2 } : new List[] { chartData } ) {
+					GregorianCalendar calendar = null;
+					for ( int i = dataList.size() - 1; i >= 0; i-- ) { // Downward is a must becase we might insert new elements
+						final Object[] data = dataList.get( i );
+						if ( calendar != null ) {
+							calendar.add( Calendar.MONTH, -1 );
+							if ( dataList == chartData ) monthsCount++;
+							final Date prevMonth = (Date) data[ 0 ];
+							while ( calendar.getTime().after( prevMonth ) ) {
+								// Add empty month
+								dataList.add( i + 1, new Object[] { calendar.getTime(), 0, 0, 0, 0, 0, 0 } );
+								calendar.add( Calendar.MONTH, -1 );
+								if ( dataList == chartData ) monthsCount++;
+							}
+						}
+						else {
+							calendar = new GregorianCalendar();
+							calendar.setTime( (Date) data[ 0 ] );
+						}
+					}
+				}
+				
 				if ( chartData.isEmpty() && chartData2.isEmpty() )
-					outputWriter.println( "<p>A player activity chart is not available for this player!</p>" );
+					outputWriter.println( "<p>Charts for this player are not available!</p>" );
 				else {
 					final int CHART_WIDTH  = 900;
 					final int CHART_HEIGHT = 333;
-					final StringBuilder activityChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=lc&amp;chdlp=t&amp;chs=" );
-					activityChartUrlBuilder.append( CHART_WIDTH ).append( 'x' ).append( CHART_HEIGHT ).append( "&amp;chtt=BWHF+Activity+of+" ).append( playerNameHtml ).append( " (games/month)" );
+					
+					// Activity chart
+					final StringBuilder activityChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=lc&amp;chdlp=t&amp;chxtc=0,0&amp;chs=" );
+					activityChartUrlBuilder.append( CHART_WIDTH ).append( 'x' ).append( CHART_HEIGHT ).append( "&amp;chtt=BWHF+Activity+of+" ).append( playerNameHtml ).append( "+(games/month)" );
 					if ( hasAka )
 						activityChartUrlBuilder.append( "&amp;chdl=" + playerNameHtml + "|with+AKAs+included" );
 					activityChartUrlBuilder.append( "&amp;chd=t:" );
 					int maxMonthGamesCount = 0;
-					int monthsCount = 1;
 					for ( final List< Object[] > dataList : hasAka ? new List[] { chartData, chartData2 } : new List[] { chartData } ) {
 						if ( dataList == chartData2 )
 							activityChartUrlBuilder.append( '|' );
 						
-						if ( !hasAka && chartData.size() == 1 || hasAka && chartData2.size() == 1 ) // If presence is less than 1 month, make chart look nicer...
+						if ( chartData.size() == 1 ) // If presence is less than 1 month, make chart look nicer...
 							activityChartUrlBuilder.append( "0,0,0," );
 						
-						GregorianCalendar calendar = null;
+						boolean isFirst = true;
 						for ( final Object[] data : dataList ) {
-							if ( calendar != null ) {
-								calendar.add( Calendar.MONTH, 1 );
-								if ( dataList == chartData ) monthsCount++;
+							if ( isFirst )
+								isFirst = false;
+							else
 								activityChartUrlBuilder.append( ',' );
-								final Date nextMonth = (Date) data[ 0 ];
-								while ( calendar.getTime().before( nextMonth ) ) { // Fill up empty months
-									activityChartUrlBuilder.append( "0," );
-									calendar.add( Calendar.MONTH, 1 );
-									if ( dataList == chartData ) monthsCount++;
-								}
-							}
-							else {
-								calendar = new GregorianCalendar();
-								calendar.setTime( (Date) data[ 0 ] );
-							}
 							final int monthGamesCount = (Integer) data[ 1 ];
 							if ( monthGamesCount > maxMonthGamesCount )
 								maxMonthGamesCount = monthGamesCount;
 							activityChartUrlBuilder.append( monthGamesCount );
 						}
 						
-						if ( !hasAka && chartData.size() == 1 || hasAka && chartData2.size() == 1 ) // If presence is less than 1 month, make chart look nicer...
+						if ( chartData.size() == 1 ) // If presence is less than 1 month, make chart look nicer...
 							activityChartUrlBuilder.append( ",0,0,0" );
 					}
 					activityChartUrlBuilder.append( "&amp;chds=0," ).append( maxMonthGamesCount );
@@ -1090,21 +1110,143 @@ public class PlayersNetworkServlet extends BaseServlet {
 						calendar.add( Calendar.MONTH, monthsJump );
 					}
 					activityChartUrlBuilder.append( "1:" );
-					final int maxYLabelsCount = maxMonthGamesCount > 10 ? 10 : maxMonthGamesCount;
+					int maxYLabelsCount = maxMonthGamesCount > 10 ? 10 : maxMonthGamesCount;
 					for ( int i = 0; i <= maxYLabelsCount; i++ )
 						activityChartUrlBuilder.append( '|' ).append( maxMonthGamesCount * i / maxYLabelsCount );
 					
 					
 					activityChartUrlBuilder.append( "&amp;chxp=0" );
-					for ( int i = 0; i < monthsCount; i += monthsJump ) {
+					for ( int i = 0; i < monthsCount; i += monthsJump )
 						activityChartUrlBuilder.append( ',' ).append( monthsCount == 1 ? 50 : i * 100 / ( monthsCount - 1 ) ); // If one month only, put it in center
-					}
 					
 					activityChartUrlBuilder.append( "&amp;chg=" );
 					activityChartUrlBuilder.append( monthsCount == 1 ? "50," : new Formatter().format( "%.2f,", monthsJump * 100.0f / ( monthsCount - 1 ) ) );
 					new Formatter( activityChartUrlBuilder ).format( "%.2f", 100.0f / maxYLabelsCount );
 					
-					outputWriter.println( "<p><img src='" + activityChartUrlBuilder.toString() + "' width=" + CHART_WIDTH + " height=" + CHART_HEIGHT + " title='BWHF Activity of " + playerNameHtml + " (games/month)'></p>");
+					outputWriter.println( "<p><img src='" + activityChartUrlBuilder.toString() + "' width=" + CHART_WIDTH + " height=" + CHART_HEIGHT + " title='BWHF Activity of " + playerNameHtml + " (games/month)'></p>" );
+					outputWriter.flush();
+					
+					// APM development chart
+					final StringBuilder apmDevelChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=lc&amp;chdlp=t&amp;chxtc=0,0&amp;chs=" );
+					apmDevelChartUrlBuilder.append( CHART_WIDTH ).append( 'x' ).append( CHART_HEIGHT ).append( "&amp;chtt=BWHF+APM+development+of+" ).append( playerNameHtml ).append( "+over+time" );
+					if ( hasAka )
+						apmDevelChartUrlBuilder.append( "&amp;chdl=" + playerNameHtml + "|with+AKAs+included" );
+					apmDevelChartUrlBuilder.append( "&amp;chd=t:" );
+					int maxMonthApm = 0;
+					for ( final List< Object[] > dataList : hasAka ? new List[] { chartData, chartData2 } : new List[] { chartData } ) {
+						if ( dataList == chartData2 )
+							apmDevelChartUrlBuilder.append( '|' );
+						
+						if ( chartData.size() == 1 ) // If presence is less than 1 month, make chart look nicer...
+							apmDevelChartUrlBuilder.append( "0,0,0," );
+						
+						boolean isFirst = true;
+						for ( final Object[] data : dataList ) {
+							if ( isFirst )
+								isFirst = false;
+							else
+								apmDevelChartUrlBuilder.append( ',' );
+							final int actionsCount = (Integer) data[ 6 ];
+							final int framesCount  = (Integer) data[ 5 ];
+							final int monthApm     = (int) ( framesCount > 0 ? ( actionsCount * 60l /  ReplayHeader.convertFramesToSeconds( framesCount ) ) : 0l );
+							if ( monthApm > maxMonthApm )
+								maxMonthApm = monthApm;
+							apmDevelChartUrlBuilder.append( monthApm );
+						}
+						
+						if ( chartData.size() == 1 ) // If presence is less than 1 month, make chart look nicer...
+							apmDevelChartUrlBuilder.append( ",0,0,0" );
+					}
+					apmDevelChartUrlBuilder.append( "&amp;chds=0," ).append( maxMonthApm );
+					if ( hasAka ) 
+						apmDevelChartUrlBuilder.append( ",0," ).append( maxMonthApm );
+					
+					apmDevelChartUrlBuilder.append( "&amp;chco=FF0000" );
+					if ( hasAka )
+						apmDevelChartUrlBuilder.append( ",00BB00" );
+					
+					apmDevelChartUrlBuilder.append( "&amp;chxt=x,y,r&amp;chxl=0:|" );
+					calendar.setTime( (Date) chartData.get( 0 )[ 0 ] );
+					for ( int i = 0; i < monthsCount; i += monthsJump ) {
+						apmDevelChartUrlBuilder.append( ACTIVITY_DATE_FORMAT.format( calendar.getTime() ) ).append( '|' );
+						calendar.add( Calendar.MONTH, monthsJump );
+					}
+					apmDevelChartUrlBuilder.append( "2:|avg|" );
+					if ( averageApm2 > 0 && Math.abs( averageApm - averageApm2 ) > 5 ) // Only render AKA average if the 2 averages are not too close
+						apmDevelChartUrlBuilder.append( "avg2|" );
+					apmDevelChartUrlBuilder.append( "1:" );
+					maxYLabelsCount = maxMonthApm > 10 ? 10 : maxMonthApm;
+					for ( int i = 0; i <= maxYLabelsCount; i++ )
+						apmDevelChartUrlBuilder.append( '|' ).append( maxMonthApm * i / maxYLabelsCount );
+					
+					apmDevelChartUrlBuilder.append( "&amp;chxp=0" );
+					for ( int i = 0; i < monthsCount; i += monthsJump )
+						apmDevelChartUrlBuilder.append( ',' ).append( monthsCount == 1 ? 50 : i * 100 / ( monthsCount - 1 ) ); // If one month only, put it in center
+					apmDevelChartUrlBuilder.append( "|2," );
+					new Formatter( apmDevelChartUrlBuilder ).format( "%.2f", averageApm * 100f / maxMonthApm );
+					if ( averageApm2 > 0 && Math.abs( averageApm - averageApm2 ) > 5 ) // Only render AKA average if the 2 averages are not too close
+						new Formatter( apmDevelChartUrlBuilder ).format( ",%.2f", averageApm2 * 100f / maxMonthApm );
+					
+					apmDevelChartUrlBuilder.append( "&amp;chg=" );
+					apmDevelChartUrlBuilder.append( monthsCount == 1 ? "50," : new Formatter().format( "%.2f,", monthsJump * 100.0f / ( monthsCount - 1 ) ) );
+					new Formatter( apmDevelChartUrlBuilder ).format( "%.2f", 100.0f / maxYLabelsCount );
+					
+					apmDevelChartUrlBuilder.append( "&amp;chxs=2,2020FF,10,-1,t,2020FF&amp;chxtc=0,0|2,-" ).append( CHART_WIDTH );
+					
+					outputWriter.println( "<p><img src='" + apmDevelChartUrlBuilder.toString() + "' width=" + CHART_WIDTH + " height=" + CHART_HEIGHT + " title='BWHF APM development of " + playerNameHtml + " over time'></p>" );
+					outputWriter.flush();
+					
+					// Race distribution over time charts
+					for ( final List< Object[] > dataList : hasAka ? new List[] { chartData, chartData2 } : new List[] { chartData } ) {
+						final StringBuilder raceChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=bvs&amp;chdlp=t&amp;chbh=a,2&amp;chs=" );
+						raceChartUrlBuilder.append( CHART_WIDTH ).append( 'x' ).append( CHART_HEIGHT ).append( "&amp;chtt=BWHF+Race+distribution+of+" ).append( playerNameHtml ).append( "+over+time" );
+						if ( dataList == chartData2 )
+							raceChartUrlBuilder.append( " (with+AKAs+included)" );
+						raceChartUrlBuilder.append( "&amp;chdl=Zerg|Terran|Protoss" );
+						raceChartUrlBuilder.append( "&amp;chd=t:" );
+						final Formatter raceDistroFormatter = new Formatter( raceChartUrlBuilder );
+						for ( int race=0; race < 3; race++ ) {
+							if ( race > 0 )
+								raceChartUrlBuilder.append( '|' );
+							if ( dataList.size() == 1 ) // If presence is less than 1 month, make chart look nicer...
+								raceChartUrlBuilder.append( "0,0,0," );
+							boolean isFirst = true;
+							for ( final Object[] data : dataList ) {
+								if ( isFirst )
+									isFirst = false;
+								else
+									raceChartUrlBuilder.append( ',' );
+								if ( (Integer) data[ 1 ] == 0 )
+									raceChartUrlBuilder.append( 0 );
+								else
+									raceDistroFormatter.format( "%.1f", (Integer) data[ 2 + race ] * 100.0f / (Integer) data[ 1 ] );
+							}
+							if ( dataList.size() == 1 ) // If presence is less than 1 month, make chart look nicer...
+								raceChartUrlBuilder.append( ",0,0,0" );
+						}
+						
+						raceChartUrlBuilder.append( "&amp;chco=FF0000,00DD00,0000FF" );
+						
+						raceChartUrlBuilder.append( "&amp;chxt=x,y&amp;chxl=0:|" );
+						calendar.setTime( (Date) chartData.get( 0 )[ 0 ] );
+						for ( int i = 0; i < monthsCount; i += monthsJump ) {
+							raceChartUrlBuilder.append( ACTIVITY_DATE_FORMAT.format( calendar.getTime() ) ).append( '|' );
+							calendar.add( Calendar.MONTH, monthsJump );
+						}
+						raceChartUrlBuilder.append( "1:|0%|33%|66%|100%" );
+						
+						raceChartUrlBuilder.append( "&amp;chxp=0" );
+						for ( int i = 0; i < monthsCount; i += monthsJump )
+							raceChartUrlBuilder.append( ',' ).append( monthsCount == 1 ? 50 : i * 100 / ( monthsCount - 1 ) ); // If one month only, put it in center
+						
+						raceChartUrlBuilder.append( "&amp;chg=" );
+						raceChartUrlBuilder.append( monthsCount == 1 ? "50," : new Formatter().format( "%.2f,", monthsJump * 100.0f / ( monthsCount - 1 ) ) );
+						raceChartUrlBuilder.append( "33.33,1,0" );
+						
+						outputWriter.println( "<p><img src='" + raceChartUrlBuilder.toString() + "' width=" + CHART_WIDTH + " height=" + CHART_HEIGHT + " title='BWHF Race distribution of " + playerNameHtml + " over time" + ( dataList == chartData2 ? " (with AKAs included)" : "" ) + "'></p>" );
+						outputWriter.flush();
+					}
+					
 				}
 				
 				if ( hasAka )
