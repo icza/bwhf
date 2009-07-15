@@ -56,7 +56,7 @@ The *average APM* is a weighted average. Longer games weight more in the average
 Randomness = 100 - ( abs(zergGames/gamesCount - 1/3) + abs(terranGames/gamesCount - 1/3) + abs(protossGames/gamesCount - 1/3) ) * 75;
 }}}
 
-You can see the *Top 10 maps* of the player's games. If you click on the games count here, it will show you the games that the player was in it and were played on that map.
+You can see the *Top 15 maps* from games of the player. If you click on the games count here, it will show you the games that the player was in it and were played on that map.
 
 The *Activity chart* shows the player activity, the games/month value over time.
 
