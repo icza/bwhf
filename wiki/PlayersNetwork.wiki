@@ -51,7 +51,7 @@ If you click on the "Who played with ..." link, it will take you to the player l
 
 The *average APM* is a weighted average. Longer games weight more in the average than short ones. For example taking 2 games: 10 min 100 APM and 20 min 200 APM, the weighted average of these 2 games is not 150 but 166.
 
-*Random-o-meter* shows the race distribution of the games of the player. It shows maximum value if all races are used equally, shows minimum value, if only 1 race is used. The exact value between 0 and 100 is calculated with my formula:
+*Random-o-meter* shows the race distribution of the player, to what extent the player uses all races. It displays maximum value if all races are used equally, shows minimum value, if only 1 race is used. The exact value between 0 and 100 is calculated with my formula:
 {{{
 Randomness = 100 - ( abs(zergGames/gamesCount - 1/3) + abs(terranGames/gamesCount - 1/3) + abs(protossGames/gamesCount - 1/3) ) * 75;
 }}}
