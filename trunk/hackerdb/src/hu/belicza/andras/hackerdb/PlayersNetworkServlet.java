@@ -956,8 +956,6 @@ public class PlayersNetworkServlet extends BaseServlet {
 					if ( hasAka ) outputWriter.print( "<td>" + ReplayHeader.formatFrames( resultSet2.getInt( 4 ), new StringBuilder(), true ) );
 					outputWriter.print( "<tr><th align=left>Average games per day:<td>" + ( firstGameDate == null ? UNKOWN_HTML_STRING : new Formatter().format( "%.2f", ( resultSet.getInt( 1 ) / (float) days ) ) ) );
 					if ( hasAka ) outputWriter.print( "<td>" + ( firstGameDate2 == null ? UNKOWN_HTML_STRING : new Formatter().format( "%.2f", ( resultSet2.getInt( 1 ) / (float) days2 ) ) ) );
-					outputWriter.print( "<tr><th align=left>Race distribution:<td>Zerg: " + (int) ( resultSet.getInt( 5 ) * 100.0f / gamesCount + 0.5f ) + "%, Terran: " + (int) ( resultSet.getInt( 6 ) * 100.0f / gamesCount + 0.5f ) + "%, Protoss: " + (int) ( resultSet.getInt( 7 ) * 100.0f / gamesCount + 0.5f ) + "%" );
-					if ( hasAka ) outputWriter.print( "<td>Zerg: " + (int) ( resultSet2.getInt( 5 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Terran: " + (int) ( resultSet2.getInt( 6 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Protoss: " + (int) ( resultSet2.getInt( 7 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
 					outputWriter.print( "<tr><th align=left>Average game length:<td>" + ( resultSet.getInt( 8 ) > 0 ? ReplayHeader.formatFrames( resultSet.getInt( 9 ) /  resultSet.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
 					if ( hasAka ) outputWriter.print( "<td>" + ( resultSet2.getInt( 8 ) > 0 ? ReplayHeader.formatFrames( resultSet2.getInt( 9 ) /  resultSet2.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
 					averageApm = (int) (resultSet.getInt( 10 ) > 0 ? ( resultSet.getInt( 11 ) * 60l /  ReplayHeader.convertFramesToSeconds( resultSet.getInt( 10 ) ) ) : 0l );
@@ -966,6 +964,14 @@ public class PlayersNetworkServlet extends BaseServlet {
 						averageApm2 = (int) (resultSet2.getInt( 10 ) > 0 ? ( resultSet2.getInt( 11 ) * 60l /  ReplayHeader.convertFramesToSeconds( resultSet2.getInt( 10 ) ) ) : 0l );
 						outputWriter.print( "<td>" + ( averageApm2 > 0 ? averageApm2 + " **" : UNKOWN_HTML_STRING ) );
 					}
+					outputWriter.print( "<tr><th align=left>Race distribution:<td>Zerg: " + (int) ( resultSet.getInt( 5 ) * 100.0f / gamesCount + 0.5f ) + "%, Terran: " + (int) ( resultSet.getInt( 6 ) * 100.0f / gamesCount + 0.5f ) + "%, Protoss: " + (int) ( resultSet.getInt( 7 ) * 100.0f / gamesCount + 0.5f ) + "%" );
+					if ( hasAka ) outputWriter.print( "<td>Zerg: " + (int) ( resultSet2.getInt( 5 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Terran: " + (int) ( resultSet2.getInt( 6 ) * 100.0f / gamesCount2 + 0.5f ) + "%, Protoss: " + (int) ( resultSet2.getInt( 7 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
+					
+					final int RANDOM_O_METER_WIDTH  = 80;
+					final int RANDOM_O_METER_HEIGHT = 40;
+					final String RANDOM_O_METER_URL = "http://chart.apis.google.com/chart?chs=" + RANDOM_O_METER_WIDTH + "x" + RANDOM_O_METER_HEIGHT + "&cht=gom&chd=t:";
+					outputWriter.print( "<tr><th align=left>Random-o-meter&trade;<td><img src='" + RANDOM_O_METER_URL + calculateRandomOMeter( resultSet.getInt( 5 ), resultSet.getInt( 6 ), resultSet.getInt( 7 ), gamesCount ) + "' width=" + RANDOM_O_METER_WIDTH + " height=" + RANDOM_O_METER_HEIGHT + ">" );
+					if ( hasAka ) outputWriter.print( "<td><img src='" + RANDOM_O_METER_URL + calculateRandomOMeter( resultSet2.getInt( 5 ), resultSet2.getInt( 6 ), resultSet2.getInt( 7 ), gamesCount2 ) + "' width=" + RANDOM_O_METER_WIDTH + " height=" + RANDOM_O_METER_HEIGHT + ">" ); 
 				}
 				else
 					outputWriter.println( "<p><b><i><font color='red'>The referred player could not be found!</font></i></b></p>" );
@@ -1011,7 +1017,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				
 				outputWriter.flush();
 				
-				// Player activity and race distribution over time charts
+				// CHARTS
 				resultSet = statement.executeQuery( "SELECT date_trunc('month',game.save_time), COUNT(*), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN frames END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN actions_count END) FROM game_player JOIN game on game.id=game_player.game WHERE player=" + entityId + "AND game.save_time IS NOT NULL GROUP BY date_trunc('month',game.save_time) ORDER BY date_trunc('month',game.save_time)" );
 				if ( hasAka )
 					resultSet2 = statement2.executeQuery( "SELECT date_trunc('month',game.save_time), COUNT(*), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN frames END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN actions_count END) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ") AND game.save_time IS NOT NULL GROUP BY date_trunc('month',game.save_time) ORDER BY date_trunc('month',game.save_time)" ); 
@@ -1127,7 +1133,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.flush();
 					
 					// APM development chart
-					final StringBuilder apmDevelChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=lc&amp;chdlp=t&amp;chxtc=0,0&amp;chs=" );
+					final StringBuilder apmDevelChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=lc&amp;chdlp=t&amp;chs=" );
 					apmDevelChartUrlBuilder.append( CHART_WIDTH ).append( 'x' ).append( CHART_HEIGHT ).append( "&amp;chtt=BWHF+APM+development+of+" ).append( playerNameHtml ).append( "+over+time" );
 					if ( hasAka )
 						apmDevelChartUrlBuilder.append( "&amp;chdl=" + playerNameHtml + "|with+AKAs+included" );
@@ -1175,7 +1181,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					if ( averageApm2 > 0 && Math.abs( averageApm - averageApm2 ) > 5 ) // Only render AKA average if the 2 averages are not too close
 						apmDevelChartUrlBuilder.append( "avg2|" );
 					apmDevelChartUrlBuilder.append( "1:" );
-					maxYLabelsCount = maxMonthApm > 10 ? 10 : maxMonthApm;
+					maxYLabelsCount = maxMonthApm > 10 ? 10 : maxMonthApm == 0 ? 1 : maxMonthApm;
 					for ( int i = 0; i <= maxYLabelsCount; i++ )
 						apmDevelChartUrlBuilder.append( '|' ).append( maxMonthApm * i / maxYLabelsCount );
 					
@@ -1183,9 +1189,9 @@ public class PlayersNetworkServlet extends BaseServlet {
 					for ( int i = 0; i < monthsCount; i += monthsJump )
 						apmDevelChartUrlBuilder.append( ',' ).append( monthsCount == 1 ? 50 : i * 100 / ( monthsCount - 1 ) ); // If one month only, put it in center
 					apmDevelChartUrlBuilder.append( "|2," );
-					new Formatter( apmDevelChartUrlBuilder ).format( "%.2f", averageApm * 100f / maxMonthApm );
+					new Formatter( apmDevelChartUrlBuilder ).format( "%.2f", averageApm * 100f / (maxMonthApm == 0 ? 1 : maxMonthApm) );
 					if ( averageApm2 > 0 && Math.abs( averageApm - averageApm2 ) > 5 ) // Only render AKA average if the 2 averages are not too close
-						new Formatter( apmDevelChartUrlBuilder ).format( ",%.2f", averageApm2 * 100f / maxMonthApm );
+						new Formatter( apmDevelChartUrlBuilder ).format( ",%.2f", averageApm2 * 100f / (maxMonthApm == 0 ? 1 : maxMonthApm) );
 					
 					apmDevelChartUrlBuilder.append( "&amp;chg=" );
 					apmDevelChartUrlBuilder.append( monthsCount == 1 ? "50," : new Formatter().format( "%.2f,", monthsJump * 100.0f / ( monthsCount - 1 ) ) );
@@ -1198,7 +1204,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					
 					// Race distribution over time charts
 					for ( final List< Object[] > dataList : hasAka ? new List[] { chartData, chartData2 } : new List[] { chartData } ) {
-						final StringBuilder raceChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=bvs&amp;chdlp=t&amp;chbh=a,2&amp;chs=" );
+						final StringBuilder raceChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=bvs&amp;chdlp=t&amp;chbh=a,2&amp;chxtc=0,0&amp;chs=" );
 						raceChartUrlBuilder.append( CHART_WIDTH ).append( 'x' ).append( CHART_HEIGHT ).append( "&amp;chtt=BWHF+Race+distribution+of+" ).append( playerNameHtml ).append( "+over+time" );
 						if ( dataList == chartData2 )
 							raceChartUrlBuilder.append( " (with+AKAs+included)" );
@@ -1270,6 +1276,19 @@ public class PlayersNetworkServlet extends BaseServlet {
 			if ( connection != null ) try { connection.close(); } catch ( final SQLException se ) {}
 			if ( outputWriter != null ) outputWriter.close();
 		}
+	}
+	
+	/**
+	 * Calculates the randomness of the race distribution.
+	 * Result is 100 if races are equal, 0 if all games belongs to 1 race.
+	 * @param zergGames    number of zerg games
+	 * @param terranGames  number of terran games
+	 * @param protossGames number of protoss games
+	 * @param gamesCount   number of total games
+	 * @return the randomness of the race distribution
+	 */
+	private static int calculateRandomOMeter( final float zergGames, final float terranGames, final float protossGames, final float gamesCount ) {
+		return 100 - (int) ( ( Math.abs( zergGames / gamesCount - 1f/3f ) + Math.abs( terranGames / gamesCount - 1f/3f ) + Math.abs( protossGames / gamesCount - 1f/3f ) ) * 75f );
 	}
 	
 	/**
