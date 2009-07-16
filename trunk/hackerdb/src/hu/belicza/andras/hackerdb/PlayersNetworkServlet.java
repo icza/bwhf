@@ -970,7 +970,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					final int RANDOM_O_METER_WIDTH  = 80;
 					final int RANDOM_O_METER_HEIGHT = 40;
 					final String RANDOM_O_METER_URL = "http://chart.apis.google.com/chart?chs=" + RANDOM_O_METER_WIDTH + "x" + RANDOM_O_METER_HEIGHT + "&cht=gom&chd=t:";
-					outputWriter.print( "<tr><th align=left>Random-o-meter&trade;<td><img src='" + RANDOM_O_METER_URL + calculateRandomOMeter( resultSet.getInt( 5 ), resultSet.getInt( 6 ), resultSet.getInt( 7 ), gamesCount ) + "' width=" + RANDOM_O_METER_WIDTH + " height=" + RANDOM_O_METER_HEIGHT + ">" );
+					outputWriter.print( "<tr><th align=left>Random-o-meter&trade;:<td><img src='" + RANDOM_O_METER_URL + calculateRandomOMeter( resultSet.getInt( 5 ), resultSet.getInt( 6 ), resultSet.getInt( 7 ), gamesCount ) + "' width=" + RANDOM_O_METER_WIDTH + " height=" + RANDOM_O_METER_HEIGHT + ">" );
 					if ( hasAka ) outputWriter.print( "<td><img src='" + RANDOM_O_METER_URL + calculateRandomOMeter( resultSet2.getInt( 5 ), resultSet2.getInt( 6 ), resultSet2.getInt( 7 ), gamesCount2 ) + "' width=" + RANDOM_O_METER_WIDTH + " height=" + RANDOM_O_METER_HEIGHT + ">" ); 
 				}
 				else
@@ -1231,7 +1231,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 								raceChartUrlBuilder.append( ",0,0,0" );
 						}
 						
-						raceChartUrlBuilder.append( "&amp;chco=FF0000,00DD00,0000FF" );
+						raceChartUrlBuilder.append( "&amp;chco=FF0000,0000FF,00DD00" );
 						
 						raceChartUrlBuilder.append( "&amp;chxt=x,y&amp;chxl=0:|" );
 						calendar.setTime( (Date) chartData.get( 0 )[ 0 ] );
@@ -1280,7 +1280,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	
 	/**
 	 * Calculates the randomness of the race distribution.
-	 * Result is 100 if races are equal, 0 if all games belongs to 1 race.
+	 * Result is 100 if races are equal, 0 if all games belong to 1 race.
 	 * @param zergGames    number of zerg games
 	 * @param terranGames  number of terran games
 	 * @param protossGames number of protoss games
