@@ -970,7 +970,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					final int RANDOM_O_METER_WIDTH  = 80;
 					final int RANDOM_O_METER_HEIGHT = 40;
 					final String RANDOM_O_METER_URL = "http://chart.apis.google.com/chart?chs=" + RANDOM_O_METER_WIDTH + "x" + RANDOM_O_METER_HEIGHT + "&cht=gom&chd=t:";
-					outputWriter.print( "<tr><th align=left>Random-o-meter&trade;:<td><img src='" + RANDOM_O_METER_URL + calculateRandomOMeter( resultSet.getInt( 5 ), resultSet.getInt( 6 ), resultSet.getInt( 7 ), gamesCount ) + "' width=" + RANDOM_O_METER_WIDTH + " height=" + RANDOM_O_METER_HEIGHT + ">" );
+					outputWriter.print( "<tr><th align=left>Random-o-meter&trade;: <span style='font-size:80%'>(<a href='http://code.google.com/p/bwhf/wiki/PlayersNetwork#Player_details'>?</a>)<td><img src='" + RANDOM_O_METER_URL + calculateRandomOMeter( resultSet.getInt( 5 ), resultSet.getInt( 6 ), resultSet.getInt( 7 ), gamesCount ) + "' width=" + RANDOM_O_METER_WIDTH + " height=" + RANDOM_O_METER_HEIGHT + ">" );
 					if ( hasAka ) outputWriter.print( "<td><img src='" + RANDOM_O_METER_URL + calculateRandomOMeter( resultSet2.getInt( 5 ), resultSet2.getInt( 6 ), resultSet2.getInt( 7 ), gamesCount2 ) + "' width=" + RANDOM_O_METER_WIDTH + " height=" + RANDOM_O_METER_HEIGHT + ">" ); 
 				}
 				else
