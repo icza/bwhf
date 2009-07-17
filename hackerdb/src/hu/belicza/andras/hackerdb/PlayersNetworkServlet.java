@@ -118,10 +118,10 @@ public class PlayersNetworkServlet extends BaseServlet {
 	);
 	/** Header of the AKA groups table. */
 	private static final TableHeader AKA_GROUPS_TABLE_HEADER = new TableHeader(
-			new String[]  { null , null      },
-			new String[]  { "#"  , "AKA group" },
-			new boolean[] { false, false     },
-			0
+			new String[]  { null , "comment", null   },
+			new String[]  { "#"  , "Person" , "AKAs" },
+			new boolean[] { false, false    , false  },
+			1
 	);
 	
 	@Override
@@ -680,11 +680,14 @@ public class PlayersNetworkServlet extends BaseServlet {
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
 				String query;
 				if ( nameFilter == null )
-					query = "SELECT id FROM aka_group WHERE 1=1 LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
+					query = "SELECT id, comment FROM aka_group";
 				else
-					query = "SELECT DISTINCT aka_group.id FROM aka_group JOIN player on aka_group.id=player.aka_group WHERE player.name LIKE ? LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
+					query = "SELECT DISTINCT aka_group.id, comment FROM aka_group JOIN player on aka_group.id=player.aka_group WHERE player.name LIKE ?";
 				
-				outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2 width=600>" );
+				query += " ORDER BY " + tableHeader.sortingColumns[ sortingIndex ] + ( sortingDesc ? " DESC" : "" )
+			       + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
+				
+				outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2 width=700>" );
 				renderSortingTableHeaderRow( outputWriter, tableHeader, pagerUrlWithoutSorting, sortingIndex, sortingDesc, page );
 				if ( nameFilter == null ) {
 					statement = connection.createStatement();
@@ -699,6 +702,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 				while ( resultSet.next() ) {
 					outputWriter.print( "<tr><td align=right>" + (++recordCounter) );
 					final int akaGroupId = resultSet.getInt( 1 );
+					
+					outputWriter.print( "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) );
 					
 					statement2.setInt( 1, akaGroupId );
 					resultSet2 = statement2.executeQuery();
