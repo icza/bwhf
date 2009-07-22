@@ -31,6 +31,8 @@ public class HackDescription {
 	public static final int HACK_TYPE_BUILD_ANYWHERE            = 10;
 	/** Use cheat drophack.             */
 	public static final int HACK_TYPE_USE_CHEAT_DROPHACK        = 11;
+	/** Subunit enqueue hack.           */
+	public static final int HACK_TYPE_SUBUNIT_ENQUEUE           = 12;
 	
 	/** Human readable names of the different types of hacks. */
 	public static final String[] HACK_TYPE_NAMES = {
@@ -45,7 +47,8 @@ public class HackDescription {
 		"multicommand ",
 		"ally-vision drop",
 		"build anywhere ",
-		"use cheat drop"
+		"use cheat drop",
+		"subunit enqueue "
 	};
 	
 	/** Name of the player who was hacking.   */

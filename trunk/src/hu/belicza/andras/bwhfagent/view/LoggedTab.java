@@ -26,14 +26,19 @@ import swingwtx.swing.JTextArea;
 public abstract class LoggedTab extends Tab {
 	
 	/** Date format to create timestamps for logging. */
-	protected static final DateFormat DATE_FORMAT    = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
+	protected static final DateFormat DATE_FORMAT          = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
 	/** The default system dependent line separator.  */
-	private   static final String     LINE_SEPARATOR = System.getProperty( "line.separator", "\r\n" );
+	private   static final String     LINE_SEPARATOR       = System.getProperty( "line.separator", "\r\n" );
+	/** Limit of messages before auto-clearing.       */
+	private   static final int        MESSAGES_COUNT_LIMIT = 2000;
 	
 	/** Log text area.        */
 	private final JTextArea logTextArea        = new JTextArea( 5, 10 );
 	/** Scroll Lock checkbox. */
 	private final JCheckBox scrollLockCheckBox = new JCheckBox( "Scroll Lock" );
+	
+	/** Number of messages in the log text area. */
+	private int messagesCount = 0;
 	
 	private final String logFileName;
 	/** Log file writer. */
@@ -76,6 +81,7 @@ public abstract class LoggedTab extends Tab {
 		clearLogButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent ae ) {
 				logTextArea.setText( "" );
+				messagesCount = 0;
 			}
 		} );
 		controlPanel.add( clearLogButton );
@@ -106,6 +112,11 @@ public abstract class LoggedTab extends Tab {
 	 * @param appendTimeStamp tells whether timestamp should be appended to the message
 	 */
 	protected void logMessage( final String message, final boolean appendTimeStamp ) {
+		if ( messagesCount++ == MESSAGES_COUNT_LIMIT ) {
+			logTextArea.setText( "    ....auto-clearing log text area (full log is still available)..." + LINE_SEPARATOR );
+			messagesCount = 0;
+		}
+		
 		// In SwingWT tabs are not working, so we replace them.
 		final String formattedMessage = ( appendTimeStamp ? DATE_FORMAT.format( new Date() ) + " - " : "" ) + message.replace( "\t", "    " ) + LINE_SEPARATOR;
 		

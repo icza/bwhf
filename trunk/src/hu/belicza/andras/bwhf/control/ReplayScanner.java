@@ -184,6 +184,34 @@ public class ReplayScanner {
 				if ( lastAction != null && lastAction.actionNameIndex == Action.ACTION_NAME_INDEX_HATCH )
 					hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_ZERG_MONEYHACK, action.iteration ) );
 			
+			// Subunit enqueue hack: subsequent of "some" subunit build actions being equally 120 iterations from each other
+			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD_SUBUNIT ) {
+				final int HACK_COUNT_LIMIT = 4;
+				final int minTestIteration = action.iteration - ( HACK_COUNT_LIMIT - 1 ) * 120;
+				int    patternSubunitBuildsCount = 0; // Subunit builds in the pattern
+				int    allSubunitBuildsCount     = 0; // All subunit build commands
+				int    testIndex                 = actionIndex;
+				int    testIteration             = action.iteration;
+				Action testAction                = null;
+				do {
+					testAction = playerActions[ testIndex ];
+					if ( testAction.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD_SUBUNIT )
+						allSubunitBuildsCount++;
+					if ( testAction.iteration == testIteration ) {
+						if ( testAction.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD_SUBUNIT ) {
+							patternSubunitBuildsCount++;
+							testIteration -= 120;
+						}
+					}
+					else {
+						if ( testAction.iteration < testIteration ) // There is at least 1 missing build subunit action from the hack pattern...
+							break;
+					}
+				} while ( testIndex-- > 0 && testAction.iteration >= minTestIteration );
+				if ( patternSubunitBuildsCount >= HACK_COUNT_LIMIT && allSubunitBuildsCount == patternSubunitBuildsCount ) // To filter out human subunit build spam (this filters out some real hack cases too)
+					hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_SUBUNIT_ENQUEUE, action.iteration ) );
+			}
+			
 			// Multicommand hack: giving "several" actions in the same iteration
 			// If actions being next to each other are the same actions (regardless to its parameters),
 			// it can be due to lag and/or "action spam". Don't count and report those.

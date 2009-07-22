@@ -157,7 +157,7 @@ public class BinRepParser {
 					final int playerId = commandsBuffer.get() & 0xff;
 					final Action action = readNextAction( frame, commandsBuffer, commandBlocksEndPos, gameChatWrapper );
 					if ( action != null ) {
-						replayHeader.playerIdActionsCounts[ playerId ]++;
+						replayHeader.playerIdActionsCounts[ playerId ]++; // If playerId is outside the index range, throw the implicit exception and fail to parse replay, else it may contain incorrect actions which may lead to false hack reports!
 						if ( playerActionLists != null )
 							playerActionLists[ playerId ].add( action );
 					}
