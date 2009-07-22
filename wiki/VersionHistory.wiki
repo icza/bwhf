@@ -6,6 +6,7 @@
 
 ----
 ===New features and changes in the upcoming release===
+ * *Detection of subunit (scarab/interceptor) enqueue hack.*
  * Minor bugfixes.
 
 ----
