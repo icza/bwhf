@@ -81,6 +81,10 @@ public class Consts {
 	public static final String PROPERTY_AUTO_CONVERT_PCX_ENABLED       = "autoConvertPcxEnabled";
 	/** PCX output format property.              */
 	public static final String PROPERTY_PCX_OUTPUT_FORMAT              = "pcxOutputFormat";
+	/** Resize converted images property.        */
+	public static final String PROPERTY_RESIZE_CONVERTED_IMAGES        = "resizeConvertedImages";
+	/** Resized image width property.            */
+	public static final String PROPERTY_RESIZED_IMAGE_WIDTH            = "resizedImageWidth";
 	/** Include replay header property.          */
 	public static final String PROPERTY_INCLUDE_REPLAY_HEADER          = "includeReplayHeader";
 	/** Use short names for autosave property.   */
@@ -185,6 +189,8 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_REPS_DESTINATION          , SwingWTUtils.isWindows() ? "c:/replays/allreps" : System.getProperty( "user.home" ) + "/replays/allreps" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_CONVERT_PCX_ENABLED      , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PCX_OUTPUT_FORMAT             , "JPG" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_RESIZE_CONVERTED_IMAGES       , "false" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_RESIZED_IMAGE_WIDTH           , "320" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_INCLUDE_REPLAY_HEADER         , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_USE_SHORT_NAMES_FOR_AUTOSAVE  , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAY_SOUND_IF_FOUND_HACKERS   , "true" );
