@@ -1330,7 +1330,7 @@ public class ReplaySearchTab extends Tab {
 								final ReplayHeader replayHeader = replay.replayHeader;
 								lastSearchResultRowsData.add( new String[] {
 									ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + replayHeader.guessVersionFromDate(),
-									replayHeader.mapName, replayHeader.getDurationString( true ), ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ], replayHeader.getPlayerNamesString(), SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ),
+									replayHeader.mapName, replayHeader.getDurationString( true ), ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType > ReplayHeader.GAME_TYPE_NAMES.length ? 0 : replayHeader.gameType ], replayHeader.getPlayerNamesString(), SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ),
 									replayHeader.gameName, replayHeader.creatorName, replayFile.getAbsolutePath().toString(), null
 								} );
 							}
@@ -1486,7 +1486,7 @@ public class ReplaySearchTab extends Tab {
 		}
 		try {
 			if ( saveDateLatestTextField.getText().length() > 0 )
-				SIMPLE_DATE_FORMAT.parse( saveDateLatestTextField.getText() );
+				maxSaveDate = SIMPLE_DATE_FORMAT.parse( saveDateLatestTextField.getText() ).getTime();
 		}
 		catch ( final Exception e ) {
 			saveDateLatestTextField.setBackground( SYNTAX_ERROR_BACKGROUND_COLOR );
