@@ -6,6 +6,7 @@
 
 ----
 ===New features and changes in the upcoming release===
+ * New setting on the PCX converter tab: resize converted screenshots. With this we can change the size of the converted images. This can be useful for example if we want to post the screenshots on forums where there is a size limit for the uploadable pictures.
  * *Detection of subunit (scarab/interceptor) enqueue hack.*
  * Minor bugfixes.
 
