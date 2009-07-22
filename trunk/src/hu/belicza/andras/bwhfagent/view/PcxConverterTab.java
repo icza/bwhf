@@ -2,6 +2,8 @@ package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhfagent.Consts;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.Date;
@@ -12,6 +14,8 @@ import javax.imageio.ImageIO;
 
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwt.awt.event.KeyEvent;
+import swingwt.awt.event.KeyListener;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
@@ -34,6 +38,10 @@ public class PcxConverterTab extends ProgressLoggedTab {
 	private static final String PCX_FILE_EXTENSION                       = ".pcx";
 	/** Time between checking for new PCX files in ms. */
 	private static final long   TIME_BETWEEN_CHECKS_FOR_NEW_PCX_FILES_MS = 1000l;
+	/** Min width of the resized images.               */
+	private static final int    MIN_RESIZED_WIDTH                        = 4;
+	/** Max width of the resized images.               */
+	private static final int    MAX_RESIZED_WIDTH                        = 1920;
 	
 	/** PCX file filter. */
 	private static final FileFilter SWING_PCX_FILE_FILTER = new FileFilter() {
@@ -47,12 +55,18 @@ public class PcxConverterTab extends ProgressLoggedTab {
 		}
 	};
 	
-	/** Checkbox to enable/disable the autoscan.       */
-	private final JCheckBox autoConvertEnabledCheckBox = new JCheckBox( "Automatically convert new PCX images detected in Starcraft directory", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTO_CONVERT_PCX_ENABLED ) ) );
-	/** Combo box to display supported output formats. */
-	private final JComboBox outputFormatComboBox       = new JComboBox( unifyStrings( ImageIO.getWriterFormatNames() ) );
-	/** Button to select files to scan.                  */
-	private final JButton   selectFilesButton          = new JButton( "Select PCX files to convert...", IconResourceManager.ICON_FILE_CHOOSER );
+	/** Checkbox to enable/disable the autoscan.           */
+	private final JCheckBox  autoConvertEnabledCheckBox    = new JCheckBox( "Automatically convert new PCX images detected in Starcraft directory", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTO_CONVERT_PCX_ENABLED ) ) );
+	/** Combo box to display supported output formats.     */
+	private final JComboBox  outputFormatComboBox          = new JComboBox( unifyStrings( ImageIO.getWriterFormatNames() ) );
+	/** Checkbox to enable/disable the autoscan.           */
+	private final JCheckBox  resizeConvertedImagesCheckBox = new JCheckBox( "Resize converted images,", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_RESIZE_CONVERTED_IMAGES ) ) );
+	/** Checkbox to enable/disable the autoscan.           */
+	private final JTextField resizedImageWidthTextField    = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_RESIZED_IMAGE_WIDTH ), 1 );
+	/** Label to display the height of the resized images. */
+	private final JLabel     resizedImageHeightLabel       = new JLabel();
+	/** Button to select files to scan.                      */
+	private final JButton    selectFilesButton             = new JButton( "Select PCX files to convert...", IconResourceManager.ICON_FILE_CHOOSER );
 	
 	/**
 	 * Creates a new PcxConverterTab.
@@ -94,6 +108,34 @@ public class PcxConverterTab extends ProgressLoggedTab {
 		panel.add( outputFormatComboBox );
 		contentBox.add( panel );
 		
+		panel = Utils.createWrapperPanel();
+		resizeConvertedImagesCheckBox.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				resizedImageWidthTextField.setEnabled( resizeConvertedImagesCheckBox.isSelected() );
+			}
+		} );
+		resizeConvertedImagesCheckBox.doClick();
+		panel.add( resizeConvertedImagesCheckBox );
+		panel.add( new JLabel( "resized image width (" + MIN_RESIZED_WIDTH + ".." + MAX_RESIZED_WIDTH + "):" ) );
+		// This is a workaround becase SwingWT does not implement DocumentListener correctly :S
+		resizedImageWidthTextField.addKeyListener( new KeyListener() {
+			public void keyPressed( final KeyEvent event ) {
+				syncResizedImageHeightLabel();
+			}
+			public void keyReleased( final KeyEvent event ) {
+				syncResizedImageHeightLabel();
+			}
+			public void keyTyped( final KeyEvent event ) {
+				syncResizedImageHeightLabel();
+			}
+		} );
+		panel.add( resizedImageWidthTextField );
+		panel.add( new JLabel( " pixels, height: " ) );
+		panel.add( resizedImageHeightLabel );
+		panel.add( new JLabel( " pixels." ) );
+		syncResizedImageHeightLabel();
+		contentBox.add( panel );
+		
 		selectFilesButton.setMnemonic( 'f' );
 		selectFilesButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
@@ -115,6 +157,34 @@ public class PcxConverterTab extends ProgressLoggedTab {
 		contentBox.add( Utils.wrapInPanel( selectFilesButton ) );
 		
 		super.buildGUI();
+	}
+	
+	/**
+	 * Checks if the supplied width is valid, and synchronizes the text of resized image height label to the supplied width.
+	 */
+	private void syncResizedImageHeightLabel() {
+		final Integer width = getSuppliedWidth();
+		if ( width == null )
+			resizedImageHeightLabel.setText( "N/A" );
+		else
+			resizedImageHeightLabel.setText( Integer.toString( width * 3 / 4 ) ); // Starcraft 640x480 resolution is a 4:3 ratio
+	}
+	
+	/**
+	 * Returns the supplied width for resized images. 
+	 * @return the supplied width for resized images; or <code>null</code> if the supplied width is invalid
+	 */
+	private Integer getSuppliedWidth() {
+		try {
+			final int width = Integer.parseInt( resizedImageWidthTextField.getText() );
+			if ( width < MIN_RESIZED_WIDTH || width > MAX_RESIZED_WIDTH )
+				return null;
+			
+			return width;
+		}
+		catch ( final NumberFormatException nfe ) {
+			return null;
+		}
 	}
 	
 	/** Lock to synchronize auto and manual convert. */
@@ -150,11 +220,24 @@ public class PcxConverterTab extends ProgressLoggedTab {
 								final String absolutePcxPath = pcxFile.getAbsolutePath();
 								try {
 									final int extensionIndex = absolutePcxPath.lastIndexOf( '.' );
-									final BufferedImage image = ImageIO.read( pcxFile );
+									BufferedImage image = ImageIO.read( pcxFile );
 									if ( image == null )
 										throw new Exception( "Failed parsing PCX file: " + absolutePcxPath );
+									final boolean resize = resizeConvertedImagesCheckBox.isSelected() && getSuppliedWidth() != null;
+									if ( resize ) {
+										final int width  = getSuppliedWidth();
+										final int height = width * 3 / 4;
+										final BufferedImage resizedImage = new BufferedImage( width, height, BufferedImage.TYPE_INT_RGB );
+										final Graphics2D graphics2D = resizedImage.createGraphics();
+										graphics2D.setRenderingHint( RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY );
+										graphics2D.drawImage( image, 0, 0, width, height, null );
+										graphics2D.dispose();
+										image.flush();
+										image = resizedImage;
+									}
 									ImageIO.write( image, formatName, new File( ( extensionIndex < 0 ? absolutePcxPath : absolutePcxPath.substring( 0, extensionIndex ) ) + extension ) );
-									logMessage( "'" + absolutePcxPath + "' converted successfully." );
+									image.flush();
+									logMessage( "'" + absolutePcxPath + "' converted " + ( resize ? "and resized " : "" ) + "successfully." );
 									if ( deleteOnSuccess )
 										pcxFile.delete();
 								} catch ( final Exception e ) {
@@ -231,6 +314,8 @@ public class PcxConverterTab extends ProgressLoggedTab {
 	public void assignUsedProperties() {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTO_CONVERT_PCX_ENABLED, Boolean.toString( autoConvertEnabledCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_PCX_OUTPUT_FORMAT       , (String) outputFormatComboBox.getSelectedItem() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_RESIZE_CONVERTED_IMAGES , Boolean.toString( resizeConvertedImagesCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_RESIZED_IMAGE_WIDTH     , resizedImageWidthTextField.getText() );
 	}
 	
 }
