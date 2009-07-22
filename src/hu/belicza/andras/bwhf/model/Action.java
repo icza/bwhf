@@ -41,26 +41,27 @@ public class Action implements Comparable< Action > {
 		public static final Size SIZE2X2 = new Size( 2, 2 );
 	}
 	
-	public static final byte ACTION_NAME_INDEX_UNKNOWN      = (byte) 0xff;
-	public static final byte ACTION_NAME_INDEX_BWCHART_HACK = (byte) 0xfe;
-	public static final byte ACTION_NAME_INDEX_ATTACK_MOVE  = (byte) 0xfd;
-	public static final byte ACTION_NAME_INDEX_GATHER       = (byte) 0xfc;
+	public static final byte ACTION_NAME_INDEX_UNKNOWN       = (byte) 0xff;
+	public static final byte ACTION_NAME_INDEX_BWCHART_HACK  = (byte) 0xfe;
+	public static final byte ACTION_NAME_INDEX_ATTACK_MOVE   = (byte) 0xfd;
+	public static final byte ACTION_NAME_INDEX_GATHER        = (byte) 0xfc;
 	
-	public static final byte ACTION_NAME_INDEX_CANCEL_TRAIN = (byte) 0x20;
-	public static final byte ACTION_NAME_INDEX_0X33         = (byte) 0x33;
-	public static final byte ACTION_NAME_INDEX_HATCH        = (byte) 0x23;
-	public static final byte ACTION_NAME_INDEX_TRAIN        = (byte) 0x1f;
-	public static final byte ACTION_NAME_INDEX_HOTKEY       = (byte) 0x13;
-	public static final byte ACTION_NAME_INDEX_USE_CHEAT    = (byte) 0x12;
-	public static final byte ACTION_NAME_INDEX_SELECT       = (byte) 0x09;
-	public static final byte ACTION_NAME_INDEX_MOVE         = (byte) 0x14;
-	public static final byte ACTION_NAME_INDEX_BUILD        = (byte) 0x0c;
-	public static final byte ACTION_NAME_INDEX_ALLY         = (byte) 0x0e;
-	public static final byte ACTION_NAME_INDEX_VISION       = (byte) 0x0d;
-	public static final byte ACTION_NAME_INDEX_UNLOAD_ALL   = (byte) 0x28;
-	public static final byte ACTION_NAME_INDEX_UNLOAD       = (byte) 0x29;
-	public static final byte ACTION_NAME_INDEX_MORPH        = (byte) 0x35;
-	public static final byte ACTION_NAME_INDEX_LEAVE        = (byte) 0x57;
+	public static final byte ACTION_NAME_INDEX_CANCEL_TRAIN  = (byte) 0x20;
+	public static final byte ACTION_NAME_INDEX_0X33          = (byte) 0x33;
+	public static final byte ACTION_NAME_INDEX_HATCH         = (byte) 0x23;
+	public static final byte ACTION_NAME_INDEX_TRAIN         = (byte) 0x1f;
+	public static final byte ACTION_NAME_INDEX_HOTKEY        = (byte) 0x13;
+	public static final byte ACTION_NAME_INDEX_USE_CHEAT     = (byte) 0x12;
+	public static final byte ACTION_NAME_INDEX_SELECT        = (byte) 0x09;
+	public static final byte ACTION_NAME_INDEX_MOVE          = (byte) 0x14;
+	public static final byte ACTION_NAME_INDEX_BUILD         = (byte) 0x0c;
+	public static final byte ACTION_NAME_INDEX_ALLY          = (byte) 0x0e;
+	public static final byte ACTION_NAME_INDEX_VISION        = (byte) 0x0d;
+	public static final byte ACTION_NAME_INDEX_UNLOAD_ALL    = (byte) 0x28;
+	public static final byte ACTION_NAME_INDEX_UNLOAD        = (byte) 0x29;
+	public static final byte ACTION_NAME_INDEX_MORPH         = (byte) 0x35;
+	public static final byte ACTION_NAME_INDEX_LEAVE         = (byte) 0x57;
+	public static final byte ACTION_NAME_INDEX_BUILD_SUBUNIT = (byte) 0x27;
 	
 	/** Action IDs we're interested in when parsing exported text by BWChart.<br>
 	 *  Parsing from exported BWChart text is no longer a goal. This might be inaccurate. */
