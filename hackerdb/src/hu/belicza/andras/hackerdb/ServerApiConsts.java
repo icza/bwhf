@@ -8,21 +8,25 @@ package hu.belicza.andras.hackerdb;
 public class ServerApiConsts {
 	
 	/** Name of the operation request parameter.       */
-	public static final String REQUEST_PARAMETER_NAME_OPERATION     = "op";
+	public static final String REQUEST_PARAMETER_NAME_OPERATION        = "op";
 	/** Name of the key request parameter.             */
-	public static final String REQUEST_PARAMETER_NAME_KEY           = "key";
+	public static final String REQUEST_PARAMETER_NAME_KEY              = "key";
 	/** Name of the player name request parameter.     */
-	public static final String REQUEST_PARAMETER_NAME_PLAYER        = "pln";
+	public static final String REQUEST_PARAMETER_NAME_PLAYER           = "pln";
 	/** Name of the gateway request parameter.         */
-	public static final String REQUEST_PARAMETER_NAME_GATEWAY       = "gat";
+	public static final String REQUEST_PARAMETER_NAME_GATEWAY          = "gat";
 	/** Name of the game engine request parameter.     */
-	public static final String REQUEST_PARAMETER_NAME_GAME_ENGINE   = "gen";
+	public static final String REQUEST_PARAMETER_NAME_GAME_ENGINE      = "gen";
 	/** Name of the map name request parameter.        */
-	public static final String REQUEST_PARAMETER_NAME_MAP_NAME      = "mpn";
+	public static final String REQUEST_PARAMETER_NAME_MAP_NAME         = "mpn";
 	/** Name of the map name request parameter.        */
-	public static final String REQUEST_PARAMETER_NAME_AGENT_VERSION = "agv";
+	public static final String REQUEST_PARAMETER_NAME_AGENT_VERSION    = "agv";
 	/** Name of the filters present request parameter. */
-	public static final String REQUEST_PARAMETER_FILTERS_PRESENT    = "fpr";
+	public static final String REQUEST_PARAMETER_NAME_FILTERS_PRESENT  = "fpr";
+	/** Name of the filters present request parameter. */
+	public static final String REQUEST_PARAMETER_NAME_REPLAY_MD5       = "md5";
+	/** Name of the filters present request parameter. */
+	public static final String REQUEST_PARAMETER_NAME_REPLAY_SAVE_TIME = "rst";
 	
 	/** List hackers operation value.            */
 	public static final String OPERATION_LIST       = "lst";

@@ -262,7 +262,6 @@ public class AutoscanTab extends LoggedTab {
 								}.start();
 							
 							if ( autoscanEnabledTime != null && newLastReplayLastModified >= autoscanEnabledTime.getTime() ) {
-								System.out.println( "ch3" );
 								if ( autoscanEnabledTime == null )
 									autoscanEnabledTime = new Date();
 								
@@ -321,7 +320,7 @@ public class AutoscanTab extends LoggedTab {
 												for ( final HackDescription hackDescription : hackDescriptionList )
 													playerNameSet.add( hackDescription.playerName );
 												
-												final String message = Utils.sendHackerReport( authorizationKey, gatewayComboBox.getSelectedIndex() - 1, replay.replayHeader.gameEngine & 0xff, replay.replayHeader.mapName, playerNameSet );
+												final String message = Utils.sendHackerReport( authorizationKey, gatewayComboBox.getSelectedIndex() - 1, replay.replayHeader.gameEngine & 0xff, replay.replayHeader.mapName, Utils.calculateFileMd5( lastReplayFile ), replay.replayHeader.saveTime.getTime(), playerNameSet );
 												if ( message == null )
 													logMessage( "Sending hacker report succeeded." );
 												else

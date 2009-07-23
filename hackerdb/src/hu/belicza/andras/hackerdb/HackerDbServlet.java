@@ -19,14 +19,16 @@ import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_LIST;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_REPORT;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_STATISTICS;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REPORT_ACCEPTED_MESSAGE;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_FILTERS_PRESENT;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_AGENT_VERSION;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_FILTERS_PRESENT;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_GAME_ENGINE;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_GATEWAY;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_KEY;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_MAP_NAME;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_OPERATION;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_PLAYER;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_REPLAY_MD5;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_REPLAY_SAVE_TIME;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_FIRST_REPORTED;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_GATEWAY;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_LAST_REPORTED;
@@ -45,6 +47,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -128,10 +132,10 @@ public class HackerDbServlet extends BaseServlet {
 				filtersWrapper.name              = getStringParamValue( request, FILTER_NAME_NAME ).toLowerCase();
 				filtersWrapper.gateways          = new boolean[ GATEWAYS.length ];
 				for ( int i = 0; i < filtersWrapper.gateways.length; i++ )
-					filtersWrapper.gateways[ i ] = request.getParameter( REQUEST_PARAMETER_FILTERS_PRESENT ) == null || request.getParameter( FILTER_NAME_GATEWAY + i ) != null;
+					filtersWrapper.gateways[ i ] = request.getParameter( REQUEST_PARAMETER_NAME_FILTERS_PRESENT ) == null || request.getParameter( FILTER_NAME_GATEWAY + i ) != null;
 				filtersWrapper.gameEngines       = new boolean[ GAME_ENGINES.length ];
 				for ( int i = 0; i < filtersWrapper.gameEngines.length; i++ )
-					filtersWrapper.gameEngines[ i ] = request.getParameter( REQUEST_PARAMETER_FILTERS_PRESENT ) == null || request.getParameter( FILTER_NAME_GAME_ENGINE + i ) != null;
+					filtersWrapper.gameEngines[ i ] = request.getParameter( REQUEST_PARAMETER_NAME_FILTERS_PRESENT ) == null || request.getParameter( FILTER_NAME_GAME_ENGINE + i ) != null;
 				filtersWrapper.mapName           = getStringParamValue( request, FILTER_NAME_MAP_NAME );
 				filtersWrapper.minReportCount    = getIntParamValue   ( request, FILTER_NAME_MIN_REPORT_COUNT, FILTER_DEFAULT_MIN_REPORT_COUNT );
 				filtersWrapper.reportedWithKey   = getStringParamValue( request, FILTER_NAME_REPORTED_WITH_KEY );
@@ -183,6 +187,18 @@ public class HackerDbServlet extends BaseServlet {
 					throw new BadRequestException();
 				mapName = mapName.toLowerCase(); // We store lowercased version to search fast without case sensitivity
 				
+				// Replay md5 and replay save time are optional (were added in version 2.50)
+				final String replayMd5 = request.getParameter( REQUEST_PARAMETER_NAME_REPLAY_MD5 );
+				Long replaySaveTime = null;
+				try {
+					final String replaySaveTimeString = request.getParameter( REQUEST_PARAMETER_NAME_REPLAY_SAVE_TIME );
+					if ( replaySaveTimeString != null )
+						replaySaveTime = Long.valueOf( replaySaveTimeString );
+				}
+				catch ( final Exception e ) {
+					throw new BadRequestException();
+				}
+				
 				String agentVersion = request.getParameter( REQUEST_PARAMETER_NAME_AGENT_VERSION );
 				if ( agentVersion == null )
 					throw new BadRequestException();
@@ -194,7 +210,7 @@ public class HackerDbServlet extends BaseServlet {
 				if ( playerNameList.isEmpty() )
 					throw new BadRequestException();
 				
-				sendBackPlainMessage( handleReport( key, gatewayIndex, gameEngine, mapName, agentVersion, playerNameList.toArray( new String[ playerNameList.size() ] ), request.getRemoteAddr() ), response );
+				sendBackPlainMessage( handleReport( key, gatewayIndex, gameEngine, mapName, replayMd5, replaySaveTime, agentVersion, playerNameList.toArray( new String[ playerNameList.size() ] ), request.getRemoteAddr() ), response );
 				
 			} else if ( operation.equals( OPERATION_STATISTICS ) ) {
 				
@@ -277,7 +293,7 @@ public class HackerDbServlet extends BaseServlet {
 			
 			// Controls section
 			outputWriter.println( "<form id='" + FORM_ID + "' action='hackers' method='POST'>" );
-			outputWriter.println( "<input name='" + REQUEST_PARAMETER_FILTERS_PRESENT + "' type=hidden value='yes'>" ); // We might use default values if this is not present (for example gateways and game engines). 
+			outputWriter.println( "<input name='" + REQUEST_PARAMETER_NAME_FILTERS_PRESENT + "' type=hidden value='yes'>" ); // We might use default values if this is not present (for example gateways and game engines). 
 			
 			// Filters
 			outputWriter.println( "<b>Filters</b> <button type=button onclick=\"" + getJavaScriptForResetFilters( filtersWrapper ) + "\">Reset filters</button><table border=1 cellspacing=0 cellpadding=2>" );
@@ -783,16 +799,18 @@ public class HackerDbServlet extends BaseServlet {
 	
 	/**
 	 * Handles a report.
-	 * @param key          authorization key of the reporter
-	 * @param gateway      gateway of the reported players
-	 * @param gameEngine   game engine
-	 * @param mapName      map name
-	 * @param agentVersion BWHF agent version
-	 * @param playerNames  names of players being reported; only non-null values contain information
-	 * @param ip           ip of the reporter's computer
+	 * @param key            authorization key of the reporter
+	 * @param gateway        gateway of the reported players
+	 * @param gameEngine     game engine
+	 * @param mapName        map name
+	 * @param replayMd5      MD5 checksum of the replay
+	 * @param replaySaveTime save time of the replay
+	 * @param agentVersion   BWHF agent version
+	 * @param playerNames    names of players being reported; only non-null values contain information
+	 * @param ip             ip of the reporter's computer
 	 * @return an error message if report fails; an empty string otherwise
 	 */
-	private String handleReport( final String key, final int gateway, final int gameEngine, final String mapName, final String agentVersion, final String[] playerNames, final String ip ) {
+	private String handleReport( final String key, final int gateway, final int gameEngine, final String mapName, final String replayMd5, final Long replaySaveTime, final String agentVersion, final String[] playerNames, final String ip ) {
 		Connection        connection = null;
 		PreparedStatement statement  = null;
 		ResultSet         resultSet  = null;
@@ -817,7 +835,20 @@ public class HackerDbServlet extends BaseServlet {
 			
 			// We synchronize the rest so the same hacker will not be inserted twice!
 			synchronized ( HackerDbServlet.class ) {
-				// The rest has to be a transaction
+				
+				// Check if the replay has already been reported based on the MD5 checksum of the replay
+				if ( replayMd5 != null ) {
+					statement = connection.prepareStatement( "SELECT COUNT(*) FROM report WHERE replay_md5=?" );
+					statement.setString( 1, replayMd5 );
+					resultSet = statement.executeQuery();
+					final boolean reportedAlready = resultSet.next() ? resultSet.getInt( 1 ) > 0 : false;
+					resultSet.close();
+					statement.close();
+					if ( reportedAlready )
+						return REPORT_ACCEPTED_MESSAGE;
+				}
+				
+				// The rest has to be in a transaction
 				connection.setAutoCommit( false );
 				
 				final Integer[] hackerIds = new Integer[ playerNames.length ];
@@ -861,12 +892,20 @@ public class HackerDbServlet extends BaseServlet {
 				statement.close();
 				
 				// Lastly insert the report records
-				statement = connection.prepareStatement( "INSERT INTO report (hacker,game_engine,map_name,agent_version,key,ip) VALUES (?,?,?,?,?,?)" );
+				statement = connection.prepareStatement( "INSERT INTO report (hacker,game_engine,map_name,agent_version,key,ip,replay_md5,save_time) VALUES (?,?,?,?,?,?,?,?)" );
 				statement.setInt   ( 2, gameEngine   );
 				statement.setString( 3, mapName      );
 				statement.setString( 4, agentVersion );
 				statement.setInt   ( 5, keyId        );
 				statement.setString( 6, ip           );
+				if ( replayMd5 == null )
+					statement.setNull( 7, Types.VARCHAR );
+				else
+					statement.setString( 7, replayMd5 );
+				if ( replaySaveTime == null )
+					statement.setNull( 8, Types.TIMESTAMP );
+				else
+					statement.setTimestamp( 8, new Timestamp( replaySaveTime ) );
 				for ( int i = 0; i < hackerIds.length && hackerIds[ i ] != null; i++ ) {
 					statement.setInt( 1, hackerIds[ i ] );
 					if ( statement.executeUpdate() <= 0 )

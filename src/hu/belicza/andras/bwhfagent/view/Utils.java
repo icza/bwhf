@@ -411,23 +411,27 @@ public class Utils {
 	
 	/**
 	 * Sends a report to the BWHF hacker data base server.
-	 * @param gateway       gateway of the reported players
-	 * @param key           authorization key to be used
-	 * @param gameEngine    game engine
-	 * @param mapName       map name
-	 * @param playerNameSet set of player names that were found hacking
+	 * @param gateway        gateway of the reported players
+	 * @param key            authorization key to be used
+	 * @param gameEngine     game engine
+	 * @param mapName        map name
+	 * @param replayMd5      MD5 checksum of the replay
+	 * @param replaySaveTime save time of the replay
+	 * @param playerNameSet  set of player names that were found hacking
 	 * @return null if report succeeded; an error message otherwise
 	 */
-	public static String sendHackerReport( final String key, final int gateway, final int gameEngine, final String mapName, final Set< String > playerNameSet ) {
+	public static String sendHackerReport( final String key, final int gateway, final int gameEngine, final String mapName, final String replayMd5, final long replaySaveTime, final Set< String > playerNameSet ) {
 		BufferedReader input = null;
 		try {
 			final StringBuilder reportURLBuilder = new StringBuilder( Consts.BWHF_HACKER_DATA_BASE_SERVER_URL );
-			reportURLBuilder.append( '?' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_OPERATION     ).append( '=' ).append( ServerApiConsts.OPERATION_REPORT      )
-							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_KEY           ).append( '=' ).append( URLEncoder.encode( key, "UTF-8" )     )
-							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_GATEWAY       ).append( '=' ).append( gateway                               )
-							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_GAME_ENGINE   ).append( '=' ).append( gameEngine                            )
-							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_MAP_NAME      ).append( '=' ).append( URLEncoder.encode( mapName, "UTF-8" ) )
-							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_AGENT_VERSION ).append( '=' ).append( URLEncoder.encode( MainFrame.getInstance().applicationVersion, "UTF-8" ) );
+			reportURLBuilder.append( '?' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_OPERATION        ).append( '=' ).append( ServerApiConsts.OPERATION_REPORT      )
+							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_KEY              ).append( '=' ).append( URLEncoder.encode( key, "UTF-8" )     )
+							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_GATEWAY          ).append( '=' ).append( gateway                               )
+							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_GAME_ENGINE      ).append( '=' ).append( gameEngine                            )
+							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_MAP_NAME         ).append( '=' ).append( URLEncoder.encode( mapName, "UTF-8" ) )
+							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_REPLAY_MD5       ).append( '=' ).append( replayMd5                             )
+							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_REPLAY_SAVE_TIME ).append( '=' ).append( replaySaveTime                        )
+							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_AGENT_VERSION    ).append( '=' ).append( URLEncoder.encode( MainFrame.getInstance().applicationVersion, "UTF-8" ) );
 			
 			int i = 0;
 			for ( final String playerName : playerNameSet )
