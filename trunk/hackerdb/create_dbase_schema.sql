@@ -49,6 +49,15 @@ WITH (
 );
 ALTER TABLE "key" OWNER TO postgres;
 
+-- Index: idx_key__value_revocated
+
+-- DROP INDEX idx_key__value_revocated;
+
+CREATE INDEX idx_key__value_revocated
+  ON "key"
+  USING btree
+  (value, revocated);
+
 
 -- Table: hacker
 
@@ -101,6 +110,8 @@ CREATE TABLE report
   ip character varying,
   "version" timestamp without time zone DEFAULT now(),
   "comment" character varying,
+  replay_md5 character varying,
+  save_time timestamp without time zone,
   CONSTRAINT report_pkey PRIMARY KEY (id),
   CONSTRAINT report_hacker_fkey FOREIGN KEY (hacker)
       REFERENCES hacker (id) MATCH SIMPLE
@@ -113,6 +124,15 @@ WITH (
   OIDS=FALSE
 );
 ALTER TABLE report OWNER TO postgres;
+
+-- Index: idx_report__replay_md5
+
+-- DROP INDEX idx_report__replay_md5;
+
+CREATE INDEX idx_report__replay_md5
+  ON report
+  USING btree
+  (replay_md5);
 
 -- Index: idx_report_version
 

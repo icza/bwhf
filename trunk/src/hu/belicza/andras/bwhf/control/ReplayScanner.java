@@ -186,7 +186,7 @@ public class ReplayScanner {
 			
 			// Subunit enqueue hack: subsequent of "some" subunit build actions being equally 120 iterations from each other
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD_SUBUNIT ) {
-				final int HACK_COUNT_LIMIT = 4;
+				final int HACK_COUNT_LIMIT = 3;
 				final int minTestIteration = action.iteration - ( HACK_COUNT_LIMIT - 1 ) * 120;
 				int    patternSubunitBuildsCount = 0; // Subunit builds in the pattern
 				int    allSubunitBuildsCount     = 0; // All subunit build commands
