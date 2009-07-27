@@ -6,7 +6,7 @@
 
 ----
 ===New features and changes in the upcoming release===
- * A new *AKA finder* tab. On this tab you can select replays or folder of replays, and BWHF Agent will analyze the replays, compare all players across all selected replays, and display a matching probability number for the players.
+ * A new *AKA finder* tab. On this tab you can select replays or folder of replays, and BWHF Agent will analyze the replays, compare all players across all selected replays, and display the matching probability for the players. Replays and players in them are compared individually, no relation between multiple replays of the same person is processed.
  * New setting on the PCX converter tab: *Resize converted images*. With this you can change the size of the converted images. This can be useful if you want to post the screenshots on forums where the allowed images are limited (either in dimension or in size).
  * *Detection of subunit (scarab/interceptor) enqueue hack.*
  * Bugfix in replay search (did not handle latest save date).
