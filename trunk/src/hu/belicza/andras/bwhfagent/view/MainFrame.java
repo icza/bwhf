@@ -123,7 +123,7 @@ public class MainFrame extends JFrame {
 		replaySearchTab    = new ReplaySearchTab();
 		gameChatTab        = new GameChatTab();
 		playersNetworkTab  = new PlayersNetworkTab();
-		tabs = new Tab[] { autoscanTab, manualScanTab, playerCheckerTab, chartsTab, replaySearchTab, gameChatTab, new PcxConverterTab(), playersNetworkTab, generalSettingsTab, new AboutTab() };
+		tabs = new Tab[] { autoscanTab, manualScanTab, playerCheckerTab, chartsTab, replaySearchTab, gameChatTab, new PcxConverterTab(), playersNetworkTab, new AkaFinderTab(), generalSettingsTab, new AboutTab() };
 		
 		buildGUI();
 		

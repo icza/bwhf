@@ -124,7 +124,7 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 		stopSendingButton  .setEnabled( true  );
 		
 		new NormalThread() {
-			/** List of replay files to be scanned. */
+			/** List of replay files to be sent. */
 			final List< File > replayFileList = new ArrayList< File >();
 			
 			@Override
