@@ -1,16 +1,26 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhf.control.BinRepParser;
+import hu.belicza.andras.bwhf.model.PlayerActions;
 import hu.belicza.andras.bwhf.model.Replay;
+import hu.belicza.andras.bwhf.model.ReplayHeader;
+import hu.belicza.andras.bwhfagent.Consts;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
+import swingwt.awt.GridLayout;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwtx.swing.BorderFactory;
 import swingwtx.swing.JButton;
+import swingwtx.swing.JCheckBox;
+import swingwtx.swing.JComboBox;
 import swingwtx.swing.JFileChooser;
+import swingwtx.swing.JLabel;
 import swingwtx.swing.JPanel;
 
 /**
@@ -23,6 +33,13 @@ public class AkaFinderTab extends ProgressLoggedTab {
 	/** Log file name for autoscan. */
 	private static final String LOG_FILE_NAME = "aka_finder.log";
 	
+	/** Flag hacker reps checkbox.                       */
+	private final JCheckBox dontCompareSameNamesCheckBox = new JCheckBox( "Don't compare players with same names", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES ) ) );
+	/** Authoritativeness threshold combobox.            */
+	private final JComboBox  authoritativenessThresholdComboBox   = new JComboBox( AuthoritativenessExtent.values() );
+	/** Matching probability treshold combobox.          */
+	private final JComboBox  matchingProbabilityThresholdComboBox = new JComboBox( new Object[] { "0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%" } );
+	
 	/** Button to select folders to analyze. */
 	private final JButton selectFoldersButton = new JButton( "Select folders to analyze recursively...", IconResourceManager.ICON_FOLDER_CHOOSER );
 	/** Button to select files to analyze.   */
@@ -32,6 +49,76 @@ public class AkaFinderTab extends ProgressLoggedTab {
 	
 	/** Variable to store stop requests of analyzing. */
 	private volatile boolean requestedToStop;
+	
+	
+	/**
+	 * The extents of authoritativeness.
+	 * @author Andras Belicza
+	 */
+	private static enum AuthoritativenessExtent {
+		USELESS  ( "Useless" ),
+		VERY_POOR( "Very poor" ),
+		POOR     ( "Poor" ),
+		AVERAGE  ( "Average" ),
+		GOOD     ( "Good" ),
+		VERY_GOOD( "Very good" ),
+		EXCELLENT( "Excellent" );
+		private final String displayName; 
+		private AuthoritativenessExtent( final String displayName ) {
+			this.displayName = displayName;
+		}
+		@Override
+		public String toString() {
+			return displayName;
+		}
+	}
+	
+	/**
+	 * Analysis of a player.
+	 * @author Andras Belicza
+	 */
+	private static class PlayerAnalysis {
+		final File   replay;
+		final Date   replayDate;
+		final String playerName;
+		final byte   race;
+		final int    frames;
+		final int    realApm;
+		public PlayerAnalysis( final File replay, final Date replayDate, final String playerName, final byte race, final int frames, final int realApm ) {
+			this.replay     = replay;
+			this.replayDate = replayDate;
+			this.playerName = playerName;
+			this.race       = race;
+			this.frames     = frames;
+			this.realApm    = realApm;
+		}
+	}
+	
+	/**
+	 * Comparision result of analysis of 2 players.
+	 * @author Andras Belicza
+	 */
+	private static class Comparision implements Comparable< Comparision > {
+		final PlayerAnalysis          analysis1;
+		final PlayerAnalysis          analysis2;
+		final float                   matchingProbability;
+		final AuthoritativenessExtent authoritativenessExtent;
+		public Comparision( final PlayerAnalysis analysis1, final PlayerAnalysis analysis2 ) {
+			this.analysis1 = analysis1;
+			this.analysis2 = analysis2;
+			this.matchingProbability = (float) Math.random() * 100.0f;
+			this.authoritativenessExtent = AuthoritativenessExtent.values()[ (int) ( Math.random() * AuthoritativenessExtent.values().length ) ];
+		}
+		@Override
+		public String toString() {
+			return String.format( "%-9s %3.1f%% - %s, %s  (%s, %s)", authoritativenessExtent.toString(), matchingProbability, analysis1.playerName, analysis2.playerName, analysis1.replay.getAbsolutePath(), analysis2.replay.getAbsolutePath() );
+		}
+		public int compareTo( final Comparision comparision ) {
+			if ( authoritativenessExtent == comparision.authoritativenessExtent )
+				return -Float.compare( matchingProbability, comparision.matchingProbability );
+			return authoritativenessExtent.ordinal() < comparision.authoritativenessExtent.ordinal() ? 1 : -1;
+		}
+	}
 	
 	/**
 	 * Creates a new PlayersNetworkTab.
@@ -44,6 +131,16 @@ public class AkaFinderTab extends ProgressLoggedTab {
 	
 	@Override
 	protected void buildGUI() {
+		contentBox.add( Utils.wrapInPanel( dontCompareSameNamesCheckBox ) );
+		
+		final JPanel tresholdPanel = new JPanel( new GridLayout( 2, 2 ) );
+		tresholdPanel.setBorder( BorderFactory.createTitledBorder( "Matching display tresholds:" ) );
+		tresholdPanel.add( new JLabel( "Extent of authoritativeness: " ) );
+		tresholdPanel.add( authoritativenessThresholdComboBox );
+		tresholdPanel.add( new JLabel( "Matching probability: " ) );
+		tresholdPanel.add( matchingProbabilityThresholdComboBox );
+		contentBox.add( Utils.wrapInPanel( tresholdPanel ) );
+		
 		final ActionListener selectFilesAndFoldersActionListener = new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.getReplayStartFolder() );
@@ -104,6 +201,7 @@ public class AkaFinderTab extends ProgressLoggedTab {
 			@Override
 			public void run() {
 				try {
+					final boolean compareSameNames = !dontCompareSameNamesCheckBox.isSelected();
 					progressBar.setValue( 0 );
 					
 					logMessage( "\n", false ); // Prints 2 empty lines
@@ -122,6 +220,8 @@ public class AkaFinderTab extends ProgressLoggedTab {
 					
 					int counter = 0;	
 					int skippedRepsCount = 0;
+					final List< PlayerAnalysis > playerAnalysisList = new ArrayList< PlayerAnalysis >();
+					final List< Comparision    > comparisionList    = new ArrayList< Comparision    >();
 					for ( final File replayFile : replayFileList ) {
 						if ( requestedToStop )
 							return;
@@ -135,11 +235,34 @@ public class AkaFinderTab extends ProgressLoggedTab {
 							skippedRepsCount++;
 						}
 						else {
+							// Players in one replay must and should not be compared, we add analysis of players of this replay after the replay has been processed.
+							final List< PlayerAnalysis > replayPlayerAnalysisList = new ArrayList< PlayerAnalysis >( replay.replayActions.players.length );
 							
+							for ( final PlayerActions playerActions : replay.replayActions.players ) {
+								final ReplayHeader replayHeader = replay.replayHeader;
+								
+								final int playerIndex = replayHeader.getPlayerIndexByName( playerActions.playerName );
+								
+								final int frames = playerActions.actions.length > 0 ? playerActions.actions[ playerActions.actions.length - 1 ].iteration : 0;
+								final PlayerAnalysis playerAnalysis = new PlayerAnalysis( replayFile, replayHeader.saveTime, playerActions.playerName, replayHeader.playerRaces[ playerIndex ],
+										frames, frames == 0 ? 0 : playerActions.actions.length * 60 / ReplayHeader.convertFramesToSeconds( frames ) );
+								replayPlayerAnalysisList.add( playerAnalysis );
+								
+								for ( final PlayerAnalysis playerAnalysis2 : playerAnalysisList )
+									if ( compareSameNames || !playerAnalysis2.playerName.equals( playerAnalysis.playerName ) )
+										comparisionList.add( new Comparision( playerAnalysis2, playerAnalysis ) );
+							}
+							
+							playerAnalysisList.addAll( replayPlayerAnalysisList );
 						}
 						
 						progressBar.setValue( ++counter );
 					}
+					
+					Collections.sort( comparisionList );
+					logMessage( "Comparision results:" );
+					for ( final Comparision comparision : comparisionList )
+						logMessage( "\t" + comparision.toString(), false );
 					
 					final long endNanoTime = System.nanoTime();
 					
@@ -184,6 +307,7 @@ public class AkaFinderTab extends ProgressLoggedTab {
 	
 	@Override
 	public void assignUsedProperties() {
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES, Boolean.toString( dontCompareSameNamesCheckBox.isSelected() ) );
 	}
 	
 }
