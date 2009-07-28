@@ -179,6 +179,10 @@ public class Consts {
 	public static final String PROPERTY_AUTO_SEND_INFO_ABOUT_LAST_REP  = "autoSendInfoAboutLastRep";
 	/** Don't compare same names property.       */
 	public static final String PROPERTY_DONT_COMPARE_SAME_NAMES        = "dontCompareSameNames";
+	/** Authoritativeness treshold property.     */
+	public static final String PROPERTY_AUTHORITATIVENESS_TRESHOLD     = "authoritativenessTreshold";
+	/** Matching probability treshold property.  */
+	public static final String PROPERTY_MATCHING_PROBABILITY_TRESHOLD  = "matchingProbabilityTreshold";
 	
 	/** Properties holding the default settings. */
 	public static final Properties DEFAULT_SETTINGS_PROPERTIES = new Properties();
@@ -240,6 +244,9 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPLAY_COLUMN_MODEL_INDICES   , "" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_SEND_INFO_ABOUT_LAST_REP , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DONT_COMPARE_SAME_NAMES       , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTHORITATIVENESS_TRESHOLD    , "3" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_MATCHING_PROBABILITY_TRESHOLD , "3" );
+		
 	}
 	
 }
