@@ -180,6 +180,8 @@ public class ReplaySearchTab extends Tab {
 	private final JMenuItem extractGameChatMenuItem      = new JMenuItem( "Extract game chat", IconResourceManager.ICON_GAME_CHATS );
 	/** Menu item to send to Players' Network.                     */
 	private final JMenuItem sendToPlayersNetworkMenuItem = new JMenuItem( "Send to Players' Network", IconResourceManager.ICON_PLAYERS_NETWORK );
+	/** Menu item to find AKAs in the selected replays.            */
+	private final JMenuItem findAKAsMenuItem             = new JMenuItem( "Find AKAs", IconResourceManager.ICON_AKA_FINDER );
 	/** Menu item to remove selected replays from the result list. */
 	private final JMenuItem removeFromListMenuItem       = new JMenuItem( "Remove from list", IconResourceManager.ICON_REMOVE_FROM_LIST );
 	/** Menu item to copy selected replay files.                   */
@@ -727,6 +729,12 @@ public class ReplaySearchTab extends Tab {
 				mainFrame.playersNetworkTab.sendFileAndFolderInfo( getSelectedResultFiles() );
 			}
 		} );
+		findAKAsMenuItem.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				mainFrame.selectTab( mainFrame.akaFinderTab );
+				mainFrame.akaFinderTab.analyzeFilesAndFolders( getSelectedResultFiles() );
+			}
+		} );
 		removeFromListMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				removeSelectedFromResultList();
@@ -832,6 +840,7 @@ public class ReplaySearchTab extends Tab {
 				displayGameChatMenuItem     .setEnabled( selectedCount == 1 );
 				extractGameChatMenuItem     .setEnabled( selectedCount >  0 );
 				sendToPlayersNetworkMenuItem.setEnabled( selectedCount >  0 );
+				findAKAsMenuItem            .setEnabled( selectedCount >  1 );
 				removeFromListMenuItem      .setEnabled( selectedCount >  0 );
 				copyReplaysMenuItem         .setEnabled( selectedCount >  0 );
 				moveReplaysMenuItem         .setEnabled( selectedCount >  0 );
@@ -904,6 +913,7 @@ public class ReplaySearchTab extends Tab {
 		replayOperationsPopupMenu.add( displayGameChatMenuItem      );
 		replayOperationsPopupMenu.add( extractGameChatMenuItem      );
 		replayOperationsPopupMenu.add( sendToPlayersNetworkMenuItem );
+		replayOperationsPopupMenu.add( findAKAsMenuItem             );
 		replayOperationsPopupMenu.add( removeFromListMenuItem       );
 		replayOperationsPopupMenu.addSeparator();
 		replayOperationsPopupMenu.add( copyReplaysMenuItem          );
@@ -926,6 +936,7 @@ public class ReplaySearchTab extends Tab {
 		displayGameChatMenuItem     .setEnabled( false );
 		extractGameChatMenuItem     .setEnabled( false );
 		sendToPlayersNetworkMenuItem.setEnabled( false );
+		findAKAsMenuItem            .setEnabled( false );
 		removeFromListMenuItem      .setEnabled( false );
 		copyReplaysMenuItem         .setEnabled( false );
 		moveReplaysMenuItem         .setEnabled( false );
