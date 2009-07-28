@@ -249,9 +249,10 @@ public class AkaFinderTab extends ProgressLoggedTab {
 								
 								final int playerIndex = replayHeader.getPlayerIndexByName( playerActions.playerName );
 								
-								final int frames = playerActions.actions.length > 0 ? playerActions.actions[ playerActions.actions.length - 1 ].iteration : 0;
+								final int frames  = playerActions.actions.length > 0 ? playerActions.actions[ playerActions.actions.length - 1 ].iteration : 0;
+								final int seconds = ReplayHeader.convertFramesToSeconds( frames );
 								final PlayerAnalysis playerAnalysis = new PlayerAnalysis( replayFile, replayHeader.saveTime, playerActions.playerName, replayHeader.playerRaces[ playerIndex ],
-										frames, frames == 0 ? 0 : playerActions.actions.length * 60 / ReplayHeader.convertFramesToSeconds( frames ) );
+										frames, frames == 0 ? 0 : seconds == 0 ? 0 : playerActions.actions.length * 60 / seconds );
 								replayPlayerAnalysisList.add( playerAnalysis );
 								
 								for ( final PlayerAnalysis playerAnalysis2 : playerAnalysisList )
