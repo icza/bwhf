@@ -38,7 +38,7 @@ public class AkaFinderTab extends ProgressLoggedTab {
 	/** Authoritativeness threshold combobox.            */
 	private final JComboBox  authoritativenessThresholdComboBox   = new JComboBox( AuthoritativenessExtent.values() );
 	/** Matching probability treshold combobox.          */
-	private final JComboBox  matchingProbabilityThresholdComboBox = new JComboBox( new Object[] { "0%", "10%", "20%", "30%", "40%", "50%", "60%", "70%", "80%", "90%" } );
+	private final JComboBox  matchingProbabilityThresholdComboBox = new JComboBox( new Object[] { "100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%", "0%" } );
 	
 	/** Button to select folders to analyze. */
 	private final JButton selectFoldersButton = new JButton( "Select folders to analyze recursively...", IconResourceManager.ICON_FOLDER_CHOOSER );
@@ -56,13 +56,14 @@ public class AkaFinderTab extends ProgressLoggedTab {
 	 * @author Andras Belicza
 	 */
 	private static enum AuthoritativenessExtent {
-		USELESS  ( "Useless" ),
-		VERY_POOR( "Very poor" ),
-		POOR     ( "Poor" ),
-		AVERAGE  ( "Average" ),
-		GOOD     ( "Good" ),
+		EXCELLENT( "Excellent" ),
 		VERY_GOOD( "Very good" ),
-		EXCELLENT( "Excellent" );
+		GOOD     ( "Good"      ),
+		AVERAGE  ( "Average"   ),
+		POOR     ( "Poor"      ),
+		VERY_POOR( "Very poor" ),
+		USELESS  ( "Useless"   );
+		
 		private final String displayName; 
 		private AuthoritativenessExtent( final String displayName ) {
 			this.displayName = displayName;
@@ -116,7 +117,7 @@ public class AkaFinderTab extends ProgressLoggedTab {
 		public int compareTo( final Comparision comparision ) {
 			if ( authoritativenessExtent == comparision.authoritativenessExtent )
 				return -Float.compare( matchingProbability, comparision.matchingProbability );
-			return authoritativenessExtent.ordinal() < comparision.authoritativenessExtent.ordinal() ? 1 : -1;
+			return authoritativenessExtent.ordinal() < comparision.authoritativenessExtent.ordinal() ? -1 : 1;
 		}
 	}
 	
@@ -126,6 +127,9 @@ public class AkaFinderTab extends ProgressLoggedTab {
 	public AkaFinderTab() {
 		super( "AKA finder", IconResourceManager.ICON_AKA_FINDER, LOG_FILE_NAME );
 		
+		authoritativenessThresholdComboBox  .setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTHORITATIVENESS_TRESHOLD ) ) );
+		matchingProbabilityThresholdComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_MATCHING_PROBABILITY_TRESHOLD ) ) );
+		
 		buildGUI();
 	}
 	
@@ -133,11 +137,11 @@ public class AkaFinderTab extends ProgressLoggedTab {
 	protected void buildGUI() {
 		contentBox.add( Utils.wrapInPanel( dontCompareSameNamesCheckBox ) );
 		
-		final JPanel tresholdPanel = new JPanel( new GridLayout( 2, 2 ) );
-		tresholdPanel.setBorder( BorderFactory.createTitledBorder( "Matching display tresholds:" ) );
-		tresholdPanel.add( new JLabel( "Extent of authoritativeness: " ) );
+		final JPanel tresholdPanel = new JPanel( new GridLayout( 2, 2, 7, 0 ) );
+		tresholdPanel.setBorder( BorderFactory.createTitledBorder( "Display tresholds:" ) );
+		tresholdPanel.add( new JLabel( "Extent of authoritativeness:" ) );
 		tresholdPanel.add( authoritativenessThresholdComboBox );
-		tresholdPanel.add( new JLabel( "Matching probability: " ) );
+		tresholdPanel.add( new JLabel( "Matching probability:" ) );
 		tresholdPanel.add( matchingProbabilityThresholdComboBox );
 		contentBox.add( Utils.wrapInPanel( tresholdPanel ) );
 		
@@ -201,7 +205,9 @@ public class AkaFinderTab extends ProgressLoggedTab {
 			@Override
 			public void run() {
 				try {
-					final boolean compareSameNames = !dontCompareSameNamesCheckBox.isSelected();
+					final boolean                 compareSameNames             = !dontCompareSameNamesCheckBox.isSelected();
+					final float                   matchingProbabilityThreshold = Float.parseFloat( ( (String) matchingProbabilityThresholdComboBox.getSelectedItem() ).substring( 0, ( (String) matchingProbabilityThresholdComboBox.getSelectedItem() ).length() - 1 ) );
+					final AuthoritativenessExtent authoritativenessThreshold   = (AuthoritativenessExtent) authoritativenessThresholdComboBox.getSelectedItem();
 					progressBar.setValue( 0 );
 					
 					logMessage( "\n", false ); // Prints 2 empty lines
@@ -249,8 +255,11 @@ public class AkaFinderTab extends ProgressLoggedTab {
 								replayPlayerAnalysisList.add( playerAnalysis );
 								
 								for ( final PlayerAnalysis playerAnalysis2 : playerAnalysisList )
-									if ( compareSameNames || !playerAnalysis2.playerName.equals( playerAnalysis.playerName ) )
-										comparisionList.add( new Comparision( playerAnalysis2, playerAnalysis ) );
+									if ( compareSameNames || !playerAnalysis2.playerName.equals( playerAnalysis.playerName ) ) {
+										final Comparision comparision = new Comparision( playerAnalysis2, playerAnalysis );
+										if ( comparision.matchingProbability >= matchingProbabilityThreshold && comparision.authoritativenessExtent.compareTo( authoritativenessThreshold ) <= 0 )
+											comparisionList.add( comparision );
+									}
 							}
 							
 							playerAnalysisList.addAll( replayPlayerAnalysisList );
@@ -307,7 +316,9 @@ public class AkaFinderTab extends ProgressLoggedTab {
 	
 	@Override
 	public void assignUsedProperties() {
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES, Boolean.toString( dontCompareSameNamesCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES      , Boolean.toString( dontCompareSameNamesCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTHORITATIVENESS_TRESHOLD   , Integer.toString( authoritativenessThresholdComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_MATCHING_PROBABILITY_TRESHOLD, Integer.toString( matchingProbabilityThresholdComboBox.getSelectedIndex() ) );
 	}
 	
 }
