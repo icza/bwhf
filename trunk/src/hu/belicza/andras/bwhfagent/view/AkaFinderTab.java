@@ -158,9 +158,9 @@ public class AkaFinderTab extends ProgressLoggedTab {
 			// Safety checking (might be out of range due to rounding problems or if it remains 1.0):
 			final int extentOrdinal = (int) ( authroitativenessExtent * AuthoritativenessExtent.values().length );
 			if ( extentOrdinal > AuthoritativenessExtent.values().length - 1 )
-				return AuthoritativenessExtent.USELESS;
-			if ( extentOrdinal < 0 )
 				return AuthoritativenessExtent.EXCELLENT;
+			if ( extentOrdinal < 0 )
+				return AuthoritativenessExtent.USELESS;
 			return AuthoritativenessExtent.values()[ extentOrdinal ];
 		}
 		
