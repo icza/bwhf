@@ -10,4 +10,4 @@ If you don't want to meet hackers on battle.net, do the following things:
  # Also avoid suspicious records with surreal win ratio like 100-5-0 and surreal disconnect ratio like 54-23-32.
  # Type {{{"/whereis name"}}} or {{{"/whois name"}}} to check if the player is online and if he/she is in the same game with you. If not, you can be sure he is a hacker spoofing a name. Ban him or leave the game (don't mistake similair letters like the small L and capital i, the letter O with the number zero etc.).
 
-If you follow these steps, you can filter out at least 90 % of the hackers.
+If you follow these steps, you can filter out *more than 95 %* of the hackers.
