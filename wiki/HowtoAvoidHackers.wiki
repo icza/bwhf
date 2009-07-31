@@ -12,3 +12,5 @@ If you don't want to meet hackers on battle.net, do the following things:
  # If certain rules apply to a username, that also means he is probably a hacker and you should have no reason to play with him. First rule: if you see a random meaningless name, don't play with him. For example: "pofahiqwefkla" or "987314523". Second rule: if the username contains the word hacker in any form, then he is a hacker (a normal, legit player would never name himself like that). For example: "i_hack", "i_never_hack", "h6x0r", "i_dr0hax_u".
 
 If you follow these steps, you can filter out *more than 95 %* of the hackers.
+
+If your have other tips, post them below.
