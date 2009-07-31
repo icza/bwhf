@@ -98,6 +98,14 @@ public class ReplayHeader {
 	}
 	
 	/**
+	 * Converts the specified amount of seconds to frames.
+	 * @return the specified amount of seconds in frames
+	 */
+	public static int convertSecondsToFrames( final int seconds ) {
+		return (int) (seconds * 1000l / 42l); // Might overflow at around 600 hours (when calculating total times from many games); this works up to about 24000 hours
+	}
+	
+	/**
 	 * Returns the game duration in seconds.
 	 * @return the game duration in seconds
 	 */
