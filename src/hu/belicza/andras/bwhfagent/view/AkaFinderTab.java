@@ -1,6 +1,7 @@
 package hu.belicza.andras.bwhfagent.view;
 
 import hu.belicza.andras.bwhf.control.BinRepParser;
+import hu.belicza.andras.bwhf.model.Action;
 import hu.belicza.andras.bwhf.model.PlayerActions;
 import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
@@ -81,20 +82,37 @@ public class AkaFinderTab extends ProgressLoggedTab {
 	 * @author Andras Belicza
 	 */
 	private static class PlayerAnalysis {
-		final File   replay;
-		final long   replayDate;
-		final String playerName;
-		final byte   race;
-		final int    frames;
-		final int    realApm;
+		final File    replay;
+		final long    replayDate;
+		final String  playerName;
+		final String  loweredPlayerName;
+		final byte    race;
+		final int     frames;
+		final int     realApm;
+		final float   hotkeyRate;
+		final float   selectRate;
+		final float   shiftSelectRate;
+		final float   rallySetRate;
+		final float   moveRate;
+		final float   attackMoveRate;
+		final float[] usedHotkeyRates;
 		
-		public PlayerAnalysis( final File replay, final long replayDate, final String playerName, final byte race, final int frames, final int realApm ) {
-			this.replay     = replay;
-			this.replayDate = replayDate;
-			this.playerName = playerName;
-			this.race       = race;
-			this.frames     = frames;
-			this.realApm    = realApm;
+		public PlayerAnalysis( final File replay, final long replayDate, final String playerName, final byte race, final int frames, final int realApm,
+				final float hotkeyRate, final float selectRate, final float shiftSelectRate, final float rallySetRate, final float moveRate, final float attackMoveRate, final float[] usedHotkeyRates ) {
+			this.replay          = replay;
+			this.replayDate      = replayDate;
+			this.playerName      = playerName;
+			loweredPlayerName    = playerName.toLowerCase();
+			this.race            = race;
+			this.frames          = frames;
+			this.realApm         = realApm;
+			this.hotkeyRate      = hotkeyRate;
+			this.selectRate      = selectRate;
+			this.shiftSelectRate = shiftSelectRate;
+			this.rallySetRate    = rallySetRate;
+			this.moveRate        = moveRate;
+			this.attackMoveRate  = attackMoveRate;
+			this.usedHotkeyRates = usedHotkeyRates;
 		}
 	}
 	
@@ -103,6 +121,7 @@ public class AkaFinderTab extends ProgressLoggedTab {
 	 * @author Andras Belicza
 	 */
 	private static class Comparision implements Comparable< Comparision > {
+		
 		final PlayerAnalysis          analysis1;
 		final PlayerAnalysis          analysis2;
 		final AuthoritativenessExtent authoritativenessExtent;
@@ -135,27 +154,42 @@ public class AkaFinderTab extends ProgressLoggedTab {
 			return authoritativenessExtent.ordinal() < comparision.authoritativenessExtent.ordinal() ? 1 : -1;
 		}
 		
+		private static final int FOUR_MINUTES_FRAMES = ReplayHeader.convertSecondsToFrames( 4*60 );
+		
+		/**
+		 * Calculates and returns the extent of authoritativeness of this comparision.<br>
+		 * This depends on:
+		 * <ul>
+		 * 		<li>Comparing different races are a huge setback (the matching algorithm operates on action distribution which naturally changes with races).
+		 * 		<li>Difference in APM is an obvious negative factor.
+		 * 		<li>If games differ in duration, the action distribution might change drastically (gather and micro focused on early, macro later on).
+		 * 		<li>Playing style changes over time. Replays from different ages are not very authoritative.
+		 * </ul>
+		 * @return the extent of authoritativeness of this comparision
+		 */
 		private AuthoritativenessExtent determineAuthoritativenessExtent() {
-			float authroitativenessExtent = 1.0f;
+			float authroitativenessExtent = 1.0f; // Value 0.0 is the worst, 1.0 is the best
 			
-			// Comparing different races are a huge setback (the mathing algorithm uses action distribution pairing which changes with races)
+			// Race dependant
 			if ( analysis1.race != analysis2.race )
 				authroitativenessExtent *= 0.5f;
 			
-			// Difference in APM is an obvious negative factor
-			if ( analysis1.realApm < 10 || analysis2.realApm < 10 )
+			// APM dependant
+			if ( analysis1.realApm < 30 || analysis2.realApm < 30 ) // Assumed obsing game
 				authroitativenessExtent = 0.0f;
 			else
-				authroitativenessExtent *= analysis1.realApm < analysis2.realApm ? (float) analysis1.realApm / analysis2.realApm : (float) analysis2.realApm / analysis1.realApm;
+				authroitativenessExtent *= rate( analysis1.realApm, analysis2.realApm );
 			
-			// If games differ in duration, the action distribution might change drastically (gather and micro focused on early, macro later on)
-			authroitativenessExtent *= analysis1.frames < analysis2.frames ? (float) analysis1.frames / analysis2.frames : (float) analysis2.frames / analysis1.frames;
+			// Duration dependant
+			if ( analysis1.frames < FOUR_MINUTES_FRAMES )
+				authroitativenessExtent *= (float) analysis1.frames / FOUR_MINUTES_FRAMES;
+			authroitativenessExtent *= rate( analysis1.frames, analysis2.frames );
 			
-			// Playing style changes over time. Replays from different ages are not very authoritative.
+			// Save time dependant
 			final int days  = (int) ( Math.abs( analysis1.replayDate - analysis2.replayDate ) / (1000l*60l*60l*24l) );
 			authroitativenessExtent *= days < 2000 ? ( 2000.0f - days ) / 2000.0f : 0.0f;
 			
-			// Safety checking (might be out of range due to rounding problems or if it remains 1.0):
+			// Range checking (might be out of range due to rounding problems or if it remains 1.0)
 			final int extentOrdinal = (int) ( authroitativenessExtent * AuthoritativenessExtent.values().length );
 			if ( extentOrdinal > AuthoritativenessExtent.values().length - 1 )
 				return AuthoritativenessExtent.EXCELLENT;
@@ -164,8 +198,63 @@ public class AkaFinderTab extends ProgressLoggedTab {
 			return AuthoritativenessExtent.values()[ extentOrdinal ];
 		}
 		
+		
+		/** Weights of the different components of the matching probability. */
+		private static final float[] MATCHING_WEIGHTS = new float[] { 1.0f, 1.0f, 1.0f, 1.0f,  1.0f,  1.0f,  1.0f };
+		static {
+			// Scale the weights so they ads up to 100.0
+			float sumWeights = 0.0f;
+			for ( final float weight : MATCHING_WEIGHTS )
+				sumWeights += weight;
+			final float mulFactor = 100.0f / sumWeights;
+			for ( int i = MATCHING_WEIGHTS.length - 1; i >= 0; i-- )
+				MATCHING_WEIGHTS[ i ] *= mulFactor;
+		}
+		
+		/**
+		 * Calculates and retuns the matching probability.
+		 * @return the matching probability
+		 */
 		private float calculateMatchingProbability() {
-			return (float) Math.random() * 100.0f;
+			float matchingProbability = 0.0f;
+			int   componentIndex      = 0;
+			
+			// Hotkey usage dependant
+			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.hotkeyRate     , analysis2.hotkeyRate      );
+			// Select usage dependant
+			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.selectRate     , analysis2.selectRate      );
+			// Shift-select usage dependant
+			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.shiftSelectRate, analysis2.shiftSelectRate );
+			// Rally set usage dependant
+			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.rallySetRate   , analysis2.rallySetRate    );
+			// Move usage dependant
+			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.moveRate       , analysis2.moveRate        );
+			// Attack move usage dependant
+			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.attackMoveRate , analysis2.attackMoveRate  );
+			// Used hotkeys dependant
+			final float weightFor1Hotkey = MATCHING_WEIGHTS[ componentIndex++ ] / analysis1.usedHotkeyRates.length;
+			for ( int i = analysis1.usedHotkeyRates.length - 1; i >= 0; i-- )
+				matchingProbability += weightFor1Hotkey * rate( analysis1.usedHotkeyRates[ i ], analysis2.usedHotkeyRates[ i ] );
+			
+			// Range checking (might be out of range due to rounding problems)
+			if ( matchingProbability < 0.0f )
+				matchingProbability = 0.0f;
+			if ( matchingProbability > 100.0f )
+				matchingProbability = 100.0f;
+			return matchingProbability;
+		}
+		
+		/**
+		 * Calculates the rate (quotient) of 2 numbers. The smaller number is divided by the greater one. This will result in a rate not greater than 1.0.<br>
+		 * If both numbers are zeros (or negative), the value <code>1.0f</code> is returned.
+		 * @param value1 one of the numbers
+		 * @param value2 the other number
+		 * @return rate (quotient) of 2 numbers not greater than 1.0f
+		 */
+		private static float rate( final float value1, final float value2 ) {
+			if ( value1 <= 0.0f && value2 <= 0.0f )
+				return 1.0f;
+			return value1 < value2 ? value1 / value2 : value2 / value1;
 		}
 	}
 	
@@ -299,16 +388,49 @@ public class AkaFinderTab extends ProgressLoggedTab {
 							for ( final PlayerActions playerActions : replay.replayActions.players ) {
 								final ReplayHeader replayHeader = replay.replayHeader;
 								
-								final int playerIndex = replayHeader.getPlayerIndexByName( playerActions.playerName );
+								final int playerIndex  = replayHeader.getPlayerIndexByName( playerActions.playerName );
+								final int actionsCount = playerActions.actions.length;
+								final float actionsCountFloat = actionsCount;
 								
-								final int frames  = playerActions.actions.length > 0 ? playerActions.actions[ playerActions.actions.length - 1 ].iteration : 0;
-								final int seconds = ReplayHeader.convertFramesToSeconds( frames );
+								final int frames        = playerActions.actions.length > 0 ? playerActions.actions[ actionsCount - 1 ].iteration : 0;
+								final int seconds       = ReplayHeader.convertFramesToSeconds( frames );
+								int   hotkeysCount      = 0;
+								int   selectsCount = 0;
+								int   shiftSelectsCount = 0;
+								int   rallySetsCount    = 0;
+								int   movesCount        = 0;
+								int   attackMovesCount  = 0;
+								int[] usedHotkeysCounts = new int[ 10 ]; // 0..9
+								
+								// Count actions...
+								for ( final Action action : playerActions.actions ) {
+									switch ( action.actionNameIndex ) {
+									case Action.ACTION_NAME_INDEX_HOTKEY       : hotkeysCount++     ;
+										try {
+											final int hotkey = action.parameters.charAt( action.parameters.indexOf( ',' ) + 1 ) - '0';
+											usedHotkeysCounts[ hotkey ]++;
+										}
+										catch ( final Exception e ) {}
+										break;
+									case Action.ACTION_NAME_INDEX_SELECT       : selectsCount++     ; break;
+									case Action.ACTION_NAME_INDEX_SHIFT_SELECT : shiftSelectsCount++; break;
+									case Action.ACTION_NAME_INDEX_SET_RALLY    : rallySetsCount++   ; break;
+									case Action.ACTION_NAME_INDEX_MOVE         : movesCount++       ; break;
+									case Action.ACTION_NAME_INDEX_ATTACK_MOVE  : attackMovesCount++ ; break;
+									}
+								}
+								
+								final float[] usedHotkeyRates = new float[ usedHotkeysCounts.length ];
+								for ( int i = usedHotkeyRates.length - 1; i >= 0; i-- )
+									usedHotkeyRates[ i ] = usedHotkeysCounts[ i ] / actionsCountFloat;
+								
 								final PlayerAnalysis playerAnalysis = new PlayerAnalysis( replayFile, replayHeader.saveTime.getTime(), playerActions.playerName, replayHeader.playerRaces[ playerIndex ],
-										frames, frames == 0 ? 0 : seconds == 0 ? 0 : playerActions.actions.length * 60 / seconds );
+										frames, frames == 0 ? 0 : seconds == 0 ? 0 : playerActions.actions.length * 60 / seconds,
+										hotkeysCount / actionsCountFloat, selectsCount / actionsCountFloat, shiftSelectsCount / actionsCountFloat, rallySetsCount / actionsCountFloat, movesCount / actionsCountFloat, attackMovesCount / actionsCountFloat, usedHotkeyRates );
 								replayPlayerAnalysisList.add( playerAnalysis );
 								
 								for ( final PlayerAnalysis playerAnalysis2 : playerAnalysisList )
-									if ( compareSameNames || !playerAnalysis2.playerName.equals( playerAnalysis.playerName ) ) {
+									if ( compareSameNames || !playerAnalysis2.loweredPlayerName.equals( playerAnalysis.loweredPlayerName ) ) {
 										final Comparision comparision = new Comparision( playerAnalysis2, playerAnalysis, authoritativenessThreshold, matchingProbabilityThreshold );
 										if ( comparision.tresholdReached )
 											comparisionList.add( comparision );

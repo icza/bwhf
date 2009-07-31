@@ -41,10 +41,12 @@ public class Action implements Comparable< Action > {
 		public static final Size SIZE2X2 = new Size( 2, 2 );
 	}
 	
+	// These are my own constants reserved for special commands
 	public static final byte ACTION_NAME_INDEX_UNKNOWN       = (byte) 0xff;
 	public static final byte ACTION_NAME_INDEX_BWCHART_HACK  = (byte) 0xfe;
 	public static final byte ACTION_NAME_INDEX_ATTACK_MOVE   = (byte) 0xfd;
 	public static final byte ACTION_NAME_INDEX_GATHER        = (byte) 0xfc;
+	public static final byte ACTION_NAME_INDEX_SET_RALLY     = (byte) 0xfb;
 	
 	public static final byte ACTION_NAME_INDEX_CANCEL_TRAIN  = (byte) 0x20;
 	public static final byte ACTION_NAME_INDEX_0X33          = (byte) 0x33;
@@ -53,6 +55,7 @@ public class Action implements Comparable< Action > {
 	public static final byte ACTION_NAME_INDEX_HOTKEY        = (byte) 0x13;
 	public static final byte ACTION_NAME_INDEX_USE_CHEAT     = (byte) 0x12;
 	public static final byte ACTION_NAME_INDEX_SELECT        = (byte) 0x09;
+	public static final byte ACTION_NAME_INDEX_SHIFT_SELECT  = (byte) 0x0a;
 	public static final byte ACTION_NAME_INDEX_MOVE          = (byte) 0x14;
 	public static final byte ACTION_NAME_INDEX_BUILD         = (byte) 0x0c;
 	public static final byte ACTION_NAME_INDEX_ALLY          = (byte) 0x0e;

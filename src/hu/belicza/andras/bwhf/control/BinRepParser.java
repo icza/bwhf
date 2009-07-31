@@ -317,13 +317,19 @@ public class BinRepParser {
 				commandsBuffer.getShort(); // Unknown
 				final byte type    = commandsBuffer.get();
 				
-				byte actionNameIndex = Action.ACTION_NAME_INDEX_UNKNOWN;
-				if ( type == (byte) 0x00 || type == (byte) 0x06 ) // Move with right click or Move by click move icon
-					actionNameIndex = Action.ACTION_NAME_INDEX_MOVE;
-				else if ( type == (byte) 0x09 || type == (byte) 0x4f || type == (byte) 0x50 ) // Gather
-					actionNameIndex = Action.ACTION_NAME_INDEX_GATHER;
-				else if ( type == (byte) 0x0e ) // Attack move
-					actionNameIndex = Action.ACTION_NAME_INDEX_ATTACK_MOVE;
+				byte actionNameIndex;
+				switch ( type ) {
+				case (byte) 0x00 : case (byte) 0x06 :  // Move with right click or Move by click move icon
+					actionNameIndex = Action.ACTION_NAME_INDEX_MOVE       ; break;
+				case (byte) 0x09 : case (byte) 0x4f : case (byte) 0x50 :
+					actionNameIndex = Action.ACTION_NAME_INDEX_GATHER     ; break;
+				case (byte) 0x0e : // Attack move
+					actionNameIndex = Action.ACTION_NAME_INDEX_ATTACK_MOVE; break;
+				case (byte) 0x28 :
+					actionNameIndex = Action.ACTION_NAME_INDEX_SET_RALLY  ; break;
+				default :
+					actionNameIndex = Action.ACTION_NAME_INDEX_UNKNOWN    ; break;
+				}
 				
 				/*final byte type2 = */commandsBuffer.get(); // Type2: 0x00 for normal attack, 0x01 for shift attack
 				action = new Action( frame, posX + "," + posY, actionNameIndex, type, Action.UNIT_NAME_INDEX_UNKNOWN, Action.BUILDING_NAME_INDEX_NON_BUILDING );
