@@ -7,7 +7,7 @@ If you double click on a match with the left button, replay #1 will be opened on
 
 *BWHF Agent pairs all players from every replays with all other players from all other replays! The matching pairs grow exponentially with the number of replays. Always keep a reasonable display treshold which you can lower anytime if the result is insufficient!*
 
-(For example without display treshold: if you select 10 replays with 6 players in each, that's 60 players, each of them would be compared with 54 other players which gives us 3240 rows!)
+(For example without display treshold: if you select 10 replays with 6 players in each, that's 60 players, each of them would be compared with 54 other players which gives us 3240 rows! With reasonable tresholds you can narrow this down to 10 which you can evaluate in seconds.)
 
 ==Extent of authoritativeness==
 The extent of authoritativeness tells you how much you can rely on the result of the analysis. For example comparing 2 players from 2 replays where the first player was zerg in a 2-minute long game from 5 years ago and the second player was protoss in a 30-minute long game played just today, that comparision result is good for absolutely nothing regardless what the result is.
