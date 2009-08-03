@@ -3,13 +3,24 @@
 =Player Matcher=
 Player matcher allows you to select any replays, and it will analyze all of them and compare all players across the selected replays individually. Afte the analysis it displays the result in a table. The table contains the *extent of authoritativeness* of the comparision, the *matching probability* of the 2 players and the names of the players and the replay files. You can choose whether to compare players with same name too. The comparisions can go really high if you select many replays, so there is option to set the display tresholds of the authoritativeness and the matching probability.
 
+==Extent of authoritativeness==
+The extent of authoritativeness tells you how much you can rely on the result of the analysis. For example comparing 2 players from 2 replays where the first player was zerg in a 2-minute long game from 5 years ago and the second player was protoss in a 30-minute long game played just today, that comparision result is good for absolutely nothing regardless what the result is.
+
 The following properties are taken into account when determining the extent of authoritativeness:
  * *Races:* Comparing different races are a huge setback (the matching algorithm operates on action distribution which naturally changes with races).
  * *APM:* Difference in APM is an obvious negative factor.
  * *Duration:* If games differ in duration, the action distribution might change drastically (gather and micro focused on early, macro later on).
  * *Replay save time:* Playing style changes over time. Replays from different ages are not very authoritative.
 
-==Extent of authoritativeness==
-The extent of authoritativeness tells you how much you can rely on the result of the analysis. For example comparing 2 players from 2 replays where the first player was zerg in a 2-minute long game and the second player was protoss in a 30-minute long game, that comparision result is good for absolutely nothing regardless what the result is.
 
 ==Matching probability==
+The algorithm which calculates the matching probability is mainly based on the action distribution and the used hotkeys. It calculates a number between 0 and 100. 100 means the 2 players have exactly the same playing style, 0 means they don't look similar at all.
+
+The algorithm examins the following properties:
+ * Hotkey actions usage
+ * Select action usage
+ * Shift-select action usage
+ * Rally set action usage
+ * Move action usage
+ * Attack move action usage
+ * The usage of the different hotkeys (0..9)
