@@ -11,11 +11,16 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Vector;
 
+import swingwt.awt.Dimension;
 import swingwt.awt.GridLayout;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwt.awt.event.MouseAdapter;
+import swingwt.awt.event.MouseEvent;
 import swingwtx.swing.BorderFactory;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
@@ -23,16 +28,20 @@ import swingwtx.swing.JComboBox;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JPanel;
+import swingwtx.swing.JProgressBar;
+import swingwtx.swing.JScrollPane;
+import swingwtx.swing.JTable;
+import swingwtx.swing.ListSelectionModel;
+import swingwtx.swing.event.ListSelectionEvent;
+import swingwtx.swing.event.ListSelectionListener;
+import swingwtx.swing.table.DefaultTableModel;
 
 /**
- * AKA finder tab.
+ * Player matcher tab.
  * 
  * @author Andras Belicza
  */
-public class AkaFinderTab extends ProgressLoggedTab {
-	
-	/** Log file name for autoscan. */
-	private static final String LOG_FILE_NAME = "aka_finder.log";
+public class PlayerMatcherTab extends Tab {
 	
 	/** Flag hacker reps checkbox.                       */
 	private final JCheckBox dontCompareSameNamesCheckBox = new JCheckBox( "Don't compare players with same names", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES ) ) );
@@ -82,7 +91,7 @@ public class AkaFinderTab extends ProgressLoggedTab {
 	 * @author Andras Belicza
 	 */
 	private static class PlayerAnalysis {
-		final File    replay;
+		final String  replayPath;
 		final long    replayDate;
 		final String  playerName;
 		final String  loweredPlayerName;
@@ -97,9 +106,9 @@ public class AkaFinderTab extends ProgressLoggedTab {
 		final float   attackMoveRate;
 		final float[] usedHotkeyRates;
 		
-		public PlayerAnalysis( final File replay, final long replayDate, final String playerName, final byte race, final int frames, final int realApm,
+		public PlayerAnalysis( final String replayPath, final long replayDate, final String playerName, final byte race, final int frames, final int realApm,
 				final float hotkeyRate, final float selectRate, final float shiftSelectRate, final float rallySetRate, final float moveRate, final float attackMoveRate, final float[] usedHotkeyRates ) {
-			this.replay          = replay;
+			this.replayPath      = replayPath;
 			this.replayDate      = replayDate;
 			this.playerName      = playerName;
 			loweredPlayerName    = playerName.toLowerCase();
@@ -145,15 +154,10 @@ public class AkaFinderTab extends ProgressLoggedTab {
 		
 		@Override
 		public String toString() {
-			return String.format( "%-9s %3.1f%% - %s, %s  (%s, %s)", authoritativenessExtent.toString(), matchingProbability, analysis1.playerName, analysis2.playerName, analysis1.replay.getAbsolutePath(), analysis2.replay.getAbsolutePath() );
+			return String.format( "%-9s %3.1f%% - %s, %s  (%s, %s)", authoritativenessExtent.toString(), matchingProbability, analysis1.playerName, analysis2.playerName, analysis1.replayPath, analysis2.replayPath );
 		}
 		
-		public int compareTo( final Comparision comparision ) {
-			if ( authoritativenessExtent == comparision.authoritativenessExtent )
-				return -Float.compare( matchingProbability, comparision.matchingProbability );
-			return authoritativenessExtent.ordinal() < comparision.authoritativenessExtent.ordinal() ? 1 : -1;
-		}
-		
+		/** Number of frames in four minutes. */
 		private static final int FOUR_MINUTES_FRAMES = ReplayHeader.convertSecondsToFrames( 4*60 );
 		
 		/**
@@ -256,13 +260,43 @@ public class AkaFinderTab extends ProgressLoggedTab {
 				return 1.0f;
 			return value1 < value2 ? value1 / value2 : value2 / value1;
 		}
+
+		/**
+		 * Compares this comparision to another one based on the extent of authoritativeness and the matching probability.
+		 * @param comparision comparision to compare to
+		 * @return >0 if this comparision has higher authoritativeness extent or higher matching probability in case of equal authoritativeness extent; 0 if both equal; and <0 if lower authoritativeness extent or lower matching probability in case of equal authoritativeness
+		 */
+		public int compareTo( final Comparision comparision ) {
+			if ( authoritativenessExtent == comparision.authoritativenessExtent )
+				return Float.compare( matchingProbability, comparision.matchingProbability );
+			return authoritativenessExtent.compareTo( comparision.authoritativenessExtent );
+		}
+		
 	}
+	
+	/** Column names of the result table.                          */
+	private static final String[]  RESULT_TABLE_COLUMN_NAMES   = new String[]  { "Authoritativeness", "Matching probability", "Player #1", "Player #2", "Replay #1", "Replay #2" };
+	/** Tells if the column has to be sorted ascendant by default. */
+	private static final boolean[] DEFAULT_SORTING_ASCENDNANTS = new boolean[] { false              , false                 , true       , true       , true       , true        };
+	
+	/** The progress bar component. */
+	private final JProgressBar progressBar = new JProgressBar();
+	
+	/** Table displaying the results.              */
+	private final JTable resultTable = new JTable();
+	/** List of comparisions of the last analysis. */
+	private final List< Comparision > comparisionList = new ArrayList< Comparision >();
+	private int     lastSortingIndex;
+	private boolean lastSortingAscendant;
+	
+	/** Label to display the results count. */
+	private final JLabel resultsCountLabel = new JLabel();
 	
 	/**
 	 * Creates a new PlayersNetworkTab.
 	 */
-	public AkaFinderTab() {
-		super( "AKA finder", IconResourceManager.ICON_AKA_FINDER, LOG_FILE_NAME );
+	public PlayerMatcherTab() {
+		super( "Player matcher", IconResourceManager.ICON_PLAYER_MATCHER );
 		
 		final List< AuthoritativenessExtent > authoritativenessExtentList = Arrays.asList( AuthoritativenessExtent.values() );
 		Collections.reverse( authoritativenessExtentList );
@@ -274,8 +308,18 @@ public class AkaFinderTab extends ProgressLoggedTab {
 		buildGUI();
 	}
 	
-	@Override
+	/**
+	 * Builds the graphical user interface of the tab.
+	 */
 	protected void buildGUI() {
+		final JButton visitPlayerMatcherHelpPageButton = new JButton( "Visit Player matcher help page", IconResourceManager.ICON_WORLD_GO );
+		visitPlayerMatcherHelpPageButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				Utils.showURLInBrowser( Consts.PLAYER_MATCHER_HELP_PAGE_URL );
+			}
+		} );
+		contentBox.add( Utils.wrapInPanel( visitPlayerMatcherHelpPageButton ) );
+		
 		contentBox.add( Utils.wrapInPanel( dontCompareSameNamesCheckBox ) );
 		
 		final JPanel tresholdPanel = new JPanel( new GridLayout( 2, 2, 7, 0 ) );
@@ -322,7 +366,46 @@ public class AkaFinderTab extends ProgressLoggedTab {
 		} );
 		contentBox.add( Utils.wrapInPanel( stopSendingButton ) );
 		
-		super.buildGUI();
+		progressBar.setMaximumSize( Utils.getMaxDimension() );
+		contentBox.add( progressBar );
+		
+		final JPanel panel = Utils.createWrapperPanelLeftAligned();
+		panel.add( new JLabel( "Comparision result:" ) );
+		panel.add( resultsCountLabel );
+		contentBox.add( panel );
+		
+		resultTable.setPreferredSize( new Dimension( 50, 50 ) );
+		resultTable.setRowSelectionAllowed( true );
+		resultTable.getSelectionModel().setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
+		resultTable.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
+			public void valueChanged( final ListSelectionEvent event ) {
+				// TODO: implement
+			}
+		} );
+		resultTable.setColumnSelectionAllowed( true );
+		resultTable.addMouseListener( new MouseAdapter() {
+			@Override
+			public void mouseClicked( final MouseEvent event ) {
+				if ( resultTable.getSelectedRow() >= 0 && event.getClickCount() == 2 ) {
+					final String replayPath = event.getButton() == MouseEvent.BUTTON1 ? comparisionList.get( resultTable.getSelectedRow() ).analysis1.replayPath : comparisionList.get( resultTable.getSelectedRow() ).analysis2.replayPath;
+					MainFrame.getInstance().selectTab( MainFrame.getInstance().chartsTab );
+					MainFrame.getInstance().chartsTab.setReplayFile( new File( replayPath ) );
+				}
+			}
+		} );
+		resultTable.getTableHeader().addMouseListener( new MouseAdapter() {
+			@Override
+			public void mouseClicked( final MouseEvent event ) {
+				final int     sortingIndex     = resultTable.getTableHeader().columnAtPoint( event.getPoint() );
+				final boolean sortingAscendant = sortingIndex == lastSortingIndex ? !lastSortingAscendant : DEFAULT_SORTING_ASCENDNANTS[ sortingIndex ];
+				
+				lastSortingIndex     = sortingIndex;
+				lastSortingAscendant = sortingAscendant;
+				
+				sortResultTable();
+			}
+		} );
+		contentBox.add( new JScrollPane( resultTable ) );
 	}
 	
 	/**
@@ -349,10 +432,9 @@ public class AkaFinderTab extends ProgressLoggedTab {
 					final boolean                 compareSameNames             = !dontCompareSameNamesCheckBox.isSelected();
 					final float                   matchingProbabilityThreshold = Float.parseFloat( ( (String) matchingProbabilityThresholdComboBox.getSelectedItem() ).substring( 0, ( (String) matchingProbabilityThresholdComboBox.getSelectedItem() ).length() - 1 ) );
 					final AuthoritativenessExtent authoritativenessThreshold   = (AuthoritativenessExtent) authoritativenessThresholdComboBox.getSelectedItem();
-					progressBar.setValue( 0 );
 					
-					logMessage( "\n", false ); // Prints 2 empty lines
-					logMessage( "Counting replays..." );
+					resultsCountLabel.setText( "Counting..." );
+					progressBar.setValue( 0 );
 					
 					chooseReplayFiles( files );
 					progressBar.setMaximum( replayFileList.size() );
@@ -360,25 +442,19 @@ public class AkaFinderTab extends ProgressLoggedTab {
 					if ( requestedToStop )
 						return;
 					
-					final String analysingMessage = "Analysing " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" );
-					logMessage( analysingMessage + "..." );
-					
-					final long startNanoTime = System.nanoTime();
+					resultsCountLabel.setText( "Analysing " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" ) + "..." );
 					
 					int counter = 0;	
 					int skippedRepsCount = 0;
 					final List< PlayerAnalysis > playerAnalysisList = new ArrayList< PlayerAnalysis >();
-					final List< Comparision    > comparisionList    = new ArrayList< Comparision    >();
+					comparisionList.clear();
 					for ( final File replayFile : replayFileList ) {
 						if ( requestedToStop )
 							return;
 						
-						final String replayFileAbsolutePath = replayFile.getAbsolutePath();
-						
 						final Replay replay = BinRepParser.parseReplay( replayFile, true, false );
 						
 						if ( replay == null ) {
-							logMessage( "Could not parse " + replayFileAbsolutePath + "!" );
 							skippedRepsCount++;
 						}
 						else {
@@ -424,7 +500,7 @@ public class AkaFinderTab extends ProgressLoggedTab {
 								for ( int i = usedHotkeyRates.length - 1; i >= 0; i-- )
 									usedHotkeyRates[ i ] = usedHotkeysCounts[ i ] / actionsCountFloat;
 								
-								final PlayerAnalysis playerAnalysis = new PlayerAnalysis( replayFile, replayHeader.saveTime.getTime(), playerActions.playerName, replayHeader.playerRaces[ playerIndex ],
+								final PlayerAnalysis playerAnalysis = new PlayerAnalysis( replayFile.getAbsolutePath(), replayHeader.saveTime.getTime(), playerActions.playerName, replayHeader.playerRaces[ playerIndex ],
 										frames, frames == 0 ? 0 : seconds == 0 ? 0 : playerActions.actions.length * 60 / seconds,
 										hotkeysCount / actionsCountFloat, selectsCount / actionsCountFloat, shiftSelectsCount / actionsCountFloat, rallySetsCount / actionsCountFloat, movesCount / actionsCountFloat, attackMovesCount / actionsCountFloat, usedHotkeyRates );
 								replayPlayerAnalysisList.add( playerAnalysis );
@@ -443,19 +519,16 @@ public class AkaFinderTab extends ProgressLoggedTab {
 						progressBar.setValue( ++counter );
 					}
 					
-					Collections.sort( comparisionList );
-					logMessage( "Comparision results:" );
-					for ( final Comparision comparision : comparisionList )
-						logMessage( "\t" + comparision.toString(), false );
+					resultsCountLabel.setText( comparisionList.size() + " match" + ( comparisionList.size() == 1 ? "" : "es" ) + " in " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" )
+							+ ( skippedRepsCount > 0 ? "(skipped " + skippedRepsCount + ( skippedRepsCount == 1 ? " replay)" : " replays)" ) : "" ) );
 					
-					final long endNanoTime = System.nanoTime();
-					
-					logMessage( analysingMessage + " done in " + Utils.formatNanoTimeAmount( endNanoTime - startNanoTime ) );
-					logMessage( "\tSkipped/failed " + skippedRepsCount + " replay" + ( skippedRepsCount == 1 ? "" : "s" ) + ".", false );
+					lastSortingIndex     = 0;
+					lastSortingAscendant = DEFAULT_SORTING_ASCENDNANTS[ lastSortingIndex ];
+					sortResultTable();
 				}
 				finally {
 					if ( requestedToStop )
-						logMessage( "Analysing was manually aborted!" );
+						resultsCountLabel.setText( "Analysing was manually aborted!" );
 					stopSendingButton  .setEnabled( false );
 					selectFilesButton  .setEnabled( true  );
 					selectFoldersButton.setEnabled( true  );
@@ -487,6 +560,68 @@ public class AkaFinderTab extends ProgressLoggedTab {
 			}
 			
 		}.start();
+	}
+	
+	/**
+	 * Sorts the result table based on the <code>lastSortingIndex</code> and <code>lastSortingAscendant</code> properties.
+	 */
+	private void sortResultTable() {
+		Collections.sort( comparisionList, new Comparator< Comparision >() {
+			public int compare( final Comparision comparision1, final Comparision comparision2 ) {
+				switch ( lastSortingIndex ) {
+				case 0 : return lastSortingAscendant ? comparision1.compareTo( comparision2 ) : -comparision1.compareTo( comparision2 );
+				case 1 : {
+					int comparisionResult = Float.compare( comparision1.matchingProbability, comparision2.matchingProbability );
+					if ( comparisionResult == 0 )
+						comparisionResult = comparision2.authoritativenessExtent.ordinal() - comparision1.authoritativenessExtent.ordinal();
+					return lastSortingAscendant ? comparisionResult : -comparisionResult;
+				}
+				case 2 : {
+					int comparisionResult = comparision1.analysis1.loweredPlayerName.compareTo( comparision2.analysis1.loweredPlayerName );
+					if ( comparisionResult == 0 )
+						comparisionResult = -comparision1.compareTo( comparision2 );
+					return lastSortingAscendant ? comparisionResult : -comparisionResult;
+				}
+				case 3 : {
+					int comparisionResult = comparision1.analysis2.loweredPlayerName.compareTo( comparision2.analysis2.loweredPlayerName );
+					if ( comparisionResult == 0 )
+						comparisionResult = -comparision1.compareTo( comparision2 );
+					return lastSortingAscendant ? comparisionResult : -comparisionResult;
+				}
+				case 4 : return lastSortingAscendant ? comparision1.analysis1.replayPath.compareTo( comparision2.analysis1.replayPath ) : -comparision1.analysis1.replayPath.compareTo( comparision2.analysis1.replayPath );
+				case 5 : return lastSortingAscendant ? comparision1.analysis2.replayPath.compareTo( comparision2.analysis2.replayPath ) : -comparision1.analysis2.replayPath.compareTo( comparision2.analysis2.replayPath );
+				}
+				return 0;
+			}
+		});
+		
+		refreshResultTable();
+	}
+	
+	/**
+	 * Refreshes the result table from the <code>lastSearchResultRowsData</code> data list.
+	 */
+	private void refreshResultTable() {
+		final Vector< Vector< String > > resultDataVector = new Vector< Vector< String > >( comparisionList.size() );
+		for ( final Comparision comparision : comparisionList ) {
+			final Vector< String > rowVector = new Vector< String >( 6 );
+			rowVector.add( comparision.authoritativenessExtent.toString() );
+			rowVector.add( String.format( "%.1f%%", comparision.matchingProbability ) );
+			rowVector.add( comparision.analysis1.playerName );
+			rowVector.add( comparision.analysis2.playerName );
+			rowVector.add( comparision.analysis1.replayPath );
+			rowVector.add( comparision.analysis2.replayPath );
+			resultDataVector.add( rowVector );
+		}
+		final Vector< String > columnNameVector = new Vector< String >( 6 );
+		Collections.addAll( columnNameVector, RESULT_TABLE_COLUMN_NAMES );
+		
+		resultTable.setModel( new DefaultTableModel( resultDataVector, columnNameVector ) {
+			@Override
+			public boolean isCellEditable( final int row, final int column ) {
+				return false;
+			}
+		} );
 	}
 	
 	@Override

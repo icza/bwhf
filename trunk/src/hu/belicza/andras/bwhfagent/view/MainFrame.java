@@ -76,8 +76,8 @@ public class MainFrame extends JFrame {
 	protected final GameChatTab        gameChatTab;
 	/** Reference to the players' network tab. */
 	protected final PlayersNetworkTab  playersNetworkTab;
-	/** Reference to the AKA finder tab.       */
-	protected final AkaFinderTab       akaFinderTab;
+	/** Reference to the player matcher tab.   */
+	protected final PlayerMatcherTab   playerMatcherTab;
 	/** Reference to the general settings tab. */
 	protected final GeneralSettingsTab generalSettingsTab;
 	
@@ -125,8 +125,8 @@ public class MainFrame extends JFrame {
 		replaySearchTab    = new ReplaySearchTab();
 		gameChatTab        = new GameChatTab();
 		playersNetworkTab  = new PlayersNetworkTab();
-		akaFinderTab       = new AkaFinderTab();
-		tabs = new Tab[] { autoscanTab, manualScanTab, playerCheckerTab, chartsTab, replaySearchTab, gameChatTab, new PcxConverterTab(), playersNetworkTab, akaFinderTab, generalSettingsTab, new AboutTab() };
+		playerMatcherTab   = new PlayerMatcherTab();
+		tabs = new Tab[] { autoscanTab, manualScanTab, playerCheckerTab, chartsTab, replaySearchTab, gameChatTab, new PcxConverterTab(), playersNetworkTab, playerMatcherTab, generalSettingsTab, new AboutTab() };
 		
 		buildGUI();
 		

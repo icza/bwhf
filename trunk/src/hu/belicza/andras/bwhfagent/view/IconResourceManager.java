@@ -42,8 +42,8 @@ public class IconResourceManager {
 	public static final ImageIcon ICON_PCX_CONVERTER       = new ImageIcon( IconResourceManager.class.getResource( "icons/photo.png" ) );
 	/** Players' Network icon.    */
 	public static final ImageIcon ICON_PLAYERS_NETWORK     = new ImageIcon( IconResourceManager.class.getResource( "icons/group_link.png" ) );
-	/** AKA finder icon.          */
-	public static final ImageIcon ICON_AKA_FINDER          = new ImageIcon( IconResourceManager.class.getResource( "icons/group_gear.png" ) );
+	/** Player matcher icon.      */
+	public static final ImageIcon ICON_PLAYER_MATCHER      = new ImageIcon( IconResourceManager.class.getResource( "icons/group_gear.png" ) );
 	/** General settings icon.    */
 	public static final ImageIcon ICON_GENERAL_SETTINGS    = new ImageIcon( IconResourceManager.class.getResource( "icons/wrench.png" ) );
 	/** About icon.               */
