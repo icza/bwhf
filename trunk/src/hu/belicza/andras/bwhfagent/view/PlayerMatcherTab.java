@@ -43,12 +43,12 @@ import swingwtx.swing.table.DefaultTableModel;
  */
 public class PlayerMatcherTab extends Tab {
 	
-	/** Flag hacker reps checkbox.                       */
+	/** Don't compare players with same name checkbox. */
 	private final JCheckBox dontCompareSameNamesCheckBox = new JCheckBox( "Don't compare players with same names", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES ) ) );
-	/** Authoritativeness threshold combobox.            */
-	private final JComboBox  authoritativenessThresholdComboBox;
-	/** Matching probability treshold combobox.          */
-	private final JComboBox  matchingProbabilityThresholdComboBox = new JComboBox( new Object[] { "100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%", "0%" } );
+	/** Authoritativeness threshold combobox.          */
+	private final JComboBox authoritativenessThresholdComboBox;
+	/** Matching probability treshold combobox.        */
+	private final JComboBox matchingProbabilityThresholdComboBox = new JComboBox( new Object[] { "100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%", "0%" } );
 	
 	/** Button to select folders to analyze. */
 	private final JButton selectFoldersButton = new JButton( "Select folders to analyze recursively...", IconResourceManager.ICON_FOLDER_CHOOSER );
@@ -520,7 +520,7 @@ public class PlayerMatcherTab extends Tab {
 					}
 					
 					resultsCountLabel.setText( comparisionList.size() + " match" + ( comparisionList.size() == 1 ? "" : "es" ) + " in " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" )
-							+ ( skippedRepsCount > 0 ? "(skipped " + skippedRepsCount + ( skippedRepsCount == 1 ? " replay)" : " replays)" ) : "" ) );
+							+ ( skippedRepsCount > 0 ? " (skipped " + skippedRepsCount + ( skippedRepsCount == 1 ? " replay)" : " replays)" ) : "" ) );
 					
 					lastSortingIndex     = 0;
 					lastSortingAscendant = DEFAULT_SORTING_ASCENDNANTS[ lastSortingIndex ];
@@ -593,13 +593,13 @@ public class PlayerMatcherTab extends Tab {
 				}
 				return 0;
 			}
-		});
+		} );
 		
 		refreshResultTable();
 	}
 	
 	/**
-	 * Refreshes the result table from the <code>lastSearchResultRowsData</code> data list.
+	 * Refreshes the result table from the <code>comparisionList</code>.
 	 */
 	private void refreshResultTable() {
 		final Vector< Vector< String > > resultDataVector = new Vector< Vector< String > >( comparisionList.size() );
