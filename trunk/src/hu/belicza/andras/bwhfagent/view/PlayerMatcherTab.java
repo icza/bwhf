@@ -47,14 +47,14 @@ public class PlayerMatcherTab extends Tab {
 	private final JCheckBox dontCompareSameNamesCheckBox = new JCheckBox( "Don't compare players with same names", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES ) ) );
 	/** Authoritativeness threshold combobox.          */
 	private final JComboBox authoritativenessThresholdComboBox;
-	/** Matching probability treshold combobox.        */
+	/** Matching probability threshold combobox.       */
 	private final JComboBox matchingProbabilityThresholdComboBox = new JComboBox( new Object[] { "100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%", "0%" } );
 	
 	/** Button to select folders to analyze. */
 	private final JButton selectFoldersButton = new JButton( "Select folders to analyze recursively...", IconResourceManager.ICON_FOLDER_CHOOSER );
 	/** Button to select files to analyze.   */
 	private final JButton selectFilesButton   = new JButton( "Select files to analyze...", IconResourceManager.ICON_FILE_CHOOSER );
-	/** Button to stop analysing.            */
+	/** Button to stop analyzing.            */
 	private final JButton stopSendingButton   = new JButton( "Stop analyzing", IconResourceManager.ICON_STOP );
 	
 	/** Variable to store stop requests of analyzing. */
@@ -126,29 +126,29 @@ public class PlayerMatcherTab extends Tab {
 	}
 	
 	/**
-	 * Comparision result of analysis of 2 players.
+	 * Comparison result of analysis of 2 players.
 	 * @author Andras Belicza
 	 */
-	private static class Comparision implements Comparable< Comparision > {
+	private static class Comparison implements Comparable< Comparison > {
 		
 		final PlayerAnalysis          analysis1;
 		final PlayerAnalysis          analysis2;
 		final AuthoritativenessExtent authoritativenessExtent;
 		final float                   matchingProbability;
-		final boolean                 tresholdReached;
+		final boolean                 thresholdReached;
 		
-		public Comparision( final PlayerAnalysis analysis1, final PlayerAnalysis analysis2, final AuthoritativenessExtent authoritativenessExtentTreshold, final float matchingProbabilityTreshold ) {
+		public Comparison( final PlayerAnalysis analysis1, final PlayerAnalysis analysis2, final AuthoritativenessExtent authoritativenessExtentThreshold, final float matchingProbabilityThreshold ) {
 			this.analysis1 = analysis1;
 			this.analysis2 = analysis2;
 			authoritativenessExtent = determineAuthoritativenessExtent();
-			// If authoritativeness extent is below the treshold, don't bother calculating the matching probability
-			if ( authoritativenessExtent.compareTo( authoritativenessExtentTreshold ) >= 0  ) {
+			// If authoritativeness extent is below the threshold, don't bother calculating the matching probability
+			if ( authoritativenessExtent.compareTo( authoritativenessExtentThreshold ) >= 0  ) {
 				matchingProbability = calculateMatchingProbability();
-				tresholdReached = matchingProbability >= matchingProbabilityTreshold;
+				thresholdReached = matchingProbability >= matchingProbabilityThreshold;
 			}
 			else {
 				matchingProbability = 0.0f;
-				tresholdReached     = false;
+				thresholdReached     = false;
 			}
 		}
 		
@@ -161,7 +161,7 @@ public class PlayerMatcherTab extends Tab {
 		private static final int FOUR_MINUTES_FRAMES = ReplayHeader.convertSecondsToFrames( 4*60 );
 		
 		/**
-		 * Calculates and returns the extent of authoritativeness of this comparision.<br>
+		 * Calculates and returns the extent of authoritativeness of this comparison.<br>
 		 * This depends on:
 		 * <ul>
 		 * 		<li>Comparing different races are a huge setback (the matching algorithm operates on action distribution which naturally changes with races).
@@ -169,27 +169,27 @@ public class PlayerMatcherTab extends Tab {
 		 * 		<li>If games differ in duration, the action distribution might change drastically (gather and micro focused on early, macro later on).
 		 * 		<li>Playing style changes over time. Replays from different ages are not very authoritative.
 		 * </ul>
-		 * @return the extent of authoritativeness of this comparision
+		 * @return the extent of authoritativeness of this comparison
 		 */
 		private AuthoritativenessExtent determineAuthoritativenessExtent() {
 			float authroitativenessExtent = 1.0f; // Value 0.0 is the worst, 1.0 is the best
 			
-			// Race dependant
+			// Race dependent
 			if ( analysis1.race != analysis2.race )
 				authroitativenessExtent *= 0.5f;
 			
-			// APM dependant
+			// APM dependent
 			if ( analysis1.realApm < 30 || analysis2.realApm < 30 ) // Assumed obsing game
 				authroitativenessExtent = 0.0f;
 			else
 				authroitativenessExtent *= rate( analysis1.realApm, analysis2.realApm );
 			
-			// Duration dependant
+			// Duration dependent
 			if ( analysis1.frames < FOUR_MINUTES_FRAMES )
 				authroitativenessExtent *= (float) analysis1.frames / FOUR_MINUTES_FRAMES;
 			authroitativenessExtent *= rate( analysis1.frames, analysis2.frames );
 			
-			// Save time dependant
+			// Save time dependent
 			final int days  = (int) ( Math.abs( analysis1.replayDate - analysis2.replayDate ) / (1000l*60l*60l*24l) );
 			authroitativenessExtent *= days < 2000 ? ( 2000.0f - days ) / 2000.0f : 0.0f;
 			
@@ -216,26 +216,26 @@ public class PlayerMatcherTab extends Tab {
 		}
 		
 		/**
-		 * Calculates and retuns the matching probability.
+		 * Calculates and returns the matching probability.
 		 * @return the matching probability
 		 */
 		private float calculateMatchingProbability() {
 			float matchingProbability = 0.0f;
 			int   componentIndex      = 0;
 			
-			// Hotkey usage dependant
+			// Hotkey usage dependent
 			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.hotkeyRate     , analysis2.hotkeyRate      );
-			// Select usage dependant
+			// Select usage dependent
 			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.selectRate     , analysis2.selectRate      );
-			// Shift-select usage dependant
+			// Shift-select usage dependent
 			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.shiftSelectRate, analysis2.shiftSelectRate );
-			// Rally set usage dependant
+			// Rally set usage dependent
 			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.rallySetRate   , analysis2.rallySetRate    );
-			// Move usage dependant
+			// Move usage dependent
 			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.moveRate       , analysis2.moveRate        );
-			// Attack move usage dependant
+			// Attack move usage dependent
 			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.attackMoveRate , analysis2.attackMoveRate  );
-			// Used hotkeys dependant
+			// Used hotkeys dependent
 			final float weightFor1Hotkey = MATCHING_WEIGHTS[ componentIndex++ ] / analysis1.usedHotkeyRates.length;
 			for ( int i = analysis1.usedHotkeyRates.length - 1; i >= 0; i-- )
 				matchingProbability += weightFor1Hotkey * rate( analysis1.usedHotkeyRates[ i ], analysis2.usedHotkeyRates[ i ] );
@@ -262,14 +262,14 @@ public class PlayerMatcherTab extends Tab {
 		}
 
 		/**
-		 * Compares this comparision to another one based on the extent of authoritativeness and the matching probability.
-		 * @param comparision comparision to compare to
-		 * @return >0 if this comparision has higher authoritativeness extent or higher matching probability in case of equal authoritativeness extent; 0 if both equal; and <0 if lower authoritativeness extent or lower matching probability in case of equal authoritativeness
+		 * Compares this comparison to another one based on the extent of authoritativeness and the matching probability.
+		 * @param comparison comparison to compare to
+		 * @return >0 if this comparison has higher authoritativeness extent or higher matching probability in case of equal authoritativeness extent; 0 if both equal; and <0 if lower authoritativeness extent or lower matching probability in case of equal authoritativeness
 		 */
-		public int compareTo( final Comparision comparision ) {
-			if ( authoritativenessExtent == comparision.authoritativenessExtent )
-				return Float.compare( matchingProbability, comparision.matchingProbability );
-			return authoritativenessExtent.compareTo( comparision.authoritativenessExtent );
+		public int compareTo( final Comparison comparison ) {
+			if ( authoritativenessExtent == comparison.authoritativenessExtent )
+				return Float.compare( matchingProbability, comparison.matchingProbability );
+			return authoritativenessExtent.compareTo( comparison.authoritativenessExtent );
 		}
 		
 	}
@@ -282,10 +282,10 @@ public class PlayerMatcherTab extends Tab {
 	/** The progress bar component. */
 	private final JProgressBar progressBar = new JProgressBar();
 	
-	/** Table displaying the results.              */
+	/** Table displaying the results.             */
 	private final JTable resultTable = new JTable();
-	/** List of comparisions of the last analysis. */
-	private final List< Comparision > comparisionList = new ArrayList< Comparision >();
+	/** List of comparisons of the last analysis. */
+	private final List< Comparison > comparisonList = new ArrayList< Comparison >();
 	private int     lastSortingIndex;
 	private boolean lastSortingAscendant;
 	
@@ -302,8 +302,8 @@ public class PlayerMatcherTab extends Tab {
 		Collections.reverse( authoritativenessExtentList );
 		authoritativenessThresholdComboBox = new JComboBox( authoritativenessExtentList.toArray( new AuthoritativenessExtent[ authoritativenessExtentList.size() ] ) );
 		
-		authoritativenessThresholdComboBox  .setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTHORITATIVENESS_TRESHOLD ) ) );
-		matchingProbabilityThresholdComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_MATCHING_PROBABILITY_TRESHOLD ) ) );
+		authoritativenessThresholdComboBox  .setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTHORITATIVENESS_THRESHOLD ) ) );
+		matchingProbabilityThresholdComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_MATCHING_PROBABILITY_THRESHOLD ) ) );
 		
 		buildGUI();
 	}
@@ -322,13 +322,13 @@ public class PlayerMatcherTab extends Tab {
 		
 		contentBox.add( Utils.wrapInPanel( dontCompareSameNamesCheckBox ) );
 		
-		final JPanel tresholdPanel = new JPanel( new GridLayout( 2, 2, 7, 0 ) );
-		tresholdPanel.setBorder( BorderFactory.createTitledBorder( "Display tresholds:" ) );
-		tresholdPanel.add( new JLabel( "Extent of authoritativeness:" ) );
-		tresholdPanel.add( authoritativenessThresholdComboBox );
-		tresholdPanel.add( new JLabel( "Matching probability:" ) );
-		tresholdPanel.add( matchingProbabilityThresholdComboBox );
-		contentBox.add( Utils.wrapInPanel( tresholdPanel ) );
+		final JPanel thresholdPanel = new JPanel( new GridLayout( 2, 2, 7, 0 ) );
+		thresholdPanel.setBorder( BorderFactory.createTitledBorder( "Display thresholds:" ) );
+		thresholdPanel.add( new JLabel( "Extent of authoritativeness:" ) );
+		thresholdPanel.add( authoritativenessThresholdComboBox );
+		thresholdPanel.add( new JLabel( "Matching probability:" ) );
+		thresholdPanel.add( matchingProbabilityThresholdComboBox );
+		contentBox.add( Utils.wrapInPanel( thresholdPanel ) );
 		
 		final ActionListener selectFilesAndFoldersActionListener = new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
@@ -370,7 +370,7 @@ public class PlayerMatcherTab extends Tab {
 		contentBox.add( progressBar );
 		
 		final JPanel panel = Utils.createWrapperPanelLeftAligned();
-		panel.add( new JLabel( "Comparision result:" ) );
+		panel.add( new JLabel( "Comparison result:" ) );
 		panel.add( resultsCountLabel );
 		contentBox.add( panel );
 		
@@ -387,7 +387,7 @@ public class PlayerMatcherTab extends Tab {
 			@Override
 			public void mouseClicked( final MouseEvent event ) {
 				if ( resultTable.getSelectedRow() >= 0 && event.getClickCount() == 2 ) {
-					final String replayPath = event.getButton() == MouseEvent.BUTTON1 ? comparisionList.get( resultTable.getSelectedRow() ).analysis1.replayPath : comparisionList.get( resultTable.getSelectedRow() ).analysis2.replayPath;
+					final String replayPath = event.getButton() == MouseEvent.BUTTON1 ? comparisonList.get( resultTable.getSelectedRow() ).analysis1.replayPath : comparisonList.get( resultTable.getSelectedRow() ).analysis2.replayPath;
 					MainFrame.getInstance().selectTab( MainFrame.getInstance().chartsTab );
 					MainFrame.getInstance().chartsTab.setReplayFile( new File( replayPath ) );
 				}
@@ -409,7 +409,7 @@ public class PlayerMatcherTab extends Tab {
 	}
 	
 	/**
-	 * Analyses files and folders to find AKAs..
+	 * Analyzes files and folders to find AKAs..
 	 * @param files files and folders to be analyzed
 	 */
 	protected void analyzeFilesAndFolders( final File[] files ) {
@@ -442,12 +442,12 @@ public class PlayerMatcherTab extends Tab {
 					if ( requestedToStop )
 						return;
 					
-					resultsCountLabel.setText( "Analysing " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" ) + "..." );
+					resultsCountLabel.setText( "Analyzing " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" ) + "..." );
 					
 					int counter = 0;	
 					int skippedRepsCount = 0;
 					final List< PlayerAnalysis > playerAnalysisList = new ArrayList< PlayerAnalysis >();
-					comparisionList.clear();
+					comparisonList.clear();
 					for ( final File replayFile : replayFileList ) {
 						if ( requestedToStop )
 							return;
@@ -507,9 +507,9 @@ public class PlayerMatcherTab extends Tab {
 								
 								for ( final PlayerAnalysis playerAnalysis2 : playerAnalysisList )
 									if ( compareSameNames || !playerAnalysis2.loweredPlayerName.equals( playerAnalysis.loweredPlayerName ) ) {
-										final Comparision comparision = new Comparision( playerAnalysis2, playerAnalysis, authoritativenessThreshold, matchingProbabilityThreshold );
-										if ( comparision.tresholdReached )
-											comparisionList.add( comparision );
+										final Comparison comparison = new Comparison( playerAnalysis2, playerAnalysis, authoritativenessThreshold, matchingProbabilityThreshold );
+										if ( comparison.thresholdReached )
+											comparisonList.add( comparison );
 									}
 							}
 							
@@ -519,7 +519,7 @@ public class PlayerMatcherTab extends Tab {
 						progressBar.setValue( ++counter );
 					}
 					
-					resultsCountLabel.setText( comparisionList.size() + " match" + ( comparisionList.size() == 1 ? "" : "es" ) + " in " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" )
+					resultsCountLabel.setText( comparisonList.size() + " match" + ( comparisonList.size() == 1 ? "" : "es" ) + " in " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" )
 							+ ( skippedRepsCount > 0 ? " (skipped " + skippedRepsCount + ( skippedRepsCount == 1 ? " replay)" : " replays)" ) : "" ) );
 					
 					lastSortingIndex     = 0;
@@ -566,30 +566,30 @@ public class PlayerMatcherTab extends Tab {
 	 * Sorts the result table based on the <code>lastSortingIndex</code> and <code>lastSortingAscendant</code> properties.
 	 */
 	private void sortResultTable() {
-		Collections.sort( comparisionList, new Comparator< Comparision >() {
-			public int compare( final Comparision comparision1, final Comparision comparision2 ) {
+		Collections.sort( comparisonList, new Comparator< Comparison >() {
+			public int compare( final Comparison comparison1, final Comparison comparison2 ) {
 				switch ( lastSortingIndex ) {
-				case 0 : return lastSortingAscendant ? comparision1.compareTo( comparision2 ) : -comparision1.compareTo( comparision2 );
+				case 0 : return lastSortingAscendant ? comparison1.compareTo( comparison2 ) : -comparison1.compareTo( comparison2 );
 				case 1 : {
-					int comparisionResult = Float.compare( comparision1.matchingProbability, comparision2.matchingProbability );
-					if ( comparisionResult == 0 )
-						comparisionResult = comparision2.authoritativenessExtent.ordinal() - comparision1.authoritativenessExtent.ordinal();
-					return lastSortingAscendant ? comparisionResult : -comparisionResult;
+					int comparisonResult = Float.compare( comparison1.matchingProbability, comparison2.matchingProbability );
+					if ( comparisonResult == 0 )
+						comparisonResult = comparison2.authoritativenessExtent.ordinal() - comparison1.authoritativenessExtent.ordinal();
+					return lastSortingAscendant ? comparisonResult : -comparisonResult;
 				}
 				case 2 : {
-					int comparisionResult = comparision1.analysis1.loweredPlayerName.compareTo( comparision2.analysis1.loweredPlayerName );
-					if ( comparisionResult == 0 )
-						comparisionResult = -comparision1.compareTo( comparision2 );
-					return lastSortingAscendant ? comparisionResult : -comparisionResult;
+					int comparisonResult = comparison1.analysis1.loweredPlayerName.compareTo( comparison2.analysis1.loweredPlayerName );
+					if ( comparisonResult == 0 )
+						comparisonResult = -comparison1.compareTo( comparison2 );
+					return lastSortingAscendant ? comparisonResult : -comparisonResult;
 				}
 				case 3 : {
-					int comparisionResult = comparision1.analysis2.loweredPlayerName.compareTo( comparision2.analysis2.loweredPlayerName );
-					if ( comparisionResult == 0 )
-						comparisionResult = -comparision1.compareTo( comparision2 );
-					return lastSortingAscendant ? comparisionResult : -comparisionResult;
+					int comparisonResult = comparison1.analysis2.loweredPlayerName.compareTo( comparison2.analysis2.loweredPlayerName );
+					if ( comparisonResult == 0 )
+						comparisonResult = -comparison1.compareTo( comparison2 );
+					return lastSortingAscendant ? comparisonResult : -comparisonResult;
 				}
-				case 4 : return lastSortingAscendant ? comparision1.analysis1.replayPath.compareTo( comparision2.analysis1.replayPath ) : -comparision1.analysis1.replayPath.compareTo( comparision2.analysis1.replayPath );
-				case 5 : return lastSortingAscendant ? comparision1.analysis2.replayPath.compareTo( comparision2.analysis2.replayPath ) : -comparision1.analysis2.replayPath.compareTo( comparision2.analysis2.replayPath );
+				case 4 : return lastSortingAscendant ? comparison1.analysis1.replayPath.compareTo( comparison2.analysis1.replayPath ) : -comparison1.analysis1.replayPath.compareTo( comparison2.analysis1.replayPath );
+				case 5 : return lastSortingAscendant ? comparison1.analysis2.replayPath.compareTo( comparison2.analysis2.replayPath ) : -comparison1.analysis2.replayPath.compareTo( comparison2.analysis2.replayPath );
 				}
 				return 0;
 			}
@@ -599,18 +599,18 @@ public class PlayerMatcherTab extends Tab {
 	}
 	
 	/**
-	 * Refreshes the result table from the <code>comparisionList</code>.
+	 * Refreshes the result table from the <code>comparisonList</code>.
 	 */
 	private void refreshResultTable() {
-		final Vector< Vector< String > > resultDataVector = new Vector< Vector< String > >( comparisionList.size() );
-		for ( final Comparision comparision : comparisionList ) {
+		final Vector< Vector< String > > resultDataVector = new Vector< Vector< String > >( comparisonList.size() );
+		for ( final Comparison comparison : comparisonList ) {
 			final Vector< String > rowVector = new Vector< String >( 6 );
-			rowVector.add( comparision.authoritativenessExtent.toString() );
-			rowVector.add( String.format( "%.1f%%", comparision.matchingProbability ) );
-			rowVector.add( comparision.analysis1.playerName );
-			rowVector.add( comparision.analysis2.playerName );
-			rowVector.add( comparision.analysis1.replayPath );
-			rowVector.add( comparision.analysis2.replayPath );
+			rowVector.add( comparison.authoritativenessExtent.toString() );
+			rowVector.add( String.format( "%.1f%%", comparison.matchingProbability ) );
+			rowVector.add( comparison.analysis1.playerName );
+			rowVector.add( comparison.analysis2.playerName );
+			rowVector.add( comparison.analysis1.replayPath );
+			rowVector.add( comparison.analysis2.replayPath );
 			resultDataVector.add( rowVector );
 		}
 		final Vector< String > columnNameVector = new Vector< String >( 6 );
@@ -627,8 +627,8 @@ public class PlayerMatcherTab extends Tab {
 	@Override
 	public void assignUsedProperties() {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES      , Boolean.toString( dontCompareSameNamesCheckBox.isSelected() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTHORITATIVENESS_TRESHOLD   , Integer.toString( authoritativenessThresholdComboBox.getSelectedIndex() ) );
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_MATCHING_PROBABILITY_TRESHOLD, Integer.toString( matchingProbabilityThresholdComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTHORITATIVENESS_THRESHOLD   , Integer.toString( authoritativenessThresholdComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_MATCHING_PROBABILITY_THRESHOLD, Integer.toString( matchingProbabilityThresholdComboBox.getSelectedIndex() ) );
 	}
 	
 }
