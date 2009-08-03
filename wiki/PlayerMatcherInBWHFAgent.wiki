@@ -16,7 +16,7 @@ The following properties are taken into account when determining the extent of a
 ==Matching probability==
 The algorithm which calculates the matching probability is mainly based on the action distribution and the used hotkeys. It calculates a number between 0 and 100. 100 means the 2 players have exactly the same playing style, 0 means they don't look similar at all.
 
-The algorithm examins the following properties:
+The algorithm examines the following properties:
  * Hotkey actions usage
  * Select action usage
  * Shift-select action usage
