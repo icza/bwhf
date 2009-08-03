@@ -1,7 +1,7 @@
 #summary This page describes how the player matcher works in BWHF Agent.
 
 =Player Matcher in BWHF Agent=
-Player matcher allows you to select any replays, and it will analyze all of them and compare all players across the selected replays individually. After the analysis it displays the result in a table. The table contains the *extent of authoritativeness* of the comparision, the *matching probability* of the 2 players and the names of the players and the replay files. You can choose whether to compare players with same name too. The comparisions can go really high if you select many replays, so there is option to set the display tresholds of the authoritativeness and the matching probability.
+Player matcher allows you to select any replays, and it will analyze all of them and compare all players across the selected replays individually. After the analysis it displays the results in a table. The table contains the *extent of authoritativeness* of the comparisions, the *matching probability* of the 2 players and the names of the players and the replay files. You can choose whether to compare players with same name too. The comparisions can go really high if you select many replays, so there is option to set the display tresholds of the authoritativeness and the matching probability.
 
 If you double click on a match with the left button, replay #1 will be opened on the charts tab. If you double click on a match with the right button, replay #2 will be opened on the charts tab. Clicking on the column headers will sort the table. Clicking again will reverse the sort order.
 
