@@ -180,8 +180,8 @@ public class ReplaySearchTab extends Tab {
 	private final JMenuItem extractGameChatMenuItem      = new JMenuItem( "Extract game chat", IconResourceManager.ICON_GAME_CHATS );
 	/** Menu item to send to Players' Network.                     */
 	private final JMenuItem sendToPlayersNetworkMenuItem = new JMenuItem( "Send to Players' Network", IconResourceManager.ICON_PLAYERS_NETWORK );
-	/** Menu item to find AKAs in the selected replays.            */
-	private final JMenuItem findAKAsMenuItem             = new JMenuItem( "Find AKAs", IconResourceManager.ICON_AKA_FINDER );
+	/** Menu item to check player matches of the selected replays. */
+	private final JMenuItem checkPlayerMatchesMenuItem   = new JMenuItem( "Check player matches", IconResourceManager.ICON_PLAYER_MATCHER );
 	/** Menu item to remove selected replays from the result list. */
 	private final JMenuItem removeFromListMenuItem       = new JMenuItem( "Remove from list", IconResourceManager.ICON_REMOVE_FROM_LIST );
 	/** Menu item to copy selected replay files.                   */
@@ -729,10 +729,10 @@ public class ReplaySearchTab extends Tab {
 				mainFrame.playersNetworkTab.sendFileAndFolderInfo( getSelectedResultFiles() );
 			}
 		} );
-		findAKAsMenuItem.addActionListener( new ActionListener() {
+		checkPlayerMatchesMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				mainFrame.selectTab( mainFrame.akaFinderTab );
-				mainFrame.akaFinderTab.analyzeFilesAndFolders( getSelectedResultFiles() );
+				mainFrame.selectTab( mainFrame.playerMatcherTab );
+				mainFrame.playerMatcherTab.analyzeFilesAndFolders( getSelectedResultFiles() );
 			}
 		} );
 		removeFromListMenuItem.addActionListener( new ActionListener() {
@@ -840,7 +840,7 @@ public class ReplaySearchTab extends Tab {
 				displayGameChatMenuItem     .setEnabled( selectedCount == 1 );
 				extractGameChatMenuItem     .setEnabled( selectedCount >  0 );
 				sendToPlayersNetworkMenuItem.setEnabled( selectedCount >  0 );
-				findAKAsMenuItem            .setEnabled( selectedCount >  1 );
+				checkPlayerMatchesMenuItem  .setEnabled( selectedCount >  1 );
 				removeFromListMenuItem      .setEnabled( selectedCount >  0 );
 				copyReplaysMenuItem         .setEnabled( selectedCount >  0 );
 				moveReplaysMenuItem         .setEnabled( selectedCount >  0 );
@@ -913,7 +913,7 @@ public class ReplaySearchTab extends Tab {
 		replayOperationsPopupMenu.add( displayGameChatMenuItem      );
 		replayOperationsPopupMenu.add( extractGameChatMenuItem      );
 		replayOperationsPopupMenu.add( sendToPlayersNetworkMenuItem );
-		replayOperationsPopupMenu.add( findAKAsMenuItem             );
+		replayOperationsPopupMenu.add( checkPlayerMatchesMenuItem   );
 		replayOperationsPopupMenu.add( removeFromListMenuItem       );
 		replayOperationsPopupMenu.addSeparator();
 		replayOperationsPopupMenu.add( copyReplaysMenuItem          );
@@ -936,7 +936,7 @@ public class ReplaySearchTab extends Tab {
 		displayGameChatMenuItem     .setEnabled( false );
 		extractGameChatMenuItem     .setEnabled( false );
 		sendToPlayersNetworkMenuItem.setEnabled( false );
-		findAKAsMenuItem            .setEnabled( false );
+		checkPlayerMatchesMenuItem  .setEnabled( false );
 		removeFromListMenuItem      .setEnabled( false );
 		copyReplaysMenuItem         .setEnabled( false );
 		moveReplaysMenuItem         .setEnabled( false );
@@ -1322,7 +1322,7 @@ public class ReplaySearchTab extends Tab {
 					progressBar.setMaximum( lastSearchReplayFilesCount );
 					resultsCountLabel.setText( "Searching " + lastSearchReplayFilesCount + " replay file" + ( lastSearchReplayFilesCount == 1 ? "" : "s" ) + "..." );
 					
-					int counter = 0;	
+					int counter = 0;
 					for ( final File replayFile : replayFileList ) {
 						if ( requestedToStop )
 							return;

@@ -24,6 +24,8 @@ public class Consts {
 	public static final String LATEST_STABLE_VERSION_TEXT_URL   = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version.txt";
 	/** Search help page url string.                                           */
 	public static final String SEARCH_HELP_PAGE_URL             = "http://code.google.com/p/bwhf/wiki/ReplaySearchInBWHFAgent";
+	/** Player matcher help page url string.                                   */
+	public static final String PLAYER_MATCHER_HELP_PAGE_URL     = "http://code.google.com/p/bwhf/wiki/PlayerMatcherInBWHFAgent";
 	/** Players' Network page url string.                                      */
 	public static final String PLAYERS_NETWORK_PAGE_URL         = "http://94.199.240.39/hackerdb/players";
 	
