@@ -106,30 +106,30 @@ public class PlayerMatcherTab extends Tab {
 		final float   moveRate;
 		final float   attackMoveRate;
 		final float[] usedHotkeyRates;
-		final float   commandRepetionTendency;
+		final float   commandRepeationTendency;
 		final float   averageSeletedUnits;
 		
 		
 		public PlayerAnalysis( final String replayPath, final long replayDate, final String playerName, final byte race, final int frames, final int realApm,
 				final boolean firstTrainThenGather, final float hotkeyRate, final float selectRate, final float shiftSelectRate, final float rallySetRate, final float moveRate, final float attackMoveRate, final float[] usedHotkeyRates,
-				final float commandRepetionTendency, final float averageSelectedUnits ) {
-			this.replayPath              = replayPath;
-			this.replayDate              = replayDate;
-			this.playerName              = playerName;
-			loweredPlayerName            = playerName.toLowerCase();
-			this.race                    = race;
-			this.frames                  = frames;
-			this.realApm                 = realApm;
-			this.firstTrainThenGather    = firstTrainThenGather;
-			this.hotkeyRate              = hotkeyRate;
-			this.selectRate              = selectRate;
-			this.shiftSelectRate         = shiftSelectRate;
-			this.rallySetRate            = rallySetRate;
-			this.moveRate                = moveRate;
-			this.attackMoveRate          = attackMoveRate;
-			this.usedHotkeyRates         = usedHotkeyRates;
-			this.commandRepetionTendency = commandRepetionTendency;
-			this.averageSeletedUnits     = averageSelectedUnits;
+				final float commandRepeationTendency, final float averageSelectedUnits ) {
+			this.replayPath               = replayPath;
+			this.replayDate               = replayDate;
+			this.playerName               = playerName;
+			loweredPlayerName             = playerName.toLowerCase();
+			this.race                     = race;
+			this.frames                   = frames;
+			this.realApm                  = realApm;
+			this.firstTrainThenGather     = firstTrainThenGather;
+			this.hotkeyRate               = hotkeyRate;
+			this.selectRate               = selectRate;
+			this.shiftSelectRate          = shiftSelectRate;
+			this.rallySetRate             = rallySetRate;
+			this.moveRate                 = moveRate;
+			this.attackMoveRate           = attackMoveRate;
+			this.usedHotkeyRates          = usedHotkeyRates;
+			this.commandRepeationTendency = commandRepeationTendency;
+			this.averageSeletedUnits      = averageSelectedUnits;
 		}
 	}
 	
@@ -249,8 +249,8 @@ public class PlayerMatcherTab extends Tab {
 			final float weightFor1Hotkey = MATCHING_WEIGHTS[ componentIndex++ ] / analysis1.usedHotkeyRates.length;
 			for ( int i = analysis1.usedHotkeyRates.length - 1; i >= 0; i-- )
 				matchingProbability += weightFor1Hotkey * rate( analysis1.usedHotkeyRates[ i ], analysis2.usedHotkeyRates[ i ] );
-			// Command repetion tendency dependent
-			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.commandRepetionTendency, analysis2.commandRepetionTendency  );
+			// Command repeation tendency dependent
+			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.commandRepeationTendency, analysis2.commandRepeationTendency  );
 			// Average selected units dependent
 			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.averageSeletedUnits, analysis2.averageSeletedUnits );
 			
@@ -486,22 +486,22 @@ public class PlayerMatcherTab extends Tab {
 							for ( final PlayerActions playerActions : replay.replayActions.players ) {
 								final ReplayHeader replayHeader = replay.replayHeader;
 								
-								final int   playerIndex       = replayHeader.getPlayerIndexByName( playerActions.playerName );
-								final int   actionsCount      = playerActions.actions.length;
-								final float actionsCountFloat = actionsCount;
+								final int   playerIndex        = replayHeader.getPlayerIndexByName( playerActions.playerName );
+								final int   actionsCount       = playerActions.actions.length;
+								final float actionsCountFloat  = actionsCount;
 								
-								final int frames             = playerActions.actions.length > 0 ? playerActions.actions[ actionsCount - 1 ].iteration : 0;
-								final int seconds            = ReplayHeader.convertFramesToSeconds( frames );
-								boolean firstTrainThenGather = false;
-								int   hotkeysCount           = 0;
-								int   selectsCount           = 0;
-								int   shiftSelectsCount      = 0;
-								int   rallySetsCount         = 0;
-								int   movesCount             = 0;
-								int   attackMovesCount       = 0;
-								int[] usedHotkeysCounts      = new int[ 10 ]; // 0..9
-								int   commandRepetionTendency = 0;
-								int   averageSelectedUnits    = 0;
+								final int frames               = playerActions.actions.length > 0 ? playerActions.actions[ actionsCount - 1 ].iteration : 0;
+								final int seconds              = ReplayHeader.convertFramesToSeconds( frames );
+								boolean firstTrainThenGather   = false;
+								int   hotkeysCount             = 0;
+								int   selectsCount             = 0;
+								int   shiftSelectsCount        = 0;
+								int   rallySetsCount           = 0;
+								int   movesCount               = 0;
+								int   attackMovesCount         = 0;
+								int[] usedHotkeysCounts        = new int[ 10 ]; // 0..9
+								int   commandRepeationTendency = 0;
+								int   averageSelectedUnits     = 0;
 								
 								if ( playerActions.actions.length >= 3 ) {
 									for ( int i = 0; i < 2; i++ )
@@ -536,7 +536,7 @@ public class PlayerMatcherTab extends Tab {
 									}
 									
 									if ( lastAction != null && action.actionNameIndex != Action.ACTION_NAME_INDEX_UNKNOWN && lastAction.actionNameIndex == action.actionNameIndex )
-										commandRepetionTendency++;
+										commandRepeationTendency++;
 									lastAction = action;
 								}
 								
@@ -547,7 +547,7 @@ public class PlayerMatcherTab extends Tab {
 								final PlayerAnalysis playerAnalysis = new PlayerAnalysis( replayFile.getAbsolutePath(), replayHeader.saveTime.getTime(), playerActions.playerName, replayHeader.playerRaces[ playerIndex ],
 										frames, frames == 0 ? 0 : seconds == 0 ? 0 : playerActions.actions.length * 60 / seconds,
 										firstTrainThenGather, hotkeysCount / actionsCountFloat, selectsCount / actionsCountFloat, shiftSelectsCount / actionsCountFloat, rallySetsCount / actionsCountFloat, movesCount / actionsCountFloat, attackMovesCount / actionsCountFloat, usedHotkeyRates,
-										commandRepetionTendency / actionsCountFloat, (float) averageSelectedUnits / selectsCount );
+										commandRepeationTendency / actionsCountFloat, (float) averageSelectedUnits / selectsCount );
 								replayPlayerAnalysisList.add( playerAnalysis );
 								
 								for ( final PlayerAnalysis playerAnalysis2 : playerAnalysisList )
