@@ -31,5 +31,5 @@ The algorithm examines the following properties:
  * Move action usage
  * Attack move action usage
  * The usage of the different hotkeys (0..9)
- * Command repetion tendency (how well the player tends to give to repeat the last action regardless to its parameters)
+ * Command repetion tendency (how much the player tends to repeat the last action regardless to its parameters)
  * Average selected units
