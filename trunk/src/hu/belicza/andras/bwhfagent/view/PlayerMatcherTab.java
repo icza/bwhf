@@ -32,8 +32,6 @@ import swingwtx.swing.JProgressBar;
 import swingwtx.swing.JScrollPane;
 import swingwtx.swing.JTable;
 import swingwtx.swing.ListSelectionModel;
-import swingwtx.swing.event.ListSelectionEvent;
-import swingwtx.swing.event.ListSelectionListener;
 import swingwtx.swing.table.DefaultTableModel;
 
 /**
@@ -50,12 +48,14 @@ public class PlayerMatcherTab extends Tab {
 	/** Matching probability threshold combobox.       */
 	private final JComboBox matchingProbabilityThresholdComboBox = new JComboBox( new Object[] { "100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%", "0%" } );
 	
-	/** Button to select folders to analyze. */
-	private final JButton selectFoldersButton = new JButton( "Select folders to analyze recursively...", IconResourceManager.ICON_FOLDER_CHOOSER );
-	/** Button to select files to analyze.   */
-	private final JButton selectFilesButton   = new JButton( "Select files to analyze...", IconResourceManager.ICON_FILE_CHOOSER );
-	/** Button to stop analyzing.            */
-	private final JButton stopSendingButton   = new JButton( "Stop analyzing", IconResourceManager.ICON_STOP );
+	/** Button to select folders to analyze.         */
+	private final JButton selectFoldersButton  = new JButton( "Select folders to analyze recursively...", IconResourceManager.ICON_FOLDER_CHOOSER );
+	/** Button to select files to analyze.           */
+	private final JButton selectFilesButton    = new JButton( "Select files to analyze...", IconResourceManager.ICON_FILE_CHOOSER );
+	/** Button to repeat analysis on the same files. */
+	private final JButton repeatAnalysisButton = new JButton( "Repeat analysis", IconResourceManager.ICON_REPEAT );
+	/** Button to stop analyzing.                    */
+	private final JButton stopAnalyzingButton  = new JButton( "Stop analyzing", IconResourceManager.ICON_STOP );
 	
 	/** Variable to store stop requests of analyzing. */
 	private volatile boolean requestedToStop;
@@ -98,6 +98,7 @@ public class PlayerMatcherTab extends Tab {
 		final byte    race;
 		final int     frames;
 		final int     realApm;
+		final boolean firstTrainThenGather;
 		final float   hotkeyRate;
 		final float   selectRate;
 		final float   shiftSelectRate;
@@ -105,23 +106,30 @@ public class PlayerMatcherTab extends Tab {
 		final float   moveRate;
 		final float   attackMoveRate;
 		final float[] usedHotkeyRates;
+		final float   commandRepetionTendency;
+		final float   averageSeletedUnits;
+		
 		
 		public PlayerAnalysis( final String replayPath, final long replayDate, final String playerName, final byte race, final int frames, final int realApm,
-				final float hotkeyRate, final float selectRate, final float shiftSelectRate, final float rallySetRate, final float moveRate, final float attackMoveRate, final float[] usedHotkeyRates ) {
-			this.replayPath      = replayPath;
-			this.replayDate      = replayDate;
-			this.playerName      = playerName;
-			loweredPlayerName    = playerName.toLowerCase();
-			this.race            = race;
-			this.frames          = frames;
-			this.realApm         = realApm;
-			this.hotkeyRate      = hotkeyRate;
-			this.selectRate      = selectRate;
-			this.shiftSelectRate = shiftSelectRate;
-			this.rallySetRate    = rallySetRate;
-			this.moveRate        = moveRate;
-			this.attackMoveRate  = attackMoveRate;
-			this.usedHotkeyRates = usedHotkeyRates;
+				final boolean firstTrainThenGather, final float hotkeyRate, final float selectRate, final float shiftSelectRate, final float rallySetRate, final float moveRate, final float attackMoveRate, final float[] usedHotkeyRates,
+				final float commandRepetionTendency, final float averageSelectedUnits ) {
+			this.replayPath              = replayPath;
+			this.replayDate              = replayDate;
+			this.playerName              = playerName;
+			loweredPlayerName            = playerName.toLowerCase();
+			this.race                    = race;
+			this.frames                  = frames;
+			this.realApm                 = realApm;
+			this.firstTrainThenGather    = firstTrainThenGather;
+			this.hotkeyRate              = hotkeyRate;
+			this.selectRate              = selectRate;
+			this.shiftSelectRate         = shiftSelectRate;
+			this.rallySetRate            = rallySetRate;
+			this.moveRate                = moveRate;
+			this.attackMoveRate          = attackMoveRate;
+			this.usedHotkeyRates         = usedHotkeyRates;
+			this.commandRepetionTendency = commandRepetionTendency;
+			this.averageSeletedUnits     = averageSelectedUnits;
 		}
 	}
 	
@@ -193,7 +201,7 @@ public class PlayerMatcherTab extends Tab {
 			final int days  = (int) ( Math.abs( analysis1.replayDate - analysis2.replayDate ) / (1000l*60l*60l*24l) );
 			authroitativenessExtent *= days < 2000 ? ( 2000.0f - days ) / 2000.0f : 0.0f;
 			
-			// Range checking (might be out of range due to rounding problems or if it remains 1.0)
+			// Range check (might be out of range due to rounding problems or if it remains 1.0)
 			final int extentOrdinal = (int) ( authroitativenessExtent * AuthoritativenessExtent.values().length );
 			if ( extentOrdinal > AuthoritativenessExtent.values().length - 1 )
 				return AuthoritativenessExtent.EXCELLENT;
@@ -204,9 +212,9 @@ public class PlayerMatcherTab extends Tab {
 		
 		
 		/** Weights of the different components of the matching probability. */
-		private static final float[] MATCHING_WEIGHTS = new float[] { 1.0f, 1.0f, 1.0f, 1.0f,  1.0f,  1.0f,  1.0f };
+		private static final float[] MATCHING_WEIGHTS = new float[] { 0.5f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f };
 		static {
-			// Scale the weights so they ads up to 100.0
+			// Scale the weights so they add up to 100.0
 			float sumWeights = 0.0f;
 			for ( final float weight : MATCHING_WEIGHTS )
 				sumWeights += weight;
@@ -223,6 +231,8 @@ public class PlayerMatcherTab extends Tab {
 			float matchingProbability = 0.0f;
 			int   componentIndex      = 0;
 			
+			// Startup dependent
+			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * ( analysis1.firstTrainThenGather == analysis2.firstTrainThenGather ? 1.0f : 0.0f );
 			// Hotkey usage dependent
 			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.hotkeyRate     , analysis2.hotkeyRate      );
 			// Select usage dependent
@@ -239,8 +249,12 @@ public class PlayerMatcherTab extends Tab {
 			final float weightFor1Hotkey = MATCHING_WEIGHTS[ componentIndex++ ] / analysis1.usedHotkeyRates.length;
 			for ( int i = analysis1.usedHotkeyRates.length - 1; i >= 0; i-- )
 				matchingProbability += weightFor1Hotkey * rate( analysis1.usedHotkeyRates[ i ], analysis2.usedHotkeyRates[ i ] );
+			// Command repetion tendency dependent
+			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.commandRepetionTendency, analysis2.commandRepetionTendency  );
+			// Average selected units dependent
+			matchingProbability += MATCHING_WEIGHTS[ componentIndex++ ] * rate( analysis1.averageSeletedUnits, analysis2.averageSeletedUnits );
 			
-			// Range checking (might be out of range due to rounding problems)
+			// Range check (might be out of range due to rounding problems)
 			if ( matchingProbability < 0.0f )
 				matchingProbability = 0.0f;
 			if ( matchingProbability > 100.0f )
@@ -281,6 +295,9 @@ public class PlayerMatcherTab extends Tab {
 	
 	/** The progress bar component. */
 	private final JProgressBar progressBar = new JProgressBar();
+	
+	/** Reference to the source files of the last analysis. */
+	private File[] lastAnalysisSourceFiles;
 	
 	/** Table displaying the results.             */
 	private final JTable resultTable = new JTable();
@@ -354,17 +371,24 @@ public class PlayerMatcherTab extends Tab {
 		selectFoldersButton.setMnemonic( 'd' );
 		selectFoldersButton.addActionListener( selectFilesAndFoldersActionListener );
 		buttonsPanel.add( selectFoldersButton );
-		contentBox.add( buttonsPanel );
-		
-		stopSendingButton.setEnabled( false );
-		stopSendingButton.setMnemonic( 't' );
-		stopSendingButton.addActionListener( new ActionListener() {
+		repeatAnalysisButton.setMnemonic( 'r' );
+		repeatAnalysisButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				requestedToStop = true; // Access to a volatile variable is automatically synchronized from Java 5.0
-				stopSendingButton.setEnabled( false );
+				analyzeFilesAndFolders( lastAnalysisSourceFiles );
 			}
 		} );
-		contentBox.add( Utils.wrapInPanel( stopSendingButton ) );
+		buttonsPanel.add( repeatAnalysisButton );
+		contentBox.add( buttonsPanel );
+		
+		stopAnalyzingButton.setEnabled( false );
+		stopAnalyzingButton.setMnemonic( 't' );
+		stopAnalyzingButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				requestedToStop = true; // Access to a volatile variable is automatically synchronized from Java 5.0
+				stopAnalyzingButton.setEnabled( false );
+			}
+		} );
+		contentBox.add( Utils.wrapInPanel( stopAnalyzingButton ) );
 		
 		progressBar.setMaximumSize( Utils.getMaxDimension() );
 		contentBox.add( progressBar );
@@ -377,11 +401,6 @@ public class PlayerMatcherTab extends Tab {
 		resultTable.setPreferredSize( new Dimension( 50, 50 ) );
 		resultTable.setRowSelectionAllowed( true );
 		resultTable.getSelectionModel().setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
-		resultTable.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
-			public void valueChanged( final ListSelectionEvent event ) {
-				// TODO: implement
-			}
-		} );
 		resultTable.setColumnSelectionAllowed( true );
 		resultTable.addMouseListener( new MouseAdapter() {
 			@Override
@@ -418,9 +437,12 @@ public class PlayerMatcherTab extends Tab {
 		
 		requestedToStop = false;
 		
-		selectFoldersButton.setEnabled( false );
-		selectFilesButton  .setEnabled( false );
-		stopSendingButton  .setEnabled( true  );
+		selectFoldersButton .setEnabled( false );
+		selectFilesButton   .setEnabled( false );
+		repeatAnalysisButton.setEnabled( false );
+		stopAnalyzingButton .setEnabled( true  );
+		
+		lastAnalysisSourceFiles = files;
 		
 		new NormalThread() {
 			/** List of replay files to be analyzed. */
@@ -464,21 +486,32 @@ public class PlayerMatcherTab extends Tab {
 							for ( final PlayerActions playerActions : replay.replayActions.players ) {
 								final ReplayHeader replayHeader = replay.replayHeader;
 								
-								final int playerIndex  = replayHeader.getPlayerIndexByName( playerActions.playerName );
-								final int actionsCount = playerActions.actions.length;
+								final int   playerIndex       = replayHeader.getPlayerIndexByName( playerActions.playerName );
+								final int   actionsCount      = playerActions.actions.length;
 								final float actionsCountFloat = actionsCount;
 								
-								final int frames        = playerActions.actions.length > 0 ? playerActions.actions[ actionsCount - 1 ].iteration : 0;
-								final int seconds       = ReplayHeader.convertFramesToSeconds( frames );
-								int   hotkeysCount      = 0;
-								int   selectsCount = 0;
-								int   shiftSelectsCount = 0;
-								int   rallySetsCount    = 0;
-								int   movesCount        = 0;
-								int   attackMovesCount  = 0;
-								int[] usedHotkeysCounts = new int[ 10 ]; // 0..9
+								final int frames             = playerActions.actions.length > 0 ? playerActions.actions[ actionsCount - 1 ].iteration : 0;
+								final int seconds            = ReplayHeader.convertFramesToSeconds( frames );
+								boolean firstTrainThenGather = false;
+								int   hotkeysCount           = 0;
+								int   selectsCount           = 0;
+								int   shiftSelectsCount      = 0;
+								int   rallySetsCount         = 0;
+								int   movesCount             = 0;
+								int   attackMovesCount       = 0;
+								int[] usedHotkeysCounts      = new int[ 10 ]; // 0..9
+								int   commandRepetionTendency = 0;
+								int   averageSelectedUnits    = 0;
 								
+								if ( playerActions.actions.length >= 3 ) {
+									for ( int i = 0; i < 2; i++ )
+										if ( playerActions.actions[ i ].actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN || playerActions.actions[ i ].actionNameIndex == Action.ACTION_NAME_INDEX_HATCH ) {
+											firstTrainThenGather = true;
+											break;
+										}
+								}
 								// Count actions...
+								Action lastAction = null;
 								for ( final Action action : playerActions.actions ) {
 									switch ( action.actionNameIndex ) {
 									case Action.ACTION_NAME_INDEX_HOTKEY       : hotkeysCount++     ;
@@ -488,12 +521,23 @@ public class PlayerMatcherTab extends Tab {
 										}
 										catch ( final Exception e ) {}
 										break;
-									case Action.ACTION_NAME_INDEX_SELECT       : selectsCount++     ; break;
+									case Action.ACTION_NAME_INDEX_SELECT       : {
+										selectsCount++;
+										averageSelectedUnits++; // There is at least 1 parameter, and there is one less commas than parameters
+										for ( int i = action.parameters.length() - 1; i >= 0; i-- )
+											if ( action.parameters.charAt( i ) == ',' )
+												averageSelectedUnits++;
+										break;
+									}
 									case Action.ACTION_NAME_INDEX_SHIFT_SELECT : shiftSelectsCount++; break;
 									case Action.ACTION_NAME_INDEX_SET_RALLY    : rallySetsCount++   ; break;
 									case Action.ACTION_NAME_INDEX_MOVE         : movesCount++       ; break;
 									case Action.ACTION_NAME_INDEX_ATTACK_MOVE  : attackMovesCount++ ; break;
 									}
+									
+									if ( lastAction != null && action.actionNameIndex != Action.ACTION_NAME_INDEX_UNKNOWN && lastAction.actionNameIndex == action.actionNameIndex )
+										commandRepetionTendency++;
+									lastAction = action;
 								}
 								
 								final float[] usedHotkeyRates = new float[ usedHotkeysCounts.length ];
@@ -502,7 +546,8 @@ public class PlayerMatcherTab extends Tab {
 								
 								final PlayerAnalysis playerAnalysis = new PlayerAnalysis( replayFile.getAbsolutePath(), replayHeader.saveTime.getTime(), playerActions.playerName, replayHeader.playerRaces[ playerIndex ],
 										frames, frames == 0 ? 0 : seconds == 0 ? 0 : playerActions.actions.length * 60 / seconds,
-										hotkeysCount / actionsCountFloat, selectsCount / actionsCountFloat, shiftSelectsCount / actionsCountFloat, rallySetsCount / actionsCountFloat, movesCount / actionsCountFloat, attackMovesCount / actionsCountFloat, usedHotkeyRates );
+										firstTrainThenGather, hotkeysCount / actionsCountFloat, selectsCount / actionsCountFloat, shiftSelectsCount / actionsCountFloat, rallySetsCount / actionsCountFloat, movesCount / actionsCountFloat, attackMovesCount / actionsCountFloat, usedHotkeyRates,
+										commandRepetionTendency / actionsCountFloat, (float) averageSelectedUnits / selectsCount );
 								replayPlayerAnalysisList.add( playerAnalysis );
 								
 								for ( final PlayerAnalysis playerAnalysis2 : playerAnalysisList )
@@ -528,10 +573,11 @@ public class PlayerMatcherTab extends Tab {
 				}
 				finally {
 					if ( requestedToStop )
-						resultsCountLabel.setText( "Analysing was manually aborted!" );
-					stopSendingButton  .setEnabled( false );
-					selectFilesButton  .setEnabled( true  );
-					selectFoldersButton.setEnabled( true  );
+						resultsCountLabel.setText( "Analyzing was manually aborted!" );
+					stopAnalyzingButton .setEnabled( false );
+					repeatAnalysisButton.setEnabled( true  );
+					selectFilesButton   .setEnabled( true  );
+					selectFoldersButton .setEnabled( true  );
 				}
 			}
 			
