@@ -161,7 +161,7 @@ public class MainFrame extends JFrame {
 		
 		if ( !new File( Consts.SETTINGS_PROPERTIES_FILE ).exists() ) {
 			// First run of BWHF Agent
-			JOptionPane.showMessageDialog( null, "Welcome!\nThis is the first run of BWHF Agent.\n\nPlease set the Starcraft directory in the General settigns tab.\nDon't forget to re-enter your Key if you have one.\n\nOptionally you can copy the 'settings.properties' file from your old BWHF Agent's folder to keep the old settings.\n\nThank your for choosing BWHF Agent.", "Welcome", JOptionPane.INFORMATION_MESSAGE );
+			JOptionPane.showMessageDialog( null, "Welcome!\nThis is the first run of BWHF Agent.\n\nPlease set the Starcraft directory in the General settings tab.\nDon't forget to re-enter your Key if you have one.\n\nOptionally you can copy the 'settings.properties' file from your old BWHF Agent's folder to keep the old settings.\n\nThank your for choosing BWHF Agent.", "Welcome", JOptionPane.INFORMATION_MESSAGE );
 		}
 	}
 	
