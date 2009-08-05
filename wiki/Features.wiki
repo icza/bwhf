@@ -3,9 +3,11 @@
 =Main features of BWHF Agent=
 
 ===Autoscan===
-It can autosave your replays. It can separate hacker replays to a different folder (duplicates them). It autoscans your replays after games, and if hackers are found in them, they are read out loudly, for example: "hacker blue protoss". If you have a key, it can autoreport hackers.
+It can autosave your replays. It can separate hacker replays to a different folder (duplicates them). It autoscans your replays after games, and if hackers are found in them, they are read out loudly, for example: "hacker blue protoss". If you have a valid BWHF authorization key, it can autoreport hackers to the central hacker database.
 
 More about the authorization keys: [AuthorizationKeys]
+
+More about the central hacker database: [OnlineHackerDatabase]
 
 ===Manual scan===
 You can scan your old replays or entire folder of replays recursively. If hacker replays are found, they can be flagged by appending 'hack' to the beginning or to the end of their names. A detailed HTML summary report can be generated at the end of scan.
@@ -33,6 +35,8 @@ There is an option to resize the converted images. The original Starcraft screen
 
 ===Players' Network===
 You can enable/disable to auto-add last replays to the Players' Network. You can also add any of your saved replays to the Players' Network.
+
+More about the Players' Network: [PlayersNetwork]
 
 ===Player matcher===
 You can select replays to analyze them in order to find the same players with different names. Or you can check if the same name in different replays is the same person. Player matcher compares the playing styles of the players.
