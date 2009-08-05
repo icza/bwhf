@@ -227,6 +227,7 @@ CREATE INDEX idx_game__replay_md5
 
 -- DROP TABLE player;
 
+
 CREATE TABLE player
 (
   id serial NOT NULL,
@@ -237,6 +238,7 @@ CREATE TABLE player
   last_game timestamp without time zone,
   total_frames integer DEFAULT 0,
   "version" timestamp without time zone DEFAULT now(),
+  is_computer boolean NOT NULL DEFAULT false,
   CONSTRAINT player_pkey PRIMARY KEY (id),
   CONSTRAINT player_aka_group_fkey FOREIGN KEY (aka_group)
       REFERENCES aka_group (id) MATCH SIMPLE
@@ -273,6 +275,15 @@ CREATE INDEX idx_player__aka_group
   ON player
   USING btree
   (aka_group);
+
+-- Index: idx_player__is_computer
+
+-- DROP INDEX idx_player__is_computer;
+
+CREATE INDEX idx_player__is_computer
+  ON player
+  USING btree
+  (is_computer);
 
 
 -- Table: game_player

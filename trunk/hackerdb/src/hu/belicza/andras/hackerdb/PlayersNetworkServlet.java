@@ -574,7 +574,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 						countQuery = "SELECT COUNT(DISTINCT player) FROM game_player JOIN player on game_player.player=player.id WHERE player.name LIKE ? AND player" + ( hasAka1 ? " NOT IN (" + akaIdList1 + ")" : "!=" + player1 ) + " AND game IN (SELECT game FROM game_player WHERE player" + ( hasAka1 ? " IN (" + akaIdList1 + ")" : "=" + player1 ) + ")";
 				}
 				else
-					countQuery = "SELECT COUNT(*) FROM player" + ( nameFilter == null ? "" : " WHERE name LIKE ?" );
+					countQuery = "SELECT COUNT(*) FROM player WHERE " + ( nameFilter == null ? "is_computer=false" : "name LIKE ?" );
 				
 				outputWriter.println( "</h3>" );
 				if ( hasAka1 ) {
@@ -612,7 +612,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
 				String query;
 				if ( player1 == null )
-					query = "SELECT id, name, games_count, first_game, last_game, total_frames FROM player" + ( nameFilter == null ? "" : " WHERE player.name LIKE ?" );
+					query = "SELECT id, name, games_count, first_game, last_game, total_frames FROM player WHERE " + ( nameFilter == null ? "is_computer=false" : "player.name LIKE ?" );
 				else
 					query = "SELECT player.id, player.name, COUNT(player.id), MIN(game.save_time), MAX(game.save_time), SUM(game.frames) FROM game_player JOIN player on player.id=game_player.player JOIN game on game.id=game_player.game WHERE player.id" + ( hasAka1 ? " NOT IN (" + akaIdList1 + ")" : "!=" + player1 ) + " AND game.id IN (SELECT game FROM game_player WHERE player" + ( hasAka1 ? " IN (" + akaIdList1 + ")" : "=" + player1 ) + ")" + ( nameFilter == null ? "" : " AND player.name LIKE ?" ) + " GROUP BY player.id, player.name";
 				
