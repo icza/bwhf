@@ -3,7 +3,7 @@
 =Main features of BWHF Agent=
 
 ===Autoscan===
-It can autosave your replays. It can separate hacker replays to a different folder (duplicates them). It autoscans your replays after games, and if hackers are found in them, they are read out loudly, for example: "hacker blue protoss". If you have a valid BWHF authorization key, it can autoreport hackers to the central hacker database.
+It can autosave your replays. It can separate hacker replays to a different folder (duplicates them). It autoscans your replays after games, and if hackers are found in them, they are read out loudly, for example: _"hacker blue protoss"_. If you have a valid BWHF authorization key, it can autoreport hackers to the central hacker database.
 
 More about the authorization keys: [AuthorizationKeys]
 
