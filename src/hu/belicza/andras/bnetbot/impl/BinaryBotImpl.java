@@ -1,6 +1,8 @@
 package hu.belicza.andras.bnetbot.impl;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 
@@ -20,8 +22,12 @@ public class BinaryBotImpl implements BinaryBot {
 	/** Status manager of this bot. */
 	private StatusManager statusManager = new StatusManager();
 	
-	/** The socket of the connection to the battle.net server. */
-	private Socket socket;
+	/** The socket of the connection to the battle.net server.    */
+	private Socket        socket;
+	/** Input stream of the connection to the battle.net server.  */
+	private InputStream   inputStream;
+	/** Output stream of the connection to the battle.net server. */
+	private OutputStream  outputStream;
 	
 	/**
 	 * @see BinaryBot#connect(LoginConfig)
@@ -31,7 +37,10 @@ public class BinaryBotImpl implements BinaryBot {
 			throw new IllegalStateException( "Illegal state! Already connected!" );
 		
 		try {
-			socket = new Socket( loginConfig.serverUrl, loginConfig.serverPort );
+			socket       = new Socket( loginConfig.serverUrl, loginConfig.serverPort );
+			inputStream  = socket.getInputStream();
+			outputStream = socket.getOutputStream();
+			
 			statusManager.setStatus( Status.CONNECTED );
 		} catch ( final UnknownHostException uhe) {
 			return "Unknown host: " + loginConfig.serverUrl;
@@ -48,7 +57,9 @@ public class BinaryBotImpl implements BinaryBot {
 	public void disconnect() {
 		if ( socket != null ) {
 			try { socket.close(); } catch ( final IOException ie ) {}
-			socket = null;
+			outputStream = null;
+			inputStream  = null;
+			socket       = null;
 		}
 		
 		statusManager.setStatus( Status.DISCONNECTED );
@@ -85,7 +96,51 @@ public class BinaryBotImpl implements BinaryBot {
 	/**
 	 * @see BinaryBot#sendPacket(BnetPacket)
 	 */
-	public void sendPacket( final BnetPacket packet ) {
+	public boolean sendPacket( final BnetPacket packet ) {
+		if ( statusManager.getStatus() == Status.DISCONNECTED )
+			throw new IllegalStateException( "Not connected!" );
+		
+		try {
+			outputStream.write( packet.data );
+			outputStream.flush();
+			return true;
+		} catch ( final IOException ie ) {
+			// Disconnected from battle.net
+			disconnect();
+			return false;
+		}
+	}
+	
+	/**
+	 * @see BinaryBot#readPacket()
+	 */
+	public BnetPacket readPacket() {
+		if ( statusManager.getStatus() == Status.DISCONNECTED )
+			throw new IllegalStateException( "Not connected!" );
+		
+		try {
+			final int packetStartByte = inputStream.read();
+			if ( packetStartByte == -1 )
+				throw new IOException( "Connection lost!" );
+			
+			final byte packetId = (byte) inputStream.read();
+			int packetLength = inputStream.read() & 0xff;
+			packetLength    += ( inputStream.read() & 0xff ) << 8;
+			
+			if ( packetStartByte != 0xff )
+				throw new IOException( "Invalid packet start byte (0x" + Integer.toHexString( packetStartByte ) + " )!" );
+			
+			final byte[] packetData = new byte[ packetLength - 4 ];
+			final int    bytesRead  = inputStream.read( packetData );
+			if ( bytesRead < packetData.length )
+				throw new IOException( "Broken packet!" );
+			
+			return new BnetPacket( packetId, packetData );
+		} catch ( final IOException ie ) {
+			// Disconnected from battle.net
+			disconnect();
+			return null;
+		}
 	}
 	
 }
