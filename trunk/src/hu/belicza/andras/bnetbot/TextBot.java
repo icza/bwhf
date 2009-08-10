@@ -26,8 +26,9 @@ public interface TextBot {
 	 * Executes a command and returns its result.
 	 * @param command command to be executed
 	 * @return the result of the command
+	 * @throws IllegalStateException if the bot is not connected
 	 */
-	String executeCommand( final String command );
+	String executeCommand( final String command ) throws IllegalStateException;
 	
 	/**
 	 * Disconnects the bot.

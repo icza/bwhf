@@ -31,8 +31,17 @@ public interface BinaryBot {
 	/**
 	 * Sends a binary packet to the battle.net server.
 	 * @param packet packet to be sent
+	 * @return true if packet sent successfully; false otherwise (disconnected)
+	 * @throws IllegalStateException if the bot is not connected
 	 */
-	void sendPacket( final BnetPacket packet );
+	boolean sendPacket( final BnetPacket packet ) throws IllegalStateException;
+	
+	/**
+	 * Reads a binary packet from the battle.net server.
+	 * @return the read binary packet; or <code>null</code> if the server disconnected
+	 * @throws IllegalStateException if the bot is not connected
+	 */
+	BnetPacket readPacket() throws IllegalStateException;
 	
 	/**
 	 * Disconnects the bot.
