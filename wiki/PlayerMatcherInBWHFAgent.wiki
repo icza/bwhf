@@ -1,7 +1,7 @@
 #summary This page describes how the player matcher works in BWHF Agent.
 
 =Player Matcher in BWHF Agent=
-Player matcher allows you to select any replays, and it will analyze all of them and compare all players across the selected replays individually. BWHF Agent will compare players by their *playing styles*. After the analysis it displays the results in a table. The table contains the *extent of authoritativeness* of the comparisions, the *matching probability* of the 2 players and the names of the players and the replay files. You can choose whether to compare players with same name too. The comparisions can go really high if you select many replays, so there is option to set the display thresholds of the authoritativeness and the matching probability.
+Player matcher allows you to select any replays, and it will analyze all of them and compare all players across the selected replays individually. BWHF Agent will compare players by their *playing styles*. After the analysis it displays the results in a table. The table contains the *extent of authoritativeness* of the comparisions, the *matching probability* of the 2 players and the names of the players and the replay files. You can choose whether to compare players with same name too. The comparisions can go really high if you select many replays, so there are options to set the display thresholds of the authoritativeness and the matching probability. You can limit the number of results too.
 
 If you double click on a match with the left button, replay #1 will be opened on the charts tab. If you double click on a match with the right button, replay #2 will be opened on the charts tab. Clicking on the column headers will sort the table. Clicking again will reverse the sort order.
 
@@ -12,7 +12,7 @@ For example without display threshold: if you select 10 replays with 6 players i
 Another example: If you analyze 1000 replays and let's say all is 4v4 and all different players or you're comparing same names too, that's 8x1000=8000 players. Every player will be compared to all other 7992 players (excluded the 8 being in the same game). That is almost 32 MILLION comparisions (31,968,000 exactly)!!
 (In case of 2v2 games this is 8 million!)
 
-If you analyze that amount of replays in one shot, setting the probability to 80% and authoritativeness to good or very good is a must minimum. If you're interested in some particular names only, you can filter the replays in the replay search tab with a few clicks, then select everything=>Check player matches.
+If you analyze that amount of replays in one shot, setting the probability to 80% and authoritativeness to good or very good is a must minimum (or you can just limit the number of results). If you're interested in some particular names only, you can filter the replays in the replay search tab with a few clicks, then select everything=>Check player matches.
 
 ==Extent of authoritativeness==
 The extent of authoritativeness tells you how much you can rely on the result of the analysis. For example comparing 2 players from 2 replays where the first player was zerg in a 2-minute long game from 5 years ago and the second player was protoss in a 30-minute long game played just today, that comparision result is good for absolutely nothing regardless what the result is.
