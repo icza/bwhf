@@ -14,7 +14,7 @@ import java.util.List;
 public class StatusManager {
 	
 	/** The managed status. */
-	private Status status;
+	private Status status = Status.DISCONNECTED;
 	
 	/** List of the registered status change listeners. */
 	private List< StatusChangeListener > statusChangeListenerList = new ArrayList< StatusChangeListener >();

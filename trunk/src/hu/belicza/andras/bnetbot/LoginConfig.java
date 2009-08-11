@@ -9,14 +9,31 @@ public class LoginConfig {
 	
 	/** URLs of the battle.net gateways. */
 	private static final String[] GATEWAY_URLS = { "useast.battle.net", "uswest.battle.net", "europe.battle.net", "asia.battle.net", "sc.theabyss.ru" };
+	/** Default platform id to send to the bnet server.  */
+	private static final String DEFAULT_PLATFORM_ID  = "IX86";
+	/** Default product id to send to the bnet server.   */
+	private static final String DEFAULT_PRODUCT_ID   = "D2DV"; // Diablo 2, not expansion
+	/** Default country code to send to the bnet server. */
+	private static final String DEFAULT_COUNTRY_CODE = "CAN";
+	/** Default country to send to the bnet server.      */
+	private static final String DEFAULT_COUNTRY      = "canada";
 	
-	/** URL of the battle.net server.       */
+	/** URL of the battle.net server.            */
 	public final String serverUrl;
-	/** Port of the battle.net server.      */
+	/** Port of the battle.net server.           */
 	public final int    serverPort;
-	/** User name to login with.            */
+	/** Platform id to send to the bnet server.  */
+	public final String platformId  = DEFAULT_PLATFORM_ID;
+	/** Product id to send to the bnet server.   */
+	public final String productId   = DEFAULT_PRODUCT_ID;
+	/** Country code to send to the bnet server. */
+	public final String countryCode = DEFAULT_COUNTRY_CODE;
+	/** Country to send to the bnet server.      */
+	public final String country     = DEFAULT_COUNTRY;
+	
+	/** User name to login with.                 */
 	public final String userName;
-	/** Password of the user to login with. */
+	/** Password of the user to login with.      */
 	public final String password;
 	
 	/**

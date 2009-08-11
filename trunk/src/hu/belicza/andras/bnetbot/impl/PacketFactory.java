@@ -2,8 +2,10 @@ package hu.belicza.andras.bnetbot.impl;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.Arrays;
 
 import hu.belicza.andras.bnetbot.BnetPacket;
+import hu.belicza.andras.bnetbot.LoginConfig;
 
 /**
  * Factory class to create Battle.net packets.
@@ -11,15 +13,6 @@ import hu.belicza.andras.bnetbot.BnetPacket;
  * @author Andras Belicza
  */
 public class PacketFactory {
-	
-	/** Platform id to send to the bnet server.  */
-	private static final String PLATFORM_ID  = "IX86";
-	/** Game id to send to the bnet server.      */
-	private static final String GAME_ID      = "D2DV"; // Diablo 2, not expansion
-	/** Country code to send to the bnet server. */
-	private static final String COUNTRY_CODE = "CAN";
-	/** Country to send to the bnet server.      */
-	private static final String COUNTRY      = "canada";
 	
 	/**
 	 * Creates and returns a protocol packet indicating binary protocol.
@@ -31,28 +24,29 @@ public class PacketFactory {
 	
 	/**
 	 * Creates and returns a protocol packet indicating binary protocol.
+	 * @param loginConfig login config holding all the data required to login
 	 * @return a protocol packet indicating binary protocol
 	 */
-	public static BnetPacket createAuthorizationInfoPacket() {
-		final ByteBuffer byteBuffer = ByteBuffer.allocate( 100 ); // TODO: revise capacity
+	public static BnetPacket createAuthorizationInfoPacket( final LoginConfig loginConfig ) {
+		final ByteBuffer byteBuffer = ByteBuffer.allocate( 64 ); // TODO: revise capacity
 		byteBuffer.order( ByteOrder.LITTLE_ENDIAN );
 		
-		addStringToBuffer( PLATFORM_ID, byteBuffer );
-		
-		addStringToBuffer( GAME_ID, byteBuffer );
-		byteBuffer.putInt( 0x00 ); // Game version, TODO: revise version
+		byteBuffer.putInt( 0x00 ); // Protocol ID
+		addStringToBuffer( loginConfig.platformId, byteBuffer );
+		addStringToBuffer( loginConfig.productId , byteBuffer );
+		byteBuffer.putInt( 0x00 ); // Version byte TODO: determine its value
 		
 		// Non-essential data
 		byteBuffer.putInt( 0x00 ); // Product language
-		byteBuffer.putInt( 0x00 ); // Local IP
-		byteBuffer.putInt( 0x00 ); // Time zone
-		byteBuffer.putInt( 0x00 ); // Local ID
+		byteBuffer.putInt( 0x00 ); // Local IP for NAT compatibility
+		byteBuffer.putInt( 0x00 ); // Timezone bias
+		byteBuffer.putInt( 0x00 ); // Locale ID
 		byteBuffer.putInt( 0x00 ); // Language ID
 		
-		addCStringToBuffer( COUNTRY_CODE, byteBuffer );
-		addCStringToBuffer( COUNTRY     , byteBuffer );
+		addCStringToBuffer( loginConfig.countryCode, byteBuffer );
+		addCStringToBuffer( loginConfig.country    , byteBuffer );
 		
-		return new BnetPacket( BnetPacket.ID_AUTHORIZATION_INFO, byteBuffer.array() );
+		return new BnetPacket( BnetPacket.SID_AUTH_INFO, Arrays.copyOf( byteBuffer.array(), byteBuffer.position() ) );
 	}
 	
 	/**
@@ -61,7 +55,7 @@ public class PacketFactory {
 	 * @param buffer buffer to add to
 	 */
 	private static void addStringToBuffer( final String s, final ByteBuffer buffer ) {
-		for ( int i = s.length() - 1; i >= 0; i-- )
+		for ( int i = 0; i < s.length(); i++ )
 			buffer.put( (byte) s.charAt( i ) );
 	}
 	
@@ -71,9 +65,23 @@ public class PacketFactory {
 	 * @param buffer buffer to add to
 	 */
 	private static void addCStringToBuffer( final String s, final ByteBuffer buffer ) {
-		for ( int i = s.length() - 1; i >= 0; i-- )
+		for ( int i = 0; i < s.length(); i++ )
 			buffer.put( (byte) s.charAt( i ) );
 		buffer.put( (byte) 0x00 );
+	}
+	
+	/**
+	 * Reads a null terminated string from a buffer.
+	 * @param buffer buffer to add to
+	 * @reutrn the null terminated string read from the buffer without the terminating null character
+	 */
+	public static String readCStringFromBuffer( final ByteBuffer buffer ) {
+		final StringBuilder builder = new StringBuilder();
+		int readChar;
+		while ( ( readChar = buffer.get() ) != 0x00 )
+			builder.append( (char) readChar );
+		
+		return builder.toString();
 	}
 	
 }
