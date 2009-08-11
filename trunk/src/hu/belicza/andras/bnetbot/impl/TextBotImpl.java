@@ -56,7 +56,7 @@ public class TextBotImpl implements TextBot, StatusChangeListener {
 		
 		final String connectResult = binaryBot.connect( loginConfig );
 		if ( connectResult == null ) {
-			return null;
+			return binaryBot.login( loginConfig );
 		}
 		else
 			return connectResult;
