@@ -30,6 +30,20 @@ public class BinaryBotImpl implements BinaryBot {
 	private OutputStream  outputStream;
 	
 	/**
+	 * @see BinaryBot#isConnected()
+	 */
+	public boolean isConnected() {
+		return statusManager.getStatus() != Status.DISCONNECTED;
+	}
+	
+	/**
+	 * @see BinaryBot#isLoggedIn()
+	 */
+	public boolean isLoggedIn() {
+		return statusManager.getStatus() == Status.LOGGED_IN;
+	}
+	
+	/**
 	 * @see BinaryBot#connect(LoginConfig)
 	 */
 	public String connect( final LoginConfig loginConfig ) {
@@ -52,45 +66,16 @@ public class BinaryBotImpl implements BinaryBot {
 	}
 	
 	/**
-	 * @see BinaryBot#disconnect()
+	 * @see BinaryBot#login(LoginConfig)
 	 */
-	public void disconnect() {
-		if ( socket != null ) {
-			try { socket.close(); } catch ( final IOException ie ) {}
-			outputStream = null;
-			inputStream  = null;
-			socket       = null;
-		}
+	public String login( final LoginConfig loginConfig ) {
+		if ( statusManager.getStatus() != Status.CONNECTED )
+			throw new IllegalStateException( "Illegal state! Must be connected and not logged in!" );
 		
-		statusManager.setStatus( Status.DISCONNECTED );
-	}
-	
-	/**
-	 * @see BinaryBot#isConnected()
-	 */
-	public boolean isConnected() {
-		return statusManager.getStatus() != Status.DISCONNECTED;
-	}
-	
-	/**
-	 * @see BinaryBot#isLoggedIn()
-	 */
-	public boolean isLoggedIn() {
-		return statusManager.getStatus() == Status.LOGGED_IN;
-	}
-	
-	/**
-	 * @see BinaryBot#registerStatusChangeListener(StatusChangeListener)
-	 */
-	public void registerStatusChangeListener( final StatusChangeListener statusChangeListener ) {
-		statusManager.registerStatusChangeListener( statusChangeListener );
-	}
-	
-	/**
-	 * @see BinaryBot#removeStatusChangeListener(StatusChangeListener)
-	 */
-	public void removeStatusChangeListener( final StatusChangeListener statusChangeListener) {
-		statusManager.removeStatusChangeListener( statusChangeListener );
+		sendPacket( PacketFactory.createBinaryProtocolPacket() );
+		sendPacket( PacketFactory.createAuthorizationInfoPacket() );
+		
+		return null;
 	}
 	
 	/**
@@ -141,6 +126,34 @@ public class BinaryBotImpl implements BinaryBot {
 			disconnect();
 			return null;
 		}
+	}
+	
+	/**
+	 * @see BinaryBot#disconnect()
+	 */
+	public void disconnect() {
+		if ( socket != null ) {
+			try { socket.close(); } catch ( final IOException ie ) {}
+			outputStream = null;
+			inputStream  = null;
+			socket       = null;
+		}
+		
+		statusManager.setStatus( Status.DISCONNECTED );
+	}
+	
+	/**
+	 * @see BinaryBot#registerStatusChangeListener(StatusChangeListener)
+	 */
+	public void registerStatusChangeListener( final StatusChangeListener statusChangeListener ) {
+		statusManager.registerStatusChangeListener( statusChangeListener );
+	}
+	
+	/**
+	 * @see BinaryBot#removeStatusChangeListener(StatusChangeListener)
+	 */
+	public void removeStatusChangeListener( final StatusChangeListener statusChangeListener) {
+		statusManager.removeStatusChangeListener( statusChangeListener );
 	}
 	
 }

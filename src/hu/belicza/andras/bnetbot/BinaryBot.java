@@ -29,6 +29,14 @@ public interface BinaryBot {
 	String connect( final LoginConfig loginConfig ) throws IllegalStateException;
 	
 	/**
+	 * Sends packets according to the Bnet protocol to login a user specified by the <code>loginConfig</code> object.
+	 * @param loginConfig login config holding all the data required to login
+	 * @return null if login was successfull; the error message otherwise
+	 * @throws IllegalStateException if the bot is not in the connected state
+	 */
+	String login( final LoginConfig loginConfig ) throws IllegalStateException;
+	
+	/**
 	 * Sends a binary packet to the battle.net server.
 	 * @param packet packet to be sent
 	 * @return true if packet sent successfully; false otherwise (disconnected)
