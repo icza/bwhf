@@ -57,14 +57,10 @@ public class BnetPacket {
 	/**
 	 * Produces a nice debug representation such as:<br>
 	 * <pre>
-	 * Packet id=0x50, length: 100
-	 * 0x00: | 00 00 00 00 49 58 38 36 44 32 44 56 00 00 00 00 | ````IX86D2DV````
-	 * 0x10: | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 | ````````````````
-	 * 0x20: | 00 00 00 00 43 41 4e 00 63 61 6e 61 64 61 00 00 | ````CAN`canada``
-	 * 0x30: | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 | ````````````````
-	 * 0x40: | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 | ````````````````
-	 * 0x50: | 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 | ````````````````
-	 * 0x60: | 00 00 00 00                                     | ````
+	 * Packet id=0x50, length: 47
+	 * 0x00: | 00 00 00 00 49 58 38 36  44 32 44 56 00 00 00 00 | ````IX86 D2DV````
+	 * 0x10: | 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 | ```````` ````````
+	 * 0x20: | 00 00 00 00 43 41 4e 00  63 61 6e 61 64 61 00 00 | ````CAN` canada`
 	 * </pre>
 	 */
 	@Override
@@ -78,15 +74,23 @@ public class BnetPacket {
 				builder.append( new Formatter().format( "\n0x%02x: | ", i ).toString() );
 			
 			builder.append( new Formatter().format( "%02x ", data[ i ] & 0xff ).toString() );
+			if ( ( i & 0x0f ) == 0x07 )
+				builder.append( ' ' );
 			
 			if ( ( i & 0x0f ) == 0x0f || i == data.length - 1 ) {
 				if ( i == data.length - 1 ) // Not full line
-					for ( int j = 0x0f - ( i & 0x0f ); j > 0; j-- )
+					for ( int j = 0x0f - ( i & 0x0f ) - 1; j >= 0; j-- ) {
 						builder.append( "   " );
+						if ( ( j & 0x0f ) == 0x07 )
+							builder.append( ' ' );
+					}
 				
 				builder.append( "| " );
-				for ( int j = i & 0xfff0; j <= i; j++ )
+				for ( int j = i & 0xfff0; j <= i; j++ ) {
 					builder.append( (char) ( data[ j ] &0xff ) );
+					if ( ( j & 0x0f ) == 0x07 )
+						builder.append( ' ' );
+				}
 			}
 		}
 		
