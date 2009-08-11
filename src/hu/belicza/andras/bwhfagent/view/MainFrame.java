@@ -78,6 +78,8 @@ public class MainFrame extends JFrame {
 	protected final PlayersNetworkTab  playersNetworkTab;
 	/** Reference to the player matcher tab.   */
 	protected final PlayerMatcherTab   playerMatcherTab;
+	/** Reference to the bot tab.              */
+	protected final BotTab             botTab;
 	/** Reference to the general settings tab. */
 	protected final GeneralSettingsTab generalSettingsTab;
 	
@@ -125,8 +127,9 @@ public class MainFrame extends JFrame {
 		replaySearchTab    = new ReplaySearchTab();
 		gameChatTab        = new GameChatTab();
 		playersNetworkTab  = new PlayersNetworkTab();
+		botTab             = new BotTab();
 		playerMatcherTab   = new PlayerMatcherTab();
-		tabs = new Tab[] { autoscanTab, manualScanTab, playerCheckerTab, chartsTab, replaySearchTab, gameChatTab, new PcxConverterTab(), playersNetworkTab, playerMatcherTab, generalSettingsTab, new AboutTab() };
+		tabs = new Tab[] { autoscanTab, manualScanTab, playerCheckerTab, chartsTab, replaySearchTab, gameChatTab, new PcxConverterTab(), playersNetworkTab, playerMatcherTab, botTab, generalSettingsTab, new AboutTab() };
 		
 		buildGUI();
 		
