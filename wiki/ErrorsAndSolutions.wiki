@@ -45,7 +45,7 @@ Check if you have the player checker enabled on the Player checker tab.
 To issue a player check, you have to press the _'Print Screen'_ (or _'!PrtScn'_) key on your keyboard. Player check only works in the game lobby. BWHF Agent reads the player names from the screenshot saved by Starcraft, so be sure you move your mouse out of the way (so it won't overlay player names).
 BWHF Agent only notifies you of players reported with the same gateway as you set in your autoscan tab. Check if you have set the gateway and if you set the right one.
 
-_If you run Chaoslauncher or Advloader, they might disable making screenshot in the game lobby. Try it without chaos or adv. I don't know why they disable lobby screenshot._
+_If you use Advloader too, it disables making screenshot in the game lobby. Try it without chaos or adv. I don't know why it disables lobby screenshot._
 
 If you still don't hear anything, check if your sound is not muted in BWHF Agent on the general settings tab.
 
