@@ -182,9 +182,11 @@ public class Consts {
 	/** Don't compare same names property.       */
 	public static final String PROPERTY_DONT_COMPARE_SAME_NAMES        = "dontCompareSameNames";
 	/** Authoritativeness threshold property.    */
-	public static final String PROPERTY_AUTHORITATIVENESS_THRESHOLD     = "authoritativenessThreshold";
+	public static final String PROPERTY_AUTHORITATIVENESS_THRESHOLD    = "authoritativenessThreshold";
 	/** Matching probability threshold property. */
-	public static final String PROPERTY_MATCHING_PROBABILITY_THRESHOLD  = "matchingProbabilityThreshold";
+	public static final String PROPERTY_MATCHING_PROBABILITY_THRESHOLD = "matchingProbabilityThreshold";
+	/** Max displayable results property.        */
+	public static final String PROPERTY_MAX_DISPLAYABLE_RESULTS        = "maxDisplayableResults";
 	
 	/** Properties holding the default settings. */
 	public static final Properties DEFAULT_SETTINGS_PROPERTIES = new Properties();
@@ -246,8 +248,9 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPLAY_COLUMN_MODEL_INDICES   , "" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_SEND_INFO_ABOUT_LAST_REP , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DONT_COMPARE_SAME_NAMES       , "true" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTHORITATIVENESS_THRESHOLD    , "3" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_MATCHING_PROBABILITY_THRESHOLD , "2" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTHORITATIVENESS_THRESHOLD   , "3" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_MATCHING_PROBABILITY_THRESHOLD, "2" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_MAX_DISPLAYABLE_RESULTS       , "2" );
 		
 	}
 	
