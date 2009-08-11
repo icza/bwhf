@@ -47,6 +47,8 @@ public class PlayerMatcherTab extends Tab {
 	private final JComboBox authoritativenessThresholdComboBox;
 	/** Matching probability threshold combobox.       */
 	private final JComboBox matchingProbabilityThresholdComboBox = new JComboBox( new Object[] { "100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%", "0%" } );
+	/** Max displayable results combobox.              */
+	private final JComboBox maxDisplayableResultsComboBox        = new JComboBox( new Object[] { "100", "1,000", "5,000", "10,000", "20,000", "50,000", "100,000" } );
 	
 	/** Button to select folders to analyze.         */
 	private final JButton selectFoldersButton  = new JButton( "Select folders to analyze recursively...", IconResourceManager.ICON_FOLDER_CHOOSER );
@@ -302,7 +304,7 @@ public class PlayerMatcherTab extends Tab {
 	/** Table displaying the results.             */
 	private final JTable resultTable = new JTable();
 	/** List of comparisons of the last analysis. */
-	private final List< Comparison > comparisonList = new ArrayList< Comparison >();
+	private final ArrayList< Comparison > comparisonList = new ArrayList< Comparison >();
 	private int     lastSortingIndex;
 	private boolean lastSortingAscendant;
 	
@@ -321,6 +323,7 @@ public class PlayerMatcherTab extends Tab {
 		
 		authoritativenessThresholdComboBox  .setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTHORITATIVENESS_THRESHOLD ) ) );
 		matchingProbabilityThresholdComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_MATCHING_PROBABILITY_THRESHOLD ) ) );
+		maxDisplayableResultsComboBox       .setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_MAX_DISPLAYABLE_RESULTS ) ) );
 		
 		buildGUI();
 	}
@@ -339,12 +342,14 @@ public class PlayerMatcherTab extends Tab {
 		
 		contentBox.add( Utils.wrapInPanel( dontCompareSameNamesCheckBox ) );
 		
-		final JPanel thresholdPanel = new JPanel( new GridLayout( 2, 2, 7, 0 ) );
+		final JPanel thresholdPanel = new JPanel( new GridLayout( 3, 2, 7, 0 ) );
 		thresholdPanel.setBorder( BorderFactory.createTitledBorder( "Display thresholds:" ) );
 		thresholdPanel.add( new JLabel( "Extent of authoritativeness:" ) );
 		thresholdPanel.add( authoritativenessThresholdComboBox );
 		thresholdPanel.add( new JLabel( "Matching probability:" ) );
 		thresholdPanel.add( matchingProbabilityThresholdComboBox );
+		thresholdPanel.add( new JLabel( "Max displayable results:" ) );
+		thresholdPanel.add( maxDisplayableResultsComboBox );
 		contentBox.add( Utils.wrapInPanel( thresholdPanel ) );
 		
 		final ActionListener selectFilesAndFoldersActionListener = new ActionListener() {
@@ -421,7 +426,7 @@ public class PlayerMatcherTab extends Tab {
 				lastSortingIndex     = sortingIndex;
 				lastSortingAscendant = sortingAscendant;
 				
-				sortResultTable();
+				sortResultTable( -1 );
 			}
 		} );
 		contentBox.add( new JScrollPane( resultTable ) );
@@ -470,6 +475,9 @@ public class PlayerMatcherTab extends Tab {
 					int skippedRepsCount = 0;
 					final List< PlayerAnalysis > playerAnalysisList = new ArrayList< PlayerAnalysis >();
 					comparisonList.clear();
+					comparisonList.trimToSize();
+					comparisonList.ensureCapacity( 10 );
+					
 					for ( final File replayFile : replayFileList ) {
 						if ( requestedToStop )
 							return;
@@ -564,12 +572,16 @@ public class PlayerMatcherTab extends Tab {
 						progressBar.setValue( ++counter );
 					}
 					
-					resultsCountLabel.setText( comparisonList.size() + " match" + ( comparisonList.size() == 1 ? "" : "es" ) + " in " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" )
+					final int maxDisplayableResults = Integer.parseInt( ( (String) maxDisplayableResultsComboBox.getSelectedItem() ).replace( ",", "" ) );
+					
+					resultsCountLabel.setText( comparisonList.size() + " match" + ( comparisonList.size() == 1 ? "" : "es" ) 
+							+ ( comparisonList.size() > maxDisplayableResults ? " limited to " + maxDisplayableResults : "" )
+							+ " in " + replayFileList.size() + " replay" + ( replayFileList.size() == 1 ? "" : "s" )
 							+ ( skippedRepsCount > 0 ? " (skipped " + skippedRepsCount + ( skippedRepsCount == 1 ? " replay)" : " replays)" ) : "" ) );
 					
 					lastSortingIndex     = 0;
 					lastSortingAscendant = DEFAULT_SORTING_ASCENDNANTS[ lastSortingIndex ];
-					sortResultTable();
+					sortResultTable( comparisonList.size() > maxDisplayableResults ? maxDisplayableResults : -1 );
 				}
 				finally {
 					if ( requestedToStop )
@@ -610,8 +622,9 @@ public class PlayerMatcherTab extends Tab {
 	
 	/**
 	 * Sorts the result table based on the <code>lastSortingIndex</code> and <code>lastSortingAscendant</code> properties.
+	 * @param maxDisplayableResults max displayable results (worse comparisions will be discarded)
 	 */
-	private void sortResultTable() {
+	private void sortResultTable( final int maxDisplayableResults ) {
 		Collections.sort( comparisonList, new Comparator< Comparison >() {
 			public int compare( final Comparison comparison1, final Comparison comparison2 ) {
 				switch ( lastSortingIndex ) {
@@ -640,6 +653,13 @@ public class PlayerMatcherTab extends Tab {
 				return 0;
 			}
 		} );
+		
+		if ( maxDisplayableResults >= 0 ) {
+			for ( int i = comparisonList.size() - 1; i >= maxDisplayableResults; i-- )
+				comparisonList.remove( i );
+			comparisonList.trimToSize();
+			System.gc();
+		}
 		
 		refreshResultTable();
 	}
@@ -672,9 +692,10 @@ public class PlayerMatcherTab extends Tab {
 	
 	@Override
 	public void assignUsedProperties() {
-		Utils.settingsProperties.setProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES      , Boolean.toString( dontCompareSameNamesCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES       , Boolean.toString( dontCompareSameNamesCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTHORITATIVENESS_THRESHOLD   , Integer.toString( authoritativenessThresholdComboBox.getSelectedIndex() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_MATCHING_PROBABILITY_THRESHOLD, Integer.toString( matchingProbabilityThresholdComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_MAX_DISPLAYABLE_RESULTS       , Integer.toString( maxDisplayableResultsComboBox.getSelectedIndex() ) );
 	}
 	
 }
