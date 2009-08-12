@@ -6,7 +6,7 @@
 
 ----
 ===Features and changes in the upcoming new release===
- * New setting on the Player matcher tab: "Max displayable results". If the provided thresholds allow more results, you don't have to worry about the Agent hanging or working too long. The highest matches with the best authoritativeness will be kept and the worse results will be trimmed.
+ * New setting on the Player matcher tab: "Max displayable results". If the provided thresholds allow more results, you don't have to worry about the Agent hanging or working too long. The highest matches with the best authoritativeness will be kept and the worse results will be thrown away.
 
 ----
 ===2.50 2009-08-04===
