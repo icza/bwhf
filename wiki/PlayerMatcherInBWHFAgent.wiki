@@ -1,7 +1,15 @@
 #summary This page describes how the player matcher works in BWHF Agent.
 
 =Player Matcher in BWHF Agent=
-Player matcher allows you to select any replays, and it will analyze all of them and compare all players across the selected replays individually. BWHF Agent will compare players by their *playing styles*. After the analysis it displays the results in a table. The table contains the *extent of authoritativeness* of the comparisions, the *matching probability* of the 2 players and the names of the players and the replay files. You can choose whether to compare players with same name too. The comparisions can go really high if you select many replays, so there are options to set the display thresholds of the authoritativeness and the matching probability. You can limit the number of results too.
+Player matcher allows you to select any replays, and it will analyze all of them and compare all players across the selected replays individually. BWHF Agent will compare players by their *playing styles*. After the analysis it displays the results in a table. The table contains the *extent of authoritativeness* of the comparisions, the *matching probability* of the 2 players and the names of the players and the replay files.
+
+You can choose whether to compare players with same name too. The comparisions can go really high if you select many replays, so there are options to set the display thresholds of the authoritativeness and the matching probability. You can limit the number of results too.
+
+You can filter the matches by the player names. There are 2 filters provided for this:
+ * *Show only matches of players*: this can be a comma separated list of player names
+ * *Exclude matches with players*: this is a comma separated list of player names
+Only those matches will be displayed where the match *does* contain a name from the first filter and *does not* contain a name from the second filter. These 2 filters can be used together or independently.
+
 
 If you double click on a match with the left button, replay #1 will be opened on the charts tab. If you double click on a match with the right button, replay #2 will be opened on the charts tab. Clicking on the column headers will sort the table. Clicking again will reverse the sort order.
 
