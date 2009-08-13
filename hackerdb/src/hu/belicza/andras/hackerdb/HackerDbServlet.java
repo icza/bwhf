@@ -551,7 +551,7 @@ public class HackerDbServlet extends BaseServlet {
 			final List< Object[] > monthlyReportsList = new ArrayList< Object[] >();
 			final PreparedStatement preparedStatement = connection.prepareStatement( "SELECT COUNT(*) FROM report JOIN key on report.key=key.id WHERE key.revocated=FALSE AND report.version>=? and report.version<?" );
 			statement = preparedStatement; // Store it to the statement variable to close it in case of exception
-			final DateFormat monthDateFormat = new SimpleDateFormat( "MMMMM, yyyy" );
+			final DateFormat monthDateFormat = new SimpleDateFormat( "yyyy-MM" );
 			final GregorianCalendar calendar1 = new GregorianCalendar( 2008, Calendar.DECEMBER, 1 );
 			final GregorianCalendar calendar2 = new GregorianCalendar( 2008, Calendar.DECEMBER, 1 );
 			calendar2.add( Calendar.MONTH, 1 );
