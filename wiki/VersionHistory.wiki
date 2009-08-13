@@ -7,7 +7,7 @@
 ----
 ===Features and changes in the upcoming new release===
  * New filters on the Player matcher tab: _"Show only matches of players"_ and _"Exclude matches with players"_. You can enter a comma separated list in each. The first one will filter out matches that *do not* contain any of the players entered here. The second filter will filter out matches that *do* contain any of the players entered here. These 2 filters can be used together or independently. The excluder filter is the stronger one.
- * New setting on the Player matcher tab: "Max displayable results". If the provided thresholds allow more results, you don't have to worry about the Agent hanging or working too long. The highest matches with the best authoritativeness will be kept and the worse results will be thrown away.
+ * New setting on the Player matcher tab: _"Max displayable results"_. If the provided thresholds allow more results, you don't have to worry about the Agent hanging or working too long. The highest matches with the best authoritativeness will be kept and the worse results will be thrown away.
 
 ----
 ===2.50 2009-08-04===
