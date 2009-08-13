@@ -13,6 +13,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.StringTokenizer;
 import java.util.Vector;
 
 import swingwt.awt.Dimension;
@@ -31,6 +32,7 @@ import swingwtx.swing.JPanel;
 import swingwtx.swing.JProgressBar;
 import swingwtx.swing.JScrollPane;
 import swingwtx.swing.JTable;
+import swingwtx.swing.JTextField;
 import swingwtx.swing.ListSelectionModel;
 import swingwtx.swing.table.DefaultTableModel;
 
@@ -42,13 +44,17 @@ import swingwtx.swing.table.DefaultTableModel;
 public class PlayerMatcherTab extends Tab {
 	
 	/** Don't compare players with same name checkbox. */
-	private final JCheckBox dontCompareSameNamesCheckBox = new JCheckBox( "Don't compare players with same names", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES ) ) );
+	private final JCheckBox dontCompareSameNamesCheckBox          = new JCheckBox( "Don't compare players with same names", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES ) ) );
+	/** Show only matches of players text field.       */
+	private final JTextField showOnlyPlayersTextField             = new JTextField( 1 );
+	/** Exclude players text field.                    */
+	private final JTextField excludePlayersTextField              = new JTextField( 1 );
 	/** Authoritativeness threshold combobox.          */
-	private final JComboBox authoritativenessThresholdComboBox;
+	private final JComboBox  authoritativenessThresholdComboBox;
 	/** Matching probability threshold combobox.       */
-	private final JComboBox matchingProbabilityThresholdComboBox = new JComboBox( new Object[] { "100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%", "0%" } );
+	private final JComboBox  matchingProbabilityThresholdComboBox = new JComboBox( new Object[] { "100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%", "0%" } );
 	/** Max displayable results combobox.              */
-	private final JComboBox maxDisplayableResultsComboBox        = new JComboBox( new Object[] { "100", "1,000", "5,000", "10,000", "20,000", "50,000", "100,000" } );
+	private final JComboBox  maxDisplayableResultsComboBox        = new JComboBox( new Object[] { "100", "1,000", "5,000", "10,000", "20,000", "50,000", "100,000" } );
 	
 	/** Button to select folders to analyze.         */
 	private final JButton selectFoldersButton  = new JButton( "Select folders to analyze recursively...", IconResourceManager.ICON_FOLDER_CHOOSER );
@@ -342,8 +348,12 @@ public class PlayerMatcherTab extends Tab {
 		
 		contentBox.add( Utils.wrapInPanel( dontCompareSameNamesCheckBox ) );
 		
-		final JPanel thresholdPanel = new JPanel( new GridLayout( 3, 2, 7, 0 ) );
-		thresholdPanel.setBorder( BorderFactory.createTitledBorder( "Display thresholds:" ) );
+		final JPanel thresholdPanel = new JPanel( new GridLayout( 5, 2, 7, 0 ) );
+		thresholdPanel.setBorder( BorderFactory.createTitledBorder( "Display filters and thresholds:" ) );
+		thresholdPanel.add( new JLabel( "Show only matches of players:" ) );
+		thresholdPanel.add( showOnlyPlayersTextField );
+		thresholdPanel.add( new JLabel( "Exclude matches with players:" ) );
+		thresholdPanel.add( excludePlayersTextField );
 		thresholdPanel.add( new JLabel( "Extent of authoritativeness:" ) );
 		thresholdPanel.add( authoritativenessThresholdComboBox );
 		thresholdPanel.add( new JLabel( "Matching probability:" ) );
@@ -457,6 +467,8 @@ public class PlayerMatcherTab extends Tab {
 			public void run() {
 				try {
 					final boolean                 compareSameNames             = !dontCompareSameNamesCheckBox.isSelected();
+					final List< String >          showOnlyPlayerList           = splitCommaSeparatedList( showOnlyPlayersTextField.getText() );
+					final List< String >          excludePlayerList            = splitCommaSeparatedList( excludePlayersTextField .getText() );
 					final float                   matchingProbabilityThreshold = Float.parseFloat( ( (String) matchingProbabilityThresholdComboBox.getSelectedItem() ).substring( 0, ( (String) matchingProbabilityThresholdComboBox.getSelectedItem() ).length() - 1 ) );
 					final AuthoritativenessExtent authoritativenessThreshold   = (AuthoritativenessExtent) authoritativenessThresholdComboBox.getSelectedItem();
 					
@@ -492,6 +504,10 @@ public class PlayerMatcherTab extends Tab {
 							final List< PlayerAnalysis > replayPlayerAnalysisList = new ArrayList< PlayerAnalysis >( replay.replayActions.players.length );
 							
 							for ( final PlayerActions playerActions : replay.replayActions.players ) {
+								if ( excludePlayerList != null )
+									if ( excludePlayerList.contains( playerActions.playerName.toLowerCase() ) )
+										continue;
+								
 								final ReplayHeader replayHeader = replay.replayHeader;
 								
 								final int   playerIndex        = replayHeader.getPlayerIndexByName( playerActions.playerName );
@@ -558,12 +574,18 @@ public class PlayerMatcherTab extends Tab {
 										commandRepeationTendency / actionsCountFloat, (float) averageSelectedUnits / selectsCount );
 								replayPlayerAnalysisList.add( playerAnalysis );
 								
-								for ( final PlayerAnalysis playerAnalysis2 : playerAnalysisList )
+								final boolean playerNameContained = showOnlyPlayerList != null && showOnlyPlayerList.contains( playerAnalysis.loweredPlayerName );
+								for ( final PlayerAnalysis playerAnalysis2 : playerAnalysisList ) {
+									if ( showOnlyPlayerList != null )
+										if ( !playerNameContained && !showOnlyPlayerList.contains( playerAnalysis2.loweredPlayerName ) )
+											continue;
+									
 									if ( compareSameNames || !playerAnalysis2.loweredPlayerName.equals( playerAnalysis.loweredPlayerName ) ) {
 										final Comparison comparison = new Comparison( playerAnalysis2, playerAnalysis, authoritativenessThreshold, matchingProbabilityThreshold );
 										if ( comparison.thresholdReached )
 											comparisonList.add( comparison );
 									}
+								}
 							}
 							
 							playerAnalysisList.addAll( replayPlayerAnalysisList );
@@ -618,6 +640,24 @@ public class PlayerMatcherTab extends Tab {
 			}
 			
 		}.start();
+	}
+	
+	/**
+	 * Splits a comma separated value list, and returns a list of their lowercased trimmed values.
+	 * @param text text to be split
+	 * @return a list of the lowercased trimmed values; or <code>null</code> if the text does not contain values)
+	 */
+	private static List< String > splitCommaSeparatedList( final String text ) {
+		final List< String > valueList = new ArrayList< String >( 2 );
+		final StringTokenizer tokenizer = new StringTokenizer( text, "," );
+		
+		while ( tokenizer.hasMoreTokens() ) {
+			final String token = tokenizer.nextToken().trim();
+			if ( token.length() > 0 )
+				valueList.add( token.toLowerCase() );
+		}
+		
+		return valueList.isEmpty() ? null : valueList;
 	}
 	
 	/**
