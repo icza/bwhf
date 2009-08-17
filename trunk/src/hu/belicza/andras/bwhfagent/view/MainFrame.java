@@ -72,8 +72,10 @@ public class MainFrame extends JFrame {
 	private final CardLayout cardLayout       = new CardLayout();
 	/** Panel to hold and display the contents of the tabs.    */
 	private final JPanel     tabsContentPanel = new JPanel( cardLayout );
-	/** Reference to the visible tab. */
+	/** Reference to the visible tab.                          */
 	private Tab              visibleTab;
+	/** Navigation box.                                        */
+	private final Box        navigationBox    = Box.createVerticalBox();
 	
 	/** Reference to the autoscan tab.         */
 	protected final AutoscanTab        autoscanTab;
@@ -180,7 +182,6 @@ public class MainFrame extends JFrame {
 		}
 	}
 	
-	final Box tabBox = Box.createVerticalBox();
 	/**
 	 * Builds the graphical user interface.
 	 */
@@ -207,8 +208,7 @@ public class MainFrame extends JFrame {
 		
 		getContentPane().add( northBox, BorderLayout.NORTH );
 		
-		//final Box tabBox = Box.createVerticalBox();
-		tabBox.setBorder( BorderFactory.createTitledBorder( "Options:" ) );
+		navigationBox.setBorder( BorderFactory.createTitledBorder( "Navigation:" ) );
 		for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ ) {
 			final Tab tab = tabs[ tabIndex ];
 			tabsContentPanel.add( tab.getTitle(), tab.getContent() );
@@ -227,10 +227,10 @@ public class MainFrame extends JFrame {
 			tabLinePanel.setCursor( new Cursor( Cursor.HAND_CURSOR ) );
 			tabLinePanel.add( iconLabel  );
 			tabLinePanel.add( titleLabel );
-			tabBox.add( tabLinePanel );
+			navigationBox.add( tabLinePanel );
 		}
-		tabBox.add( new JPanel( new BorderLayout() ) ); // To consume the available space
-		getContentPane().add( tabBox, BorderLayout.WEST );
+		navigationBox.add( new JPanel( new BorderLayout() ) ); // To consume the available space
+		getContentPane().add( navigationBox, BorderLayout.WEST );
 		getContentPane().add( tabsContentPanel, BorderLayout.CENTER );
 		
 		
