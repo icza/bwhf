@@ -66,7 +66,7 @@ public class BaseServlet extends HttpServlet {
 		+ "try {"
 		+ "var pageTracker = _gat._getTracker(\"UA-4884955-10\");"
 		+ "pageTracker._trackPageview();"
-		+ "} catch(err) {}</script>\" );";
+		+ "} catch(err) {}</script>";
 	
 	
 	/** URL of the database. */
