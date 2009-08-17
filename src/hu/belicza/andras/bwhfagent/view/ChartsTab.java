@@ -9,6 +9,7 @@ import hu.belicza.andras.bwhfagent.view.charts.ChartsComponent.ChartType;
 import java.io.File;
 
 import swingwt.awt.Color;
+import swingwt.awt.Cursor;
 import swingwt.awt.Dimension;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
@@ -159,6 +160,7 @@ public class ChartsTab extends Tab {
 		} );
 		contentBox.add( chartsCommonControlPanel );
 		
+		chartsComponent.setCursor( new Cursor( Cursor.HAND_CURSOR ) );
 		contentBox.add( chartsComponent.getContentPanel() );
 	}
 	

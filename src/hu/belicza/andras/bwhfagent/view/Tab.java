@@ -3,6 +3,7 @@ package hu.belicza.andras.bwhfagent.view;
 import swingwtx.swing.Box;
 import swingwtx.swing.Icon;
 import swingwtx.swing.JComponent;
+import swingwtx.swing.JLabel;
 
 /**
  * Defines a tab to be added to the main frame.
@@ -18,6 +19,8 @@ public abstract class Tab {
 	private final String title;
 	/** The icon of the tab.  */
 	private final Icon   icon;
+	/** The title of the tab. */
+	private final JLabel titleLabel;
 	
 	/**
 	 * Creates a new Tab.
@@ -25,8 +28,9 @@ public abstract class Tab {
 	 * @param icon icon of the tab
 	 */
 	public Tab( final String title, final Icon icon ) {
-		this.title = title;
-		this.icon  = icon;
+		this.title      = title;
+		this.icon       = icon;
+		this.titleLabel = new JLabel( title );
 	}
 	
 	/**
@@ -35,6 +39,14 @@ public abstract class Tab {
 	 */
 	public String getTitle() {
 		return title;
+	}
+	
+	/**
+	 * Returns the label for the title of the tab.
+	 * @return the label for the title of the tab
+	 */
+	public JLabel getTitleLabel() {
+		return titleLabel;
 	}
 	
 	/**
