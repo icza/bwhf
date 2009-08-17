@@ -1579,7 +1579,9 @@ public class PlayersNetworkServlet extends BaseServlet {
 		outputWriter.println( "<hr><table border=0 width='100%'><tr><td width='40%' align='left'><a href='http://code.google.com/p/bwhf/'>BWHF Agent home page</a>&nbsp;&nbsp;<a href='hackers'>BWHF Hacker Database</a>"
 							+ "<td align=center width='20%'><i>Served in " + (executionMs / 1000) + " sec, " + (executionMs % 1000) + " ms</i>"
 							+ "<td align=right widht='40%'><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></table>" );
-		outputWriter.println( "</center></body></html>" );
+		outputWriter.println( "</center>" );
+		outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
+		outputWriter.println( "</body></html>" );
 	}
 	
 }
