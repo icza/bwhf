@@ -16,18 +16,27 @@ import java.io.IOException;
 import java.util.StringTokenizer;
 
 import swingwt.awt.BorderLayout;
+import swingwt.awt.CardLayout;
+import swingwt.awt.Color;
+import swingwt.awt.Component;
+import swingwt.awt.Cursor;
 import swingwt.awt.Dimension;
 import swingwt.awt.Toolkit;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwt.awt.event.MouseAdapter;
+import swingwt.awt.event.MouseEvent;
+import swingwt.awt.event.MouseListener;
 import swingwt.awt.event.WindowAdapter;
 import swingwt.awt.event.WindowEvent;
+import swingwtx.swing.BorderFactory;
+import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JFrame;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JOptionPane;
 import swingwtx.swing.JPanel;
-import swingwtx.swing.JTabbedPane;
+import swingwtx.swing.SwingConstants;
 import swingwtx.swing.event.ChangeEvent;
 import swingwtx.swing.event.ChangeListener;
 
@@ -59,8 +68,12 @@ public class MainFrame extends JFrame {
 	/** Label to display if starcraft folder is set correctly. */
 	protected final JLabel     starcraftFolderStatusLabel = new JLabel();
 	
-	/** The tabbed pane holding the tabs. */
-	private final JTabbedPane tabbedPane = new JTabbedPane();
+	/** Card layout used for showing the contents of the tabs. */
+	private final CardLayout cardLayout       = new CardLayout();
+	/** Panel to hold and display the contents of the tabs.    */
+	private final JPanel     tabsContentPanel = new JPanel( cardLayout );
+	/** Reference to the visible tab. */
+	private Tab              visibleTab;
 	
 	/** Reference to the autoscan tab.         */
 	protected final AutoscanTab        autoscanTab;
@@ -78,8 +91,6 @@ public class MainFrame extends JFrame {
 	protected final PlayersNetworkTab  playersNetworkTab;
 	/** Reference to the player matcher tab.   */
 	protected final PlayerMatcherTab   playerMatcherTab;
-	/** Reference to the bot tab.              */
-	protected final BotTab             botTab;
 	/** Reference to the general settings tab. */
 	protected final GeneralSettingsTab generalSettingsTab;
 	
@@ -127,9 +138,8 @@ public class MainFrame extends JFrame {
 		replaySearchTab    = new ReplaySearchTab();
 		gameChatTab        = new GameChatTab();
 		playersNetworkTab  = new PlayersNetworkTab();
-		botTab             = new BotTab();
 		playerMatcherTab   = new PlayerMatcherTab();
-		tabs = new Tab[] { autoscanTab, manualScanTab, playerCheckerTab, chartsTab, replaySearchTab, gameChatTab, new PcxConverterTab(), playersNetworkTab, playerMatcherTab, botTab, generalSettingsTab, new AboutTab() };
+		tabs = new Tab[] { autoscanTab, manualScanTab, playerCheckerTab, chartsTab, replaySearchTab, gameChatTab, new PcxConverterTab(), playersNetworkTab, playerMatcherTab, generalSettingsTab, new AboutTab() };
 		
 		buildGUI();
 		
@@ -156,11 +166,13 @@ public class MainFrame extends JFrame {
 		if ( argumentFile.isFile() ) {
 			setVisible( true );
 			selectTab( chartsTab );
-			chartsTab.setReplayFile( new File( arguments[ 0 ] ) );
+			chartsTab.setReplayFile( argumentFile );
 		}
-		else
+		else {
 			// We have to call setVisible() even if we start minimized to tray, because menu items have to be initialized. 
 			setVisible( !trayIconInstalled || !generalSettingsTab.startAgentMinimizedToTrayCheckBox.isSelected() );
+			selectTab( autoscanTab );
+		}
 		
 		if ( !new File( Consts.SETTINGS_PROPERTIES_FILE ).exists() ) {
 			// First run of BWHF Agent
@@ -168,6 +180,7 @@ public class MainFrame extends JFrame {
 		}
 	}
 	
+	final Box tabBox = Box.createVerticalBox();
 	/**
 	 * Builds the graphical user interface.
 	 */
@@ -194,20 +207,32 @@ public class MainFrame extends JFrame {
 		
 		getContentPane().add( northBox, BorderLayout.NORTH );
 		
+		//final Box tabBox = Box.createVerticalBox();
+		tabBox.setBorder( BorderFactory.createTitledBorder( "Options:" ) );
 		for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ ) {
 			final Tab tab = tabs[ tabIndex ];
-			tabbedPane.add( tab.getTitle(), tab.getContent() );
-			if ( tab.getIcon() != null )
-				tabbedPane.setIconAt( tabIndex, tab.getIcon() );
+			tabsContentPanel.add( tab.getTitle(), tab.getContent() );
+			final JPanel        tabLinePanel  = Utils.createWrapperPanelLeftAligned();
+			final JLabel        iconLabel     = new JLabel( tab.getIcon(), SwingConstants.LEFT );
+			final JLabel        titleLabel    = tab.getTitleLabel();
+			final MouseListener mouseListener = new MouseAdapter() {
+				@Override
+				public void mousePressed( final MouseEvent event ) {
+					selectTab( tab );
+				}
+			};
+			iconLabel   .addMouseListener( mouseListener );
+			titleLabel  .addMouseListener( mouseListener );
+			tabLinePanel.addMouseListener( mouseListener );
+			tabLinePanel.setCursor( new Cursor( Cursor.HAND_CURSOR ) );
+			tabLinePanel.add( iconLabel  );
+			tabLinePanel.add( titleLabel );
+			tabBox.add( tabLinePanel );
 		}
+		tabBox.add( new JPanel( new BorderLayout() ) ); // To consume the available space
+		getContentPane().add( tabBox, BorderLayout.WEST );
+		getContentPane().add( tabsContentPanel, BorderLayout.CENTER );
 		
-		tabbedPane.addChangeListener( new ChangeListener() {
-			public void stateChanged( final ChangeEvent event ) {
-				tabs[ tabbedPane.getSelectedIndex() ].onSelected();
-			}
-		} );
-		
-		getContentPane().add( tabbedPane, BorderLayout.CENTER );
 		
 		if ( SystemTray.isSupported() ) {
 			trayIcon = new TrayIcon( new javax.swing.ImageIcon( getClass().getResource( inWonderland ? IconResourceManager.ICON_RESOURCE_BLUE_PILL : IconResourceManager.ICON_RESOURCE_RED_PILL ) ).getImage() );
@@ -412,7 +437,22 @@ public class MainFrame extends JFrame {
 	 * @param tab tab to be selected
 	 */
 	public void selectTab( final Tab tab ) {
-		tabbedPane.setSelectedIndex( tabbedPane.indexOfComponent( tab.getContent() ) );
+		if ( visibleTab != null ) {
+			visibleTab.getTitleLabel().setForeground( Color.BLACK );
+			final Color defaultBackgroundColor = getContentPane().getBackground();
+			( (JPanel) visibleTab.getTitleLabel().getParent() ).setBackground( defaultBackgroundColor );
+			for ( final Component component : ( (JPanel) visibleTab.getTitleLabel().getParent() ).getComponents() )
+				component.setBackground( defaultBackgroundColor );
+		}
+		
+		visibleTab = tab;
+		
+		tab.getTitleLabel().setForeground( Color.RED );
+		( (JPanel) visibleTab.getTitleLabel().getParent() ).setBackground( Color.YELLOW );
+		for ( final Component component : ( (JPanel) visibleTab.getTitleLabel().getParent() ).getComponents() )
+			component.setBackground( Color.YELLOW );
+		
+		cardLayout.show( tabsContentPanel, tab.getTitle() );
 	}
 	
 	/**
