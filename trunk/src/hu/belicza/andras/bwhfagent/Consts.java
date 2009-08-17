@@ -27,12 +27,12 @@ public class Consts {
 	/** Player matcher help page url string.                                   */
 	public static final String PLAYER_MATCHER_HELP_PAGE_URL     = "http://code.google.com/p/bwhf/wiki/PlayerMatcherInBWHFAgent";
 	/** Players' Network page url string.                                      */
-	public static final String PLAYERS_NETWORK_PAGE_URL         = "http://94.199.240.39/hackerdb/players";
+	public static final String PLAYERS_NETWORK_PAGE_URL         = "http://bwhf.net/hackerdb/players";
 	
 	/** URL of the BWHF hacker data base server.                               */
-	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL = "http://94.199.240.39/hackerdb/hackers";
+	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL = "http://bwhf.net/hackerdb/hackers";
 	/** URL of the Players' Network processor server.                          */
-	public static final String PLAYERS_NETWORK_DATA_BASE_URL    = "http://94.199.240.39/hackerdb/players";
+	public static final String PLAYERS_NETWORK_DATA_BASE_URL    = "http://bwhf.net/hackerdb/players";
 	
 	/** Name of the resource containing the about html template.               */
 	public static final String ABOUT_TEMLATE_RESOURCE_NAME      = "about_template.html";

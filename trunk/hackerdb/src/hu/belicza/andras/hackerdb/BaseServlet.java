@@ -57,6 +57,18 @@ public class BaseServlet extends HttpServlet {
 		COMMON_HTML_HEADER_ELEMENTS = commonHtmlHeaderElementsBuilder.toString();
 	}
 	
+	/** The tracking HTML code for Google Analytics. */
+	protected static final String GOOGLE_ANALYTICS_TRACKING_CODE = "<script type=\"text/javascript\">"
+		+ "var gaJsHost = ((\"https:\" == document.location.protocol) ? \"https://ssl.\" : \"http://www.\");"
+		+ "document.write(unescape(\"%3Cscript src='\" + gaJsHost + \"google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E\"));"
+		+ "</script>"
+		+ "<script type=\"text/javascript\">"
+		+ "try {"
+		+ "var pageTracker = _gat._getTracker(\"UA-4884955-10\");"
+		+ "pageTracker._trackPageview();"
+		+ "} catch(err) {}</script>\" );";
+	
+	
 	/** URL of the database. */
 	private static final String DATABASE_URL = "jdbc:postgresql://localhost/hackers";
 	
