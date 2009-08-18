@@ -175,40 +175,34 @@ public class BinRepParser {
 						playerNameActionListMap.put( replayHeader.playerNames[ i ], playerActionLists[ replayHeader.playerIds[ i ] ] );
 			final ReplayActions replayActions = new ReplayActions( playerNameActionListMap );
 			
-			/*// Map data length section
+			// Map data length section
 			final int mapDataLength = Integer.reverseBytes( ByteBuffer.wrap( unpacker.unpackSection( 4 ) ).getInt() );
 			
 			// Map data section
-			final ByteBuffer mapDataBuffer = ByteBuffer.wrap( unpacker.unpackSection( mapDataLength ) );
+			final ByteBuffer mapDataBuffer = ByteBuffer.wrap( unpacker.unpackSection(  mapDataLength ) );
 			mapDataBuffer.order( ByteOrder.LITTLE_ENDIAN );
 			
 			final byte[] sectionNameBuffer = new byte[ 4 ];
-			// Name of the unit section in the map data replay section.
-			final String UNIT_SECTION_NAME = "UNIT";
+			// Name of the dimension section in the map data replay section.
+			final String DIMENSION_SECTION_NAME = "DIM ";
 			while ( mapDataBuffer.position() < mapDataLength ) {
 				mapDataBuffer.get( sectionNameBuffer );
 				final String sectionName   = new String( sectionNameBuffer, "US-ASCII" );
 				final int    sectionLength = mapDataBuffer.getInt();
 				final int    sectionEndPos = mapDataBuffer.position() + sectionLength;
 				
-				if ( sectionName.equals( UNIT_SECTION_NAME ) ) {
-					//System.out.println( sectionName + ", length=" + sectionLength );
-					while ( mapDataBuffer.position() < sectionEndPos ) {
-						final int unitRecordEndPos = mapDataBuffer.position() + 36; // unit record length is 36 bytes
-						final int unitId = mapDataBuffer.getInt();
-						mapDataBuffer.position( mapDataBuffer.position() + 4 ); // We skip the x and y coordinates
-						final int unitType = mapDataBuffer.getInt();
-						//System.out.println( unitId + " - " + unitType );
-						mapDataBuffer.position( unitRecordEndPos );
-					}
-					break; // We only needed the unit section
+				if ( sectionName.equals( DIMENSION_SECTION_NAME ) ) {
+					// If map has a non-standard size, the replay header contains invalid map size, this is the correct one
+					replayHeader.mapWidth  = mapDataBuffer.getShort();
+					replayHeader.mapHeight = mapDataBuffer.getShort();
+					break; // We only needed the dimension section
 				}
 				
-				if ( mapDataBuffer.position() < sectionEndPos )
+				if ( mapDataBuffer.position() < sectionEndPos ) // Part or all the section might be unprocessed, skip the unprocessed bytes
 					mapDataBuffer.position( sectionEndPos );
 			}
 			if ( mapDataBuffer.position() < mapDataLength ) // We might have skipped some parts of map data, so we position to the end
-				mapDataBuffer.position( mapDataLength );*/
+				mapDataBuffer.position( mapDataLength );
 			
 			return new Replay( replayHeader, replayActions, null );
 		}

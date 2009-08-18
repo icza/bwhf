@@ -41,10 +41,6 @@ public class ReplayScanner {
 	 * @param skipLatterActionsOfHackers tells whether we have to proceed to the next player if one is found hacking
 	 */
 	private static void scanPlayerForHacks( final ReplayHeader replayHeader, final PlayerActions player, final List< HackDescription > hackDescriptionList, final boolean skipLatterActionsOfHackers ) {
-		// The size of the map Carthage is non-standard: it is somewhere between 96 and 128,
-		// but in the replay it is saved as 96.
-		final boolean STANDARD_MAP_SIZE = !replayHeader.mapName.toLowerCase().contains( "carthage" );
-		
 		final Action[] playerActions = player.actions;
 		final int      actionsCount  = playerActions.length;
 		
@@ -94,7 +90,7 @@ public class ReplayScanner {
 			
 			// Use Cheat drophack
 			// Single Player: only melee, ffa and ums is allowed.
-			// TODO: This check should relate to all multiplayer mode.
+			// TODO: This check should relate to all multiplayer modes.
 			// For now I only check if the game type is only allowed in multiplayer mode, this might skip some multiplayer game.  
 			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_USE_CHEAT && ( replayHeader.gameType != ReplayHeader.GAME_TYPE_MELEE && replayHeader.gameType != ReplayHeader.GAME_TYPE_FFA && replayHeader.gameType != ReplayHeader.GAME_TYPE_UMS ) )
 				hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_USE_CHEAT_DROPHACK, action.iteration ) );
@@ -113,7 +109,7 @@ public class ReplayScanner {
 			// This can be checked only on standard size maps, because Starcraft only saves standard map sizes.  
 			// If map size is not standard, then the saved map size might be smaller than the actual size,
 			// and this would result in building outside the map box when in fact it is not.
-			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD && action.parameters != null && action.parameters.length() > 0 && action.parameterBuildingNameIndex != Action.BUILDING_NAME_INDEX_NON_BUILDING && STANDARD_MAP_SIZE ) {
+			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD && action.parameters != null && action.parameters.length() > 0 && action.parameterBuildingNameIndex != Action.BUILDING_NAME_INDEX_NON_BUILDING ) {
 				final Action.Size buildingSize = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
 				if ( buildingSize != null ) {
 					try {
