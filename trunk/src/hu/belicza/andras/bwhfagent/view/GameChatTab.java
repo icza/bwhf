@@ -113,7 +113,7 @@ public class GameChatTab extends ProgressLoggedTab {
 		try {
 			progressBar.setValue( 0 );
 			progressBar.setMaximum( 1 );
-			final Replay replay = BinRepParser.parseReplay( replayFile, true, true );
+			final Replay replay = BinRepParser.parseReplay( replayFile, true, true, true );
 			logMessage( "\n", false ); // Prints 2 empty lines
 			if ( replay == null )
 				logMessage( "Could not extract game chat from '" + Consts.LAST_REPLAY_FILE_NAME + "'!" );
@@ -164,7 +164,7 @@ public class GameChatTab extends ProgressLoggedTab {
 					int counter = 0;
 					for ( final File replayFile : replayFiles ) {
 						final String absoluteReplayPath = replayFile.getAbsolutePath();
-						final Replay replay = BinRepParser.parseReplay( replayFile, true, true );
+						final Replay replay = BinRepParser.parseReplay( replayFile, true, true, true );
 						if ( replay == null )
 							logMessage( "Could not extract game chat from '" + absoluteReplayPath + "'!" );
 						else {

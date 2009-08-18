@@ -31,7 +31,7 @@ public class BinRepParser {
 		final String[] replayNames = new String[] { "w:/rep/4 - hack.rep" };
 		
 		for ( final String replayName : replayNames ) {
-			final Replay replay = parseReplay( new File( replayName ), true, false );
+			final Replay replay = parseReplay( new File( replayName ), true, false, true );
 			if ( replay != null )
 				replay.replayHeader.printHeaderInformation( new PrintWriter( System.out ) );
 			else
@@ -75,10 +75,11 @@ public class BinRepParser {
 	 * @param replayFile           replay file to be parsed
 	 * @param parseCommandsSection tells if player actions have to be parsed from the commands section 
 	 * @param gameChatOnly         tells if only game chat is desired but not other actions
+	 * @param parseMapDataSection  tells if map data section has to be parsed
 	 * @return a {@link Replay} object describing the replay; or <code>null</code> if replay cannot be parsed 
 	 */
 	@SuppressWarnings("unchecked")
-	public static Replay parseReplay( final File replayFile, final boolean parseCommandsSection, final boolean gameChatOnly ) {
+	public static Replay parseReplay( final File replayFile, final boolean parseCommandsSection, final boolean gameChatOnly, final boolean parseMapDataSection ) {
 		BinReplayUnpacker unpacker = null;
 		try {
 			unpacker = new BinReplayUnpacker( replayFile );
@@ -175,36 +176,39 @@ public class BinRepParser {
 						playerNameActionListMap.put( replayHeader.playerNames[ i ], playerActionLists[ replayHeader.playerIds[ i ] ] );
 			final ReplayActions replayActions = new ReplayActions( playerNameActionListMap );
 			
-			// Map data length section
-			final int mapDataLength = Integer.reverseBytes( ByteBuffer.wrap( unpacker.unpackSection( 4 ) ).getInt() );
-			
-			// Map data section
-			final ByteBuffer mapDataBuffer = ByteBuffer.wrap( unpacker.unpackSection(  mapDataLength ) );
-			mapDataBuffer.order( ByteOrder.LITTLE_ENDIAN );
-			
-			final byte[] sectionNameBuffer = new byte[ 4 ];
-			// Name of the dimension section in the map data replay section.
-			final String DIMENSION_SECTION_NAME = "DIM ";
-			while ( mapDataBuffer.position() < mapDataLength ) {
-				mapDataBuffer.get( sectionNameBuffer );
-				final String sectionName   = new String( sectionNameBuffer, "US-ASCII" );
-				final int    sectionLength = mapDataBuffer.getInt();
-				final int    sectionEndPos = mapDataBuffer.position() + sectionLength;
+			if ( parseMapDataSection ) {
+				// Map data length section
+				final int mapDataLength = Integer.reverseBytes( ByteBuffer.wrap( unpacker.unpackSection( 4 ) ).getInt() );
 				
-				if ( sectionName.equals( DIMENSION_SECTION_NAME ) ) {
-					// If map has a non-standard size, the replay header contains invalid map size, this is the correct one
-					replayHeader.mapWidth  = mapDataBuffer.getShort();
-					replayHeader.mapHeight = mapDataBuffer.getShort();
-					break; // We only needed the dimension section
+				// Map data section
+				final ByteBuffer mapDataBuffer = ByteBuffer.wrap( unpacker.unpackSection(  mapDataLength ) );
+				mapDataBuffer.order( ByteOrder.LITTLE_ENDIAN );
+				
+				final byte[] sectionNameBuffer = new byte[ 4 ];
+				// Name of the dimension section in the map data replay section.
+				final String DIMENSION_SECTION_NAME = "DIM ";
+				while ( mapDataBuffer.position() < mapDataLength ) {
+					mapDataBuffer.get( sectionNameBuffer );
+					final String sectionName   = new String( sectionNameBuffer, "US-ASCII" );
+					final int    sectionLength = mapDataBuffer.getInt();
+					final int    sectionEndPos = mapDataBuffer.position() + sectionLength;
+					
+					if ( sectionName.equals( DIMENSION_SECTION_NAME ) ) {
+						// If map has a non-standard size, the replay header contains invalid map size, this is the correct one
+						replayHeader.mapWidth  = mapDataBuffer.getShort();
+						replayHeader.mapHeight = mapDataBuffer.getShort();
+						break; // We only needed the dimension section
+					}
+					
+					if ( mapDataBuffer.position() < sectionEndPos ) // Part or all the section might be unprocessed, skip the unprocessed bytes
+						mapDataBuffer.position( sectionEndPos );
 				}
 				
-				if ( mapDataBuffer.position() < sectionEndPos ) // Part or all the section might be unprocessed, skip the unprocessed bytes
-					mapDataBuffer.position( sectionEndPos );
+				if ( mapDataBuffer.position() < mapDataLength ) // We might have skipped some parts of map data, so we position to the end
+					mapDataBuffer.position( mapDataLength );
 			}
-			if ( mapDataBuffer.position() < mapDataLength ) // We might have skipped some parts of map data, so we position to the end
-				mapDataBuffer.position( mapDataLength );
 			
-			return new Replay( replayHeader, replayActions, null );
+			return new Replay( replayHeader, gameChatWrapper == null ? replayActions : null, gameChatWrapper == null ? null : gameChatWrapper.gameChatBuilder.toString() );
 		}
 		catch ( final Exception e ) {
 			return null;

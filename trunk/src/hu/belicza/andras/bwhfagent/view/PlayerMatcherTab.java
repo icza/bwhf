@@ -494,7 +494,7 @@ public class PlayerMatcherTab extends Tab {
 						if ( requestedToStop )
 							return;
 						
-						final Replay replay = BinRepParser.parseReplay( replayFile, true, false );
+						final Replay replay = BinRepParser.parseReplay( replayFile, true, false, false );
 						
 						if ( replay == null ) {
 							skippedRepsCount++;

@@ -210,7 +210,7 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 		
 		logMessage( "Sending info about " + replayFileAbsolutePath + "..." );
 		
-		final Replay replay = BinRepParser.parseReplay( replayFile, true, false );
+		final Replay replay = BinRepParser.parseReplay( replayFile, true, false, true );
 		
 		if ( replay == null ) {
 			logMessage( "Could not parse " + replayFileAbsolutePath + "!" );
