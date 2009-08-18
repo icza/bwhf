@@ -165,16 +165,16 @@ public class BinRepParser {
 				}
 			}
 			
-			if ( gameChatWrapper != null )
-				return new Replay( replayHeader, null, gameChatWrapper.gameChatBuilder.toString() );
-			
-			// Now create the ReplayActions object
-			final Map< String, List< Action > > playerNameActionListMap = new HashMap< String, List< Action > >();
-			for ( int i = 0; i < replayHeader.playerNames.length; i++ )
-				if ( replayHeader.playerNames[ i ] != null )
-					if ( replayHeader.playerIds[ i ] != 0xff )  // Computers are listed with playerId values of 0xff, but no actions are recorded from them.
-						playerNameActionListMap.put( replayHeader.playerNames[ i ], playerActionLists[ replayHeader.playerIds[ i ] ] );
-			final ReplayActions replayActions = new ReplayActions( playerNameActionListMap );
+			ReplayActions replayActions = null;
+			if ( !gameChatOnly ) {
+				// Now create the ReplayActions object
+				final Map< String, List< Action > > playerNameActionListMap = new HashMap< String, List< Action > >();
+				for ( int i = 0; i < replayHeader.playerNames.length; i++ )
+					if ( replayHeader.playerNames[ i ] != null )
+						if ( replayHeader.playerIds[ i ] != 0xff )  // Computers are listed with playerId values of 0xff, but no actions are recorded from them.
+							playerNameActionListMap.put( replayHeader.playerNames[ i ], playerActionLists[ replayHeader.playerIds[ i ] ] );
+				replayActions = new ReplayActions( playerNameActionListMap );
+			}
 			
 			if ( parseMapDataSection ) {
 				// Map data length section
@@ -208,7 +208,7 @@ public class BinRepParser {
 					mapDataBuffer.position( mapDataLength );
 			}
 			
-			return new Replay( replayHeader, gameChatWrapper == null ? replayActions : null, gameChatWrapper == null ? null : gameChatWrapper.gameChatBuilder.toString() );
+			return new Replay( replayHeader, replayActions, gameChatWrapper == null ? null : gameChatWrapper.gameChatBuilder.toString() );
 		}
 		catch ( final Exception e ) {
 			return null;
