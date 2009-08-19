@@ -61,7 +61,7 @@ public class MainFrame extends JFrame {
 	/** Current version of the application. */
 	public final String applicationVersion;
 	
-	/** Button to start/switch to Starcraft.                   */
+	/** Button to start to Starcraft.                          */
 	protected final JButton    startScButton              = new JButton( "Start StarCraft", IconResourceManager.ICON_WRAITH );
 	/** Button to minimize to tray.                            */
 	protected final JButton    minimizeToTrayButton       = new JButton( "Minimize to tray", IconResourceManager.ICON_MINIMIZE );
@@ -192,7 +192,7 @@ public class MainFrame extends JFrame {
 		startScButton.setMnemonic( startScButton.getText().charAt( 0 ) );
 		startScButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				startOrSwitchToStarcraft();
+				startStarcraft();
 			}
 		} );
 		startStarcraftPanel.add( startScButton );
@@ -246,10 +246,10 @@ public class MainFrame extends JFrame {
 			} );
 			
 			final PopupMenu popupMenu = new PopupMenu();
-			final MenuItem startStarcraftMenuItem = new MenuItem( "Start / Switch to Starcraft" );
+			final MenuItem startStarcraftMenuItem = new MenuItem( "Start Starcraft" );
 			startStarcraftMenuItem.addActionListener( new java.awt.event.ActionListener() {
 				public void actionPerformed( final java.awt.event.ActionEvent event ) {
-					startOrSwitchToStarcraft();
+					startStarcraft();
 				}
 			} );
 			popupMenu.add( startStarcraftMenuItem );
@@ -402,9 +402,9 @@ public class MainFrame extends JFrame {
 	}
 	
 	/**
-	 * Starts or switches to Starcraft.
+	 * Starts Starcraft.
 	 */
-	private void startOrSwitchToStarcraft() {
+	private void startStarcraft() {
 		try {
 			Runtime.getRuntime().exec( new File( generalSettingsTab.starcraftFolderTextField.getText(), Consts.STARCRAFT_EXECUTABLE_FILE_NAME ).getCanonicalPath(), null, new File( generalSettingsTab.starcraftFolderTextField.getText() ) );
 		} catch ( final IOException ie ) {
