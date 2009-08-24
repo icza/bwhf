@@ -65,7 +65,7 @@ public class PlayerCheckerTab extends LoggedTab {
 	
 	/** Checkbox to enable/disable the autoscan.                       */
 	protected final JCheckBox  playerCheckerEnabledCheckBox       = new JCheckBox( "Enable checking players in the game lobby when pressing the 'Print Screen' key", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_PLAYER_CHECKER_ENABLED ) ) );
-	/** Combo box to set the hacker list update interval.              */
+	/** Combo box to set the hacker list update interval in hours.     */
 	private   final JComboBox  hackerListUpdateIntervalComboBox   = new JComboBox( new Object[] { 1, 2, 6, 12, 24, 48 } );
 	/** Label to display the last update time of the hacker list.      */
 	private   final JLabel     hackerListLastUpdatedLabel         = new JLabel();

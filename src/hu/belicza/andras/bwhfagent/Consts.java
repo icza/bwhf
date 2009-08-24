@@ -187,6 +187,8 @@ public class Consts {
 	public static final String PROPERTY_MATCHING_PROBABILITY_THRESHOLD = "matchingProbabilityThreshold";
 	/** Max displayable results property.        */
 	public static final String PROPERTY_MAX_DISPLAYABLE_RESULTS        = "maxDisplayableResults";
+	/** Monitor re-check time interval property. */
+	public static final String PROPERTY_MONITOR_RECHECK_INTERVAL       = "monitorRecheckInterval";
 	
 	/** Properties holding the default settings. */
 	public static final Properties DEFAULT_SETTINGS_PROPERTIES = new Properties();
@@ -251,7 +253,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTHORITATIVENESS_THRESHOLD   , "3" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_MATCHING_PROBABILITY_THRESHOLD, "2" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_MAX_DISPLAYABLE_RESULTS       , "2" );
-		
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_MONITOR_RECHECK_INTERVAL      , "2" );
 	}
 	
 }

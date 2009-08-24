@@ -15,3 +15,8 @@ starcraftdream.com Starcraft Dream
 vilegaming.com Vilegaming
 bghers.com BGHers
 thebgh.com TheBgh
+jbls.org:9367 jbls.org BNLS
+distant.no-ip.org:9367 Distant BNLS
+jbls.clanbnu.net:9367 ClanBNU BNLS
+pyro.no-ip.biz:9367 Pyro BNLS
+localhost:8080 Localhost

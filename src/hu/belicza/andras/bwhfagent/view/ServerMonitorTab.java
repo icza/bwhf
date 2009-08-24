@@ -1,5 +1,7 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import hu.belicza.andras.bwhfagent.Consts;
+
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -17,6 +19,7 @@ import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.BorderFactory;
 import swingwtx.swing.JButton;
+import swingwtx.swing.JComboBox;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JScrollPane;
@@ -37,20 +40,31 @@ public class ServerMonitorTab extends Tab {
 		PORT_NAME_MAP.put( 80  , "Web"        );
 		PORT_NAME_MAP.put( 6112, "Battle.net" );
 		PORT_NAME_MAP.put( 21  , "Ftp"        );
+		PORT_NAME_MAP.put( 9367, "BNLS"       );
+		PORT_NAME_MAP.put( 443 , "Secure Web" );
 	}
 	
-	/** Reference to the servers panel. */
-	private final JPanel          serversPanel    = new JPanel();
-	/** The list of the check buttons.  */
-	private final List< JButton > checkButtonList = new ArrayList< JButton >();
+	/** Reference to the servers panel.                                 */
+	private final JPanel          serversPanel                   = new JPanel();
+	/** The list of the check buttons.                                  */
+	private final List< JButton > checkButtonList                = new ArrayList< JButton >();
+	/** Combo box to set the monitor re-check time interval in seconds. */
+	private final JComboBox       monitorRecheckIntervalComboBox = new JComboBox( new Object[] { 5, 10, 15, 30, 60, 120 } );
+	/** Check button list of the monitored servers.                     */
+	private final List< JButton > monitoredServerButtonList      = new ArrayList< JButton >();
+	
+	/** Reference to the monitor thread. */
+	private volatile NormalThread monitorThread;
 	
 	/**
-	 * Creates a new ServerMOnitorTab.
+	 * Creates a new ServerMonitorTab.
 	 */
 	public ServerMonitorTab() {
 		super( "Server monitor", IconResourceManager.ICON_SERVER_MONITOR );
 		
 		buildGUI();
+		
+		monitorRecheckIntervalComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_MONITOR_RECHECK_INTERVAL ) ) );
 		
 		reloadServerList();
 	}
@@ -59,6 +73,12 @@ public class ServerMonitorTab extends Tab {
 	 * Builds the graphical user interface of the tab.
 	 */
 	protected void buildGUI() {
+		final JPanel settingsPanel = Utils.createWrapperPanel();
+		settingsPanel.add( new JLabel( "Re-check time interval for monitored servers:" ) );
+		settingsPanel.add( monitorRecheckIntervalComboBox );
+		settingsPanel.add( new JLabel( "seconds." ) );
+		contentBox.add( settingsPanel );
+		
 		final JPanel buttonsPanel = Utils.createWrapperPanel();
 		final JButton checkAllServersButton = new JButton( "Check all servers", IconResourceManager.ICON_SERVER_CONNECT );
 		checkAllServersButton.setMnemonic( checkAllServersButton.getText().charAt( 0 ) );
@@ -102,6 +122,7 @@ public class ServerMonitorTab extends Tab {
 			try {
 				final BufferedReader input = new BufferedReader( new FileReader( SERVER_LIST_FILE_NAME ) );
 				
+				stopMonitoring();
 				checkButtonList.clear();
 				for ( int i = serversPanel.getComponentCount() - 1; i >= 0; i-- )
 					serversPanel.remove( i );
@@ -146,11 +167,13 @@ public class ServerMonitorTab extends Tab {
 					
 					serversPanel.add( new JLabel( portName == null ? "Port " + port : portName, JLabel.CENTER ) );
 					
-					final JButton checkButton = new JButton( "Check", IconResourceManager.ICON_SERVER_CONNECT );
-					final JLabel  statusLabel = new JLabel( "", JLabel.CENTER );
+					final JButton checkButton   = new JButton( "Check", IconResourceManager.ICON_SERVER_CONNECT );
+					final JLabel  statusLabel   = new JLabel( "", JLabel.CENTER );
+					final JButton monitorButton = new JButton( "Monitor", IconResourceManager.ICON_MONITOR_SERVER );
+					
 					checkButton.addActionListener( new ActionListener() {
 						public void actionPerformed( final ActionEvent event ) {
-							checkServer( (String) server[ 0 ], (Integer) server[ 1 ], checkButton, statusLabel );
+							checkServer( (String) server[ 0 ], (Integer) server[ 1 ], checkButton, monitorButton, statusLabel );
 						}
 					} );
 					serversPanel.add( checkButton );
@@ -158,20 +181,33 @@ public class ServerMonitorTab extends Tab {
 					
 					serversPanel.add( statusLabel );
 					
-					final JButton monitorButton = new JButton( "Monitor", IconResourceManager.ICON_MONITOR_SERVER );
 					monitorButton.addActionListener( new ActionListener() {
 						public void actionPerformed( final ActionEvent event ) {
-							monitorButton.setText( "Stop" );
-							monitorButton.setIcon( IconResourceManager.ICON_STOP_MONITOR );
+							if ( monitorButton.getText().equals( "Monitor" ) ) {
+								disableMonitorButton( monitorButton );
+								synchronized ( monitoredServerButtonList ) {
+									monitoredServerButtonList.add( checkButton );
+								}
+								
+								if ( monitorThread == null )
+									startMonitoring();
+							}
+							else {
+								synchronized ( monitoredServerButtonList ) {
+									monitoredServerButtonList.remove( monitorButton );
+								}
+								enableMonitorButton( monitorButton );
+								// The monitor thread stops itself if there is nothing to be monitored.
+							}
 						}
 					} );
 					serversPanel.add( monitorButton );
 					
-					if ( port == 80 ) {
+					if ( port == 80 || port == 443 ) {
 						final JButton visitButton = new JButton( "Visit", IconResourceManager.ICON_WORLD_GO );
 						visitButton.addActionListener( new ActionListener() {
 							public void actionPerformed( final ActionEvent event ) {
-								Utils.showURLInBrowser( "http://" + (String) server[ 0 ] );
+								Utils.showURLInBrowser( ( port == 80 ? "http://" : port == 443 ? "https://" : "" ) + (String) server[ 0 ] );
 							}
 						} );
 						serversPanel.add( visitButton );
@@ -204,11 +240,39 @@ public class ServerMonitorTab extends Tab {
 	}
 	
 	/**
-	 * Checks a server in a new Thread.
+	 * Disables a monitor button.
+	 * @param monitorButton monitor button to be disabled
 	 */
-	private void checkServer( final String serverUrl, final int port, final JButton sourceButton, final JLabel statusLabel ) {
-		sourceButton.setEnabled( false );
-		statusLabel.setText( "Checking..." );
+	private void disableMonitorButton( final JButton monitorButton ) {
+		monitorButton.setText( "Stop" );
+		monitorButton.setIcon( IconResourceManager.ICON_STOP_MONITOR );
+	}
+	
+	/**
+	 * Enables a monitor button.
+	 * @param monitorButton monitor button to be disabled
+	 */
+	private void enableMonitorButton( final JButton monitorButton ) {
+		monitoredServerButtonList.remove( monitorButton );
+		monitorButton.setText( "Monitor" );
+		monitorButton.setIcon( IconResourceManager.ICON_MONITOR_SERVER );
+	}
+	
+	/**
+	 * Checks a server in a new Thread.
+	 * 
+	 * @param serverUrl     url of the server
+	 * @param port          port of the server
+	 * @param checkButton   button that is associated with this check
+	 * @param monitorButton monitor button that is associated with this server
+	 * @param statusLabel   status label to be updated
+	 */
+	private void checkServer( final String serverUrl, final int port, final JButton checkButton, final JButton monitorButton, final JLabel statusLabel ) {
+		if ( !checkButton.isEnabled() )
+			return;
+		
+		checkButton.setEnabled( false );
+		statusLabel.setIcon( IconResourceManager.ICON_WAITING );
 		new NormalThread() {
 			@Override
 			public void run() {
@@ -216,20 +280,77 @@ public class ServerMonitorTab extends Tab {
 					final Socket socket = new Socket( serverUrl, port );
 					socket.getInputStream();
 					socket.close();
-					statusLabel.setIcon( IconResourceManager.ICON_ACCEPT );
+					statusLabel.setIcon( IconResourceManager.ICON_TICK );
+					synchronized ( monitoredServerButtonList ) {
+						if ( monitoredServerButtonList.contains( monitorButton ) ) {
+							monitoredServerButtonList.remove( monitorButton );
+							enableMonitorButton( monitorButton );
+							// TODO: play sound: "server is back online"
+						}
+						if ( monitoredServerButtonList.isEmpty() )
+							stopMonitoring();
+					}
 				}
 				catch ( final Exception e ) {
 					statusLabel.setIcon( IconResourceManager.ICON_DELETE_REPLAY );
 				}
 				finally {
-					sourceButton.setEnabled( true );
+					checkButton.setEnabled( true );
 				}
 			}
 		}.start();
 	}
 	
+	/**
+	 * Starts the monitoring thread.
+	 */
+	private void startMonitoring() {
+		if ( monitorThread != null )
+			return;
+		
+		monitorThread = new NormalThread() {
+			@Override
+			public void run() {
+				try {
+					sleep( 5000l );
+					// TODO: only perform check if the re-check time interval has passed!
+					
+					synchronized ( monitoredServerButtonList ) {
+						if ( monitoredServerButtonList.isEmpty() )
+							return;
+						
+						for ( final JButton checkButton : monitoredServerButtonList )
+							checkButton.doClick(); // The action listener might access the monitoredServerButtonList lock, but doClick() spawns a new thread, so there will be no dead-locking.
+					}
+				}
+				catch ( InterruptedException ie ) {
+				}
+			}
+		};
+	}
+	
+	/**
+	 * Stops the monitoring thread.
+	 */
+	private void stopMonitoring() {
+		if ( monitorThread == null )
+			return;
+		
+		synchronized ( monitoredServerButtonList ) {
+			monitoredServerButtonList.clear();
+		}
+		
+		try {
+			monitorThread.join();
+		}
+		catch ( final InterruptedException ie ) {}
+		
+		monitorThread = null;
+	}
+	
 	@Override
 	public void assignUsedProperties() {
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_MONITOR_RECHECK_INTERVAL, Integer.toString( monitorRecheckIntervalComboBox.getSelectedIndex() ) );
 	}
 	
 }
