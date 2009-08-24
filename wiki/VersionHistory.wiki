@@ -7,7 +7,7 @@
 ----
 ===Features and changes in the upcoming new release===
  * Changed the horizontal tab bar to a vertical navigation panel.
- * A new *Server monitor* tab. On this tab you can check the online status of the battle.net servers and Starcraft websites. You can edit the list to add any of your websites (or any other server) or to remove sites you don't care. If a server is offline, you can start monitoring it. When the server goes online again, you will be notified with a sound saying: _"server is back online"_.
+ * A new *Server monitor* tab. On this tab you can check the online status of the battle.net servers and Starcraft websites. You can edit the list to add any of your websites (or any other servers) or to remove sites you don't care. If a server is offline, you can start *monitoring* it. When the server goes online again, you will hear a sound saying: _"server is back online"_.
  * New filters on the Player matcher tab: _"Show only matches of players"_ and _"Exclude matches with players"_. You can enter a comma separated list in each. The first one will filter out matches that *do not* contain any of the players entered here. The second filter will filter out matches that *do* contain any of the players entered here. These 2 filters can be used together or independently. The excluder filter is the stronger one.
  * New setting on the Player matcher tab: _"Max displayable results"_. If the provided thresholds allow more results, you don't have to worry about the Agent hanging or working too long. The highest matches with the best authoritativeness will be kept and the worse results will be thrown away.
  * Added a startup splash image.
