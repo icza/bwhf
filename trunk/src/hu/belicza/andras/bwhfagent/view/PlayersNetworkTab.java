@@ -123,7 +123,7 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 		selectFilesButton  .setEnabled( false );
 		stopSendingButton  .setEnabled( true  );
 		
-		new NormalThread() {
+		new NormalThread( "PN worker" ) {
 			/** List of replay files to be sent. */
 			final List< File > replayFileList = new ArrayList< File >();
 			

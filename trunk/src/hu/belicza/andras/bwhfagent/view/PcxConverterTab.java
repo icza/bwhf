@@ -198,7 +198,7 @@ public class PcxConverterTab extends ProgressLoggedTab {
 	 */
 	private void convertPcxFiles( final File[] pcxFiles, final boolean deleteOnSuccess, final boolean printNewLinesAtStart ) {
 		selectFilesButton.setEnabled( false );
-		new NormalThread() {
+		new NormalThread( "PCX converter" ) {
 			@Override
 			public void run() {
 				try {
@@ -262,7 +262,7 @@ public class PcxConverterTab extends ProgressLoggedTab {
 	 * Starts the auto converter.
 	 */
 	private void startAutoConverter() {
-		new NormalThread() {
+		new NormalThread( "New PCX detector" ) {
 			
 			@Override
 			public void run() {

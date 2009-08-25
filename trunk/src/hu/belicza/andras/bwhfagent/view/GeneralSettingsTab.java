@@ -289,7 +289,7 @@ public class GeneralSettingsTab extends Tab {
 		checkUpdatesButton.setText( "Checking..." );
 		checkUpdatesButton.getParent().validate();
 		
-		new NormalThread() {
+		new NormalThread( "Update checker" ) {
 			@Override
 			public void run() {
 				try {

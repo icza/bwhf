@@ -200,7 +200,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 		selectFilesButton   .setEnabled( false );
 		stopScanButton      .setEnabled( true  );
 		
-		new NormalThread() {
+		new NormalThread( "Manual scanner" ) {
 			/** List of replay files to be scanned. */
 			final List< File > replayFileList = new ArrayList< File >();
 			

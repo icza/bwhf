@@ -459,7 +459,7 @@ public class PlayerMatcherTab extends Tab {
 		
 		lastAnalysisSourceFiles = files;
 		
-		new NormalThread() {
+		new NormalThread( "Player matcher analyzer" ) {
 			/** List of replay files to be analyzed. */
 			final List< File > replayFileList = new ArrayList< File >();
 			

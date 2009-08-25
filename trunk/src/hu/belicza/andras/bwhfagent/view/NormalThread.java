@@ -10,7 +10,12 @@ package hu.belicza.andras.bwhfagent.view;
  */
 public class NormalThread extends Thread {
 	
-	public NormalThread() {
+	/**
+	 * Creates a new NormalThread.
+	 * @param threadName name of the thread
+	 */
+	public NormalThread( final String threadName ) {
+		super( threadName );
 		setPriority( NORM_PRIORITY );
 	}
 	

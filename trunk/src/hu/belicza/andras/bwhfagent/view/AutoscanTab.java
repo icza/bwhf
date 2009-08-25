@@ -149,7 +149,7 @@ public class AutoscanTab extends LoggedTab {
 					}
 					reportHackersCheckBox.setEnabled( false );
 					gatewayComboBox.setEnabled( false );
-					new NormalThread() {
+					new NormalThread( "Key checker" ) {
 						public void run() {
 							checkKeyButton.doClick();
 							
@@ -195,7 +195,7 @@ public class AutoscanTab extends LoggedTab {
 				keyCheckInProgress = true;
 				checkKeyButton.setEnabled( false );
 				checkKeyButton.setText( "Checking..." );
-				new NormalThread() {
+				new NormalThread( "Key checker2" ) {
 					public void run() {
 						lastKeyCheckResult = Utils.checkAuthorizationKey( authorizationKey );
 						checkKeyButton.setText( CHECK_KEY_BUTTON_TEXT + ( lastKeyCheckResult == null ? " (check failed!)" : ( lastKeyCheckResult ? " (valid)" : " (invalid)" ) ) );
@@ -226,7 +226,7 @@ public class AutoscanTab extends LoggedTab {
 	 * Starts the autoscanner.
 	 */
 	private void startAutoscanner() {
-		new NormalThread() {
+		new NormalThread( "Autoscanner" ) {
 			
 			@Override
 			public void run() {
@@ -254,7 +254,7 @@ public class AutoscanTab extends LoggedTab {
 							lastModifiedOfLastChecked = newLastReplayLastModified;
 							
 							if ( MainFrame.getInstance().playersNetworkTab.autoSendInfoAboutLastReplayCheckBox.isSelected() )
-								new NormalThread() { // We send it in a new Thread to not block the autoscan process
+								new NormalThread( "Sending info to PN" ) { // We send it in a new Thread to not block the autoscan process
 									@Override
 									public void run() {
 										MainFrame.getInstance().playersNetworkTab.sendFileInfo( lastReplayFile, gatewayComboBox.getSelectedIndex() > 0 ? gatewayComboBox.getSelectedIndex() - 1 : null );

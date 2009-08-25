@@ -1306,7 +1306,7 @@ public class ReplaySearchTab extends Tab {
 		
 		final ReplayFilter[] replayFilters = getReplayFilters();
 		
-		new NormalThread() {
+		new NormalThread( "Replay searcher" ) {
 			/** List of replay files to be scanned. */
 			final List< File > replayFileList = new ArrayList< File >();
 			
