@@ -149,7 +149,7 @@ public class GameChatTab extends ProgressLoggedTab {
 		selectFilesToExtractFromButton.setEnabled( false );
 		selectFileToDisplayFromButton.setEnabled( false );
 		displayFromLastReplayButton.setEnabled( false );
-		new NormalThread() {
+		new NormalThread( "Game chat extractor" ) {
 			@Override
 			public void run() {
 				try {

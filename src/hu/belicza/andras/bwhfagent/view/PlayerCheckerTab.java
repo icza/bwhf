@@ -365,7 +365,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		updateNowButton.setText( "Updating..." );
 		settingsPanel.getParent().validate();
 		
-		new NormalThread() {
+		new NormalThread( "Hacker list updater" ) {
 			@Override
 			public void run() {
 				BufferedReader input  = null;
@@ -499,7 +499,7 @@ public class PlayerCheckerTab extends LoggedTab {
 	 * Starts the local hacker list cache auto updater. 
 	 */
 	private void startCacheAutoUpdater() {
-		new NormalThread() {
+		new NormalThread( "Cache update listener" ) {
 			
 			@Override
 			public void run() {

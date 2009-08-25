@@ -8,6 +8,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -118,11 +119,11 @@ public class ServerMonitorTab extends Tab {
 	 * Reloads the server list from the file.
 	 */
 	private void reloadServerList() {
+		stopMonitoring();
 		synchronized ( checkButtonList ) {
 			try {
 				final BufferedReader input = new BufferedReader( new FileReader( SERVER_LIST_FILE_NAME ) );
 				
-				stopMonitoring();
 				checkButtonList.clear();
 				for ( int i = serversPanel.getComponentCount() - 1; i >= 0; i-- )
 					serversPanel.remove( i );
@@ -194,7 +195,7 @@ public class ServerMonitorTab extends Tab {
 							}
 							else {
 								synchronized ( monitoredServerButtonList ) {
-									monitoredServerButtonList.remove( monitorButton );
+									monitoredServerButtonList.remove( checkButton );
 								}
 								enableMonitorButton( monitorButton );
 								// The monitor thread stops itself if there is nothing to be monitored.
@@ -253,6 +254,7 @@ public class ServerMonitorTab extends Tab {
 	 * @param monitorButton monitor button to be disabled
 	 */
 	private void enableMonitorButton( final JButton monitorButton ) {
+		// This method is called from a synchronized block, no need (and must not use) another synchronized block! 
 		monitoredServerButtonList.remove( monitorButton );
 		monitorButton.setText( "Monitor" );
 		monitorButton.setIcon( IconResourceManager.ICON_MONITOR_SERVER );
@@ -273,7 +275,7 @@ public class ServerMonitorTab extends Tab {
 		
 		checkButton.setEnabled( false );
 		statusLabel.setIcon( IconResourceManager.ICON_WAITING );
-		new NormalThread() {
+		new NormalThread( "Server checker" ) {
 			@Override
 			public void run() {
 				try {
@@ -282,13 +284,11 @@ public class ServerMonitorTab extends Tab {
 					socket.close();
 					statusLabel.setIcon( IconResourceManager.ICON_TICK );
 					synchronized ( monitoredServerButtonList ) {
-						if ( monitoredServerButtonList.contains( monitorButton ) ) {
-							monitoredServerButtonList.remove( monitorButton );
+						if ( monitoredServerButtonList.contains( checkButton ) ) {
+							monitoredServerButtonList.remove( checkButton );
 							enableMonitorButton( monitorButton );
 							// TODO: play sound: "server is back online"
 						}
-						if ( monitoredServerButtonList.isEmpty() )
-							stopMonitoring();
 					}
 				}
 				catch ( final Exception e ) {
@@ -308,25 +308,41 @@ public class ServerMonitorTab extends Tab {
 		if ( monitorThread != null )
 			return;
 		
-		monitorThread = new NormalThread() {
+		monitorThread = new NormalThread( "Server monitor" ) {
 			@Override
 			public void run() {
 				try {
-					sleep( 5000l );
-					// TODO: only perform check if the re-check time interval has passed!
-					
-					synchronized ( monitoredServerButtonList ) {
-						if ( monitoredServerButtonList.isEmpty() )
-							return;
+					long lastCheckTime = new Date().getTime();
+					while ( true ) {
+						sleep( 300l );
 						
-						for ( final JButton checkButton : monitoredServerButtonList )
-							checkButton.doClick(); // The action listener might access the monitoredServerButtonList lock, but doClick() spawns a new thread, so there will be no dead-locking.
+						synchronized ( monitoredServerButtonList ) {
+							// We have to check this first because if reload was pressed, it will wait for this thread to die,
+							// and it is a SwingWT thread meaning we can't query the selected item of monitorRecheckIntervalComboBox
+							// (cause the SwingWT thread is blocked by us).
+							if ( monitoredServerButtonList.isEmpty() )
+								return;
+						}
+						
+						final long recheckIntervalMs = (Integer) monitorRecheckIntervalComboBox.getSelectedItem() * 1000l;
+						if ( lastCheckTime + recheckIntervalMs < new Date().getTime() ) {
+							lastCheckTime = new Date().getTime();
+							synchronized ( monitoredServerButtonList ) {
+								for ( final JButton checkButton : monitoredServerButtonList )
+									checkButton.doClick(); // The action listener might access the monitoredServerButtonList lock, but doClick() spawns a new thread, so there will be no dead-locking.
+							}
+						}
 					}
 				}
 				catch ( InterruptedException ie ) {
 				}
+				finally {
+					monitorThread = null;
+				}
 			}
 		};
+		
+		monitorThread.start();
 	}
 	
 	/**
@@ -344,8 +360,6 @@ public class ServerMonitorTab extends Tab {
 			monitorThread.join();
 		}
 		catch ( final InterruptedException ie ) {}
-		
-		monitorThread = null;
 	}
 	
 	@Override
