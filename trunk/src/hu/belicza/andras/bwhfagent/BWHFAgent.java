@@ -1,5 +1,7 @@
 package hu.belicza.andras.bwhfagent;
 
+import java.awt.SplashScreen;
+
 import hu.belicza.andras.bwhfagent.view.MainFrame;
 import hu.belicza.andras.bwhfagent.view.Utils;
 import swingwtx.swing.SwingWTUtils;
@@ -33,7 +35,7 @@ public class BWHFAgent {
 	
 	/**
 	 * Starts the agent.<br>
-	 * Creates the main frame.
+	 * Creates the main frame and hides the splash screen.
 	 * 
 	 * @param arguments used to take arguments from the running environment - not used here
 	 */
@@ -47,6 +49,11 @@ public class BWHFAgent {
 		}*/
 	    
 		new MainFrame( applicationVersion == null ? "" : applicationVersion, arguments );
+		
+		// Since the main frame is not an AWT or Swing window, splash screen will not disappear by itself. Make it disappear.
+		final SplashScreen splashScreen = SplashScreen.getSplashScreen();
+		if ( splashScreen != null )
+			splashScreen.close();
 	}
 	
 }

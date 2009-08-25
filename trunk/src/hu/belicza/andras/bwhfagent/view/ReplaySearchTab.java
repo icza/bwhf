@@ -141,7 +141,7 @@ public class ReplaySearchTab extends Tab {
 	private JPanel headerFiltersPanel; 
 	
 	/** Checkbox to add new search results to previous one (do not clear). */
-	private final JCheckBox appendResultsToTableCheckBox = new JCheckBox( "Append results to table (will not clear table)", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_APPEND_RESULTS_TO_TABLE ) ) );
+	private final JCheckBox appendResultsToTableCheckBox = new JCheckBox( "Append results to table", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_APPEND_RESULTS_TO_TABLE ) ) );
 	
 	/** Button to select folders to search.        */
 	private final JButton selectFoldersButton        = new JButton( "Select folders to search recursively...", IconResourceManager.ICON_FOLDER_CHOOSER );

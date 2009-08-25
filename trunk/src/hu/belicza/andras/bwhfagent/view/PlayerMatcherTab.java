@@ -392,6 +392,7 @@ public class PlayerMatcherTab extends Tab {
 				analyzeFilesAndFolders( lastAnalysisSourceFiles );
 			}
 		} );
+		repeatAnalysisButton.setEnabled( false );
 		buttonsPanel.add( repeatAnalysisButton );
 		contentBox.add( buttonsPanel );
 		
