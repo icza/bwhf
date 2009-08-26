@@ -46,7 +46,7 @@ You can select replays to analyze them in order to find the same players with di
 More about the player matcher: [PlayerMatcherInBWHFAgent]
 
 ===Server monitor===
-On the Server monitor tab you can check the online status of the battle.net servers and Starcraft websites. You can edit the server list to add any of your websites (or any other servers) or to remove sites you don't care about. Basically you can add any server that listens on a TCP port (like ftp, online video and audio streams etc.). If a server is offline, you can start monitoring it. When the server goes online again, you will hear a sound saying: _"server is back online"_. You can set the re-check time interval of the monitored servers. You can open the listed web sites with a click.
+On the Server monitor tab you can check the online status of the battle.net servers and Starcraft websites. You can edit the server list to add any of your websites (or any other servers) or to remove sites you don't care about. Basically you can add any server that listens on a TCP port (like ftp, online video and audio streams etc.). If a server is offline, you can start monitoring it. When the server goes online again, you will hear an alert sound. You can set the re-check time interval of the monitored servers. You can open the listed web sites with a click.
 
 ===Miscellaneous===
  * Can be minimized to system tray. Can be started minimized to tray.
