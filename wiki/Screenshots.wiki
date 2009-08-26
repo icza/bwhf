@@ -4,6 +4,9 @@
 
 <wiki:toc max_depth="3" />
 
+===Server monitor:===
+http://lh4.ggpht.com/_jDMClHrENz8/SpTf4hVtZWI/AAAAAAAAOas/dXBmHiBxhPk/s800/server_monitor.png.jpg
+
 ===Player matcher:===
 http://lh4.ggpht.com/_jDMClHrENz8/SnfomCZ8spI/AAAAAAAAOZA/6QQNUj9MmtA/s800/player_matcher.png.jpg
 
