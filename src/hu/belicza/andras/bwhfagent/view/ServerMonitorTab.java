@@ -3,6 +3,7 @@ package hu.belicza.andras.bwhfagent.view;
 import hu.belicza.andras.bwhfagent.Consts;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -287,7 +288,7 @@ public class ServerMonitorTab extends Tab {
 						if ( monitoredServerButtonList.contains( checkButton ) ) {
 							monitoredServerButtonList.remove( checkButton );
 							enableMonitorButton( monitorButton );
-							// TODO: play sound: "server is back online"
+							Utils.playWavFile( new File( "sounds/pager.wav"), false );
 						}
 					}
 				}
