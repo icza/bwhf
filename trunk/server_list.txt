@@ -8,15 +8,13 @@ europe.battle.net:6112 Europe
 asia.battle.net:6112 Asia
 sc.theabyss.ru:6112 Iccup (Abyss)
 bwhf.net BWHF
-iccup.com Iccup
-teamliquid.net Teamliquid
+teamliquid.net Team Liquid
 gosugamers.net Gosugamers
+iccup.com Iccup
 starcraftdream.com Starcraft Dream
 vilegaming.com Vilegaming
-bghers.com BGHers
-thebgh.com TheBgh
-jbls.org:9367 jbls.org
+www.bghers.com BGHers
+www.thebgh.com TheBGH
 distant.no-ip.org:9367 Distant
 jbls.clanbnu.net:9367 ClanBNU
-pyro.no-ip.biz:9367 Pyro
-localhost:8080 Localhost
+jbls.org:9367 jbls.org
