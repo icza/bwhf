@@ -195,8 +195,13 @@ public class BinRepParser {
 					
 					if ( sectionName.equals( DIMENSION_SECTION_NAME ) ) {
 						// If map has a non-standard size, the replay header contains invalid map size, this is the correct one
-						replayHeader.mapWidth  = mapDataBuffer.getShort();
-						replayHeader.mapHeight = mapDataBuffer.getShort();
+						final short newWidth  = mapDataBuffer.getShort();
+						final short newHeight = mapDataBuffer.getShort();
+						// Sometimes newWidth and newHeight is 0, we don't want to overwrite the size with wrong values!
+						if ( newWidth > replayHeader.mapWidth )
+							replayHeader.mapWidth = newWidth;
+						if ( newHeight > replayHeader.mapHeight )
+							replayHeader.mapHeight= newHeight;
 						break; // We only needed the dimension section
 					}
 					
