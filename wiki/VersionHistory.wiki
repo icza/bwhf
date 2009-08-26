@@ -5,6 +5,10 @@
 <wiki:toc max_depth="3" />
 
 ----
+===2.61 2009-08-26===
+ * Map size was taken from the map data section of the replays which contains 0 with and height in some cases. In these cases the data recorded in the replay header is used. This fixes false build anywhere hack alerts.
+
+----
 ===2.60 2009-08-26===
  * Changed the horizontal tab bar to a vertical navigation panel.
  * A new *Server monitor* tab. On this tab you can check the online status of the battle.net servers and Starcraft websites. You can edit the list to add any of your websites (or any other servers) or to remove sites you don't care about. Basically you can add any server that listens on a TCP port (like ftp, online video and audio streams etc.). If a server is offline, you can start *monitoring* it. When the server goes online again, you will hear an alert sound. You can set the re-check time interval of the monitored servers. You can open the listed web sites with a click.
