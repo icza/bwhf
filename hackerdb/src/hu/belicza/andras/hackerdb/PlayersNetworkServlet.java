@@ -241,18 +241,19 @@ public class PlayersNetworkServlet extends BaseServlet {
 		try {
 			connection = dataSource.getConnection();
 			
-			statement = connection.prepareStatement( "SELECT id FROM game WHERE replay_md5=?" );
-			statement.setString( 1, replayMd5 );
-			resultSet = statement.executeQuery();
-			if ( resultSet.next() ) {
-				// This game has already been reported
-				sendBackPlainMessage( ServerApiConsts.REPORT_ACCEPTED_MESSAGE, response );
-				return;
-			}
-			resultSet.close();
-			statement.close();
-			
 			synchronized ( PlayersNetworkServlet.class ) {
+				// This query has to be in the sync block too, else there might be duplicates (there were in the past)
+				statement = connection.prepareStatement( "SELECT id FROM game WHERE replay_md5=?" );
+				statement.setString( 1, replayMd5 );
+				resultSet = statement.executeQuery();
+				if ( resultSet.next() ) {
+					// This game has already been reported
+					sendBackPlainMessage( ServerApiConsts.REPORT_ACCEPTED_MESSAGE, response );
+					return;
+				}
+				resultSet.close();
+				statement.close();
+			
 				connection.setAutoCommit( false );
 				
 				// First create the players
