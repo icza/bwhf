@@ -16,7 +16,7 @@ Basically all windows are supported where you can install the 32-bit version Jav
 To run BWHF Agent, you need the 32-bit version of Java 6.0 or higher installed on your system. You can download and install Java here: http://www.java.com/download
 
 *IF* you have trouble to get the 32-bit version of Java, you may check out this page: http://java.sun.com/javase/downloads/index.jsp.
-Proceed with the JRE, and you can choose your platform (platform without the 64 tag contains the 32-bit installation).
+Proceed with the JRE, and you can choose your platform (platforms without the 64 tag contain the 32-bit installation).
 
 ===What's new in the latest release?===
 
