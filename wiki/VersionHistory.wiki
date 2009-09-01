@@ -6,7 +6,7 @@
 
 ----
 ===2.61 2009-08-26===
- * Map size was taken from the map data section of the replays which contains 0 with and height in some cases. In these cases the data recorded in the replay header is used. This fixes false build anywhere hack alerts.
+ * Map size was taken from the map data section of the replays which contains 0 width and height in some cases. In these cases the data recorded in the replay header is used. This fixes false build anywhere hack alerts.
 
 ----
 ===2.60 2009-08-26===
