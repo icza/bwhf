@@ -63,7 +63,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 			throw new RuntimeException( pe );
 		}
 	}
-	/** Cached string for the "<unkown>" html string. */
+	/** Cached string for the "N/A" html string. */
 	private static final String UNKOWN_HTML_STRING = encodeHtmlString( "N/A" );
 	/** Size of the list in one page. */
 	private static final int PAGE_SIZE = 25;
@@ -544,7 +544,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.print( "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + ( replayHeader.saveTime == null ? "" : replayHeader.guessVersionFromDate() ) );
 					outputWriter.print( "<td>" + getGameListWithMapHtmlLink( replayHeader.mapName, replayHeader.mapName, player1, player2, includeAkas) );
 					outputWriter.print( "<td>" + replayHeader.getDurationString( true ) );
-					outputWriter.print( "<td>" + ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ] );
+					outputWriter.print( "<td>" + getGameTypeName( replayHeader.gameType ) );
 					outputWriter.print( "<td>" + ( replayHeader.saveTime == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ) ) );
 					
 					statement2.setInt( 1, gameId );
@@ -868,7 +868,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.println( "<tr><th align=left>Map name:<td>" + getGameListWithMapHtmlLink( replayHeader.mapName, replayHeader.mapName, null, null, false ) );
 					outputWriter.println( "<tr><th align=left>Map size:<td>" + replayHeader.getMapSize() );
 					outputWriter.println( "<tr><th align=left>Creator name:<td>" + replayHeader.creatorName );
-					outputWriter.println( "<tr><th align=left>Game type:<td>" + ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ] );
+					outputWriter.println( "<tr><th align=left>Game type:<td>" + getGameTypeName( replayHeader.gameType ) );
 					if ( gateway >= 0 && gateway < GATEWAYS.length )
 						outputWriter.print( "<tr><th align=left>Reported gateway:<td class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + ">" + GATEWAYS[ gateway ] );
 					
@@ -1318,6 +1318,22 @@ public class PlayersNetworkServlet extends BaseServlet {
 		formatBuilder.append( days ).append( days == 1 ? " day" : " days" );
 		
 		return formatBuilder.toString();
+	}
+	
+	/**
+	 * Safe method to get the name of a game type. Returns <code>UNKOWN_HTML_STRING</code> if game type is invalid/unknown.
+	 * @param gameType game type whose name to be return
+	 * @return the name of a game type
+	 */
+	private static String getGameTypeName( final short gameType ) {
+		try {
+			final String gameTypeName = ReplayHeader.GAME_TYPE_NAMES[ gameType ];
+			return gameTypeName == null ? UNKOWN_HTML_STRING : gameTypeName;
+		}
+		catch ( ArrayIndexOutOfBoundsException aioobe ) {
+			// This case should be very rare that's why I didn't check for array index range.
+			return UNKOWN_HTML_STRING;
+		}
 	}
 	
 	/**
