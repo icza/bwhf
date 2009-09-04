@@ -429,7 +429,7 @@ public class HackerDbServlet extends BaseServlet {
 		else
 			queryBuilder.append( "SELECT h.name, h.gateway, COUNT(h.gateway) AS reportsCount, MIN(r.version) AS firstReported, MAX(r.version) AS lastReported" );
 		
-		queryBuilder.append( " FROM hacker h, report r, key k WHERE r.hacker=h.id AND r.key=k.id AND k.revocated=FALSE" );
+		queryBuilder.append( " FROM hacker h, report r, key k WHERE r.hacker=h.id AND r.key=k.id AND k.revocated=FALSE AND r.revocated=FALSE" );
 		
 		int sqlParamsCounter  = 0;
 		int nameParamIndex    = 0;
@@ -536,7 +536,7 @@ public class HackerDbServlet extends BaseServlet {
 			
 			// Gateway distribution chart data
 			statement = connection.createStatement();
-			resultSet = statement.executeQuery( "SELECT hacker.gateway, COUNT(DISTINCT hacker.id) FROM report JOIN key on report.key=key.id JOIN hacker on report.hacker=hacker.id WHERE key.revocated=FALSE GROUP BY hacker.gateway ORDER BY COUNT(DISTINCT hacker.id) DESC" );
+			resultSet = statement.executeQuery( "SELECT hacker.gateway, COUNT(DISTINCT hacker.id) FROM report JOIN key on report.key=key.id JOIN hacker on report.hacker=hacker.id WHERE key.revocated=FALSE AND report.revocated=FALSE GROUP BY hacker.gateway ORDER BY COUNT(DISTINCT hacker.id) DESC" );
 			final List< int[] > gatewayDistributionList = new ArrayList< int[] >();
 			int hackersCount = 0;
 			while ( resultSet.next() ) {
@@ -551,7 +551,7 @@ public class HackerDbServlet extends BaseServlet {
 			statement = connection.createStatement();
 			
 			final List< Object[] > monthlyReportsList = new ArrayList< Object[] >();
-			final PreparedStatement preparedStatement = connection.prepareStatement( "SELECT COUNT(*) FROM report JOIN key on report.key=key.id WHERE key.revocated=FALSE AND report.version>=? and report.version<?" );
+			final PreparedStatement preparedStatement = connection.prepareStatement( "SELECT COUNT(*) FROM report JOIN key on report.key=key.id WHERE key.revocated=FALSE AND report.revocated=FALSE AND report.version>=? and report.version<?" );
 			statement = preparedStatement; // Store it to the statement variable to close it in case of exception
 			final DateFormat monthDateFormat = new SimpleDateFormat( "yyyy-MM" );
 			final GregorianCalendar calendar1 = new GregorianCalendar( 2008, Calendar.DECEMBER, 1 );
@@ -726,7 +726,7 @@ public class HackerDbServlet extends BaseServlet {
 			connection = dataSource.getConnection();
 			
 			statement = connection.createStatement();
-			resultSet = statement.executeQuery( "SELECT DISTINCT gateway, name from hacker JOIN report on report.hacker=hacker.id JOIN key on report.key=key.id WHERE key.revocated=FALSE" );
+			resultSet = statement.executeQuery( "SELECT DISTINCT gateway, name from hacker JOIN report on report.hacker=hacker.id JOIN key on report.key=key.id WHERE key.revocated=FALSE AND report.revocated=FALSE" );
 			outputWriter = response.getWriter();
 			
 			while ( resultSet.next() )
