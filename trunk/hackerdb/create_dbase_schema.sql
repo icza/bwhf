@@ -112,6 +112,7 @@ CREATE TABLE report
   "comment" character varying,
   replay_md5 character varying,
   save_time timestamp without time zone,
+  revocated boolean NOT NULL DEFAULT false,
   CONSTRAINT report_pkey PRIMARY KEY (id),
   CONSTRAINT report_hacker_fkey FOREIGN KEY (hacker)
       REFERENCES hacker (id) MATCH SIMPLE
@@ -143,6 +144,14 @@ CREATE INDEX idx_report_version
   USING btree
   (version);
 
+-- Index: idx_report_revocated
+
+-- DROP INDEX idx_report_revocated;
+
+CREATE INDEX idx_report_revocated
+  ON report
+  USING btree
+  (revocated);
 
 
 -- Table: download_log
