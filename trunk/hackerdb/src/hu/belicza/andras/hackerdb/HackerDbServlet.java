@@ -31,6 +31,7 @@ import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_REPLAY_SAVE_TIME;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_FIRST_REPORTED;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_GATEWAY;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_HACKING_PERIOD;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_LAST_REPORTED;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_NAME;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_REPORT_COUNT;
@@ -100,6 +101,7 @@ public class HackerDbServlet extends BaseServlet {
 		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_REPORT_COUNT  , false );
 		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_FIRST_REPORTED, false );
 		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_LAST_REPORTED , false );
+		FILTER_DEFAULT_ASCENDANT_SORTING_MAP.put( SORT_BY_VALUE_HACKING_PERIOD, false );
 	}
 	
 	@Override
@@ -334,6 +336,7 @@ public class HackerDbServlet extends BaseServlet {
 								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_NAME          , filtersWrapper ) + "\">Name"           + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME           ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
 								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_GATEWAY       , filtersWrapper ) + "\">Gateway"        + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_GATEWAY        ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
 								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_REPORT_COUNT  , filtersWrapper ) + "\">Report count"   + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_REPORT_COUNT   ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
+								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_HACKING_PERIOD, filtersWrapper ) + "\">Hacking period" + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_HACKING_PERIOD ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
 								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_FIRST_REPORTED, filtersWrapper ) + "\">First reported" + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_FIRST_REPORTED ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
 								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_LAST_REPORTED , filtersWrapper ) + "\">Last reported"  + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_LAST_REPORTED  ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" ) );
 			if ( matchingRecordsCount > 0 ) {
@@ -342,7 +345,7 @@ public class HackerDbServlet extends BaseServlet {
 				resultSet = statement.executeQuery();
 				while ( resultSet.next() ) {
 					final int gateway = resultSet.getInt( 2 );
-					outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++recordNumber) + "<td>" + encodeHtmlString( resultSet.getString( 1 ) ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td align=center>" + resultSet.getInt( 3 ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 4 ) ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 5 ) ) );
+					outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++recordNumber) + "<td>" + encodeHtmlString( resultSet.getString( 1 ) ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td align=center>" + resultSet.getInt( 3 ) + "<td align=center>" + formatDays( resultSet.getInt( 4 ) ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 5 ) ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 6 ) ) );
 				}
 			}
 			outputWriter.println( "</table>" );
@@ -425,7 +428,7 @@ public class HackerDbServlet extends BaseServlet {
 		if ( countOnly )
 			queryBuilder.append( "SELECT COUNT(*) FROM (SELECT h.gateway" );
 		else
-			queryBuilder.append( "SELECT h.name, h.gateway, COUNT(h.gateway) AS reportsCount, MIN(r.version) AS firstReported, MAX(r.version) AS lastReported" );
+			queryBuilder.append( "SELECT h.name, h.gateway, COUNT(h.gateway) AS reportsCount, 1 + date(MAX(r.version)) - date(MIN(r.version)) AS hackingPeriod, MIN(r.version) AS firstReported, MAX(r.version) AS lastReported" );
 		
 		queryBuilder.append( " FROM hacker h, report r, key k WHERE r.hacker=h.id AND r.key=k.id AND k.revocated=FALSE AND r.revocated=FALSE" );
 		
@@ -490,6 +493,8 @@ public class HackerDbServlet extends BaseServlet {
 				queryBuilder.append( "reportsCount" );
 			else if ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME ) )
 				queryBuilder.append( "h.name" );
+			else if ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_HACKING_PERIOD ) )
+				queryBuilder.append( "hackingPeriod" );
 			else // Default sorting...
 				queryBuilder.append( "firstReported" );
 			

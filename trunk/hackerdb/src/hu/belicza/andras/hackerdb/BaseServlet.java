@@ -212,4 +212,27 @@ public class BaseServlet extends HttpServlet {
 		}
 	}
 	
+	/**
+	 * Formats the days to human readable format (breaks it down to years, months, days).
+	 * @param days number of days to be formatted
+	 * @return the formatted days in human readable format (years, months, days)
+	 */
+	public static String formatDays( int days ) {
+		final StringBuilder formatBuilder = new StringBuilder();
+		
+		final int years = days / 365;
+		if ( years > 0 )
+			formatBuilder.append( years ).append( years == 1 ? " year, " : " years, " );
+		days = days % 365;
+		
+		final int months = days / 30;
+		if ( months > 0 )
+			formatBuilder.append( months ).append( months == 1 ? " month, " : " months, " );
+		days = days % 30;
+		
+		formatBuilder.append( days ).append( days == 1 ? " day" : " days" );
+		
+		return formatBuilder.toString();
+	}
+	
 }

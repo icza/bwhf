@@ -80,6 +80,8 @@ public class ServerApiConsts {
 	public static final String SORT_BY_VALUE_FIRST_REPORTED  = "sfr";
 	/** Sort by value for last reported.   */
 	public static final String SORT_BY_VALUE_LAST_REPORTED   = "slr";
+	/** Sort by value for hacking period.  */
+	public static final String SORT_BY_VALUE_HACKING_PERIOD  = "shp";
 	
 	/** Step direction value for first.    */
 	public static final String STEP_DIRECTION_FIRST          = "First";
