@@ -671,7 +671,7 @@ public class HackerDbServlet extends BaseServlet {
 			
 			outputWriter.println( "<h3>Last " + LAST_DAYS_REPORTS + " days' daily reports</h3>" );
 			outputWriter.println( "<table border=0><tr><td>" );
-			outputWriter.println( "<tr><td><img src='" + dailyReportsChartUrlBuilder.toString() + "' width=" + CHARTS_WIDTH + " height=" + CHARTS_HEIGHT + " title='Last " + LAST_DAYS_REPORTS + " days' daily reports'></img>" );
+			outputWriter.println( "<tr><td><img src='" + dailyReportsChartUrlBuilder.toString() + "' width=" + CHARTS_WIDTH + " height=" + CHARTS_HEIGHT + " title=\"Last " + LAST_DAYS_REPORTS + " days' daily reports\"></img>" );
 			outputWriter.println( "<td><div style='width:125;height:400;overflow:auto;'><table border=1 cellspacing=0 cellpadding=2><tr class=" + TABLE_HEADER_STYLE_NAME + "><th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Day:<th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Reports:" );
 			Collections.reverse( dailyReportsList );
 			dailyReportsList.add( 0, new Object[] { "Total:", lastDaysReportsCount } );
