@@ -52,11 +52,9 @@ import java.sql.Types;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Formatter;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -534,6 +532,24 @@ public class HackerDbServlet extends BaseServlet {
 			
 			connection = dataSource.getConnection();
 			
+			// Last days daily reports chart data
+			final int LAST_DAYS_REPORTS = 30;
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery( "SELECT date_trunc('day',report.version), COUNT(*) FROM report JOIN key on key.id=report.key WHERE report.version>=current_date-INTEGER '" + LAST_DAYS_REPORTS + "' AND report.revocated=FALSE AND key.revocated=FALSE GROUP BY date_trunc('day',report.version) ORDER BY date_trunc('day',report.version)" );
+			final List< Object[] > dailyReportsList = new ArrayList< Object[] >( LAST_DAYS_REPORTS );
+			final DateFormat dayFormat = new SimpleDateFormat( "dd" );
+			int lastDaysReportsCount = 0;
+			int maxLastDaysReportsCount = 0;
+			while ( resultSet.next() ) {
+				final int dayReportsCount = resultSet.getInt( 2 );
+				lastDaysReportsCount += dayReportsCount;
+				if ( maxLastDaysReportsCount < dayReportsCount )
+					maxLastDaysReportsCount = dayReportsCount;
+				dailyReportsList.add( new Object[] { dayFormat.format( resultSet.getDate( 1 ) ), dayReportsCount } );
+			}
+			resultSet.close();
+			statement.close();
+			
 			// Gateway distribution chart data
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery( "SELECT hacker.gateway, COUNT(DISTINCT hacker.id) FROM report JOIN key on report.key=key.id JOIN hacker on report.hacker=hacker.id WHERE key.revocated=FALSE AND report.revocated=FALSE GROUP BY hacker.gateway ORDER BY COUNT(DISTINCT hacker.id) DESC" );
@@ -548,44 +564,52 @@ public class HackerDbServlet extends BaseServlet {
 			statement.close();
 			
 			// Monthly reports chart data
-			statement = connection.createStatement();
-			
 			final List< Object[] > monthlyReportsList = new ArrayList< Object[] >();
-			final PreparedStatement preparedStatement = connection.prepareStatement( "SELECT COUNT(*) FROM report JOIN key on report.key=key.id WHERE key.revocated=FALSE AND report.revocated=FALSE AND report.version>=? and report.version<?" );
-			statement = preparedStatement; // Store it to the statement variable to close it in case of exception
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery( "SELECT date_trunc('month',report.version), COUNT(*) FROM report JOIN key on report.key=key.id WHERE key.revocated=FALSE AND report.revocated=FALSE GROUP BY date_trunc('month',report.version) ORDER BY date_trunc('month',report.version)" );
 			final DateFormat monthDateFormat = new SimpleDateFormat( "yyyy-MM" );
-			final GregorianCalendar calendar1 = new GregorianCalendar( 2008, Calendar.DECEMBER, 1 );
-			final GregorianCalendar calendar2 = new GregorianCalendar( 2008, Calendar.DECEMBER, 1 );
-			calendar2.add( Calendar.MONTH, 1 );
-			int reportsCount           = 0;
+			int totalReportsCount = 0;
 			int maxMonthlyReportsCount = 0;
-			while ( calendar1.getTime().before( currentDate  ) ) {
-				preparedStatement.setDate( 1, new java.sql.Date( calendar1.getTime().getTime() ) );
-				preparedStatement.setDate( 2, new java.sql.Date( calendar2.getTime().getTime() ) );
-				
-				resultSet = preparedStatement.executeQuery();
-				while ( resultSet.next() ) {
-					final int reportsInMonth = resultSet.getInt( 1 );
-					reportsCount += reportsInMonth;
-					if ( reportsInMonth > maxMonthlyReportsCount )
-						maxMonthlyReportsCount = reportsInMonth;
-					monthlyReportsList.add( new Object[] { monthDateFormat.format( calendar1.getTime() ), reportsInMonth } );
-				}
-				resultSet.close();
-				
-				calendar1.setTime( calendar2.getTime() );
-				calendar2.add( Calendar.MONTH, 1 );
+			while ( resultSet.next() ) {
+				final int monthReportsCount = resultSet.getInt( 2 );
+				totalReportsCount += monthReportsCount;
+				if ( maxMonthlyReportsCount < monthReportsCount )
+					maxMonthlyReportsCount = monthReportsCount;
+				monthlyReportsList.add( new Object[] { monthDateFormat.format( resultSet.getDate( 1 ) ), monthReportsCount } );
 			}
-			if ( maxMonthlyReportsCount == 0 )
-				maxMonthlyReportsCount = 1;
+			resultSet.close();
 			statement.close();
+			
+			// Last days daily reports chart URL
+			final int ADDED_DAILY_LINES_GRANULARITY = 50; // Added lines in granularity of reports count (a helper line added in every ADDED_DAILY_LINES_GRANULARITY repors)
+			final StringBuilder dailyReportsChartUrlBuilder = new StringBuilder();
+			Formatter numberFormatter = new Formatter( dailyReportsChartUrlBuilder );
+			dailyReportsChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=bvs&amp;chbh=a&amp;chxt=y&amp;chxr=0,0," )
+				.append( maxLastDaysReportsCount ).append( "," ).append( ADDED_DAILY_LINES_GRANULARITY ).append( "&amp;chg=0," );
+			numberFormatter.format( "%2.2f", ADDED_DAILY_LINES_GRANULARITY * 100.0f / maxLastDaysReportsCount );
+			dailyReportsChartUrlBuilder.append( "&amp;chs=" ).append( CHARTS_WIDTH ).append( 'x' ).append( CHARTS_HEIGHT )
+				.append( "&amp;chtt=BWHF+Last+" ).append( LAST_DAYS_REPORTS ).append( "+days%27+daily+reports+at+" ).append( DATE_FORMAT.format( currentDate ).replace( " ", "+" ) );
+			dailyReportsChartUrlBuilder.append( "&amp;chd=t:" );
+			for ( int i = 0; i < dailyReportsList.size(); i++ ) {
+				final Object[] dayReports = dailyReportsList.get( i ); 
+				if ( i > 0 )
+					dailyReportsChartUrlBuilder.append( ',' );
+				numberFormatter.format( "%2.1f", 100.0f * (Integer) dayReports[ 1 ] / maxLastDaysReportsCount );
+			}
+			dailyReportsChartUrlBuilder.append( "&amp;chl=" );
+			for ( int i = 0; i < dailyReportsList.size(); i++ ) {
+				final Object[] dayReports = dailyReportsList.get( i ); 
+				if ( i > 0 )
+					dailyReportsChartUrlBuilder.append( '|' );
+				dailyReportsChartUrlBuilder.append( ( (String) dayReports[ 0 ] ).replace( " ", "+" ) );
+			}
 			
 			// Gateway distribution chart URL
 			final StringBuilder gatewayDistributionChartUrlBuilder = new StringBuilder();
 			gatewayDistributionChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=p3&amp;chs=" ).append( CHARTS_WIDTH ).append( 'x' ).append( CHARTS_HEIGHT )
 				.append( "&amp;chtt=BWHF+Hacker+gateway+distribution+at+" ).append( DATE_FORMAT.format( currentDate ).replace( " ", "+" ) );
 			gatewayDistributionChartUrlBuilder.append( "&amp;chd=t:" );
-			Formatter numberFormatter = new Formatter( gatewayDistributionChartUrlBuilder );
+			numberFormatter = new Formatter( gatewayDistributionChartUrlBuilder );
 			for ( int i = 0; i < gatewayDistributionList.size(); i++ ) {
 				final int[] gatewayDistribution = gatewayDistributionList.get( i ); 
 				if ( i > 0 )
@@ -610,27 +634,27 @@ public class HackerDbServlet extends BaseServlet {
 			}
 			
 			// Monthly reports chart URL
-			final int ADDED_LINES_GRANULARITY = 500; // Added lines in granularity of reports count 
+			final int ADDED_MONTLY_LINES_GRANULARITY = 500; // Added lines in granularity of reports count (a helper line added in every ADDED_MONTLY_LINES_GRANULARITY repors)
 			final StringBuilder monthlyReportsChartUrlBuilder = new StringBuilder();
 			numberFormatter = new Formatter( monthlyReportsChartUrlBuilder );
 			monthlyReportsChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=bvs&amp;chbh=a&amp;chxt=y&amp;chxr=0,0," )
-				.append( maxMonthlyReportsCount ).append( "," ).append( ADDED_LINES_GRANULARITY ).append( "&amp;chg=0," );
-			numberFormatter.format( "%2.2f", ADDED_LINES_GRANULARITY * 100.0f / maxMonthlyReportsCount );
+				.append( maxMonthlyReportsCount ).append( "," ).append( ADDED_MONTLY_LINES_GRANULARITY ).append( "&amp;chg=0," );
+			numberFormatter.format( "%2.2f", ADDED_MONTLY_LINES_GRANULARITY * 100.0f / maxMonthlyReportsCount );
 			monthlyReportsChartUrlBuilder.append( "&amp;chs=" ).append( CHARTS_WIDTH ).append( 'x' ).append( CHARTS_HEIGHT )
 				.append( "&amp;chtt=BWHF+Monthly+reports+at+" ).append( DATE_FORMAT.format( currentDate ).replace( " ", "+" ) );
 			monthlyReportsChartUrlBuilder.append( "&amp;chd=t:" );
 			for ( int i = 0; i < monthlyReportsList.size(); i++ ) {
-				final Object[] monthlyReports = monthlyReportsList.get( i ); 
+				final Object[] monthReports = monthlyReportsList.get( i ); 
 				if ( i > 0 )
 					monthlyReportsChartUrlBuilder.append( ',' );
-				numberFormatter.format( "%2.1f", 100.0f * (Integer) monthlyReports[ 1 ] / maxMonthlyReportsCount );
+				numberFormatter.format( "%2.1f", 100.0f * (Integer) monthReports[ 1 ] / maxMonthlyReportsCount );
 			}
 			monthlyReportsChartUrlBuilder.append( "&amp;chl=" );
 			for ( int i = 0; i < monthlyReportsList.size(); i++ ) {
-				final Object[] monthlyReports = monthlyReportsList.get( i ); 
+				final Object[] monthReports = monthlyReportsList.get( i ); 
 				if ( i > 0 )
 					monthlyReportsChartUrlBuilder.append( '|' );
-				monthlyReportsChartUrlBuilder.append( ( (String) monthlyReports[ 0 ] ).replace( " ", "+" ) );
+				monthlyReportsChartUrlBuilder.append( ( (String) monthReports[ 0 ] ).replace( " ", "+" ) );
 			}
 			
 			// Generate HTML output
@@ -644,6 +668,16 @@ public class HackerDbServlet extends BaseServlet {
 			// Header section
 			outputWriter.println( "<h2>BWHF Hacker Database Statistics</h2>" );
 			outputWriter.println( "<table border=0><tr><td><a href='hackers'>Back to the hacker list</a><td>&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></table>" );
+			
+			outputWriter.println( "<h3>Last " + LAST_DAYS_REPORTS + " days' daily reports</h3>" );
+			outputWriter.println( "<table border=0><tr><td>" );
+			outputWriter.println( "<tr><td><img src='" + dailyReportsChartUrlBuilder.toString() + "' width=" + CHARTS_WIDTH + " height=" + CHARTS_HEIGHT + " title='Last " + LAST_DAYS_REPORTS + " days' daily reports'></img>" );
+			outputWriter.println( "<td><div style='width:125;height:400;overflow:auto;'><table border=1 cellspacing=0 cellpadding=2><tr class=" + TABLE_HEADER_STYLE_NAME + "><th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Day:<th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Reports:" );
+			Collections.reverse( dailyReportsList );
+			dailyReportsList.add( 0, new Object[] { "Total:", lastDaysReportsCount } );
+			for ( final Object[] dayReports : dailyReportsList )
+				outputWriter.println( "<tr><td>" + dayReports[ 0 ] + "<td align=right>" + dayReports[ 1 ] );
+			outputWriter.println( "</div></table></table>" );
 			
 			outputWriter.println( "<h3>Hacker distribution between gateways</h3>" );
 			outputWriter.println( "<table border=0><tr><td>" );
@@ -671,9 +705,9 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( "<tr><td><img src='" + monthlyReportsChartUrlBuilder.toString() + "' width=" + CHARTS_WIDTH + " height=" + CHARTS_HEIGHT + " title='Monthly reports'></img>" );
 			outputWriter.println( "<td><table border=1 cellspacing=0 cellpadding=2><tr class=" + TABLE_HEADER_STYLE_NAME + "><th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Month:<th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Reports:" );
 			Collections.reverse( monthlyReportsList );
-			monthlyReportsList.add( 0, new Object[] { "Total:", reportsCount} );
-			for ( final Object[] monthlyReports : monthlyReportsList )
-				outputWriter.println( "<tr><td>" + monthlyReports[ 0 ] + "<td align=right>" + monthlyReports[ 1 ] );
+			monthlyReportsList.add( 0, new Object[] { "Total:", totalReportsCount} );
+			for ( final Object[] monthReports : monthlyReportsList )
+				outputWriter.println( "<tr><td>" + monthReports[ 0 ] + "<td align=right>" + monthReports[ 1 ] );
 			outputWriter.println( "</table></table>" );
 			
 			// Footer section
