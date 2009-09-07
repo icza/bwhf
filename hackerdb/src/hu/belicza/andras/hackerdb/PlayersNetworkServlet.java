@@ -975,7 +975,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					
 					final int RANDOM_O_METER_WIDTH  = 80;
 					final int RANDOM_O_METER_HEIGHT = 40;
-					final String RANDOM_O_METER_URL = "http://chart.apis.google.com/chart?chs=" + RANDOM_O_METER_WIDTH + "x" + RANDOM_O_METER_HEIGHT + "&cht=gom&chd=t:";
+					final String RANDOM_O_METER_URL = "http://chart.apis.google.com/chart?chs=" + RANDOM_O_METER_WIDTH + "x" + RANDOM_O_METER_HEIGHT + "&cht=gom&amp;chf=bg,s,ffffff00&amp;chd=t:";
 					outputWriter.print( "<tr><th align=left>Random-o-meter&trade;: <span style='font-size:80%'>(<a href='http://code.google.com/p/bwhf/wiki/PlayersNetwork#Player_details'>?</a>)<td><img src='" + RANDOM_O_METER_URL + calculateRandomOMeter( resultSet.getInt( 5 ), resultSet.getInt( 6 ), resultSet.getInt( 7 ), gamesCount ) + "' width=" + RANDOM_O_METER_WIDTH + " height=" + RANDOM_O_METER_HEIGHT + ">" );
 					if ( hasAka ) outputWriter.print( "<td><img src='" + RANDOM_O_METER_URL + calculateRandomOMeter( resultSet2.getInt( 5 ), resultSet2.getInt( 6 ), resultSet2.getInt( 7 ), gamesCount2 ) + "' width=" + RANDOM_O_METER_WIDTH + " height=" + RANDOM_O_METER_HEIGHT + ">" ); 
 				}
@@ -1077,7 +1077,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					final int CHART_HEIGHT = 333;
 					
 					// Activity chart
-					final StringBuilder activityChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=lc&amp;chdlp=t&amp;chxtc=0,0&amp;chs=" );
+					final StringBuilder activityChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=lc&amp;chf=bg,s,ffffff00&amp;chdlp=t&amp;chxtc=0,0&amp;chs=" );
 					activityChartUrlBuilder.append( CHART_WIDTH ).append( 'x' ).append( CHART_HEIGHT ).append( "&amp;chtt=BWHF+Activity+of+" ).append( playerNameHtml ).append( "+(games/month)" );
 					if ( hasAka )
 						activityChartUrlBuilder.append( "&amp;chdl=" + playerNameHtml + "|with+AKAs+included" );
@@ -1139,7 +1139,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.flush();
 					
 					// APM development chart
-					final StringBuilder apmDevelChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=lc&amp;chdlp=t&amp;chs=" );
+					final StringBuilder apmDevelChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=lc&amp;chf=bg,s,ffffff00&amp;chdlp=t&amp;chs=" );
 					apmDevelChartUrlBuilder.append( CHART_WIDTH ).append( 'x' ).append( CHART_HEIGHT ).append( "&amp;chtt=BWHF+APM+development+of+" ).append( playerNameHtml ).append( "+over+time" );
 					if ( hasAka )
 						apmDevelChartUrlBuilder.append( "&amp;chdl=" + playerNameHtml + "|with+AKAs+included" );
@@ -1210,7 +1210,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					
 					// Race distribution over time charts
 					for ( final List< Object[] > dataList : hasAka ? new List[] { chartData, chartData2 } : new List[] { chartData } ) {
-						final StringBuilder raceChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=bvs&amp;chdlp=t&amp;chbh=a,2&amp;chxtc=0,0&amp;chs=" );
+						final StringBuilder raceChartUrlBuilder = new StringBuilder( "http://chart.apis.google.com/chart?cht=bvs&amp;chf=bg,s,ffffff00&amp;chdlp=t&amp;chbh=a,2&amp;chxtc=0,0&amp;chs=" );
 						raceChartUrlBuilder.append( CHART_WIDTH ).append( 'x' ).append( CHART_HEIGHT ).append( "&amp;chtt=BWHF+Race+distribution+of+" ).append( playerNameHtml ).append( "+over+time" );
 						if ( dataList == chartData2 )
 							raceChartUrlBuilder.append( " (with+AKAs+included)" );

@@ -584,7 +584,7 @@ public class HackerDbServlet extends BaseServlet {
 			final int ADDED_DAILY_LINES_GRANULARITY = 50; // Added lines in granularity of reports count (a helper line added in every ADDED_DAILY_LINES_GRANULARITY repors)
 			final StringBuilder dailyReportsChartUrlBuilder = new StringBuilder();
 			Formatter numberFormatter = new Formatter( dailyReportsChartUrlBuilder );
-			dailyReportsChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=bvs&amp;chbh=a&amp;chxt=y&amp;chxr=0,0," )
+			dailyReportsChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=bvs&amp;chf=bg,s,ffffff00&amp;chbh=a&amp;chxt=y&amp;chxr=0,0," )
 				.append( maxLastDaysReportsCount ).append( "," ).append( ADDED_DAILY_LINES_GRANULARITY ).append( "&amp;chg=0," );
 			numberFormatter.format( "%2.2f", ADDED_DAILY_LINES_GRANULARITY * 100.0f / maxLastDaysReportsCount );
 			dailyReportsChartUrlBuilder.append( "&amp;chs=" ).append( CHARTS_WIDTH ).append( 'x' ).append( CHARTS_HEIGHT )
@@ -606,7 +606,7 @@ public class HackerDbServlet extends BaseServlet {
 			
 			// Gateway distribution chart URL
 			final StringBuilder gatewayDistributionChartUrlBuilder = new StringBuilder();
-			gatewayDistributionChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=p3&amp;chs=" ).append( CHARTS_WIDTH ).append( 'x' ).append( CHARTS_HEIGHT )
+			gatewayDistributionChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=p3&amp;chf=bg,s,ffffff00&amp;chs=" ).append( CHARTS_WIDTH ).append( 'x' ).append( CHARTS_HEIGHT )
 				.append( "&amp;chtt=BWHF+Hacker+gateway+distribution+at+" ).append( DATE_FORMAT.format( currentDate ).replace( " ", "+" ) );
 			gatewayDistributionChartUrlBuilder.append( "&amp;chd=t:" );
 			numberFormatter = new Formatter( gatewayDistributionChartUrlBuilder );
@@ -637,7 +637,7 @@ public class HackerDbServlet extends BaseServlet {
 			final int ADDED_MONTLY_LINES_GRANULARITY = 500; // Added lines in granularity of reports count (a helper line added in every ADDED_MONTLY_LINES_GRANULARITY repors)
 			final StringBuilder monthlyReportsChartUrlBuilder = new StringBuilder();
 			numberFormatter = new Formatter( monthlyReportsChartUrlBuilder );
-			monthlyReportsChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=bvs&amp;chbh=a&amp;chxt=y&amp;chxr=0,0," )
+			monthlyReportsChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=bvs&amp;chf=bg,s,ffffff00&amp;chbh=a&amp;chxt=y&amp;chxr=0,0," )
 				.append( maxMonthlyReportsCount ).append( "," ).append( ADDED_MONTLY_LINES_GRANULARITY ).append( "&amp;chg=0," );
 			numberFormatter.format( "%2.2f", ADDED_MONTLY_LINES_GRANULARITY * 100.0f / maxMonthlyReportsCount );
 			monthlyReportsChartUrlBuilder.append( "&amp;chs=" ).append( CHARTS_WIDTH ).append( 'x' ).append( CHARTS_HEIGHT )
