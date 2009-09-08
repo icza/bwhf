@@ -5,7 +5,7 @@
 <wiki:toc max_depth="3" />
 
 ===Q: Does BWHF Agent detect only autogather/autotrain?===
-A: No. By default, the agent stops scanning further actions of a player if a hack has been identified. And since autogather/autotrain is the first hack it looks for, that is the most common hack that it will alert for. You can disable this _fast scan_ by unchecking the "During a replay scan if a player is found hacking..." option on the general settings tab.
+A: Hell no! By default, the Agent stops scanning further actions of a player if a hack has been identified. And since autogather/autotrain is the first hack it looks for, that is the most common hack that it will alert for. If you want to know the full hack list that were detected, you can disable this _fast scan_ by unchecking the "During a replay scan if a player is found hacking..." option on the general settings tab.
 
 ===Q: Could it be that someone is alerted for hacking because of lag?===
 A: No. Lag is known and is built into the scan engine.
