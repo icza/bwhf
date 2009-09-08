@@ -16,7 +16,7 @@ A: No. Lag is known and is built into the scan engine.
 A: Some but not all by far.
 
 ===Q: Why doesn't work the player checker for me in the game lobby?===
-A: The 3 main important things requarding to player checker: 1) you have to press the Print Screen key, 2) it will only alert for hackers reported with the same gateway you have set on your autoscan tab, 3) as far as I know Advloader disables making screenshot in the lobby, so it probably won't work with Advloader on. For more information check out the last section on this page: ErrorsAndSolutions
+A: The 3 main important things to keep in mind about player checker: 1) you have to press the Print Screen key, 2) it will only alert for hackers reported with the same gateway you have set on your autoscan tab, 3) as far as I know Advloader disables making screenshot in the lobby, so it probably won't work with Advloader on. For more information check out the last section on this page: ErrorsAndSolutions
 
 ===Q: My name is on the hacker list but I don't hack. What can I do?===
 A: If you never hack but you're on the hacker list, contact me and try to convience me. My gmail user name is *iczaaa*. Drop me an email.
