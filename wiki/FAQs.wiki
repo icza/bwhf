@@ -1,0 +1,11 @@
+#summary Frequently Asked Questions and answers regarding to BWHF Agent
+
+=Frequently Asked Questions=
+
+<wiki:toc max_depth="3" />
+
+===Q: Does BWHF Agent detect only autogather/autotrain?===
+A: No.
+
+===Q: Does BWHF Agent detect maphacks?===
+A: Some but not all by far.
