@@ -290,6 +290,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Header section
 			outputWriter.println( "<h2>BWHF Hacker Database</h2>" );
 			outputWriter.println( HACKER_LIST_MENU_HTML );
+			outputWriter.println( GOOGLE_AD_HTML_HEADER );
 			
 			// Controls section
 			outputWriter.println( "<form id='" + FORM_ID + "' action='hackers' method='POST'>" );
@@ -673,6 +674,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Header section
 			outputWriter.println( "<h2>BWHF Hacker Database Statistics</h2>" );
 			outputWriter.println( "<table border=0><tr><td><a href='hackers'>Back to the hacker list</a><td>&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></table>" );
+			outputWriter.println( GOOGLE_AD_HTML_HEADER );
 			
 			outputWriter.println( "<h3>Last " + LAST_DAYS_REPORTS + " days' daily reports</h3>" );
 			outputWriter.println( "<table border=0><tr><td>" );

@@ -57,6 +57,19 @@ public class BaseServlet extends HttpServlet {
 		COMMON_HTML_HEADER_ELEMENTS = commonHtmlHeaderElementsBuilder.toString();
 	}
 	
+	/** Header Google Ad HTML */
+	protected static final String GOOGLE_AD_HTML_HEADER = "<script type=\"text/javascript\"><!--\n"
+		+ "google_ad_client = \"pub-4479321142068297\";\n"
+		+ "/* Header ad 728x90 */\n"
+		+ "google_ad_slot = \"4124263936\";\n"
+		+ "google_ad_width = 728;\n"
+		+ "google_ad_height = 90;\n"
+		+ "//-->\n"
+		+ "</script>\n"
+		+ "<script type=\"text/javascript\"\n"
+		+ "src=\"http://pagead2.googlesyndication.com/pagead/show_ads.js\">\n"
+		+ "</script>\n";
+	
 	/** The tracking HTML code for Google Analytics. */
 	protected static final String GOOGLE_ANALYTICS_TRACKING_CODE = "<script type=\"text/javascript\">"
 		+ "var gaJsHost = ((\"https:\" == document.location.protocol) ? \"https://ssl.\" : \"http://www.\");"
