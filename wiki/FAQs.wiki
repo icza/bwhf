@@ -29,16 +29,16 @@ A: There can be several reasons:
  * The server might have been down when you detected the hacker. You can check this in you r autoscan.log file.
  * The hacker you reported might have removed (due to spoof or key revocation or being an invalid report).
 
-===Q: A hacker got recently reported, but player checker did not alert him in the lobby. Why?===
-A: If your player checker works, then these can be the reasons:
- * If he got reported recently, your local cache of the hacker list might not yet contain his name. It is updated automatically, or you can issue an update at any time by pressing the "Update now" button on the Player checker tab.
- * If he was reported not so recently, you might had some trouble reacing the BWHF hacker database when your Agent tried to update your local cache (either you had a connection blackout or the server was down). Try to update it manually with the "Update now" button on the Player checker tab.
-
 ===Q: Why doesn't work the player checker for me in the game lobby?===
 A: The 3 main important things to keep in mind about player checker:
  # you have to press the Print Screen key
  # it will only alert for hackers reported with the same gateway you have set on your autoscan tab
  # as far as I know Advloader disables making screenshot in the lobby, so it probably won't work with Advloader on. For more information check out the last section on this page: ErrorsAndSolutions
+
+===Q: A hacker got recently reported, he is on the hacker list, but player checker did not alert him in the lobby. Why?===
+A: If the player checker works for you, then these can be the reasons:
+ * If he got reported recently, your local cache of the hacker list might not yet contain his name. It is updated automatically, or you can issue an update at any time by pressing the "Update now" button on the Player checker tab.
+ * If he was reported not so recently, you might had some trouble reacing the BWHF hacker database when your Agent tried to update your local cache (either you had a connection blackout or the server was down). Try to update it manually with the "Update now" button on the Player checker tab.
 
 ===Q: My name is on the hacker list but I don't hack. What can I do?===
 A: If you never hack but you're on the hacker list, contact me and try to convience me. My gmail user name is *iczaaa*. Drop me an email.
