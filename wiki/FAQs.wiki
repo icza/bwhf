@@ -21,6 +21,14 @@ A: Yes. Since it does not interact with Starcraft at all (it does not read or wr
 ===Q: Is latency changer (not Chaos LAN latency) considered a hack?===
 A: Not by the Agent.
 
+===Q: I run the Agent and it detected a hacker but I can't find him in the database. Why?===
+A: There can be several reasons:
+ * You don't have a valid authorization key to report hackers.
+ * You have not enabled reporting hackers.
+ * Manual scan does not report. Only autoscan.
+ * The server might have been down when you detected the hacker. You can check this in you r autoscan.log file.
+ * The hacker you reported might have removed (due to spoof or key revocation or being an invalid report).
+
 ===Q: Why doesn't work the player checker for me in the game lobby?===
 A: The 3 main important things to keep in mind about player checker: 1) you have to press the Print Screen key, 2) it will only alert for hackers reported with the same gateway you have set on your autoscan tab, 3) as far as I know Advloader disables making screenshot in the lobby, so it probably won't work with Advloader on. For more information check out the last section on this page: ErrorsAndSolutions
 
