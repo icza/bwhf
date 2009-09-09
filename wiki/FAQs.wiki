@@ -26,8 +26,8 @@ A: There can be several reasons:
  * You don't have a valid authorization key to report hackers.
  * You have not enabled reporting hackers.
  * Manual scan does not report. Only autoscan.
- * The server might have been down when you detected the hacker. You can check this in you r autoscan.log file.
- * The hacker you reported might have removed (due to spoof or key revocation or being an invalid report).
+ * The server might have been down when you detected the hacker. You can check this in your "autoscan.log" file.
+ * The hacker you reported might have been removed (due to spoof or key revocation or being an invalid report).
 
 ===Q: Why doesn't work the player checker for me in the game lobby?===
 A: The 3 main important things to keep in mind about player checker:
