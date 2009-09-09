@@ -18,7 +18,7 @@ A: Some but not all by far.
 ===Q: Is BWHF Agent allowed on iCCup?===
 A: Yes. Since it does not interact with Starcraft at all (it does not read or write Starcraft's memory), it can be used anywhere with or without any other launchers.
 
-===Q: Is latency changer (not Chaos LAN latency) considered as hack?===
+===Q: Is latency changer (not Chaos LAN latency) considered a hack?===
 A: Not by the Agent.
 
 ===Q: Why doesn't work the player checker for me in the game lobby?===
