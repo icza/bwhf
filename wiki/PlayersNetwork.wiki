@@ -68,7 +68,7 @@ The *Race distribution charts* show the race distribution of the player over tim
 On this page you can check the registered AKAs. Every player being in the same AKA group denotes the same person behind the accounts of the group.
 
 ==Name filters==
-There is a *Filter by name* or a *Filter by map name* option on the pages. This can be used to filter the entities listed on the page to those that contain this text. An entity will be included in the filter process if the text entered here is contained anywhere in it.
+There is a *Filter by name* or a *Filter by map name* option on the pages. These can be used to filter the entities listed on the page to those that contain this text. An entity will be included in the filter process if the text entered here is contained anywhere in it.
 
 For example: filter="ota" includes names like "ota", "otawe", "dakota", "dakota_fanning".
 
