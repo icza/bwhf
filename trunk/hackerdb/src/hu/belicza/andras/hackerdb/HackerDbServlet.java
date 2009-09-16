@@ -313,7 +313,7 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( "</table>" );
 			outputWriter.println( "<p><input type=submit value='Go / Refresh'></p>" );
 			
-			outputWriter.println( "<p><b>Hackers matching the filters: " + matchingRecordsCount + "</b></p>" );
+			outputWriter.println( "<p><b>Hackers matching the filters: " + DECIMAL_FORMAT.format( matchingRecordsCount ) + "</b></p>" );
 			
 			// Sorting
 			outputWriter.println( "<input name='" + FILTER_NAME_SORT_BY + "' type=hidden value='" + filtersWrapper.sortByValue + "'>" );
@@ -322,7 +322,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Pagination
 			outputWriter.println( "<input type=submit name='" + FILTER_NAME_STEP_DIRECTION +"' value='" + STEP_DIRECTION_FIRST + "' " + ( filtersWrapper.page <= 1 ? "disabled" : "" ) + ">" );
 			outputWriter.println( "<input type=submit name='" + FILTER_NAME_STEP_DIRECTION +"' value='" + STEP_DIRECTION_PREVIOUS + "' " + ( filtersWrapper.page <= 1 ? "disabled" : "" ) + ">" );
-			outputWriter.println( "Page <input name='" + FILTER_NAME_PAGE + "' type=text value='" + filtersWrapper.page + "' size=1> out of <b>" + pagesCount + "</b>, page size:" );
+			outputWriter.println( "Page <input name='" + FILTER_NAME_PAGE + "' type=text value='" + filtersWrapper.page + "' size=1> out of <b>" + DECIMAL_FORMAT.format( pagesCount ) + "</b>, page size:" );
 			outputWriter.println( "<input name='" + FILTER_NAME_PAGE_SIZE + "' type=text value='" + filtersWrapper.pageSize + "' size=1>" );
 			outputWriter.println( "<input type=submit name='" + FILTER_NAME_STEP_DIRECTION +"' value='" + STEP_DIRECTION_NEXT + "' " + ( filtersWrapper.page >= pagesCount ? "disabled" : "" ) + ">" );
 			outputWriter.println( "<input type=submit name='" + FILTER_NAME_STEP_DIRECTION +"' value='" + STEP_DIRECTION_LAST + "' " + ( filtersWrapper.page >= pagesCount ? "disabled" : "" ) + ">" );
@@ -346,7 +346,7 @@ public class HackerDbServlet extends BaseServlet {
 				resultSet = statement.executeQuery();
 				while ( resultSet.next() ) {
 					final int gateway = resultSet.getInt( 2 );
-					outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++recordNumber) + "<td>" + encodeHtmlString( resultSet.getString( 1 ) ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td align=center>" + resultSet.getInt( 3 ) + "<td align=center>" + formatDays( resultSet.getInt( 4 ) ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 5 ) ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 6 ) ) );
+					outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + DECIMAL_FORMAT.format( ++recordNumber ) + "<td>" + encodeHtmlString( resultSet.getString( 1 ) ) + "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ] + "<td align=center>" + resultSet.getInt( 3 ) + "<td align=center>" + formatDays( resultSet.getInt( 4 ) ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 5 ) ) + "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 6 ) ) );
 				}
 			}
 			outputWriter.println( "</table>" );
@@ -683,7 +683,7 @@ public class HackerDbServlet extends BaseServlet {
 			Collections.reverse( dailyReportsList );
 			dailyReportsList.add( 0, new Object[] { "Total:", lastDaysReportsCount } );
 			for ( final Object[] dayReports : dailyReportsList )
-				outputWriter.println( "<tr><td>" + dayReports[ 0 ] + "<td align=right>" + dayReports[ 1 ] );
+				outputWriter.println( "<tr><td>" + dayReports[ 0 ] + "<td align=right>" + DECIMAL_FORMAT.format( dayReports[ 1 ] ) );
 			outputWriter.println( "</div></table></table>" );
 			
 			outputWriter.println( "<h3>Hacker distribution between gateways</h3>" );
@@ -701,9 +701,9 @@ public class HackerDbServlet extends BaseServlet {
 				if ( !gatewayIncluded )
 					gatewayDistributionList.add( new int[] { gateway, 0 } );
 			}
-			outputWriter.println( "<tr class=" + UNKNOWN_GATEWAY_STYLE_NAME + "><td>Total:<td align=right>" + hackersCount );
+			outputWriter.println( "<tr class=" + UNKNOWN_GATEWAY_STYLE_NAME + "><td>Total:<td align=right>" + DECIMAL_FORMAT.format( hackersCount ) );
 			for ( final int[] gatewayDistribution : gatewayDistributionList )
-				outputWriter.println( "<tr class=" + ( gatewayDistribution[ 0 ] < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gatewayDistribution[ 0 ] ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td>" + GATEWAYS[ gatewayDistribution[ 0 ] ] + "<td align=right>" + gatewayDistribution[ 1 ] );
+				outputWriter.println( "<tr class=" + ( gatewayDistribution[ 0 ] < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gatewayDistribution[ 0 ] ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td>" + GATEWAYS[ gatewayDistribution[ 0 ] ] + "<td align=right>" + DECIMAL_FORMAT.format( gatewayDistribution[ 1 ] ) );
 			outputWriter.println( "</table></table>" );
 			outputWriter.flush();
 			
@@ -714,7 +714,7 @@ public class HackerDbServlet extends BaseServlet {
 			Collections.reverse( monthlyReportsList );
 			monthlyReportsList.add( 0, new Object[] { "Total:", totalReportsCount} );
 			for ( final Object[] monthReports : monthlyReportsList )
-				outputWriter.println( "<tr><td>" + monthReports[ 0 ] + "<td align=right>" + monthReports[ 1 ] );
+				outputWriter.println( "<tr><td>" + monthReports[ 0 ] + "<td align=right>" + DECIMAL_FORMAT.format( monthReports[ 1 ] ) );
 			outputWriter.println( "</table></table>" );
 			
 			// Footer section

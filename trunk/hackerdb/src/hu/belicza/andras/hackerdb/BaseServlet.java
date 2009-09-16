@@ -2,6 +2,8 @@ package hu.belicza.andras.hackerdb;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -17,6 +19,17 @@ import org.apache.commons.dbcp.BasicDataSource;
  * @author Andras Belicza
  */
 public class BaseServlet extends HttpServlet {
+	
+	/** Decimal format used to format numbers (example: 12,345,678). */
+	protected static DecimalFormat DECIMAL_FORMAT;
+	static {
+		DECIMAL_FORMAT = new DecimalFormat();
+		DECIMAL_FORMAT.setGroupingSize( 3 );
+		
+		final DecimalFormatSymbols dfs = new DecimalFormatSymbols();
+		dfs.setGroupingSeparator( ',' );
+		DECIMAL_FORMAT.setDecimalFormatSymbols( dfs );
+	}
 	
 	/** Gateway colors.                                              */
 	protected static final String[] GATEWAY_COLORS                = new String[] { "ff5050", "00ffff", "00ff00", "ffff00", "000000", "f080f0" };

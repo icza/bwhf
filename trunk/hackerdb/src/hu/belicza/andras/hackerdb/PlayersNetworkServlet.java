@@ -483,7 +483,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				
 				// Pages count section
 				final int gamesCount = queryParam == null ? executeCountStatement( countQuery, connection ) : executeCountStatement( countQuery, queryParam, connection );
-				outputWriter.println( "<p>Games count: <b>" + gamesCount + "</b><br>" );
+				outputWriter.println( "<p>Games count: <b>" + DECIMAL_FORMAT.format( gamesCount ) + "</b><br>" );
 				outputWriter.flush();
 				
 				// Filter section
@@ -540,7 +540,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					replayHeader.gameType   = (short) resultSet.getInt( colCounter++ );
 					
 					final Integer gateway = resultSet.getInt( 7 );
-					outputWriter.print( "<tr><td align=right class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + ">" + getGameDetailsHtmlLink( gameId, Integer.toString( ++recordCounter ) ) + "&nbsp;" );
+					outputWriter.print( "<tr><td align=right class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + ">" + getGameDetailsHtmlLink( gameId, DECIMAL_FORMAT.format( ++recordCounter ) ) + "&nbsp;" );
 					outputWriter.print( "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + ( replayHeader.saveTime == null ? "" : replayHeader.guessVersionFromDate() ) );
 					outputWriter.print( "<td>" + getGameListWithMapHtmlLink( replayHeader.mapName, replayHeader.mapName, player1, player2, includeAkas) );
 					outputWriter.print( "<td>" + replayHeader.getDurationString( true ) );
@@ -597,7 +597,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					page = 1;
 				if ( page > maxPage )
 					page = maxPage;
-				outputWriter.println( "Players count: <b>" + playersCount + "</b><br>" );
+				outputWriter.println( "Players count: <b>" + DECIMAL_FORMAT.format( playersCount ) + "</b><br>" );
 				outputWriter.flush();
 				
 				// Filter section
@@ -632,11 +632,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 					resultSet = statement2.executeQuery();
 				}
 				while ( resultSet.next() ) {
-					outputWriter.print( "<tr><td align=right>" + (++recordCounter) );
+					outputWriter.print( "<tr><td align=right>" + DECIMAL_FORMAT.format( ++recordCounter ) );
 					final int playerId = resultSet.getInt( 1 );
 					outputWriter.print( "<td>" + getPlayerDetailsHtmlLink( playerId, resultSet.getString( 2 ), null ) );
-					outputWriter.print( "<td align=center>" + ( player1 == null ? getGameListOfPlayerHtmlLink ( playerId, Integer.toString( resultSet.getInt( 3 ) ), false )
-							                                                    : getGameListOfPlayersHtmlLink( player1, playerId, Integer.toString( resultSet.getInt( 3 ) ), includeAkas ) + ( hasAka1 ? " *" : "" ) ) );
+					outputWriter.print( "<td align=center>" + ( player1 == null ? getGameListOfPlayerHtmlLink ( playerId, DECIMAL_FORMAT.format( resultSet.getInt( 3 ) ), false )
+							                                                    : getGameListOfPlayersHtmlLink( player1, playerId, DECIMAL_FORMAT.format( resultSet.getInt( 3 ) ), includeAkas ) + ( hasAka1 ? " *" : "" ) ) );
 					final Date firstGameDate = resultSet.getDate( 4 );
 					final Date lastGameDate  = resultSet.getDate( 5 );
 					outputWriter.print( "<td>" + ( firstGameDate == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( firstGameDate ) ) );
@@ -665,7 +665,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					page = 1;
 				if ( page > maxPage )
 					page = maxPage;
-				outputWriter.println( "AKA groups count: <b>" + akaGroupsCount + "</b><br>" );
+				outputWriter.println( "AKA groups count: <b>" + DECIMAL_FORMAT.format( akaGroupsCount ) + "</b><br>" );
 				outputWriter.flush();
 				
 				// Filter section
@@ -701,7 +701,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				}
 				statement2 = connection.prepareStatement( "SELECT id, name FROM player WHERE aka_group=?" );
 				while ( resultSet.next() ) {
-					outputWriter.print( "<tr><td align=right>" + (++recordCounter) );
+					outputWriter.print( "<tr><td align=right>" + DECIMAL_FORMAT.format( ++recordCounter ) );
 					final int akaGroupId = resultSet.getInt( 1 );
 					
 					outputWriter.print( "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) );
@@ -887,7 +887,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 							colorName = UNKOWN_HTML_STRING;
 						}
 						outputWriter.print( "<td>" + ReplayHeader.RACE_NAMES[ resultSet2.getInt( 3 ) ] );
-						outputWriter.print( "<td align=right>" + resultSet2.getInt( 4 ) );
+						outputWriter.print( "<td align=right>" + DECIMAL_FORMAT.format( resultSet2.getInt( 4 ) ) );
 						outputWriter.println( "<td align=right>" + resultSet2.getInt( 4 ) * 60 / Math.max( seconds, 1 ) + "<td>" + colorName );
 					}
 					outputWriter.println( "</table>" );
@@ -937,8 +937,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 					gamesCount  = resultSet.getInt( 1 );
 					gamesCount2 = hasAka ? resultSet2.getInt( 1 ) : 0;
 					
-					outputWriter.print( "<tr><th align=left>Games count:<td>" + getGameListOfPlayerHtmlLink ( entityId, Integer.toString( gamesCount ), false ) );
-					if ( hasAka ) outputWriter.print( "<td>" + getGameListOfPlayerHtmlLink ( entityId, Integer.toString( gamesCount2 ), true ) );
+					outputWriter.print( "<tr><th align=left>Games count:<td>" + getGameListOfPlayerHtmlLink ( entityId, DECIMAL_FORMAT.format( gamesCount ), false ) );
+					if ( hasAka ) outputWriter.print( "<td>" + getGameListOfPlayerHtmlLink ( entityId, DECIMAL_FORMAT.format( gamesCount2 ), true ) );
 					outputWriter.print( "<tr><th align=left>Player list:<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Who played with " + playerNameHtml + "?", false ) );
 					if ( hasAka ) outputWriter.print( "<td>" + getPlayerListWhoPlayedWithAPlayerHtmlLink( entityId, "Players with AKAs included", true ) );
 					
@@ -998,7 +998,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				int rowCounter = 1;
 				while ( resultSet.next() ) {
 					outputWriter.println( "<tr" + ( (rowCounter & 0x01) == 1 ? " style='background:#cacaca'" : "" ) + "><td align=right>" + rowCounter + "<td>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), resultSet.getString( 1 ), null, null, false ) );
-					outputWriter.println( "<td align=right>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), Integer.toString( resultSet.getInt( 2 ) ), entityId, null, false ) + "<td align=right>" + (int) ( resultSet.getInt( 2 ) * 100.0f / gamesCount + 0.5f ) + "%" );
+					outputWriter.println( "<td align=right>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), DECIMAL_FORMAT.format( resultSet.getInt( 2 ) ), entityId, null, false ) + "<td align=right>" + (int) ( resultSet.getInt( 2 ) * 100.0f / gamesCount + 0.5f ) + "%" );
 					rowCounter++;
 				}
 				outputWriter.println( "</table>" );
@@ -1007,7 +1007,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					rowCounter = 1;
 					while ( resultSet2.next() ) {
 						outputWriter.println( "<tr" + ( (rowCounter & 0x01) == 1 ? " style='background:#cacaca'" : "" ) + "><td align=right>" + rowCounter + "<td>" + getGameListWithMapHtmlLink( resultSet2.getString( 1 ), resultSet2.getString( 1 ), null, null, false ) );
-						outputWriter.println( "<td align=right>" + getGameListWithMapHtmlLink( resultSet2.getString( 1 ), Integer.toString( resultSet2.getInt( 2 ) ), entityId, null, true ) + "<td align=right>" + (int) ( resultSet2.getInt( 2 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
+						outputWriter.println( "<td align=right>" + getGameListWithMapHtmlLink( resultSet2.getString( 1 ), DECIMAL_FORMAT.format( resultSet2.getInt( 2 ) ), entityId, null, true ) + "<td align=right>" + (int) ( resultSet2.getInt( 2 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
 						rowCounter++;
 					}
 					outputWriter.println( "</table>" );
@@ -1346,7 +1346,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 		else {
 			outputWriter.print( "First&nbsp;&nbsp;Prev" );
 		}
-		outputWriter.print( "&nbsp;&nbsp;|&nbsp;&nbsp;Page <b>" + page + "</b> out of <b>" + maxPage + "</b>.&nbsp;&nbsp;|&nbsp;&nbsp;" );
+		outputWriter.print( "&nbsp;&nbsp;|&nbsp;&nbsp;Page <b>" + DECIMAL_FORMAT.format( page ) + "</b> out of <b>" + DECIMAL_FORMAT.format( maxPage ) + "</b>.&nbsp;&nbsp;|&nbsp;&nbsp;" );
 		if ( page < maxPage ) {
 			outputWriter.print( "<a href='" + pagerUrl + ( page + 1 ) + "'>Next</a>&nbsp;&nbsp;" );
 			outputWriter.print( "<a href='" + pagerUrl + maxPage + "'>Last</a>" );
