@@ -43,5 +43,8 @@ A: If the player checker works for you, then these can be the reasons:
 ===Q: I used the player checker feature and it said: "possible hacker at slot x". What does this mean?===
 A: In the game lobby Starcraft uses a font in which the capital i and the small L looks the same, there is no way to differentiate between them just by looking at them. In cases when a name detected in the lobby which consists some capital i's or small L's and at least one of the variations is on the hacker list, it will say _"possible hacker at slot x"_.
 
+===Q: Is there a way to view hackers that I reported?===
+A: Yes. On the hacker database page there is a filter: "reported with key". Enter your key there, and reports will be filtered to your key only.
+
 ===Q: My name is on the hacker list but I don't hack. What can I do?===
 A: If you never hack but you're on the hacker list, contact me and try to convience me. My gmail user name is *iczaaa*. Drop me an email.
