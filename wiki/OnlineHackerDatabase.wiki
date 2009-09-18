@@ -42,7 +42,7 @@ The columns and their meaning:
  * *First reported:* the date and time of when the first report of the hacker arrived; this has the meaning of how long has been the hacker hacking, or rather when was he first recorded in the database
  * *Last reported:* the date and time of when the last report of the hacker arrived; this has the meaning of when was the last activity of the hacker, or rather when was he last recorded
 
-Note that all times and dates are in the server's time zone which is GMT+1 (CET and CEST).
+Note that all times and dates after 2009-09-18 are in the server's time zone which is GMT-9. Reports before 2009-09-18 are in the time zone GMT+1.
 
 The *First reported* column shows how long the hacker is using hacks and the *Last reported* column shows how recently was the hacker active (based on the reports arrived to the BWHF system).
 
