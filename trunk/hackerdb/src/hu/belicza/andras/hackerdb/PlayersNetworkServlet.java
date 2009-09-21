@@ -125,17 +125,12 @@ public class PlayersNetworkServlet extends BaseServlet {
 	);
 	
 	@Override
-	public void doPost( final HttpServletRequest request, final HttpServletResponse response ) {
-		doGet( request, response );
-	}
-	
-	@Override
 	public void doGet( final HttpServletRequest request, final HttpServletResponse response ) {
 		setNoCache( response );
 		response.setCharacterEncoding( "UTF-8" );
 		try {
 			request.setCharacterEncoding( "UTF-8" );
-		} catch (UnsupportedEncodingException e1) {
+		} catch ( final UnsupportedEncodingException uee ) {
 			// This will never happen.
 			throw new RuntimeException( "Unsupported UTF-8 encoding?" ); 
 		}

@@ -8,6 +8,10 @@
 		<servlet-name>Players</servlet-name>
 		<servlet-class>hu.belicza.andras.hackerdb.PlayersNetworkServlet</servlet-class>
 	</servlet>
+	<servlet>
+		<servlet-name>Admin</servlet-name>
+		<servlet-class>hu.belicza.andras.hackerdb.AdminServlet</servlet-class>
+	</servlet>
 	
 	<servlet-mapping>
 		<servlet-name>Hackers</servlet-name>
@@ -16,6 +20,10 @@
 	<servlet-mapping>
 		<servlet-name>Players</servlet-name>
 		<url-pattern>/players</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>Admin</servlet-name>
+		<url-pattern>/admin</url-pattern>
 	</servlet-mapping>
 	
 </web-app>

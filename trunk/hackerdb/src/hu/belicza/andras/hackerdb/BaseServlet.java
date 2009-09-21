@@ -111,6 +111,11 @@ public class BaseServlet extends HttpServlet {
 		super.init( config );
 	}
 	
+	@Override
+	public void doPost( final HttpServletRequest request, final HttpServletResponse response ) throws ServletException, IOException {
+		doGet( request, response );
+	}
+	
 	/**
 	 * Sends back a message as plain text.
 	 * @param message  message to be sent
