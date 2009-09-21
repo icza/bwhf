@@ -18,6 +18,7 @@ CREATE TABLE person
   email character varying,
   "comment" character varying,
   "version" timestamp without time zone DEFAULT now(),
+  password character varying,
   CONSTRAINT person_pkey PRIMARY KEY (id)
 )
 WITH (
