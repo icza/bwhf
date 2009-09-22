@@ -15,6 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 
@@ -48,14 +49,14 @@ public class AdminServlet extends BaseServlet {
 	/** Reinstate report id request param. */
 	private static final String REQUEST_PARAM_REINSTATE_ID   = "reinstate_id";
 	
-	/** Login operation.        */
-	private static final String OPERATION_LOGIN     = "login";
-	/** Logout operation.       */
-	private static final String OPERATION_LOGOUT    = "logout";
-	/** Last reports operation. */
-	private static final String OPERATION_LAST_REPS = "lastreps";
-	/** New key operation.      */
-	private static final String OPERATION_NEW_KEY = "newkey";
+	/** Last reports operation.   */
+	private static final String OPERATION_LAST_REPS      = "lastreps";
+	/** New key operation.        */
+	private static final String OPERATION_NEW_KEY        = "newkey";
+	/** Reporters stat operation. */
+	private static final String OPERATION_REPORTERS_STAT = "reportersstat";
+	/** Logout operation.         */
+	private static final String OPERATION_LOGOUT         = "logout";
 	
 	/** Default operation for the logged in users. */
 	private static final String DEFAULT_OPERATION = OPERATION_LAST_REPS;
@@ -66,6 +67,7 @@ public class AdminServlet extends BaseServlet {
 	/** Hacker list menu HTML code to be sent. */
 	private static final String ADMIN_PAGE_MENU_HTML = "<p><a href='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_LAST_REPS + "'>Last reports</a>"
 			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_NEW_KEY + "'>New key</a>"
+			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_REPORTERS_STAT + "'>Reporters stat</a>"
 			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_LOGOUT + "'>Logout</a></p>";
 	
 	@Override
@@ -82,37 +84,32 @@ public class AdminServlet extends BaseServlet {
 		
 		if ( session == null )
 			handleLogin( request, response );
-		else
-			try {
-				String operation = request.getParameter( REQUEST_PARAM_OPERATION );
+		else {
+			String operation = request.getParameter( REQUEST_PARAM_OPERATION );
+			
+			if ( operation == null )
+				operation = OPERATION_LAST_REPS;
+			
+			if ( operation.equals( OPERATION_LAST_REPS ) ) {
 				
-				if ( operation == null )
-					operation = OPERATION_LOGIN;
+				handleLastReports( request, response );
 				
-				if ( operation.equals( OPERATION_LOGIN ) ) {
-					
-					if ( false )
-						throw new BadRequestException();
-					
-				} else if ( operation.equals( OPERATION_LAST_REPS ) ) {
-					
-					handleLastReports( request, response );
-					
-				} else if ( operation.equals( OPERATION_NEW_KEY ) ) {
-					
-					handleNewKey( request, response );
-					
-				} else if ( operation.equals( OPERATION_LOGOUT ) ) {
-					
-					if ( session != null )
-						session.invalidate();
-					request.getRequestDispatcher( "admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_LOGIN ).forward( request, response );
-					
-				}
+			} else if ( operation.equals( OPERATION_NEW_KEY ) ) {
+				
+				handleNewKey( request, response );
+				
+			} else if ( operation.equals( OPERATION_REPORTERS_STAT ) ) {
+				
+				handleReportersStat( request, response );
+				
+			} else if ( operation.equals( OPERATION_LOGOUT ) ) {
+				
+				if ( session != null )
+					session.invalidate();
+				request.getRequestDispatcher( "admin" ).forward( request, response );
+				
 			}
-			catch ( final BadRequestException bre ) {
-				sendBackErrorMessage( response );
-			}
+		}
 	}
 	
 	/**
@@ -154,7 +151,7 @@ public class AdminServlet extends BaseServlet {
 				if ( message != null )
 					outputWriter.println( "<p style='color:red'>" + message + "</p>" );
 				
-				outputWriter.println( "<form action='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_LOGIN + "' method='POST'>" );
+				outputWriter.println( "<form action='admin' method='POST'>" );
 				outputWriter.println( "<table border=0>" );
 				outputWriter.println( "<tr><td>User name:<td><input type=text name='" + REQUEST_PARAM_USER_NAME + "' id='userNameFieldId'" + ( userName == null ? "" : " value='" + encodeHtmlString( userName ) + "'" ) + ">" );
 				outputWriter.println( "<tr><td>Password:<td><input type=password name='" + REQUEST_PARAM_PASSWORD + "'>" );
@@ -270,11 +267,11 @@ public class AdminServlet extends BaseServlet {
 				final boolean revocated = resultSet.getBoolean( 12 );
 				
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
-						+ "<td>" + resultSet.getString( 1 ) + "<td>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 3 ) ) 
-						+ "<td>" + getHackerRecordsByKeyLink( resultSet.getString( 13 ), Integer.toString( resultSet.getInt( 4 ) ), "keyreportsform" ) + "&uarr;<td>" + resultSet.getInt( 5 ) + "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 6 ) ) 
-						+ "<td>" + GATEWAYS[ gateway ]
+						+ "<td>" + resultSet.getString( 1 ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 3 ) ) 
+						+ "<td align=right>" + getHackerRecordsByKeyLink( resultSet.getString( 13 ), Integer.toString( resultSet.getInt( 4 ) ), "keyreportsform" ) + "&uarr;<td align=right>" + resultSet.getInt( 5 )
+						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 6 ) ) + "<td>" + GATEWAYS[ gateway ]
 						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 8 ) ] + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 9 ) )
-						+ "<td>" + resultSet.getString( 10 ) + "<td>" + ( resultSet.getObject( 11 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 11 ), Integer.toString( resultSet.getInt( 11 ) ) ) ) + "<td>" + ( revocated ? "T" : "F" ) );
+						+ "<td align=right>" + resultSet.getString( 10 ) + "<td align=right>" + ( resultSet.getObject( 11 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 11 ), Integer.toString( resultSet.getInt( 11 ) ) ) ) + "<td>" + ( revocated ? "Yes" : "No" ) );
 				outputWriter.println( revocated ? "<input type=submit value='Reinstate' onclick='javascript:this.form." + REQUEST_PARAM_REINSTATE_ID + ".value=\"" + reportId + "\";'>" : "<input type=submit value='Revocate' onclick='javascript:this.form." + REQUEST_PARAM_REVOCATE_ID + ".value=\"" + reportId + "\";'>" );
 			}
 			resultSet.close();
@@ -335,6 +332,65 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "<h3>New key</h3>" );
 			
 			connection = dataSource.getConnection();
+			
+		} catch ( final SQLException se ) {
+			se.printStackTrace();
+			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
+		}
+		finally {
+			if ( resultSet != null )
+				try { resultSet.close(); } catch ( final SQLException se ) {}
+			if ( statement != null )
+				try { statement.close(); } catch ( final SQLException se ) {}
+			if ( connection != null )
+				try { connection.close(); } catch ( final SQLException se ) {}
+			
+			if ( outputWriter != null )
+				outputWriter.close();
+		}
+	}
+	
+	/**
+	 * Serves the reporters statistics.
+	 * @param request the http servlet request
+	 * @param response the http servlet repsonse
+	 */
+	private void handleReportersStat( final HttpServletRequest request, final HttpServletResponse response ) throws IOException, ServletException {
+		Connection  connection   = null;
+		Statement   statement    = null;
+		ResultSet   resultSet    = null;
+		PrintWriter outputWriter = null;
+		
+		try {
+			outputWriter = response.getWriter();
+			renderHeader( request, outputWriter );
+			outputWriter.println( "<h3>Reporters statistics</h3>" );
+			
+			connection = dataSource.getConnection();
+			
+			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
+			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME + "><th>#<th>Key<th>Key owner<th>Reports<br>sent<th>Hackers<br>caught<th>Revocated<br>count<th>Avg daily<br>reports<th>First report<th>Last report" );
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery( "SELECT key.id, key.value, person.name, COUNT(report.id), COUNT(DISTINCT hacker.id), COUNT(CASE WHEN report.revocated=TRUE OR key.revocated=TRUE THEN 1 END), COUNT(report.id)/(1.000+CAST(CAST(MAX(report.version) AS DATE)-CAST(MIN(report.version) AS DATE) AS bigint)), MIN(report.version), MAX(report.version) FROM report JOIN key on report.key=key.id JOIN person on key.person=person.id JOIN hacker on report.hacker=hacker.id GROUP BY key.id, key.value, person.name ORDER BY COUNT(report.id) DESC;" );
+			
+			int rowCounter = 0;
+			while ( resultSet.next() ) {
+				outputWriter.println( "<tr><td align=right>" + (++rowCounter)
+						+ "<td align=right>" + getHackerRecordsByKeyLink( resultSet.getString( 2 ), Integer.toString( resultSet.getInt( 1 ) ), "keyreportsform" ) + "&uarr;<td>" + encodeHtmlString( resultSet.getString( 3 ) )
+						+ "<td align=right>" + resultSet.getInt( 4 ) + "<td align=right>" + resultSet.getInt( 5 ) + "<td align=right>" + resultSet.getInt( 6 )
+						+ "<td align=right>" + String.format( "%.3f", resultSet.getFloat( 7 ) ) 
+						+ "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 8 ) ) + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 9 ) ) );
+			}
+			resultSet.close();
+			statement.close();
+			
+			outputWriter.println( "</table></form>" );
+			
+			outputWriter.println( "<form id='keyreportsform' action='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_LIST + "' method=POST target='_blank'><input type=hidden name='" + FILTER_NAME_REPORTED_WITH_KEY + "'></form>" );
+			
+			renderFooter( outputWriter );
+			
+			outputWriter.flush();
 			
 		} catch ( final SQLException se ) {
 			se.printStackTrace();
