@@ -1,6 +1,9 @@
 package hu.belicza.andras.hackerdb;
 
+import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_REPORTED_WITH_KEY;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.GATEWAYS;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_LIST;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_OPERATION;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.IOException;
@@ -245,7 +248,7 @@ public class AdminServlet extends BaseServlet {
 					+ ( hackerName != null ? " value='" + encodeHtmlString( hackerName ) + "'" : "" ) + ">&nbsp;&nbsp;|&nbsp;&nbsp;Limit:<input type=text name='" + REQUEST_PARAM_LASTREPS_LIMIT + "'" 
 					+ " value='" + lastRepsLimit + "' size=1>&nbsp;&nbsp;|&nbsp;&nbsp;<input type=submit value='Refresh'></p>" );
 			
-			String query = "SELECT report.ip, report.id as report, person.name as reporter, key.id as key, hacker.id as hacker, hacker.name as hacker_name, hacker.gateway as gw, game_engine as BW, report.version as date, substr(report.agent_version,1,4) as agver, game.id as game_id, report.revocated as revoc FROM report JOIN key on report.key=key.id JOIN person on key.person=person.id JOIN hacker on report.hacker=hacker.id LEFT OUTER JOIN game on report.replay_md5=game.replay_md5 WHERE 1=1";
+			String query = "SELECT report.ip, report.id as report, person.name as reporter, key.id as key, hacker.id as hacker, hacker.name as hacker_name, hacker.gateway as gw, game_engine as BW, report.version as date, substr(report.agent_version,1,4) as agver, game.id as game_id, report.revocated as revoc, key.value FROM report JOIN key on report.key=key.id JOIN person on key.person=person.id JOIN hacker on report.hacker=hacker.id LEFT OUTER JOIN game on report.replay_md5=game.replay_md5 WHERE 1=1";
 			if ( hackerName != null )
 				query += "and hacker.name=?";
 			query += "ORDER BY report.id DESC LIMIT " + lastRepsLimit;
@@ -268,15 +271,17 @@ public class AdminServlet extends BaseServlet {
 				
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
 						+ "<td>" + resultSet.getString( 1 ) + "<td>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 3 ) ) 
-						+ "<td>" + resultSet.getInt( 4 ) + "<td>" + resultSet.getInt( 5 ) + "<td>" + encodeHtmlString( resultSet.getString( 6 ) ) 
+						+ "<td>" + getHackerRecordsByKeyLink( resultSet.getString( 13 ), Integer.toString( resultSet.getInt( 4 ) ), "keyreportsform" ) + "&uarr;<td>" + resultSet.getInt( 5 ) + "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 6 ) ) 
 						+ "<td>" + GATEWAYS[ gateway ]
 						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 8 ) ] + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 9 ) )
-						+ "<td>" + resultSet.getString( 10 ) + "<td>" + ( resultSet.getObject( 11 ) == null ? "N/A" : resultSet.getInt( 11 ) ) + "<td>" + ( revocated ? "T" : "F" ) );
+						+ "<td>" + resultSet.getString( 10 ) + "<td>" + ( resultSet.getObject( 11 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 11 ), Integer.toString( resultSet.getInt( 11 ) ) ) ) + "<td>" + ( revocated ? "T" : "F" ) );
 				outputWriter.println( revocated ? "<input type=submit value='Reinstate' onclick='javascript:this.form." + REQUEST_PARAM_REINSTATE_ID + ".value=\"" + reportId + "\";'>" : "<input type=submit value='Revocate' onclick='javascript:this.form." + REQUEST_PARAM_REVOCATE_ID + ".value=\"" + reportId + "\";'>" );
 			}
 			resultSet.close();
 			statement.close();
 			outputWriter.println( "</table></form>" );
+			
+			outputWriter.println( "<form id='keyreportsform' action='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_LIST + "' method=POST target='_blank'><input type=hidden name='" + FILTER_NAME_REPORTED_WITH_KEY + "'></form>" );
 			
 			renderFooter( outputWriter );
 			
@@ -297,6 +302,20 @@ public class AdminServlet extends BaseServlet {
 			if ( outputWriter != null )
 				outputWriter.close();
 		}
+	}
+	
+	/**
+	 * Generates and returns an HTML link to the records of a hacker search by key.<br>
+	 * An HTML anchor tag will be returned whose text is the value of <code>text</code> and an up arrow indicating
+	 * that the result will open in a new window.
+	 * The link on click will store the key value to a form element and submit the form.
+	 * @param key value of the key
+	 * @param text text to appear in the link
+	 * @param formId id of the form element
+	 * @return an HTML link to the records of a hacker search by key
+	 */
+	private static String getHackerRecordsByKeyLink( final String key, final String text, final String formId ) {
+		return "<a href='#' onclick=\"javascript:document.forms['" + formId + "']." + FILTER_NAME_REPORTED_WITH_KEY + ".value='" + key + "';document.forms['" + formId + "'].submit();\">" + text + "</a>";
 	}
 	
 	/**

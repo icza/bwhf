@@ -1483,7 +1483,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * @param text text to appear in the link
 	 * @return an HTML link to the details page of the player
 	 */
-	private static String getGameDetailsHtmlLink( final int id, final String text ) {
+	protected static String getGameDetailsHtmlLink( final int id, final String text ) {
 		return "<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_DETAILS
 							 + '&' + PN_REQUEST_PARAM_NAME_ENTITY    + '=' + ENTITY_GAME
 							 + '&' + PN_REQUEST_PARAM_NAME_ENTITY_ID + '=' + id + "'>" + text + "</a>"; 
