@@ -43,6 +43,7 @@ import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_PREVIOUS
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -975,6 +976,24 @@ public class HackerDbServlet extends BaseServlet {
 			if ( resultSet  != null ) try { resultSet .close(); } catch ( final SQLException se ) {}
 			if ( statement  != null ) try { statement .close(); } catch ( final SQLException se ) {}
 			if ( connection != null ) try { connection.close(); } catch ( final SQLException se ) {}
+		}
+	}
+	
+	/**
+	 * Generates and returns an HTML link to the records of a hacker search by name.<br>
+	 * An HTML anchor tag will be returned whose text is the value of <code>hackerName</code>.
+	 * @param hackerName name of the hacker whose records to be listed
+	 * @return an HTML link to the records of a hacker search by name
+	 */
+	protected static String getHackerRecordsByNameLink( final String hackerName ) {
+		try {
+			return "<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_LIST
+				 + '&' + FILTER_NAME_NAME + '=' + URLEncoder.encode( hackerName, "UTF-8" )
+				 + "'>" + encodeHtmlString( hackerName ) + "</a>";
+		} catch ( final UnsupportedEncodingException uee ) {
+			// This should never happen
+			uee.printStackTrace();
+			throw new RuntimeException( uee );
 		}
 	}
 	

@@ -11,7 +11,7 @@ public class ServerApiConsts {
 	public static final String REQUEST_PARAMETER_NAME_OPERATION        = "op";
 	/** Name of the key request parameter.             */
 	public static final String REQUEST_PARAMETER_NAME_KEY              = "key";
-	/** Name of the player name request parameter.     */
+	/** Name of the player request parameter.          */
 	public static final String REQUEST_PARAMETER_NAME_PLAYER           = "pln";
 	/** Name of the gateway request parameter.         */
 	public static final String REQUEST_PARAMETER_NAME_GATEWAY          = "gat";
