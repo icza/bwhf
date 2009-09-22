@@ -1,4 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE web-app PUBLIC 
+  "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
+  "http://java.sun.com/dtd/web-app_2_3.dtd">
+
 <web-app>
+	
+	<display-name>BWHF database and web interface</display-name>
+	<description>
+		This webapplication is the server backend of the BWHF system.
+		It also supplies a web interface to list/view/filter/sort etc. the hackers, players, games, to view statistics
+		and to provide a basic administration interface. 
+	</description>
 	
 	<servlet>
 		<servlet-name>Hackers</servlet-name>
@@ -25,5 +37,9 @@
 		<servlet-name>Admin</servlet-name>
 		<url-pattern>/admin</url-pattern>
 	</servlet-mapping>
+	
+	<session-config>
+		<session-timeout>60</session-timeout>    <!-- Session timeout in minutes. -->
+	</session-config>
 	
 </web-app>
