@@ -106,7 +106,7 @@ public class HackerDbServlet extends BaseServlet {
 	}
 	
 	@Override
-	public void doGet( final HttpServletRequest request, final HttpServletResponse response ) {
+	public void doGet( final HttpServletRequest request, final HttpServletResponse response ) throws IOException {
 		setNoCache( response );
 		try {
 			request.setCharacterEncoding( "UTF-8" );
@@ -234,7 +234,7 @@ public class HackerDbServlet extends BaseServlet {
 	 * @param filtersWrapper filters wrapper holding the filter parameters
 	 * @param response       the http response
 	 */
-	private void serveHackerList( final FiltersWrapper filtersWrapper, final HttpServletResponse response ) {
+	private void serveHackerList( final FiltersWrapper filtersWrapper, final HttpServletResponse response ) throws IOException {
 		setNoCache( response );
 		response.setContentType( "text/html" );
 		response.setCharacterEncoding( "UTF-8" );
@@ -354,8 +354,6 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( "</body></html>" );
 			
 			outputWriter.flush();
-		} catch ( final IOException ie ) {
-			ie.printStackTrace();
 		} catch ( final SQLException se ) {
 			se.printStackTrace();
 			final String errorMessage = "<p>Sorry, the server has encountered an error, we cannot fulfill your request! We apologize.</p>";
@@ -371,9 +369,6 @@ public class HackerDbServlet extends BaseServlet {
 				try { statement.close(); } catch ( final SQLException se ) {}
 			if ( connection != null )
 				try { connection.close(); } catch ( final SQLException se ) {}
-			
-			if ( outputWriter != null )
-				outputWriter.close();
 		}
 	}
 	
@@ -515,7 +510,7 @@ public class HackerDbServlet extends BaseServlet {
 	 * Creates and sends statistics of the hacker database.
 	 * @param response the http response
 	 */
-	private void serveStatistics( final HttpServletResponse response ) {
+	private void serveStatistics( final HttpServletResponse response ) throws IOException {
 		setNoCache( response );
 		response.setContentType( "text/html" );
 		response.setCharacterEncoding( "UTF-8" );
@@ -681,6 +676,7 @@ public class HackerDbServlet extends BaseServlet {
 			for ( final Object[] dayReports : dailyReportsList )
 				outputWriter.println( "<tr><td>" + dayReports[ 0 ] + "<td align=right>" + DECIMAL_FORMAT.format( dayReports[ 1 ] ) );
 			outputWriter.println( "</div></table></table>" );
+			outputWriter.flush();
 			
 			outputWriter.println( "<h3>Hacker distribution between gateways</h3>" );
 			outputWriter.println( "<table border=0><tr><td>" );
@@ -720,8 +716,6 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( "</body></html>" );
 			
 			outputWriter.flush();
-		} catch ( final IOException ie ) {
-			ie.printStackTrace();
 		} catch ( final SQLException se ) {
 			se.printStackTrace();
 			final String errorMessage = "<p>Sorry, the server has encountered an error, we cannot fulfill your request! We apologize.</p>";
@@ -737,9 +731,6 @@ public class HackerDbServlet extends BaseServlet {
 				try { statement.close(); } catch ( final SQLException se ) {}
 			if ( connection != null )
 				try { connection.close(); } catch ( final SQLException se ) {}
-			
-			if ( outputWriter != null )
-				outputWriter.close();
 		}
 	}
 	

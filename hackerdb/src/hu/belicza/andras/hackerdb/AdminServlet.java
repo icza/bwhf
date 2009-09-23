@@ -187,9 +187,6 @@ public class AdminServlet extends BaseServlet {
 				try { statement.close(); } catch ( final SQLException se ) {}
 			if ( connection != null )
 				try { connection.close(); } catch ( final SQLException se ) {}
-			
-			if ( outputWriter != null )
-				outputWriter.close();
 		}
 	}
 	
@@ -299,9 +296,6 @@ public class AdminServlet extends BaseServlet {
 				try { statement.close(); } catch ( final SQLException se ) {}
 			if ( connection != null )
 				try { connection.close(); } catch ( final SQLException se ) {}
-			
-			if ( outputWriter != null )
-				outputWriter.close();
 		}
 	}
 	
@@ -430,9 +424,6 @@ public class AdminServlet extends BaseServlet {
 				try { statement.close(); } catch ( final SQLException se ) {}
 			if ( connection != null )
 				try { connection.close(); } catch ( final SQLException se ) {}
-			
-			if ( outputWriter != null )
-				outputWriter.close();
 		}
 	}
 	
@@ -489,9 +480,6 @@ public class AdminServlet extends BaseServlet {
 				try { statement.close(); } catch ( final SQLException se ) {}
 			if ( connection != null )
 				try { connection.close(); } catch ( final SQLException se ) {}
-			
-			if ( outputWriter != null )
-				outputWriter.close();
 		}
 	}
 	
