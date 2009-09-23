@@ -121,28 +121,19 @@ public class BaseServlet extends HttpServlet {
 	 * @param message  message to be sent
 	 * @param response response to be used
 	 */
-	protected static void sendBackPlainMessage( final String message, final HttpServletResponse response ) {
+	protected static void sendBackPlainMessage( final String message, final HttpServletResponse response ) throws IOException {
 		response.setContentType( "text/plain" );
 		
-		PrintWriter output = null;
-		try {
-			output = response.getWriter();
-			output.println( message );
-			output.flush();
-		} catch ( final IOException ie ) {
-			ie.printStackTrace();
-		}
-		finally {
-			if ( output != null )
-				 output.close();
-		}
+		final PrintWriter output = response.getWriter();;
+		output.println( message );
+		output.flush();
 	}
 	
 	/**
 	 * Sends back an error message to the client indicating a bad request.
 	 * @param response response to be used
 	 */
-	protected static void sendBackErrorMessage( final HttpServletResponse response ) {
+	protected static void sendBackErrorMessage( final HttpServletResponse response ) throws IOException {
 		sendBackErrorMessage( response, "Bad request!" );
 	}
 	
@@ -151,21 +142,12 @@ public class BaseServlet extends HttpServlet {
 	 * @param response response to be used
 	 * @param message  message to be sent back
 	 */
-	protected static void sendBackErrorMessage( final HttpServletResponse response, final String message ) {
+	protected static void sendBackErrorMessage( final HttpServletResponse response, final String message ) throws IOException {
 		response.setContentType( "text/html" );
 		
-		PrintWriter output = null;
-		try {
-			output = response.getWriter();
-			output.println( message );
-			output.flush();
-		} catch ( final IOException ie ) {
-			ie.printStackTrace();
-		}
-		finally {
-			if ( output != null )
-				 output.close();
-		}
+		final PrintWriter output = response.getWriter();
+		output.println( message );
+		output.flush();
 	}
 	
 	/**

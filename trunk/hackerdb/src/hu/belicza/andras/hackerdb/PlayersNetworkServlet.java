@@ -125,7 +125,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	);
 	
 	@Override
-	public void doGet( final HttpServletRequest request, final HttpServletResponse response ) {
+	public void doGet( final HttpServletRequest request, final HttpServletResponse response ) throws IOException {
 		setNoCache( response );
 		response.setCharacterEncoding( "UTF-8" );
 		try {
@@ -183,7 +183,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * @param request  http request
 	 * @param response http response
 	 */
-	private void handleSend( final HttpServletRequest request, final HttpServletResponse response ) {
+	private void handleSend( final HttpServletRequest request, final HttpServletResponse response ) throws IOException {
 		int engine = 0, frames = 0, mapWidth = 0, mapHeight = 0, speed = 0, type = 0, subType = 0;
 		Long saveTime = null;
 		String name = null, creatorName = null, mapName = null, replayMd5 = null, agentVersion = null;
@@ -362,7 +362,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * @param entity   entity to be listed
 	 * @param page     page to be listed
 	 */
-	private void handleList( final HttpServletRequest request, final HttpServletResponse response, final String entity, int page ) {
+	private void handleList( final HttpServletRequest request, final HttpServletResponse response, final String entity, int page ) throws IOException {
 		PrintWriter       outputWriter = null;
 		Connection        connection   = null;
 		Statement         statement    = null;
@@ -718,10 +718,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 			
 			renderFooter( request, outputWriter );
 		}
-		catch ( final IOException ie ) {
-			ie.printStackTrace();
-		}
 		catch ( final SQLException se ) {
+			se.printStackTrace();
 		}
 		finally {
 			if ( statement3 != null ) try { statement3.close(); } catch ( final SQLException se ) {}
@@ -730,7 +728,6 @@ public class PlayersNetworkServlet extends BaseServlet {
 			if ( resultSet != null ) try { resultSet.close(); } catch ( final SQLException se ) {}
 			if ( statement != null ) try { statement.close(); } catch ( final SQLException se ) {}
 			if ( connection != null ) try { connection.close(); } catch ( final SQLException se ) {}
-			if ( outputWriter != null ) outputWriter.close();
 		}
 	}
 	
@@ -818,7 +815,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * @param entity   entity to be detailed
 	 * @param entityId id of entity to be detailed
 	 */
-	private void handleDetails( final HttpServletRequest request, final HttpServletResponse response, final String entity, final int entityId ) {
+	private void handleDetails( final HttpServletRequest request, final HttpServletResponse response, final String entity, final int entityId ) throws IOException {
 		PrintWriter outputWriter = null;
 		Connection  connection   = null;
 		Statement   statement    = null;
@@ -1264,10 +1261,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 			
 			renderFooter( request, outputWriter );
 		}
-		catch ( final IOException ie ) {
-			ie.printStackTrace();
-		}
 		catch ( final SQLException se ) {
+			se.printStackTrace();
 		}
 		finally {
 			if ( resultSet2 != null ) try { resultSet2.close(); } catch ( final SQLException se ) {}
@@ -1275,7 +1270,6 @@ public class PlayersNetworkServlet extends BaseServlet {
 			if ( resultSet != null ) try { resultSet.close(); } catch ( final SQLException se ) {}
 			if ( statement != null ) try { statement.close(); } catch ( final SQLException se ) {}
 			if ( connection != null ) try { connection.close(); } catch ( final SQLException se ) {}
-			if ( outputWriter != null ) outputWriter.close();
 		}
 	}
 	
@@ -1572,6 +1566,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 		outputWriter.println( "</center>" );
 		outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
 		outputWriter.println( "</body></html>" );
+		outputWriter.flush();
 	}
 	
 }
