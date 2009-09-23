@@ -170,8 +170,6 @@ public class AdminServlet extends BaseServlet {
 				outputWriter.println( "<script>document.getElementById('userNameFieldId').focus();</script>" );
 				
 				renderFooter( outputWriter );
-				
-				outputWriter.flush();
 			}
 			else
 				request.getRequestDispatcher( "admin?" + REQUEST_PARAM_OPERATION + "=" + DEFAULT_OPERATION ).forward( request, response );
@@ -282,9 +280,6 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "<form id='keyreportsform' action='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_LIST + "' method=POST target='_blank'><input type=hidden name='" + FILTER_NAME_REPORTED_WITH_KEY + "'></form>" );
 			
 			renderFooter( outputWriter );
-			
-			outputWriter.flush();
-			
 		} catch ( final SQLException se ) {
 			se.printStackTrace();
 			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
@@ -412,9 +407,6 @@ public class AdminServlet extends BaseServlet {
 			}
 			
 			renderFooter( outputWriter );
-			
-			outputWriter.flush();
-			
 		} catch ( final SQLException se ) {
 			se.printStackTrace();
 			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
@@ -466,8 +458,6 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "<form id='keyreportsform' action='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_LIST + "' method=POST target='_blank'><input type=hidden name='" + FILTER_NAME_REPORTED_WITH_KEY + "'></form>" );
 			
 			renderFooter( outputWriter );
-			
-			outputWriter.flush();
 			
 		} catch ( final SQLException se ) {
 			se.printStackTrace();
@@ -543,6 +533,7 @@ public class AdminServlet extends BaseServlet {
 		outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></p></center>" );
 		outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
 		outputWriter.println( "</body></html>" );
+		outputWriter.flush();
 	}
 	
 }
