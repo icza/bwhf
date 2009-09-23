@@ -18,6 +18,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Random;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -34,20 +35,28 @@ public class AdminServlet extends BaseServlet {
 	/** User name session attribute. */
 	private static final String ATTRIBUTE_USER_NAME = "userName";
 	
-	/** Operation request param.           */
+	/** Operation request param.             */
 	private static final String REQUEST_PARAM_OPERATION      = "op";
-	/** User name request param.           */
+	/** User name request param.             */
 	private static final String REQUEST_PARAM_USER_NAME      = "userName";
-	/** Password request param.            */
+	/** Password request param.              */
 	private static final String REQUEST_PARAM_PASSWORD       = "password";
-	/** Hacker name request param.         */
+	/** Hacker name request param.           */
 	private static final String REQUEST_PARAM_HACKER_NAME    = "hackername";
-	/** Last reports limit request param.  */
+	/** Last reports limit request param.    */
 	private static final String REQUEST_PARAM_LASTREPS_LIMIT = "lastrepslimit";
-	/** Revocate report id request param.  */
+	/** Revocate report id request param.    */
 	private static final String REQUEST_PARAM_REVOCATE_ID    = "revocate_id";
-	/** Reinstate report id request param. */
+	/** Reinstate report id request param.   */
 	private static final String REQUEST_PARAM_REINSTATE_ID   = "reinstate_id";
+	/** Number of keys request param.        */
+	private static final String REQUEST_PARAM_NUMBER_OF_KEYS = "numberofkeys";
+	/** Name of hte person request param.    */
+	private static final String REQUEST_PARAM_PERSON_NAME    = "personname";
+	/** Email of the person request param.   */
+	private static final String REQUEST_PARAM_PERSON_EMAIL   = "personemail";
+	/** Comment to the person request param. */
+	private static final String REQUEST_PARAM_PERSON_COMMENT = "personcomment";
 	
 	/** Last reports operation.   */
 	private static final String OPERATION_LAST_REPS      = "lastreps";
@@ -66,9 +75,9 @@ public class AdminServlet extends BaseServlet {
 	
 	/** Hacker list menu HTML code to be sent. */
 	private static final String ADMIN_PAGE_MENU_HTML = "<p><a href='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_LAST_REPS + "'>Last reports</a>"
-			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_NEW_KEY + "'>New key</a>"
-			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_REPORTERS_STAT + "'>Reporters stat</a>"
-			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_LOGOUT + "'>Logout</a></p>";
+			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + '=' + OPERATION_NEW_KEY + "'>New key</a>"
+			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + '=' + OPERATION_REPORTERS_STAT + "'>Reporters stat</a>"
+			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + '=' + OPERATION_LOGOUT + "'>Logout</a></p>";
 	
 	@Override
 	public void doGet( final HttpServletRequest request, final HttpServletResponse response ) throws ServletException, IOException {
@@ -147,9 +156,9 @@ public class AdminServlet extends BaseServlet {
 			if ( request.getSession( false ) == null ) {
 				outputWriter = response.getWriter();
 				renderHeader( request, outputWriter );
-				outputWriter.println( "<h3>Login page</h3>" );
+				outputWriter.println( "<h3>Login</h3>" );
 				if ( message != null )
-					outputWriter.println( "<p style='color:red'>" + message + "</p>" );
+					renderMessage( message, true, outputWriter );
 				
 				outputWriter.println( "<form action='admin' method='POST'>" );
 				outputWriter.println( "<table border=0>" );
@@ -202,12 +211,9 @@ public class AdminServlet extends BaseServlet {
 			
 			connection = dataSource.getConnection();
 			
-			String revocateId  = request.getParameter( REQUEST_PARAM_REVOCATE_ID  );
-			if ( revocateId != null && revocateId.length() == 0 )
-				revocateId = null;
-			String reinstateId = request.getParameter( REQUEST_PARAM_REINSTATE_ID );
-			if ( reinstateId != null && reinstateId.length() == 0 )
-				reinstateId = null;
+			final String revocateId  = getNullStringParamValue( request, REQUEST_PARAM_REVOCATE_ID  );
+			final String reinstateId = getNullStringParamValue( request, REQUEST_PARAM_REINSTATE_ID );
+			
 			if ( revocateId != null || reinstateId != null ) {
 				Integer id = null;
 				try {
@@ -219,16 +225,14 @@ public class AdminServlet extends BaseServlet {
 					statement = connection.prepareStatement( "UPDATE report set revocated=" + ( revocateId == null ? "false" : "true" ) + " WHERE id=?" );
 					statement.setInt( 1, id );
 					if ( statement.executeUpdate() == 1 )
-						outputWriter.println( "<p style='color:green'>Report has been " + ( revocateId == null ? "reinstated" : "revocated" ) + " successfully.</p>" );
+						renderMessage( "Report has been " + ( revocateId == null ? "reinstated" : "revocated" ) + " successfully.", false, outputWriter );
 					else
-						outputWriter.println( "<p style='color:red'>Failed to " + ( revocateId == null ? "reinstate" : "revocate" ) + " the report!</p>" );
+						renderMessage( "Failed to " + ( revocateId == null ? "reinstate" : "revocate" ) + " the report!", true, outputWriter );
 					statement.close();
 				}
 			}
 			
-			String hackerName = request.getParameter( REQUEST_PARAM_HACKER_NAME );
-			if ( hackerName != null && hackerName.length() == 0 )
-				hackerName = null;
+			final String hackerName = getNullStringParamValue( request, REQUEST_PARAM_HACKER_NAME );
 			
 			String lastRepsLimitParam = request.getParameter( REQUEST_PARAM_LASTREPS_LIMIT );
 			int lastRepsLimit;
@@ -320,10 +324,9 @@ public class AdminServlet extends BaseServlet {
 	 * @param request the http servlet request
 	 * @param response the http servlet repsonse
 	 */
-	private void handleNewKey( final HttpServletRequest request, final HttpServletResponse response ) throws IOException, ServletException {
+	private synchronized void handleNewKey( final HttpServletRequest request, final HttpServletResponse response ) throws IOException, ServletException {
 		Connection        connection   = null;
 		PreparedStatement statement    = null;
-		ResultSet         resultSet    = null;
 		PrintWriter       outputWriter = null;
 		
 		try {
@@ -331,15 +334,98 @@ public class AdminServlet extends BaseServlet {
 			renderHeader( request, outputWriter );
 			outputWriter.println( "<h3>New key</h3>" );
 			
-			connection = dataSource.getConnection();
+			final Integer numberOfKeys  = getIntegerParamValue   ( request, REQUEST_PARAM_NUMBER_OF_KEYS );
+			final String  personName    = getNullStringParamValue( request, REQUEST_PARAM_PERSON_NAME    );
+			final String  personEmail   = getNullStringParamValue( request, REQUEST_PARAM_PERSON_EMAIL   );
+			final String  personComment = getNullStringParamValue( request, REQUEST_PARAM_PERSON_COMMENT );
+			
+			StringBuilder emailMessageBuilder = null;
+			if ( numberOfKeys != null || personName != null || personEmail != null || personComment != null ) {
+				if ( numberOfKeys == null || personName == null || personEmail == null || personComment == null ) {
+					renderMessage( "All fields are required!", true, outputWriter );
+				}
+				else {
+					final int    PASSWORD_LENGTH = 20;
+					final char[] PASSWORD_CHARSET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+					// Generate keys
+					final Random          random      = new Random( System.nanoTime() + Runtime.getRuntime().freeMemory() );
+					final StringBuilder[] keyBuilders = new StringBuilder[ numberOfKeys ];
+					
+					for ( int i = 0; i < keyBuilders.length; i++ ) {
+						final StringBuilder keyBuilder = keyBuilders[ i ] = new StringBuilder();
+						for ( int j = 0; j < PASSWORD_LENGTH; j++ )
+							keyBuilder.append( PASSWORD_CHARSET[ random.nextInt( PASSWORD_CHARSET.length ) ] );
+					}
+					
+					connection = dataSource.getConnection();
+					statement  = connection.prepareStatement( "INSERT INTO person (name,email,comment) VALUES (?,?,?)" );
+					statement.setString( 1, personName    );
+					statement.setString( 2, personEmail   );
+					statement.setString( 3, personComment );
+					final boolean personAdded = statement.executeUpdate() == 1;
+					statement.close();
+					if ( personAdded ) {
+						int keysAdded = 0;
+						statement = connection.prepareStatement( "INSERT INTO key (value,person) VALUES (?,(SELECT MAX(id) FROM person))" );
+						for ( final StringBuilder keyBuilder : keyBuilders ) {
+							statement.setString( 1, keyBuilder.toString() );
+							if ( statement.executeUpdate() == 1 )
+								keysAdded++;
+						}
+						statement.close();
+						if ( keysAdded == keyBuilders.length )
+							renderMessage( "Added person and " + keysAdded + ( keysAdded == 1 ? " key." : " keys." ), false, outputWriter );
+						else
+							renderMessage( "Added person and " + keysAdded + ( keysAdded == 1 ? " key" : " keys" ) + ", failed to add " + ( keyBuilders.length - keysAdded ) + ( keyBuilders.length - keysAdded == 1 ? " key!" : " keys!" ), true, outputWriter );
+						
+						// Build the email text
+						emailMessageBuilder = new StringBuilder();
+						emailMessageBuilder.append( personEmail ).append( "\nBWHF authorization key" ).append( keyBuilders.length == 1 ? "" : "s" )
+							.append( "\n\n\nHi " ).append( personName ).append( "!\n\n" )
+							.append( keyBuilders.length == 1 ? "This is your BWHF authorization key:" : "Here are your BWHF authorization keys:" );
+						for ( final StringBuilder keyBuilder : keyBuilders )
+							emailMessageBuilder.append( '\n' ).append( keyBuilder );
+						emailMessageBuilder.append( "\n\n" );
+						if ( keyBuilders.length == 1 ) {
+							emailMessageBuilder.append( "It's your own, don't give it to anyone. After you enter your key, check \"report hackers\" and you're good to go." );
+						}
+						else {
+							emailMessageBuilder.append( "Plz make sure that one key is only used by one person (a unique key should be given to each person)." );
+						}
+						emailMessageBuilder.append( "\n\nIf you have old hacker replays (only from 2009), send them and I add them in your name (with your key). Just reply to this email. Don't forget to indicate the gateway for the replays!" );
+						emailMessageBuilder.append( "\n\nCheers,\n    Dakota_Fanning" );
+					}
+					else
+						renderMessage( "Could not insert person!", true, outputWriter );
+				}
+			}
+			
+			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_OPERATION + '=' + OPERATION_NEW_KEY + "' method=POST>" );
+			outputWriter.println( "<table border=0>" );
+			outputWriter.println( "<tr><td align=right>Number of keys*:<td><input type=text name='" + REQUEST_PARAM_NUMBER_OF_KEYS + "' value='1'>" );
+			outputWriter.println( "<tr><td align=right>Name of the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_NAME + "'>" );
+			outputWriter.println( "<tr><td align=right>E-mail of the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_EMAIL + "'>" );
+			outputWriter.println( "<tr><td align=right>Comment to the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_COMMENT + "'>" );
+			outputWriter.println( "<tr><td colspan=2 align=center><input type=submit value='Generate and Add'>" );
+			outputWriter.println( "</table>" );
+			outputWriter.println( "</form>" );
+			
+			if ( emailMessageBuilder != null ) {
+				outputWriter.println( "<p>E-mail to send:</p>" );
+				outputWriter.println( "<textarea rows=15 cols=80 readonly>" );
+				outputWriter.println( emailMessageBuilder );
+				outputWriter.println( "</textarea>" );
+			}
+			
+			renderFooter( outputWriter );
+			
+			outputWriter.flush();
 			
 		} catch ( final SQLException se ) {
 			se.printStackTrace();
 			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
 		}
 		finally {
-			if ( resultSet != null )
-				try { resultSet.close(); } catch ( final SQLException se ) {}
 			if ( statement != null )
 				try { statement.close(); } catch ( final SQLException se ) {}
 			if ( connection != null )
@@ -435,6 +521,16 @@ public class AdminServlet extends BaseServlet {
 	    
 	    // Here sb contains the hex string of the digest of the message		
 		return sb.toString();
+	}
+	
+	/**
+	 * Renders a message.
+	 * @param message message to be rendered
+	 * @param error tells if the message is an error message
+	 * @param outputWriter output writer to be used to render
+	 */
+	private static void renderMessage( final String message, final boolean error, final PrintWriter outputWriter ) {
+		outputWriter.println( "<p style='color:" + ( error ? "red" : "green" ) + "'>" + message + "</p>" );
 	}
 	
 	/**
