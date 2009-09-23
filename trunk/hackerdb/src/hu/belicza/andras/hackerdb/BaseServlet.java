@@ -213,6 +213,17 @@ public class BaseServlet extends HttpServlet {
 	}
 	
 	/**
+	 * Returns the value of a request parameter.
+	 * @param request   http request object
+	 * @param paramName name of the parameter whose value is to be returned
+	 * @return the value of a request parameter if its length is greater than 0; <code>null</code> otherwise
+	 */
+	protected static String getNullStringParamValue( final HttpServletRequest request, final String paramName ) {
+		final String paramValue = request.getParameter( paramName );
+		return paramValue == null || paramValue.length() == 0 ? null : paramValue;
+	}
+	
+	/**
 	 * Returns the integer value parsed from a request parameter.
 	 * @param request      http request object
 	 * @param paramName    name of the parameter whose value is to be returned
@@ -232,7 +243,7 @@ public class BaseServlet extends HttpServlet {
 	 * Returns the integer value parsed from a request parameter.
 	 * @param request   http request object
 	 * @param paramName name of the parameter whose value is to be returned
-	 * @return the value of a request parameter 
+	 * @return the value of a request parameter; or <code>null</code> if the parameter is null or an integer cannot be parsed from its value 
 	 */
 	protected static Integer getIntegerParamValue( final HttpServletRequest request, final String paramName ) {
 		try {
