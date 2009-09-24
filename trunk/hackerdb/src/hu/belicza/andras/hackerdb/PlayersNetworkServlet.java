@@ -336,6 +336,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 			sendBackPlainMessage( ServerApiConsts.REPORT_ACCEPTED_MESSAGE, response );
 		}
 		catch ( final Exception e ) {
+			if ( e instanceof IOException )
+				throw (IOException) e;
 			e.printStackTrace();
 			if ( connection != null )
 				try { connection.rollback(); } catch ( final SQLException se2 ) {}
@@ -1314,9 +1316,9 @@ public class PlayersNetworkServlet extends BaseServlet {
 	private static void renderFiltersSection( final PrintWriter outputWriter, final String displayText, final String nameFilter, final int page, final String pagerUrlWithoutNameFilter ) {
 		outputWriter.println( displayText + ": <input type=text id='8347' onkeydown=\"javascritp:if(event.keyCode==13) document.getElementById('4358').onclick()\""
 				+ ( nameFilter == null ? "" : " value='" + encodeHtmlString( nameFilter ) + "'" )
-				+ "> <a id='4358' href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter
+				+ "> <a id='4358' href=\"javascript:window.location='" + pagerUrlWithoutNameFilter
 				+ '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page
-				+ "&" + PN_REQUEST_PARAM_NAME_NAME_FILTER + "='+escape(document.getElementById('8347').value);\">Apply</a>&nbsp;&nbsp;<a href='#' onclick=\"javascript:window.location='" + pagerUrlWithoutNameFilter
+				+ "&" + PN_REQUEST_PARAM_NAME_NAME_FILTER + "='+escape(document.getElementById('8347').value);\">Apply</a>&nbsp;&nbsp;<a href=\"javascript:window.location='" + pagerUrlWithoutNameFilter
 				+ '&' + PN_REQUEST_PARAM_NAME_PAGE + "=" + page + "'\">Clear</a><br>" );
 	}
 	
@@ -1343,7 +1345,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 		else {
 			outputWriter.print( "Next&nbsp;&nbsp;Last" );
 		}
-		outputWriter.print( "&nbsp;&nbsp;|&nbsp;&nbsp;To page: <input id='2130' type=text size=1 onkeydown=\"javascritp:if(event.keyCode==13) document.getElementById('3498').onclick()\"> <a id='3498' href='#' onclick=\"javascript:window.location='"
+		outputWriter.print( "&nbsp;&nbsp;|&nbsp;&nbsp;To page: <input id='2130' type=text size=1 onkeydown=\"javascritp:if(event.keyCode==13) document.getElementById('3498').onclick()\"> <a id='3498' href=\"javascript:window.location='"
 				+ pagerUrl + "'+escape(document.getElementById('2130').value);\">Jump</a>" );
 	}
 	

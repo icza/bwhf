@@ -62,6 +62,8 @@ public class AdminServlet extends BaseServlet {
 	private static final String OPERATION_LAST_REPS      = "lastreps";
 	/** New key operation.        */
 	private static final String OPERATION_NEW_KEY        = "newkey";
+	/** Misc stat operation.      */
+	private static final String OPERATION_MISC_STAT      = "miscstat";
 	/** Reporters stat operation. */
 	private static final String OPERATION_REPORTERS_STAT = "reportersstat";
 	/** Logout operation.         */
@@ -75,6 +77,7 @@ public class AdminServlet extends BaseServlet {
 	
 	/** Hacker list menu HTML code to be sent. */
 	private static final String ADMIN_PAGE_MENU_HTML = "<p><a href='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_LAST_REPS + "'>Last reports</a>"
+			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + '=' + OPERATION_MISC_STAT + "'>Misc stat</a>"
 			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + '=' + OPERATION_NEW_KEY + "'>New key</a>"
 			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + '=' + OPERATION_REPORTERS_STAT + "'>Reporters stat</a>"
 			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + '=' + OPERATION_LOGOUT + "'>Logout</a></p>";
@@ -100,23 +103,17 @@ public class AdminServlet extends BaseServlet {
 				operation = OPERATION_LAST_REPS;
 			
 			if ( operation.equals( OPERATION_LAST_REPS ) ) {
-				
 				handleLastReports( request, response );
-				
 			} else if ( operation.equals( OPERATION_NEW_KEY ) ) {
-				
 				handleNewKey( request, response );
-				
+			} else if ( operation.equals( OPERATION_MISC_STAT ) ) {
+				handleMiscStat( request, response );
 			} else if ( operation.equals( OPERATION_REPORTERS_STAT ) ) {
-				
 				handleReportersStat( request, response );
-				
 			} else if ( operation.equals( OPERATION_LOGOUT ) ) {
-				
 				if ( session != null )
 					session.invalidate();
 				request.getRequestDispatcher( "admin" ).forward( request, response );
-				
 			}
 		}
 	}
@@ -244,10 +241,10 @@ public class AdminServlet extends BaseServlet {
 					+ ( hackerName != null ? " value='" + encodeHtmlString( hackerName ) + "'" : "" ) + ">&nbsp;&nbsp;|&nbsp;&nbsp;Limit:<input type=text name='" + REQUEST_PARAM_LASTREPS_LIMIT + "'" 
 					+ " value='" + lastRepsLimit + "' size=1>&nbsp;&nbsp;|&nbsp;&nbsp;<input type=submit value='Refresh'></p>" );
 			
-			String query = "SELECT report.ip, report.id as report, person.name as reporter, key.id as key, hacker.id as hacker, hacker.name as hacker_name, hacker.gateway as gw, game_engine as BW, report.version as date, substr(report.agent_version,1,4) as agver, game.id as game_id, report.revocated as revoc, key.value FROM report JOIN key on report.key=key.id JOIN person on key.person=person.id JOIN hacker on report.hacker=hacker.id LEFT OUTER JOIN game on report.replay_md5=game.replay_md5 WHERE 1=1";
+			String query = "SELECT report.ip, report.id as report, person.name as reporter, key.id as key, hacker.id as hacker, hacker.name as hacker_name, hacker.gateway as gw, game_engine as BW, report.version as date, substr(report.agent_version,1,4) as agver, game.id as game_id, report.revocated as revoc, key.value FROM report JOIN key on report.key=key.id JOIN person on key.person=person.id JOIN hacker on report.hacker=hacker.id LEFT OUTER JOIN game on report.replay_md5=game.replay_md5";
 			if ( hackerName != null )
-				query += "and hacker.name=?";
-			query += "ORDER BY report.id DESC LIMIT " + lastRepsLimit;
+				query += " WHERE hacker.name=?";
+			query += " ORDER BY report.id DESC LIMIT " + lastRepsLimit;
 			
 			statement = connection.prepareStatement( query ); 
 			if ( hackerName != null )
@@ -266,8 +263,8 @@ public class AdminServlet extends BaseServlet {
 				final boolean revocated = resultSet.getBoolean( 12 );
 				
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
-						+ "<td>" + resultSet.getString( 1 ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 3 ) ) 
-						+ "<td align=right>" + getHackerRecordsByKeyLink( resultSet.getString( 13 ), Integer.toString( resultSet.getInt( 4 ) ), "keyreportsform" ) + "&uarr;<td align=right>" + resultSet.getInt( 5 )
+						+ "<td>" + getIpLookupLink( resultSet.getString( 1 ), "iplookupform" )+ "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 3 ) ) 
+						+ "<td align=right>" + getHackerRecordsByKeyLink( resultSet.getString( 13 ), Integer.toString( resultSet.getInt( 4 ) ), "keyreportsform" ) + "<td align=right>" + resultSet.getInt( 5 )
 						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 6 ) ) + "<td>" + GATEWAYS[ gateway ]
 						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 8 ) ] + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 9 ) )
 						+ "<td align=right>" + resultSet.getString( 10 ) + "<td align=right>" + ( resultSet.getObject( 11 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 11 ), Integer.toString( resultSet.getInt( 11 ) ) ) ) + "<td>" + ( revocated ? "Yes" : "No" ) );
@@ -278,6 +275,7 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "</table></form>" );
 			
 			outputWriter.println( "<form id='keyreportsform' action='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_LIST + "' method=POST target='_blank'><input type=hidden name='" + FILTER_NAME_REPORTED_WITH_KEY + "'></form>" );
+			outputWriter.println( "<form id='iplookupform' action='http://whatismyipaddress.com/staticpages/index.php/lookup-results' method=POST target='_blank'><input type=hidden name='LOOKUPADDRESS'></form>" );
 			
 			renderFooter( outputWriter );
 		} catch ( final SQLException se ) {
@@ -305,7 +303,20 @@ public class AdminServlet extends BaseServlet {
 	 * @return an HTML link to the records of a hacker search by key
 	 */
 	private static String getHackerRecordsByKeyLink( final String key, final String text, final String formId ) {
-		return "<a href='#' onclick=\"javascript:document.forms['" + formId + "']." + FILTER_NAME_REPORTED_WITH_KEY + ".value='" + key + "';document.forms['" + formId + "'].submit();\">" + text + "</a>";
+		return "<a href=\"javascript:document.forms['" + formId + "']." + FILTER_NAME_REPORTED_WITH_KEY + ".value='" + key + "';document.forms['" + formId + "'].submit();\">" + text + "</a>&uarr;";
+	}
+	
+	/**
+	 * Generates and returns an HTML link to an IP lookup.<br>
+	 * An HTML anchor tag will be returned whose text is the value of <code>text</code> and an up arrow indicating
+	 * that the result will open in a new window.
+	 * The link on click will store the IP address to a form element and submit the form.
+	 * @param ip IP address to lookup
+	 * @param formId id of the form element
+	 * @return an HTML link to lookup an IP address
+	 */
+	private static String getIpLookupLink( final String ip, final String formId ) {
+		return "<a href=\"javascript:document.forms['" + formId + "'].LOOKUPADDRESS.value='" + ip + "';document.forms['" + formId + "'].submit();\">" + ip + "</a>&uarr;";
 	}
 	
 	/**
@@ -412,6 +423,83 @@ public class AdminServlet extends BaseServlet {
 			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
 		}
 		finally {
+			if ( statement != null )
+				try { statement.close(); } catch ( final SQLException se ) {}
+			if ( connection != null )
+				try { connection.close(); } catch ( final SQLException se ) {}
+		}
+	}
+	
+	/**
+	 * Serves the miscellaneous statistics.
+	 * @param request the http servlet request
+	 * @param response the http servlet repsonse
+	 */
+	private void handleMiscStat( final HttpServletRequest request, final HttpServletResponse response ) throws IOException, ServletException {
+		Connection  connection   = null;
+		Statement   statement    = null;
+		ResultSet   resultSet    = null;
+		PrintWriter outputWriter = null;
+		
+		try {
+			outputWriter = response.getWriter();
+			renderHeader( request, outputWriter );
+			outputWriter.println( "<h3>Miscellaneous statistics</h3>" );
+			
+			connection = dataSource.getConnection();
+			
+			outputWriter.println( "<table border=1>" );
+			statement = connection.createStatement();
+			
+			resultSet = statement.executeQuery( "select ((select count(*) from game)+0.0)/(select count(*) from player)" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr><th align=left>Games/Players quota:<td align=right>" + String.format( "%.8f", resultSet.getFloat( 1 ) ) );
+			}
+			resultSet.close();
+			
+			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM (SELECT ip FROM download_log WHERE version>='2009-04-20' GROUP BY ip HAVING COUNT(*)>=10) as foo" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr><th align=left>Different IPs with at least 10 downloads:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+			}
+			resultSet.close();
+			
+			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM person" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr><th align=left>Persons in database:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+			}
+			resultSet.close();
+			
+			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM key WHERE key.revocated=FALSE" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr><th align=left>Keys in database:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+			}
+			resultSet.close();
+			
+			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT key.id) FROM key JOIN report on key.id=report.key WHERE key.revocated=FALSE AND CAST(report.version AS DATE)>CAST(now() AS DATE)-30" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr><th align=left>Active keys (which have report in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+			}
+			resultSet.close();
+			
+			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM download_log WHERE version + interval '24 hours'>now()" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr><th align=left>Hacker list downloads in the last 24 hours:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+			}
+			resultSet.close();
+			
+			statement.close();
+			
+			outputWriter.println( "</table>" );
+			
+			renderFooter( outputWriter );
+			
+		} catch ( final SQLException se ) {
+			se.printStackTrace();
+			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
+		}
+		finally {
+			if ( resultSet != null )
+				try { resultSet.close(); } catch ( final SQLException se ) {}
 			if ( statement != null )
 				try { statement.close(); } catch ( final SQLException se ) {}
 			if ( connection != null )
