@@ -39,7 +39,7 @@
 	</servlet-mapping>
 	
 	<session-config>
-		<session-timeout>60</session-timeout>    <!-- Session timeout in minutes. -->
+		<session-timeout>90</session-timeout>    <!-- Session timeout in minutes. -->
 	</session-config>
 	
 </web-app>
