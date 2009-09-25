@@ -73,7 +73,7 @@ public class AdminServlet extends BaseServlet {
 	private static final String DEFAULT_OPERATION = OPERATION_LAST_REPS;
 	
 	/** Time format to format report times. */
-	private static final DateFormat TIME_FORMAT = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss.SSS " );
+	private static final DateFormat TIME_FORMAT         = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss.SSS" );
 	
 	/** Hacker list menu HTML code to be sent. */
 	private static final String ADMIN_PAGE_MENU_HTML = "<p><a href='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_LAST_REPS + "'>Last reports</a>"
@@ -224,7 +224,9 @@ public class AdminServlet extends BaseServlet {
 				}
 			}
 			
-			final String hackerName = getNullStringParamValue( request, REQUEST_PARAM_HACKER_NAME );
+			String hackerName = getNullStringParamValue( request, REQUEST_PARAM_HACKER_NAME );
+			if ( hackerName != null )
+				hackerName = hackerName.toLowerCase();
 			
 			String lastRepsLimitParam = request.getParameter( REQUEST_PARAM_LASTREPS_LIMIT );
 			int lastRepsLimit;
@@ -605,7 +607,8 @@ public class AdminServlet extends BaseServlet {
 	 * @param outputWriter writer to be used to render
 	 */
 	private static void renderFooter( final PrintWriter outputWriter ) {
-		outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></p></center>" );
+		outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></td></center>" );
+		outputWriter.println( getCurrentTimeCode() );
 		outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
 		outputWriter.println( "</body></html>" );
 		outputWriter.flush();
