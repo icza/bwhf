@@ -239,6 +239,8 @@ public class AdminServlet extends BaseServlet {
 				lastRepsLimit = 23;
 			}
 			
+			outputWriter.println( "<form id='keyreportsform' action='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_LIST + "' method=POST target='_blank'><input type=hidden name='" + FILTER_NAME_REPORTED_WITH_KEY + "'></form>" );
+			
 			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_LAST_REPS + "' method=POST><p>Hacker name:<input type=text name='" + REQUEST_PARAM_HACKER_NAME + "'"
 					+ ( hackerName != null ? " value='" + encodeHtmlString( hackerName ) + "'" : "" ) + ">&nbsp;&nbsp;|&nbsp;&nbsp;Limit:<input type=text name='" + REQUEST_PARAM_LASTREPS_LIMIT + "'" 
 					+ " value='" + lastRepsLimit + "' size=1>&nbsp;&nbsp;|&nbsp;&nbsp;<input type=submit value='Refresh'></p>" );
@@ -275,8 +277,6 @@ public class AdminServlet extends BaseServlet {
 			resultSet.close();
 			statement.close();
 			outputWriter.println( "</table></form>" );
-			
-			outputWriter.println( "<form id='keyreportsform' action='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_LIST + "' method=POST target='_blank'><input type=hidden name='" + FILTER_NAME_REPORTED_WITH_KEY + "'></form>" );
 			
 			renderFooter( outputWriter );
 		} catch ( final SQLException se ) {
@@ -523,8 +523,8 @@ public class AdminServlet extends BaseServlet {
 				outputWriter.println( "<tr><td align=right>" + (++rowCounter)
 						+ "<td align=right>" + getHackerRecordsByKeyLink( resultSet.getString( 2 ), Integer.toString( resultSet.getInt( 1 ) ), "keyreportsform" ) + "<td>" + encodeHtmlString( resultSet.getString( 3 ) )
 						+ "<td align=right>" + resultSet.getInt( 4 ) + "<td align=right>" + resultSet.getInt( 5 ) + "<td align=right>" + resultSet.getInt( 6 )
-						+ "<td align=right>" + String.format( "%.3f", resultSet.getFloat( 7 ) ) 
-						+ "<td>" + formatDays( resultSet.getInt( 10 ) ) 
+						+ "<td align=right>" + String.format( "%.3f", resultSet.getFloat( 7 ) )
+						+ "<td align=center>" + formatDays( resultSet.getInt( 10 ) )
 						+ "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 8 ) ) + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 9 ) ) );
 			}
 			resultSet.close();
@@ -597,9 +597,11 @@ public class AdminServlet extends BaseServlet {
 		outputWriter.println( COMMON_HTML_HEADER_ELEMENTS );
 		outputWriter.println( "<title>BWHF Admin Page</title>" );
 		outputWriter.println( "</head><body><center>" );
+		outputWriter.println( getCurrentTimeCode() );
 		outputWriter.println( "<h2>BWHF Admin Page</h2>" );
 		if ( request.getSession( false ) != null )
 			outputWriter.println( ADMIN_PAGE_MENU_HTML );
+		outputWriter.flush();
 	}
 	
 	/**
@@ -608,7 +610,6 @@ public class AdminServlet extends BaseServlet {
 	 */
 	private static void renderFooter( final PrintWriter outputWriter ) {
 		outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></td></center>" );
-		outputWriter.println( getCurrentTimeCode() );
 		outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
 		outputWriter.println( "</body></html>" );
 		outputWriter.flush();

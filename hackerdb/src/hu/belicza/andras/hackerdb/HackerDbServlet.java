@@ -284,9 +284,11 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( "</head><body><center>" );
 			
 			// Header section
+			outputWriter.println( getCurrentTimeCode() );
 			outputWriter.println( "<h2>BWHF Hacker Database</h2>" );
 			outputWriter.println( HACKER_LIST_MENU_HTML );
 			outputWriter.println( GOOGLE_AD_HTML_HEADER );
+			outputWriter.flush();
 			
 			// Controls section
 			outputWriter.println( "<form id='" + FORM_ID + "' action='hackers' method='POST'>" );
@@ -350,7 +352,6 @@ public class HackerDbServlet extends BaseServlet {
 			// Footer section
 			outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></p>" );
 			outputWriter.println( "</center>" );
-			outputWriter.println( getCurrentTimeCode() );
 			outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
 			outputWriter.println( "</body></html>" );
 			
@@ -664,9 +665,11 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( "</head><body><center>" );
 			
 			// Header section
+			outputWriter.println( getCurrentTimeCode() );
 			outputWriter.println( "<h2>BWHF Hacker Database Statistics</h2>" );
 			outputWriter.println( "<table border=0><tr><td><a href='hackers'>Back to the hacker list</a><td>&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></table>" );
 			outputWriter.println( GOOGLE_AD_HTML_HEADER );
+			outputWriter.flush();
 			
 			outputWriter.println( "<h3>Last " + LAST_DAYS_REPORTS + " days' daily reports</h3>" );
 			outputWriter.println( "<table border=0><tr><td>" );
@@ -713,7 +716,6 @@ public class HackerDbServlet extends BaseServlet {
 			// Footer section
 			outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></p>" );
 			outputWriter.println( "</center>" );
-			outputWriter.println( getCurrentTimeCode() );
 			outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
 			outputWriter.println( "</body></html>" );
 			
