@@ -268,7 +268,7 @@ public class BaseServlet extends HttpServlet {
 	protected static String getCurrentTimeCode() {
 		// We send over the server time in UTC (GMT) time zone). The client will interpret the time as if it would be in their time zone, so we have to 
 		// add the client's timezone offset as well (getTimezoneOffset() returns minutes): new Date().getTimezoneOffset()*60*1000
-		return "<div style='position:absolute;top:0;right:0;color:#777777'>Server's current time: <span id='timeslot'></span></div>"
+		return "<div style='position:absolute;top:0;right:1;color:#777777'>Server's current time: <span id='timeslot'></span></div>"
 			+ "<script type='text/javascript'>var timeOffset=" + ( new Date().getTime() + TimeZone.getDefault().getOffset( new Date().getTime() ) ) + "-new Date().getTime()+new Date().getTimezoneOffset()*60*1000;"
 			+ "function ups(){var time=new Date(new Date().getTime()+timeOffset);"
 			+ "var year=time.getFullYear(),month=time.getMonth()+1,day=time.getDate(),hour=time.getHours(),min=time.getMinutes(),sec=time.getSeconds();"
