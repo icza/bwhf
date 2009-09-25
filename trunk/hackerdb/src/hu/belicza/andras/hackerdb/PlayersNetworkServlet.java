@@ -1566,6 +1566,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 							+ "<td align=center width='20%'><i>Served in " + (executionMs / 1000) + " sec, " + (executionMs % 1000) + " ms</i>"
 							+ "<td align=right widht='40%'><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></table>" );
 		outputWriter.println( "</center>" );
+		outputWriter.println( getCurrentTimeCode() );
 		outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
 		outputWriter.println( "</body></html>" );
 		outputWriter.flush();

@@ -350,6 +350,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Footer section
 			outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></p>" );
 			outputWriter.println( "</center>" );
+			outputWriter.println( getCurrentTimeCode() );
 			outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
 			outputWriter.println( "</body></html>" );
 			
@@ -712,6 +713,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Footer section
 			outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></p>" );
 			outputWriter.println( "</center>" );
+			outputWriter.println( getCurrentTimeCode() );
 			outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
 			outputWriter.println( "</body></html>" );
 			

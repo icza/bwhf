@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.util.Date;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -257,6 +258,21 @@ public class BaseServlet extends HttpServlet {
 		formatBuilder.append( days ).append( days == 1 ? " day" : " days" );
 		
 		return formatBuilder.toString();
+	}
+	
+	/**
+	 * Returns an HTML code for displaying a real-time current server time.
+	 * @return an HTML code for displaying a real-time current server time
+	 */
+	protected static String getCurrentTimeCode() {
+		// -4 hours for the server time zone (GMT-4), and client will interpret the time as if it would be in their time zone, so we have to 
+		// substract their timezone as well (getTimezoneOffset returns minutes): new Date().getTimezoneOffset()*60*1000
+		return "<div style='position:absolute;top:0;right:0;color:#777777'>Current server time: <span id='timeslot'></span></div>"
+		+ "<script type='text/javascript'>var timeOffset=new Date().getTime()-" + ( new Date().getTime() -4l*3600l*1000l ) + "-new Date().getTimezoneOffset()*60*1000;function ups(){"
+		+ "var time=new Date(new Date().getTime()-timeOffset);"
+		+ "var year=time.getFullYear(),month=time.getMonth()+1,day=time.getDate(),hour=time.getHours(),min=time.getMinutes(),sec=time.getSeconds();"
+		+ "document.getElementById('timeslot').innerHTML=year+'-'+(month<10?'0':'')+month+'-'+(day<10?'0':'')+day+' '+(hour<10?'0':'')+hour+':'+(min<10?'0':'')+min+':'+(sec<10?'0':'')+sec;"
+		+ "setTimeout('ups()',1000);}ups();</script>";
 	}
 	
 }
