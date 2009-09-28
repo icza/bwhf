@@ -627,8 +627,10 @@ public class AdminServlet extends BaseServlet {
 			final String ACTION_NEW_AKA       = "Add new AKA";
 			
 			final String akaGroupName = getNullStringParamValue( request, REQUEST_PARAM_AKA_GROUP_NAME );
-			final String playerName   = getNullStringParamValue( request, REQUEST_PARAM_PLAYER_NAME    );
-			final String action       = getNullStringParamValue( request, REQUEST_PARAM_AKA_ACTION     );
+			String playerName = getNullStringParamValue( request, REQUEST_PARAM_PLAYER_NAME    );
+			if ( playerName != null )
+				playerName = playerName.toLowerCase();
+			final String action = getNullStringParamValue( request, REQUEST_PARAM_AKA_ACTION     );
 			
 			if ( action != null ) {
 				if ( akaGroupName == null )
