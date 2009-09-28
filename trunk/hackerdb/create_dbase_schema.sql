@@ -19,6 +19,7 @@ CREATE TABLE person
   "comment" character varying,
   "version" timestamp without time zone DEFAULT now(),
   password character varying,
+  page_access integer,
   CONSTRAINT person_pkey PRIMARY KEY (id)
 )
 WITH (
@@ -183,7 +184,8 @@ CREATE TABLE aka_group
   id serial NOT NULL,
   "comment" character varying,
   "version" timestamp without time zone DEFAULT now(),
-  CONSTRAINT aka_group_pkey PRIMARY KEY (id)
+  CONSTRAINT aka_group_pkey PRIMARY KEY (id),
+  CONSTRAINT aka_group_comment_key UNIQUE (comment)
 )
 WITH (
   OIDS=FALSE
