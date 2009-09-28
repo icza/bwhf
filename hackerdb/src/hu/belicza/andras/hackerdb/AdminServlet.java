@@ -32,11 +32,37 @@ import javax.servlet.http.HttpSession;
  */
 public class AdminServlet extends BaseServlet {
 	
-	/** User name session attribute. */
-	private static final String ATTRIBUTE_USER_NAME = "userName";
+	/**
+	 * Pages of the admin modul.
+	 * @author Andras Belicza
+	 */
+	private static enum Page {
+		LAST_REPORTS  ( 0x01, "Last reports"        ),
+		NEW_KEY       ( 0x02, "New key"             ),
+		MISC_STAT     ( 0x04, "Miscellaneous stats" ),
+		REPORTERS_STAT( 0x08, "Reporters stats"     ),
+		MANAGE_AKAS   ( 0x10, "Manage AKAs"         ),
+		LOGOUT        ( 0x20, "Logout"              );
+		
+		public final int    pageId;
+		public final String displayName;
+		private Page( final int pageId, final String displayName ) {
+			this.pageId      = pageId;
+			this.displayName = displayName;
+		}
+	}
 	
-	/** Operation request param.             */
-	private static final String REQUEST_PARAM_OPERATION      = "op";
+	/** User name session attribute.   */
+	private static final String ATTRIBUTE_USER_NAME   = "userName";
+	/** User id session attribute.     */
+	private static final String ATTRIBUTE_USER_ID     = "userId";
+	/** Page access session attribute. */
+	private static final String ATTRIBUTE_PAGE_ACCESS = "pageAccess";
+	/** Menu HTML session attribute.   */
+	private static final String ATTRIBUTE_MENU_HTML   = "menuHtml";
+	
+	/** Page name request param.             */
+	private static final String REQUEST_PARAM_PAGE_NAME      = "pn";
 	/** User name request param.             */
 	private static final String REQUEST_PARAM_USER_NAME      = "userName";
 	/** Password request param.              */
@@ -57,30 +83,15 @@ public class AdminServlet extends BaseServlet {
 	private static final String REQUEST_PARAM_PERSON_EMAIL   = "personemail";
 	/** Comment to the person request param. */
 	private static final String REQUEST_PARAM_PERSON_COMMENT = "personcomment";
-	
-	/** Last reports operation.   */
-	private static final String OPERATION_LAST_REPS      = "lastreps";
-	/** New key operation.        */
-	private static final String OPERATION_NEW_KEY        = "newkey";
-	/** Misc stat operation.      */
-	private static final String OPERATION_MISC_STAT      = "miscstat";
-	/** Reporters stat operation. */
-	private static final String OPERATION_REPORTERS_STAT = "reportersstat";
-	/** Logout operation.         */
-	private static final String OPERATION_LOGOUT         = "logout";
-	
-	/** Default operation for the logged in users. */
-	private static final String DEFAULT_OPERATION = OPERATION_LAST_REPS;
+	/** Aka group name request param.        */
+	private static final String REQUEST_PARAM_AKA_GROUP_NAME = "akagroupname";
+	/** Player name request param.           */
+	private static final String REQUEST_PARAM_PLAYER_NAME    = "playername";
+	/** AKA managing action request param.   */
+	private static final String REQUEST_PARAM_AKA_ACTION     = "akaaction";
 	
 	/** Time format to format report times. */
 	private static final DateFormat TIME_FORMAT         = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss.SSS" );
-	
-	/** Hacker list menu HTML code to be sent. */
-	private static final String ADMIN_PAGE_MENU_HTML = "<p><a href='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_LAST_REPS + "'>Last reports</a>"
-			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + '=' + OPERATION_MISC_STAT + "'>Misc stat</a>"
-			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + '=' + OPERATION_NEW_KEY + "'>New key</a>"
-			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + '=' + OPERATION_REPORTERS_STAT + "'>Reporters stat</a>"
-			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='admin?" + REQUEST_PARAM_OPERATION + '=' + OPERATION_LOGOUT + "'>Logout</a></p>";
 	
 	@Override
 	public void doGet( final HttpServletRequest request, final HttpServletResponse response ) throws ServletException, IOException {
@@ -97,25 +108,67 @@ public class AdminServlet extends BaseServlet {
 		if ( session == null )
 			handleLogin( request, response );
 		else {
-			String operation = request.getParameter( REQUEST_PARAM_OPERATION );
+			final Page page = getRequestedPage( request );
 			
-			if ( operation == null )
-				operation = OPERATION_LAST_REPS;
+			if ( page == null ) {
+				final PrintWriter outputWriter = response.getWriter();
+				renderHeader( request, outputWriter );
+				renderMessage( "You do not have access to that page!", true, outputWriter );
+				renderFooter( outputWriter );
+				return;
+			}
 			
-			if ( operation.equals( OPERATION_LAST_REPS ) ) {
+			switch ( page ) {
+			case LAST_REPORTS:
 				handleLastReports( request, response );
-			} else if ( operation.equals( OPERATION_NEW_KEY ) ) {
+				break;
+			case NEW_KEY:
 				handleNewKey( request, response );
-			} else if ( operation.equals( OPERATION_MISC_STAT ) ) {
+				break;
+			case MISC_STAT:
 				handleMiscStat( request, response );
-			} else if ( operation.equals( OPERATION_REPORTERS_STAT ) ) {
+				break;
+			case REPORTERS_STAT:
 				handleReportersStat( request, response );
-			} else if ( operation.equals( OPERATION_LOGOUT ) ) {
+				break;
+			case MANAGE_AKAS:
+				handleAkas( request, response );
+				break;
+			case LOGOUT:
 				if ( session != null )
 					session.invalidate();
 				request.getRequestDispatcher( "admin" ).forward( request, response );
+				break;
 			}
 		}
+	}
+	
+	/**
+	 * Returns the requested page.
+	 * @param request the http request
+	 * @return the requested page parsed from the request; or <null> if the user has no access to the requested page
+	 */
+	private static Page getRequestedPage( final HttpServletRequest request ) {
+		String            pageName   = request.getParameter( REQUEST_PARAM_PAGE_NAME );
+		final HttpSession session    = request.getSession( false );
+		final int         pageAccess = (Integer) session.getAttribute( ATTRIBUTE_PAGE_ACCESS );
+		
+		if ( pageName == null ) {
+			for ( final Page page : Page.values() )
+				if ( ( pageAccess & page.pageId ) != 0 ) {
+					pageName = page.name();
+					break;
+				}
+		}
+		
+		if ( pageName == null )
+			return null;
+		
+		final Page page = Page.valueOf( pageName );
+		if ( ( pageAccess & page.pageId ) == 0 )
+			return null;
+		
+		return page;
 	}
 	
 	/**
@@ -136,13 +189,16 @@ public class AdminServlet extends BaseServlet {
 			String message = null;
 			if ( userName != null && password != null ) {
 				connection = dataSource.getConnection();
-				statement  = connection.prepareStatement( "SELECT id FROM person WHERE name=? AND password=?" );
+				statement  = connection.prepareStatement( "SELECT id, page_access FROM person WHERE name=? AND password=?" );
 				statement.setString( 1, userName );
 				statement.setString( 2, encodePassword( password ) );
 				
 				resultSet = statement.executeQuery();
 				if ( resultSet.next() ) {
-					request.getSession().setAttribute( ATTRIBUTE_USER_NAME, userName );
+					request.getSession().setAttribute( ATTRIBUTE_USER_NAME  , userName              );
+					request.getSession().setAttribute( ATTRIBUTE_USER_ID    , resultSet.getInt( 1 ) );
+					request.getSession().setAttribute( ATTRIBUTE_PAGE_ACCESS, resultSet.getInt( 2 ) );
+					request.getSession().setAttribute( ATTRIBUTE_MENU_HTML  , getMenuHtml( resultSet.getInt( 2 ) ) );
 				}
 				else
 					message = "Invalid user name or password!";
@@ -169,7 +225,7 @@ public class AdminServlet extends BaseServlet {
 				renderFooter( outputWriter );
 			}
 			else
-				request.getRequestDispatcher( "admin?" + REQUEST_PARAM_OPERATION + "=" + DEFAULT_OPERATION ).forward( request, response );
+				request.getRequestDispatcher( "admin" ).forward( request, response );
 			
 		} catch ( final SQLException se ) {
 			se.printStackTrace();
@@ -199,7 +255,7 @@ public class AdminServlet extends BaseServlet {
 		try {
 			outputWriter = response.getWriter();
 			renderHeader( request, outputWriter );
-			outputWriter.println( "<h3>Last reports</h3>" );
+			outputWriter.println( "<h3>" + Page.LAST_REPORTS.displayName + "</h3>" );
 			
 			connection = dataSource.getConnection();
 			
@@ -241,7 +297,7 @@ public class AdminServlet extends BaseServlet {
 			
 			outputWriter.println( "<form id='keyreportsform' action='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_LIST + "' method=POST target='_blank'><input type=hidden name='" + FILTER_NAME_REPORTED_WITH_KEY + "'></form>" );
 			
-			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_OPERATION + "=" + OPERATION_LAST_REPS + "' method=POST><p>Hacker name:<input type=text name='" + REQUEST_PARAM_HACKER_NAME + "'"
+			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + "=" + Page.LAST_REPORTS.name() + "' method=POST><p>Hacker name:<input type=text name='" + REQUEST_PARAM_HACKER_NAME + "'"
 					+ ( hackerName != null ? " value='" + encodeHtmlString( hackerName ) + "'" : "" ) + ">&nbsp;&nbsp;|&nbsp;&nbsp;Limit:<input type=text name='" + REQUEST_PARAM_LASTREPS_LIMIT + "'" 
 					+ " value='" + lastRepsLimit + "' size=1>&nbsp;&nbsp;|&nbsp;&nbsp;<input type=submit value='Refresh'></p>" );
 			
@@ -320,7 +376,7 @@ public class AdminServlet extends BaseServlet {
 		try {
 			outputWriter = response.getWriter();
 			renderHeader( request, outputWriter );
-			outputWriter.println( "<h3>New key</h3>" );
+			outputWriter.println( "<h3>" + Page.NEW_KEY.displayName + "</h3>" );
 			
 			final Integer numberOfKeys  = getIntegerParamValue   ( request, REQUEST_PARAM_NUMBER_OF_KEYS );
 			final String  personName    = getNullStringParamValue( request, REQUEST_PARAM_PERSON_NAME    );
@@ -388,7 +444,7 @@ public class AdminServlet extends BaseServlet {
 				}
 			}
 			
-			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_OPERATION + '=' + OPERATION_NEW_KEY + "' method=POST>" );
+			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.NEW_KEY.name() + "' method=POST>" );
 			outputWriter.println( "<table border=0>" );
 			outputWriter.println( "<tr><td align=right>Number of keys*:<td><input type=text name='" + REQUEST_PARAM_NUMBER_OF_KEYS + "' value='1'>" );
 			outputWriter.println( "<tr><td align=right>Name of the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_NAME + "'>" );
@@ -432,7 +488,7 @@ public class AdminServlet extends BaseServlet {
 		try {
 			outputWriter = response.getWriter();
 			renderHeader( request, outputWriter );
-			outputWriter.println( "<h3>Miscellaneous statistics</h3>" );
+			outputWriter.println( "<h3>" + Page.MISC_STAT.displayName + "</h3>" );
 			
 			connection = dataSource.getConnection();
 			
@@ -441,25 +497,13 @@ public class AdminServlet extends BaseServlet {
 			
 			resultSet = statement.executeQuery( "select ((select count(*) from game)+0.0)/(select count(*) from player)" );
 			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Games/Players quota:<td align=right>" + String.format( "%.8f", resultSet.getFloat( 1 ) ) );
+				outputWriter.println( "<tr><th align=left>Games Per Players quota:<td align=right>" + String.format( "%.5f", resultSet.getFloat( 1 ) ) );
 			}
 			resultSet.close();
 			
 			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM (SELECT ip FROM download_log WHERE version>='2009-04-20' GROUP BY ip HAVING COUNT(*)>=10) as foo" );
 			if ( resultSet.next() ) {
 				outputWriter.println( "<tr><th align=left>Different IPs with at least 10 downloads:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
-			}
-			resultSet.close();
-			
-			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM person" );
-			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Persons in database:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
-			}
-			resultSet.close();
-			
-			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM key WHERE key.revocated=FALSE" );
-			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Keys in database:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
@@ -472,6 +516,18 @@ public class AdminServlet extends BaseServlet {
 			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM download_log WHERE version + interval '24 hours'>now()" );
 			if ( resultSet.next() ) {
 				outputWriter.println( "<tr><th align=left>Hacker list downloads in the last 24 hours:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+			}
+			resultSet.close();
+			
+			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM person" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr><th align=left>Persons in database:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+			}
+			resultSet.close();
+			
+			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM key WHERE key.revocated=FALSE" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr><th align=left>Keys in database:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
@@ -509,7 +565,7 @@ public class AdminServlet extends BaseServlet {
 		try {
 			outputWriter = response.getWriter();
 			renderHeader( request, outputWriter );
-			outputWriter.println( "<h3>Reporters statistics</h3>" );
+			outputWriter.println( "<h3>" + Page.REPORTERS_STAT.displayName + "</h3>" );
 			
 			connection = dataSource.getConnection();
 			
@@ -533,6 +589,101 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "</table></form>" );
 			
 			outputWriter.println( "<form id='keyreportsform' action='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_LIST + "' method=POST target='_blank'><input type=hidden name='" + FILTER_NAME_REPORTED_WITH_KEY + "'></form>" );
+			
+			renderFooter( outputWriter );
+			
+		} catch ( final SQLException se ) {
+			se.printStackTrace();
+			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
+		}
+		finally {
+			if ( resultSet != null )
+				try { resultSet.close(); } catch ( final SQLException se ) {}
+			if ( statement != null )
+				try { statement.close(); } catch ( final SQLException se ) {}
+			if ( connection != null )
+				try { connection.close(); } catch ( final SQLException se ) {}
+		}
+	}
+	
+	/**
+	 * Handles the AKAs.
+	 * @param request the http servlet request
+	 * @param response the http servlet repsonse
+	 */
+	private synchronized void handleAkas( final HttpServletRequest request, final HttpServletResponse response ) throws IOException, ServletException {
+		Connection        connection   = null;
+		PreparedStatement statement    = null;
+		ResultSet         resultSet    = null;
+		PrintWriter       outputWriter = null;
+		
+		try {
+			outputWriter = response.getWriter();
+			renderHeader( request, outputWriter );
+			outputWriter.println( "<h3>" + Page.MANAGE_AKAS.displayName + "</h3>" );
+			connection = dataSource.getConnection();
+			
+			final String ACTION_NEW_AKA_GROUP = "Create new AKA group";
+			final String ACTION_NEW_AKA       = "Add new AKA";
+			
+			final String akaGroupName = getNullStringParamValue( request, REQUEST_PARAM_AKA_GROUP_NAME );
+			final String playerName   = getNullStringParamValue( request, REQUEST_PARAM_PLAYER_NAME    );
+			final String action       = getNullStringParamValue( request, REQUEST_PARAM_AKA_ACTION     );
+			
+			if ( action != null ) {
+				if ( akaGroupName == null )
+					renderMessage( "AKA group has to be provided!", true, outputWriter );
+				else {
+					Integer akaGroupId = null;
+					statement = connection.prepareStatement( "SELECT id FROM aka_group WHERE comment=?" );
+					statement.setString( 1, akaGroupName );
+					resultSet = statement.executeQuery();
+					if ( resultSet.next() )
+						akaGroupId = resultSet.getInt( 1 );
+					resultSet.close();
+					statement.close();
+					
+					if ( action.equals( ACTION_NEW_AKA_GROUP ) ) {
+						if ( akaGroupId != null ) {
+							renderMessage( "AKA group already exists!", true, outputWriter );
+						}
+						else {
+							statement = connection.prepareStatement( "INSERT INTO aka_group (comment) VALUES (?) " );
+							statement.setString( 1, akaGroupName );
+							if ( statement.executeUpdate() == 1 )
+								renderMessage( "Added 1 new AKA group.", false, outputWriter );
+							else
+								renderMessage( "Failed to add AKA group!", true, outputWriter );
+							statement.close();
+						}
+					}
+					else if ( action.equals( ACTION_NEW_AKA ) ) {
+						if ( playerName == null )
+							renderMessage( "Player name has to be provided!", true, outputWriter );
+						else if ( akaGroupId == null )
+							renderMessage( "AKA group does not exist!", true, outputWriter );
+						else {
+							statement = connection.prepareStatement( "UPDATE player SET aka_group=" + akaGroupId + " WHERE name=?" );
+							statement.setString( 1, playerName );
+							if ( statement.executeUpdate() == 1 )
+								renderMessage( "Added 1 new AKA.", false, outputWriter );
+							else
+								renderMessage( "Failed to add AKA!", true, outputWriter );
+							statement.close();
+						}
+					}
+				}
+			}
+			
+			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.MANAGE_AKAS.name() + "' method=POST><table border=1>" );
+			
+			outputWriter.println( "<tr><td rowspan=2>AKA group/person name:<input type=text name='" + REQUEST_PARAM_AKA_GROUP_NAME + "'>" );
+			outputWriter.println( "<td><input type=submit name='" + REQUEST_PARAM_AKA_ACTION + "' value='" + ACTION_NEW_AKA_GROUP + "'>" );
+			
+			outputWriter.println( "<tr><td>Player name:<input type=text name='" + REQUEST_PARAM_PLAYER_NAME + "'><input type=submit name='" + REQUEST_PARAM_AKA_ACTION + "' value='" + ACTION_NEW_AKA + "'>" );
+			outputWriter.println( "</table></form>" );
+			
+			connection = dataSource.getConnection();
 			
 			renderFooter( outputWriter );
 			
@@ -599,9 +750,33 @@ public class AdminServlet extends BaseServlet {
 		outputWriter.println( "</head><body><center>" );
 		outputWriter.println( getCurrentTimeCode() );
 		outputWriter.println( "<h2>BWHF Admin Page</h2>" );
-		if ( request.getSession( false ) != null )
-			outputWriter.println( ADMIN_PAGE_MENU_HTML );
+		final HttpSession session = request.getSession( false );
+		if ( session != null )
+			outputWriter.println( session.getAttribute( ATTRIBUTE_MENU_HTML ) );
 		outputWriter.flush();
+	}
+	
+	/**
+	 * Returns the menu HTML for the current user.<br>
+	 * The menu will only contain pages to which the user has access.
+	 * @param pageAccess page access bitmask
+	 * @return the menu HTML for the current user.
+	 */
+	private static String getMenuHtml( final int pageAccess ) {
+		final StringBuilder menuBuilder = new StringBuilder( "<p>" );
+		
+		boolean firstPage = true;
+		for ( final Page page : Page.values() )
+			if ( ( pageAccess & page.pageId ) != 0 ) {
+				if ( firstPage )
+					firstPage = false;
+				else
+					menuBuilder.append( "&nbsp;&nbsp;|&nbsp;&nbsp;" );
+				menuBuilder.append( "<a href='admin?" ).append( REQUEST_PARAM_PAGE_NAME ).append( '=' ).append( page.name() )
+					.append( "'>" ).append( page.displayName ).append( "</a>" );
+			}
+		
+		return menuBuilder.toString();
 	}
 	
 	/**
