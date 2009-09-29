@@ -253,9 +253,11 @@ public class AdminServlet extends BaseServlet {
 		PrintWriter       outputWriter = null;
 		
 		try {
+			final boolean fullAdmin = (Integer) request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) == 0;
+			
 			outputWriter = response.getWriter();
 			renderHeader( request, outputWriter );
-			outputWriter.println( "<h3>" + Page.LAST_REPORTS.displayName + "</h3>" );
+			outputWriter.println( "<h3>" + Page.LAST_REPORTS.displayName + ( fullAdmin ? "" : " <i>(limited access)</i>" ) + "</h3>" );
 			
 			connection = dataSource.getConnection();
 			
@@ -299,7 +301,9 @@ public class AdminServlet extends BaseServlet {
 			
 			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + "=" + Page.LAST_REPORTS.name() + "' method=POST><p>Hacker name:<input type=text name='" + REQUEST_PARAM_HACKER_NAME + "'"
 					+ ( hackerName != null ? " value='" + encodeHtmlString( hackerName ) + "'" : "" ) + ">&nbsp;&nbsp;|&nbsp;&nbsp;Limit:<input type=text name='" + REQUEST_PARAM_LASTREPS_LIMIT + "'" 
-					+ " value='" + lastRepsLimit + "' size=1>&nbsp;&nbsp;|&nbsp;&nbsp;<input type=submit value='Refresh'></p>" );
+					+ " value='" + lastRepsLimit + "' size=1>&nbsp;&nbsp;|&nbsp;&nbsp;<input type=submit value='Apply'></p>" );
+			if ( !fullAdmin )
+				outputWriter.println();
 			
 			String query = "SELECT report.ip, report.id, person.name, key.id, hacker.id, hacker.name, hacker.gateway, game_engine, report.version, substr(report.agent_version,1,4), game.id, report.revocated, key.value FROM report JOIN key on report.key=key.id JOIN person on key.person=person.id JOIN hacker on report.hacker=hacker.id LEFT OUTER JOIN game on report.replay_md5=game.replay_md5";
 			if ( hackerName != null )
@@ -323,8 +327,8 @@ public class AdminServlet extends BaseServlet {
 				final boolean revocated = resultSet.getBoolean( 12 );
 				
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
-						+ "<td><a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 1 ) + "' target='_blank'>" + resultSet.getString( 1 ) + "</a>&uarr;<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 3 ) ) 
-						+ "<td align=right>" + getHackerRecordsByKeyLink( resultSet.getString( 13 ), Integer.toString( resultSet.getInt( 4 ) ), "keyreportsform" ) + "<td align=right>" + resultSet.getInt( 5 )
+						+ "<td>" + ( fullAdmin ? "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 1 ) + "' target='_blank'>" + resultSet.getString( 1 ) + "</a>&uarr;" : "&lt;hidden&gt;" ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 3 ) ) 
+						+ "<td align=right>" + ( fullAdmin ? getHackerRecordsByKeyLink( resultSet.getString( 13 ), Integer.toString( resultSet.getInt( 4 ) ), "keyreportsform" ) : resultSet.getInt( 4 ) ) + "<td align=right>" + resultSet.getInt( 5 )
 						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 6 ) ) + "<td>" + GATEWAYS[ gateway ]
 						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 8 ) ] + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 9 ) )
 						+ "<td align=right>" + resultSet.getString( 10 ) + "<td align=right>" + ( resultSet.getObject( 11 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 11 ), Integer.toString( resultSet.getInt( 11 ) ) ) ) + "<td>" + ( revocated ? "Yes" : "No" ) );
@@ -563,9 +567,11 @@ public class AdminServlet extends BaseServlet {
 		PrintWriter outputWriter = null;
 		
 		try {
+			final boolean fullAdmin = (Integer) request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) == 0;
+			
 			outputWriter = response.getWriter();
 			renderHeader( request, outputWriter );
-			outputWriter.println( "<h3>" + Page.REPORTERS_STAT.displayName + "</h3>" );
+			outputWriter.println( "<h3>" + Page.REPORTERS_STAT.displayName + ( fullAdmin ? "" : " <i>(limited access)</i>" ) + "</h3>" );
 			
 			connection = dataSource.getConnection();
 			
@@ -577,7 +583,7 @@ public class AdminServlet extends BaseServlet {
 			int rowCounter = 0;
 			while ( resultSet.next() ) {
 				outputWriter.println( "<tr><td align=right>" + (++rowCounter)
-						+ "<td align=right>" + getHackerRecordsByKeyLink( resultSet.getString( 2 ), Integer.toString( resultSet.getInt( 1 ) ), "keyreportsform" ) + "<td>" + encodeHtmlString( resultSet.getString( 3 ) )
+						+ "<td align=right>" + ( fullAdmin ? getHackerRecordsByKeyLink( resultSet.getString( 2 ), Integer.toString( resultSet.getInt( 1 ) ), "keyreportsform" ) : resultSet.getInt( 1 ) ) + "<td>" + encodeHtmlString( resultSet.getString( 3 ) )
 						+ "<td align=right>" + resultSet.getInt( 4 ) + "<td align=right>" + resultSet.getInt( 5 ) + "<td align=right>" + resultSet.getInt( 6 )
 						+ "<td align=right>" + String.format( "%.3f", resultSet.getFloat( 7 ) )
 						+ "<td align=center>" + formatDays( resultSet.getInt( 10 ) )
