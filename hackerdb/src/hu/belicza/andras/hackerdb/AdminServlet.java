@@ -37,12 +37,13 @@ public class AdminServlet extends BaseServlet {
 	 * @author Andras Belicza
 	 */
 	private static enum Page {
-		LAST_REPORTS  ( 0x01, "Last reports"        ),
-		NEW_KEY       ( 0x02, "New key"             ),
-		MISC_STAT     ( 0x04, "Miscellaneous stats" ),
-		REPORTERS_STAT( 0x08, "Reporters stats"     ),
-		MANAGE_AKAS   ( 0x10, "Manage AKAs"         ),
-		LOGOUT        ( 0x20, "Logout"              );
+		LAST_REPORTS   ( 0x01, "Last reports"        ),
+		NEW_KEY        ( 0x02, "New key"             ),
+		MISC_STAT      ( 0x04, "Miscellaneous stats" ),
+		REPORTERS_STAT ( 0x08, "Reporters stats"     ),
+		MANAGE_AKAS    ( 0x10, "Manage AKAs"         ),
+		CHANGE_PASSWORD( 0x40, "Change password"     ),
+		LOGOUT         ( 0x20, "Logout"              );
 		
 		public final int    pageId;
 		public final String displayName;
@@ -89,6 +90,8 @@ public class AdminServlet extends BaseServlet {
 	private static final String REQUEST_PARAM_PLAYER_NAME    = "playername";
 	/** AKA managing action request param.   */
 	private static final String REQUEST_PARAM_AKA_ACTION     = "akaaction";
+	/** Password again request param.        */
+	private static final String REQUEST_PARAM_PASSWORD_AGAIN = "passwordagain";
 	
 	/** Time format to format report times. */
 	private static final DateFormat TIME_FORMAT         = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss.SSS" );
@@ -119,22 +122,25 @@ public class AdminServlet extends BaseServlet {
 			}
 			
 			switch ( page ) {
-			case LAST_REPORTS:
+			case LAST_REPORTS :
 				handleLastReports( request, response );
 				break;
-			case NEW_KEY:
+			case NEW_KEY :
 				handleNewKey( request, response );
 				break;
-			case MISC_STAT:
+			case MISC_STAT :
 				handleMiscStat( request, response );
 				break;
-			case REPORTERS_STAT:
+			case REPORTERS_STAT :
 				handleReportersStat( request, response );
 				break;
-			case MANAGE_AKAS:
+			case MANAGE_AKAS :
 				handleAkas( request, response );
 				break;
-			case LOGOUT:
+			case CHANGE_PASSWORD :
+				handleChangePassword( request, response );
+				break;
+			case LOGOUT :
 				if ( session != null )
 					session.invalidate();
 				request.getRequestDispatcher( "admin" ).forward( request, response );
@@ -702,6 +708,61 @@ public class AdminServlet extends BaseServlet {
 		finally {
 			if ( resultSet != null )
 				try { resultSet.close(); } catch ( final SQLException se ) {}
+			if ( statement != null )
+				try { statement.close(); } catch ( final SQLException se ) {}
+			if ( connection != null )
+				try { connection.close(); } catch ( final SQLException se ) {}
+		}
+	}
+	
+	/**
+	 * Handles changing password.
+	 * @param request the http servlet request
+	 * @param response the http servlet repsonse
+	 */
+	private synchronized void handleChangePassword( final HttpServletRequest request, final HttpServletResponse response ) throws IOException, ServletException {
+		Connection        connection   = null;
+		PreparedStatement statement    = null;
+		PrintWriter       outputWriter = null;
+		
+		try {
+			outputWriter = response.getWriter();
+			renderHeader( request, outputWriter );
+			outputWriter.println( "<h3>" + Page.CHANGE_PASSWORD.displayName + "</h3>" );
+			connection = dataSource.getConnection();
+			
+			final String password      = getNullStringParamValue( request, REQUEST_PARAM_PASSWORD       );
+			final String passwordAgain = getNullStringParamValue( request, REQUEST_PARAM_PASSWORD_AGAIN );
+			
+			if ( password != null && passwordAgain != null ) {
+				if ( !password.equals( passwordAgain ) )
+					renderMessage( "Passwords do not match!", true, outputWriter );
+				else {
+					statement = connection.prepareStatement( "UPDATE person set password=? WHERE id=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) );
+					statement.setString( 1, encodePassword( password ) );
+					if ( statement.executeUpdate() == 1 )
+						renderMessage( "Password is changed.", false, outputWriter );
+					else
+						renderMessage( "Could not change password!", true, outputWriter );
+					statement.close();
+				}
+			}
+			
+			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.CHANGE_PASSWORD.name() + "' method=POST><table border=0>" );
+			outputWriter.println( "<tr><td>New password:<td><input id='passwordFieldId' type=password name='" + REQUEST_PARAM_PASSWORD + "'>" );
+			outputWriter.println( "<tr><td>New password again:<td><input type=password name='" + REQUEST_PARAM_PASSWORD_AGAIN + "'>" );
+			outputWriter.println( "<tr><td colspan=2 align=center><input type=submit value='Change'></table></form>" );
+			outputWriter.println( "<script>document.getElementById('passwordFieldId').focus();</script>" );
+			
+			connection = dataSource.getConnection();
+			
+			renderFooter( outputWriter );
+			
+		} catch ( final SQLException se ) {
+			se.printStackTrace();
+			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
+		}
+		finally {
 			if ( statement != null )
 				try { statement.close(); } catch ( final SQLException se ) {}
 			if ( connection != null )
