@@ -322,7 +322,9 @@ public class AdminServlet extends BaseServlet {
 					+ ( hackerName != null ? " value='" + encodeHtmlString( hackerName ) + "'" : "" ) + ">&nbsp;&nbsp;|&nbsp;&nbsp;Limit:<input type=text name='" + REQUEST_PARAM_LASTREPS_LIMIT + "'" 
 					+ " value='" + lastRepsLimit + "' size=1>&nbsp;&nbsp;|&nbsp;&nbsp;<input type=submit value='Apply'></p>" );
 			
-			String query = "SELECT report.ip, report.id, person.name, key.id, hacker.id, hacker.name, hacker.gateway, game_engine, report.version, substr(report.agent_version,1,4), game.id, report.revocated, key.value FROM report JOIN key on report.key=key.id JOIN person on key.person=person.id JOIN hacker on report.hacker=hacker.id LEFT OUTER JOIN game on report.replay_md5=game.replay_md5";
+			String query = "SELECT report.id, reporter.name, key.id, hacker.id, hacker.name, hacker.gateway, game_engine, report.version, substr(report.agent_version,1,4), game.id, report.revocated"
+					+ ( fullAdmin ? ", key.value, report.ip, changer.name" : "" ) + " FROM report JOIN key on report.key=key.id JOIN person as reporter on key.person=reporter.id JOIN hacker on report.hacker=hacker.id LEFT OUTER JOIN game on report.replay_md5=game.replay_md5"
+					+ ( fullAdmin ? " LEFT OUTER JOIN person as changer on report.changed_by=changer.id" : "" );
 			if ( hackerName != null )
 				query += " WHERE hacker.name=?";
 			query += " ORDER BY report.id DESC LIMIT " + lastRepsLimit;
@@ -335,21 +337,23 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_REINSTATE_ID + "'>" );
 			
 			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
-			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME + "><th>#" + ( fullAdmin ? "<th>IP" : "" ) + "<th>Report<th>Reporter<th>Key<th>Hacker<th>Hacker name<th>Gateway<th>Engine<th>Date<th>Agver<th>Game id<th>Revocated" );
+			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME + "><th>#" + ( fullAdmin ? "<th>IP" : "" ) + "<th>Report<th>Reporter<th>Key<th>Hacker<th>Hacker name<th>Gateway<th>Engine<th>Date<th>Agver<th>Game id<th>Revocated" + ( fullAdmin ? "<th>Changed by" : "" ) );
 			resultSet = statement.executeQuery();
 			int rowCounter = 0;
 			while ( resultSet.next() ) {
-				final int     reportId  = resultSet.getInt( 2 );
-				final int     gateway   = resultSet.getInt( 7 );
-				final boolean revocated = resultSet.getBoolean( 12 );
+				final int     reportId  = resultSet.getInt( 1 );
+				final int     gateway   = resultSet.getInt( 6 );
+				final boolean revocated = resultSet.getBoolean( 11 );
 				
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
-						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 1 ) + "' target='_blank'>" + resultSet.getString( 1 ) + "</a>&uarr;" : "" ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 3 ) ) 
-						+ "<td align=right>" + ( fullAdmin ? getHackerRecordsByKeyLink( resultSet.getString( 13 ), Integer.toString( resultSet.getInt( 4 ) ), "keyreportsform" ) : resultSet.getInt( 4 ) ) + "<td align=right>" + resultSet.getInt( 5 )
-						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 6 ) ) + "<td>" + GATEWAYS[ gateway ]
-						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 8 ) ] + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 9 ) )
-						+ "<td align=right>" + resultSet.getString( 10 ) + "<td align=right>" + ( resultSet.getObject( 11 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 11 ), Integer.toString( resultSet.getInt( 11 ) ) ) ) + "<td>" + ( revocated ? "Yes" : "No" ) );
+						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 13 ) + "' target='_blank'>" + resultSet.getString( 13 ) + "</a>&uarr;" : "" ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) 
+						+ "<td align=right>" + ( fullAdmin ? getHackerRecordsByKeyLink( resultSet.getString( 12 ), Integer.toString( resultSet.getInt( 3 ) ), "keyreportsform" ) : resultSet.getInt( 3 ) ) + "<td align=right>" + resultSet.getInt( 4 )
+						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 5 ) ) + "<td>" + GATEWAYS[ gateway ]
+						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 7 ) ] + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 8 ) )
+						+ "<td align=right>" + resultSet.getString( 9 ) + "<td align=right>" + ( resultSet.getObject( 10 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 10 ), Integer.toString( resultSet.getInt( 10 ) ) ) ) + "<td>" + ( revocated ? "Yes" : "No" ) );
 				outputWriter.println( revocated ? "<input type=submit value='Reinstate' onclick='javascript:this.form." + REQUEST_PARAM_REINSTATE_ID + ".value=\"" + reportId + "\";'>" : "<input type=submit value='Revocate' onclick='javascript:this.form." + REQUEST_PARAM_REVOCATE_ID + ".value=\"" + reportId + "\";'>" );
+				if ( fullAdmin )
+					outputWriter.println( "<td>" + ( resultSet.getString( 14 ) == null ? "&nbsp;" : encodeHtmlString( resultSet.getString( 14 ) ) ) );
 			}
 			resultSet.close();
 			statement.close();

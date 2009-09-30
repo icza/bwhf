@@ -226,7 +226,7 @@ public class HackerDbServlet extends BaseServlet {
 	/** Hacker list menu HTML code to be sent. */
 	private static final String HACKER_LIST_MENU_HTML = "<p><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a>"
 			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + "=" + OPERATION_STATISTICS + "'>Statistics</a>"
-			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players'>BWHF Players' Network</a><sup style='color:red;background:yellow;font-size:65%'>NEW!</sup>"
+			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players'>BWHF Players' Network</a>"
 			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help (filters, sorting)</a></p>";
 	
 	/**
