@@ -115,12 +115,16 @@ CREATE TABLE report
   replay_md5 character varying,
   save_time timestamp without time zone,
   revocated boolean NOT NULL DEFAULT false,
+  changed_by integer,
   CONSTRAINT report_pkey PRIMARY KEY (id),
   CONSTRAINT report_hacker_fkey FOREIGN KEY (hacker)
       REFERENCES hacker (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE CASCADE,
   CONSTRAINT report_key_fkey FOREIGN KEY ("key")
       REFERENCES "key" (id) MATCH SIMPLE
+      ON UPDATE NO ACTION ON DELETE CASCADE,
+  CONSTRAINT report_person_fkey FOREIGN KEY (changed_by)
+      REFERENCES person (id) MATCH SIMPLE
       ON UPDATE NO ACTION ON DELETE CASCADE
 )
 WITH (
@@ -350,3 +354,23 @@ CREATE INDEX idx_game_player__game
   ON game_player
   USING btree
   (game);
+
+
+-- Table: login_log
+
+-- DROP TABLE login_log;
+
+CREATE TABLE login_log
+(
+  id serial NOT NULL,
+  ip character varying,
+  "name" character varying,
+  success boolean,
+  "version" timestamp without time zone DEFAULT now(),
+  CONSTRAINT login_log_pkey PRIMARY KEY (id)
+)
+WITH (
+  OIDS=FALSE
+);
+ALTER TABLE login_log OWNER TO postgres;
+

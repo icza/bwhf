@@ -202,8 +202,9 @@ public class AdminServlet extends BaseServlet {
 				statement.setString( 2, encodePassword( password ) );
 				
 				resultSet = statement.executeQuery();
-				if ( resultSet.next() ) {
-					final HttpSession session    = request.getSession();
+				final boolean success = resultSet.next();
+				if ( success ) {
+					final HttpSession session = request.getSession();
 					session.setAttribute( ATTRIBUTE_USER_NAME  , userName              );
 					session.setAttribute( ATTRIBUTE_USER_ID    , resultSet.getInt( 1 ) );
 					session.setAttribute( ATTRIBUTE_PAGE_ACCESS, resultSet.getInt( 2 ) );
@@ -213,6 +214,14 @@ public class AdminServlet extends BaseServlet {
 				else
 					message = "Invalid user name or password!";
 				resultSet.close();
+				statement.close();
+				
+				// Login log
+				statement  = connection.prepareStatement( "INSERT INTO login_log (ip,name,success) VALUES (?,?,?)" );
+				statement.setString ( 1, request.getRemoteAddr() );
+				statement.setString ( 2, userName                );
+				statement.setBoolean( 3, success                 );
+				statement.executeUpdate();
 				statement.close();
 			}
 			
@@ -283,8 +292,7 @@ public class AdminServlet extends BaseServlet {
 				}
 				if ( id != null )
 					synchronized ( Page.LAST_REPORTS ) {
-						statement = connection.prepareStatement( "UPDATE report set revocated=" + ( revocateId == null ? "false" : "true" ) + " WHERE id=?" );
-						statement.setInt( 1, id );
+						statement = connection.prepareStatement( "UPDATE report set revocated=" + ( revocateId == null ? "false" : "true" ) + ", changed_by=" + ( request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) ) + " WHERE id=" + id );
 						if ( statement.executeUpdate() == 1 )
 							renderMessage( "Report has been " + ( revocateId == null ? "reinstated" : "revocated" ) + " successfully.", false, outputWriter );
 						else
@@ -523,7 +531,7 @@ public class AdminServlet extends BaseServlet {
 			
 			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT key.id) FROM key JOIN report on key.id=report.key WHERE key.revocated=FALSE AND report.version+interval '30 days'>now()" );
 			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Active keys (which have report in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+				outputWriter.println( "<tr><th align=left>Active keys (have reports in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
@@ -542,6 +550,12 @@ public class AdminServlet extends BaseServlet {
 			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM key WHERE key.revocated=FALSE" );
 			if ( resultSet.next() ) {
 				outputWriter.println( "<tr><th align=left>Keys in database:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+			}
+			resultSet.close();
+			
+			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM person WHERE password IS NOT NULL" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr><th align=left>Persons with login:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
@@ -687,7 +701,7 @@ public class AdminServlet extends BaseServlet {
 								if ( statement.executeUpdate() == 1 )
 									renderMessage( "Added 1 new AKA.", false, outputWriter );
 								else
-									renderMessage( "Failed to add AKA!", true, outputWriter );
+									renderMessage( "Failed to add AKA (player does not exists?)!", true, outputWriter );
 								statement.close();
 							}
 						}
@@ -752,14 +766,14 @@ public class AdminServlet extends BaseServlet {
 						if ( statement.executeUpdate() == 1 )
 							renderMessage( "Password is changed.", false, outputWriter );
 						else
-							renderMessage( "Could not change password!", true, outputWriter );
+							renderMessage( "Could not change password" + ( fullAdmin ? " (invalid user name?)!" : "!" ), true, outputWriter );
 						statement.close();
 					}
 			}
 			
 			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.CHANGE_PASSWORD.name() + "' method=POST><table border=0>" );
 			if ( fullAdmin )
-				outputWriter.println( "<tr><td>User name:<td><input type=text name='" + REQUEST_PARAM_USER_NAME + "' value='" + encodeHtmlString( (String) request.getSession( false ).getAttribute( ATTRIBUTE_USER_NAME ) ) + "'>" );
+				outputWriter.println( "<tr><td>Change password for user:<td><input type=text name='" + REQUEST_PARAM_USER_NAME + "' value='" + encodeHtmlString( (String) request.getSession( false ).getAttribute( ATTRIBUTE_USER_NAME ) ) + "'>" );
 			outputWriter.println( "<tr><td>New password:<td><input id='passwordFieldId' type=password name='" + REQUEST_PARAM_PASSWORD + "'>" );
 			outputWriter.println( "<tr><td>New password again:<td><input type=password name='" + REQUEST_PARAM_PASSWORD_AGAIN + "'>" );
 			outputWriter.println( "<tr><td colspan=2 align=center><input type=submit value='Change'></table></form>" );
