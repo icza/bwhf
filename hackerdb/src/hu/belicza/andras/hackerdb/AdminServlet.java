@@ -1,8 +1,12 @@
 package hu.belicza.andras.hackerdb;
 
+import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_AKA;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_REPORTED_WITH_KEY;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.GATEWAYS;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_LIST;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_LIST;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_OPERATION;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_OPERATION;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
 
@@ -563,6 +567,12 @@ public class AdminServlet extends BaseServlet {
 			}
 			resultSet.close();
 			
+			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM player WHERE aka_group IS NOT NULL" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr><th align=left>Players belonging to AKA groups:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+			}
+			resultSet.close();
+			
 			statement.close();
 			
 			outputWriter.println( "</table>" );
@@ -719,6 +729,7 @@ public class AdminServlet extends BaseServlet {
 			
 			outputWriter.println( "<tr><td>Player name:<input type=text name='" + REQUEST_PARAM_PLAYER_NAME + "'><input type=submit name='" + REQUEST_PARAM_AKA_ACTION + "' value='" + ACTION_NEW_AKA + "'>" );
 			outputWriter.println( "</table></form>" );
+			outputWriter.println( "<p>Jump to the Player's Network <a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_AKA + "'>AKA list</a>.</p>" );
 			
 			renderFooter( outputWriter );
 			
