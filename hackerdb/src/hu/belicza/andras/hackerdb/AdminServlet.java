@@ -61,6 +61,8 @@ public class AdminServlet extends BaseServlet {
 	private static final String ATTRIBUTE_PAGE_ACCESS = "pageAccess";
 	/** Menu HTML session attribute.   */
 	private static final String ATTRIBUTE_MENU_HTML   = "menuHtml";
+	/** Full admin session attribute.  */
+	private static final String ATTRIBUTE_FULL_ADMIN  = "fullAdmin";
 	
 	/** Page name request param.             */
 	private static final String REQUEST_PARAM_PAGE_NAME      = "pn";
@@ -188,8 +190,8 @@ public class AdminServlet extends BaseServlet {
 		ResultSet         resultSet    = null;
 		PrintWriter       outputWriter = null;
 		
-		final String userName = request.getParameter( REQUEST_PARAM_USER_NAME );
-		final String password = request.getParameter( REQUEST_PARAM_PASSWORD  );
+		final String userName = getNullStringParamValue( request, REQUEST_PARAM_USER_NAME );
+		final String password = getNullStringParamValue( request, REQUEST_PARAM_PASSWORD  );
 		
 		try {
 			String message = null;
@@ -201,10 +203,12 @@ public class AdminServlet extends BaseServlet {
 				
 				resultSet = statement.executeQuery();
 				if ( resultSet.next() ) {
-					request.getSession().setAttribute( ATTRIBUTE_USER_NAME  , userName              );
-					request.getSession().setAttribute( ATTRIBUTE_USER_ID    , resultSet.getInt( 1 ) );
-					request.getSession().setAttribute( ATTRIBUTE_PAGE_ACCESS, resultSet.getInt( 2 ) );
-					request.getSession().setAttribute( ATTRIBUTE_MENU_HTML  , getMenuHtml( resultSet.getInt( 2 ) ) );
+					final HttpSession session    = request.getSession();
+					session.setAttribute( ATTRIBUTE_USER_NAME  , userName              );
+					session.setAttribute( ATTRIBUTE_USER_ID    , resultSet.getInt( 1 ) );
+					session.setAttribute( ATTRIBUTE_PAGE_ACCESS, resultSet.getInt( 2 ) );
+					session.setAttribute( ATTRIBUTE_MENU_HTML  , getMenuHtml( resultSet.getInt( 2 ), userName ) );
+					session.setAttribute( ATTRIBUTE_FULL_ADMIN , resultSet.getInt( 1 ) == 0 );
 				}
 				else
 					message = "Invalid user name or password!";
@@ -259,7 +263,7 @@ public class AdminServlet extends BaseServlet {
 		PrintWriter       outputWriter = null;
 		
 		try {
-			final boolean fullAdmin = (Integer) request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) == 0;
+			final boolean fullAdmin = (Boolean) request.getSession( false ).getAttribute( ATTRIBUTE_FULL_ADMIN );
 			
 			outputWriter = response.getWriter();
 			renderHeader( request, outputWriter );
@@ -277,15 +281,16 @@ public class AdminServlet extends BaseServlet {
 				}
 				catch ( final Exception e ) {
 				}
-				if ( id != null ) {
-					statement = connection.prepareStatement( "UPDATE report set revocated=" + ( revocateId == null ? "false" : "true" ) + " WHERE id=?" );
-					statement.setInt( 1, id );
-					if ( statement.executeUpdate() == 1 )
-						renderMessage( "Report has been " + ( revocateId == null ? "reinstated" : "revocated" ) + " successfully.", false, outputWriter );
-					else
-						renderMessage( "Failed to " + ( revocateId == null ? "reinstate" : "revocate" ) + " the report!", true, outputWriter );
-					statement.close();
-				}
+				if ( id != null )
+					synchronized ( Page.LAST_REPORTS ) {
+						statement = connection.prepareStatement( "UPDATE report set revocated=" + ( revocateId == null ? "false" : "true" ) + " WHERE id=?" );
+						statement.setInt( 1, id );
+						if ( statement.executeUpdate() == 1 )
+							renderMessage( "Report has been " + ( revocateId == null ? "reinstated" : "revocated" ) + " successfully.", false, outputWriter );
+						else
+							renderMessage( "Failed to " + ( revocateId == null ? "reinstate" : "revocate" ) + " the report!", true, outputWriter );
+						statement.close();
+					}
 			}
 			
 			String hackerName = getNullStringParamValue( request, REQUEST_PARAM_HACKER_NAME );
@@ -308,8 +313,6 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + "=" + Page.LAST_REPORTS.name() + "' method=POST><p>Hacker name:<input type=text name='" + REQUEST_PARAM_HACKER_NAME + "'"
 					+ ( hackerName != null ? " value='" + encodeHtmlString( hackerName ) + "'" : "" ) + ">&nbsp;&nbsp;|&nbsp;&nbsp;Limit:<input type=text name='" + REQUEST_PARAM_LASTREPS_LIMIT + "'" 
 					+ " value='" + lastRepsLimit + "' size=1>&nbsp;&nbsp;|&nbsp;&nbsp;<input type=submit value='Apply'></p>" );
-			if ( !fullAdmin )
-				outputWriter.println();
 			
 			String query = "SELECT report.ip, report.id, person.name, key.id, hacker.id, hacker.name, hacker.gateway, game_engine, report.version, substr(report.agent_version,1,4), game.id, report.revocated, key.value FROM report JOIN key on report.key=key.id JOIN person on key.person=person.id JOIN hacker on report.hacker=hacker.id LEFT OUTER JOIN game on report.replay_md5=game.replay_md5";
 			if ( hackerName != null )
@@ -324,7 +327,7 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_REINSTATE_ID + "'>" );
 			
 			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
-			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME + "><th>#<th>IP<th>Report<th>Reporter<th>Key<th>Hacker<th>Hacker name<th>Gateway<th>Engine<th>Date<th>Agver<th>Game id<th>Revocated" );
+			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME + "><th>#" + ( fullAdmin ? "<th>IP" : "" ) + "<th>Report<th>Reporter<th>Key<th>Hacker<th>Hacker name<th>Gateway<th>Engine<th>Date<th>Agver<th>Game id<th>Revocated" );
 			resultSet = statement.executeQuery();
 			int rowCounter = 0;
 			while ( resultSet.next() ) {
@@ -333,7 +336,7 @@ public class AdminServlet extends BaseServlet {
 				final boolean revocated = resultSet.getBoolean( 12 );
 				
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
-						+ "<td>" + ( fullAdmin ? "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 1 ) + "' target='_blank'>" + resultSet.getString( 1 ) + "</a>&uarr;" : "&lt;hidden&gt;" ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 3 ) ) 
+						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 1 ) + "' target='_blank'>" + resultSet.getString( 1 ) + "</a>&uarr;" : "" ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 3 ) ) 
 						+ "<td align=right>" + ( fullAdmin ? getHackerRecordsByKeyLink( resultSet.getString( 13 ), Integer.toString( resultSet.getInt( 4 ) ), "keyreportsform" ) : resultSet.getInt( 4 ) ) + "<td align=right>" + resultSet.getInt( 5 )
 						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 6 ) ) + "<td>" + GATEWAYS[ gateway ]
 						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 8 ) ] + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 9 ) )
@@ -378,7 +381,7 @@ public class AdminServlet extends BaseServlet {
 	 * @param request the http servlet request
 	 * @param response the http servlet repsonse
 	 */
-	private synchronized void handleNewKey( final HttpServletRequest request, final HttpServletResponse response ) throws IOException, ServletException {
+	private void handleNewKey( final HttpServletRequest request, final HttpServletResponse response ) throws IOException, ServletException {
 		Connection        connection   = null;
 		PreparedStatement statement    = null;
 		PrintWriter       outputWriter = null;
@@ -398,60 +401,61 @@ public class AdminServlet extends BaseServlet {
 				if ( numberOfKeys == null || personName == null || personEmail == null || personComment == null ) {
 					renderMessage( "All fields are required!", true, outputWriter );
 				}
-				else {
-					final int    PASSWORD_LENGTH = 20;
-					final char[] PASSWORD_CHARSET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
-					// Generate keys
-					final Random          random      = new Random( System.nanoTime() + Runtime.getRuntime().freeMemory() );
-					final StringBuilder[] keyBuilders = new StringBuilder[ numberOfKeys ];
-					
-					for ( int i = 0; i < keyBuilders.length; i++ ) {
-						final StringBuilder keyBuilder = keyBuilders[ i ] = new StringBuilder();
-						for ( int j = 0; j < PASSWORD_LENGTH; j++ )
-							keyBuilder.append( PASSWORD_CHARSET[ random.nextInt( PASSWORD_CHARSET.length ) ] );
-					}
-					
-					connection = dataSource.getConnection();
-					statement  = connection.prepareStatement( "INSERT INTO person (name,email,comment) VALUES (?,?,?)" );
-					statement.setString( 1, personName    );
-					statement.setString( 2, personEmail   );
-					statement.setString( 3, personComment );
-					final boolean personAdded = statement.executeUpdate() == 1;
-					statement.close();
-					if ( personAdded ) {
-						int keysAdded = 0;
-						statement = connection.prepareStatement( "INSERT INTO key (value,person) VALUES (?,(SELECT MAX(id) FROM person))" );
-						for ( final StringBuilder keyBuilder : keyBuilders ) {
-							statement.setString( 1, keyBuilder.toString() );
-							if ( statement.executeUpdate() == 1 )
-								keysAdded++;
-						}
-						statement.close();
-						if ( keysAdded == keyBuilders.length )
-							renderMessage( "Added person and " + keysAdded + ( keysAdded == 1 ? " key." : " keys." ), false, outputWriter );
-						else
-							renderMessage( "Added person and " + keysAdded + ( keysAdded == 1 ? " key" : " keys" ) + ", failed to add " + ( keyBuilders.length - keysAdded ) + ( keyBuilders.length - keysAdded == 1 ? " key!" : " keys!" ), true, outputWriter );
+				else
+					synchronized ( Page.NEW_KEY ) {
+						final int    PASSWORD_LENGTH = 20;
+						final char[] PASSWORD_CHARSET = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".toCharArray();
+						// Generate keys
+						final Random          random      = new Random( System.nanoTime() + Runtime.getRuntime().freeMemory() );
+						final StringBuilder[] keyBuilders = new StringBuilder[ numberOfKeys ];
 						
-						// Build the email text
-						emailMessageBuilder = new StringBuilder();
-						emailMessageBuilder.append( personEmail ).append( "\nBWHF authorization key" ).append( keyBuilders.length == 1 ? "" : "s" )
-							.append( "\n\n\nHi " ).append( personName ).append( "!\n\n" )
-							.append( keyBuilders.length == 1 ? "This is your BWHF authorization key:" : "Here are your BWHF authorization keys:" );
-						for ( final StringBuilder keyBuilder : keyBuilders )
-							emailMessageBuilder.append( '\n' ).append( keyBuilder );
-						emailMessageBuilder.append( "\n\n" );
-						if ( keyBuilders.length == 1 ) {
-							emailMessageBuilder.append( "It's your own, don't give it to anyone. After you enter your key, check \"report hackers\" and you're good to go." );
+						for ( int i = 0; i < keyBuilders.length; i++ ) {
+							final StringBuilder keyBuilder = keyBuilders[ i ] = new StringBuilder();
+							for ( int j = 0; j < PASSWORD_LENGTH; j++ )
+								keyBuilder.append( PASSWORD_CHARSET[ random.nextInt( PASSWORD_CHARSET.length ) ] );
 						}
-						else {
-							emailMessageBuilder.append( "Plz make sure that one key is only used by one person (a unique key should be given to each person)." );
+						
+						connection = dataSource.getConnection();
+						statement  = connection.prepareStatement( "INSERT INTO person (name,email,comment) VALUES (?,?,?)" );
+						statement.setString( 1, personName    );
+						statement.setString( 2, personEmail   );
+						statement.setString( 3, personComment );
+						final boolean personAdded = statement.executeUpdate() == 1;
+						statement.close();
+						if ( personAdded ) {
+							int keysAdded = 0;
+							statement = connection.prepareStatement( "INSERT INTO key (value,person) VALUES (?,(SELECT MAX(id) FROM person))" );
+							for ( final StringBuilder keyBuilder : keyBuilders ) {
+								statement.setString( 1, keyBuilder.toString() );
+								if ( statement.executeUpdate() == 1 )
+									keysAdded++;
+							}
+							statement.close();
+							if ( keysAdded == keyBuilders.length )
+								renderMessage( "Added person and " + keysAdded + ( keysAdded == 1 ? " key." : " keys." ), false, outputWriter );
+							else
+								renderMessage( "Added person and " + keysAdded + ( keysAdded == 1 ? " key" : " keys" ) + ", failed to add " + ( keyBuilders.length - keysAdded ) + ( keyBuilders.length - keysAdded == 1 ? " key!" : " keys!" ), true, outputWriter );
+							
+							// Build the email text
+							emailMessageBuilder = new StringBuilder();
+							emailMessageBuilder.append( personEmail ).append( "\nBWHF authorization key" ).append( keyBuilders.length == 1 ? "" : "s" )
+								.append( "\n\n\nHi " ).append( personName ).append( "!\n\n" )
+								.append( keyBuilders.length == 1 ? "This is your BWHF authorization key:" : "Here are your BWHF authorization keys:" );
+							for ( final StringBuilder keyBuilder : keyBuilders )
+								emailMessageBuilder.append( '\n' ).append( keyBuilder );
+							emailMessageBuilder.append( "\n\n" );
+							if ( keyBuilders.length == 1 ) {
+								emailMessageBuilder.append( "It's your own, don't give it to anyone. After you enter your key, check \"report hackers\" and you're good to go." );
+							}
+							else {
+								emailMessageBuilder.append( "Plz make sure that one key is only used by one person (a unique key should be given to each person)." );
+							}
+							emailMessageBuilder.append( "\n\nIf you have old hacker replays (only from 2009), send them and I add them in your name (with your key). Just reply to this email. Don't forget to indicate the gateway for the replays!" );
+							emailMessageBuilder.append( "\n\nCheers,\n    Dakota_Fanning" );
 						}
-						emailMessageBuilder.append( "\n\nIf you have old hacker replays (only from 2009), send them and I add them in your name (with your key). Just reply to this email. Don't forget to indicate the gateway for the replays!" );
-						emailMessageBuilder.append( "\n\nCheers,\n    Dakota_Fanning" );
+						else
+							renderMessage( "Could not insert person!", true, outputWriter );
 					}
-					else
-						renderMessage( "Could not insert person!", true, outputWriter );
-				}
 			}
 			
 			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.NEW_KEY.name() + "' method=POST>" );
@@ -573,7 +577,7 @@ public class AdminServlet extends BaseServlet {
 		PrintWriter outputWriter = null;
 		
 		try {
-			final boolean fullAdmin = (Integer) request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) == 0;
+			final boolean fullAdmin = (Boolean) request.getSession( false ).getAttribute( ATTRIBUTE_FULL_ADMIN );
 			
 			outputWriter = response.getWriter();
 			renderHeader( request, outputWriter );
@@ -623,7 +627,7 @@ public class AdminServlet extends BaseServlet {
 	 * @param request the http servlet request
 	 * @param response the http servlet repsonse
 	 */
-	private synchronized void handleAkas( final HttpServletRequest request, final HttpServletResponse response ) throws IOException, ServletException {
+	private void handleAkas( final HttpServletRequest request, final HttpServletResponse response ) throws IOException, ServletException {
 		Connection        connection   = null;
 		PreparedStatement statement    = null;
 		ResultSet         resultSet    = null;
@@ -647,46 +651,47 @@ public class AdminServlet extends BaseServlet {
 			if ( action != null ) {
 				if ( akaGroupName == null )
 					renderMessage( "AKA group has to be provided!", true, outputWriter );
-				else {
-					Integer akaGroupId = null;
-					statement = connection.prepareStatement( "SELECT id FROM aka_group WHERE comment=?" );
-					statement.setString( 1, akaGroupName );
-					resultSet = statement.executeQuery();
-					if ( resultSet.next() )
-						akaGroupId = resultSet.getInt( 1 );
-					resultSet.close();
-					statement.close();
-					
-					if ( action.equals( ACTION_NEW_AKA_GROUP ) ) {
-						if ( akaGroupId != null ) {
-							renderMessage( "AKA group already exists!", true, outputWriter );
+				else 
+					synchronized ( Page.MANAGE_AKAS ) {
+						Integer akaGroupId = null;
+						statement = connection.prepareStatement( "SELECT id FROM aka_group WHERE comment=?" );
+						statement.setString( 1, akaGroupName );
+						resultSet = statement.executeQuery();
+						if ( resultSet.next() )
+							akaGroupId = resultSet.getInt( 1 );
+						resultSet.close();
+						statement.close();
+						
+						if ( action.equals( ACTION_NEW_AKA_GROUP ) ) {
+							if ( akaGroupId != null ) {
+								renderMessage( "AKA group already exists!", true, outputWriter );
+							}
+							else {
+								statement = connection.prepareStatement( "INSERT INTO aka_group (comment) VALUES (?) " );
+								statement.setString( 1, akaGroupName );
+								if ( statement.executeUpdate() == 1 )
+									renderMessage( "Added 1 new AKA group.", false, outputWriter );
+								else
+									renderMessage( "Failed to add AKA group!", true, outputWriter );
+								statement.close();
+							}
 						}
-						else {
-							statement = connection.prepareStatement( "INSERT INTO aka_group (comment) VALUES (?) " );
-							statement.setString( 1, akaGroupName );
-							if ( statement.executeUpdate() == 1 )
-								renderMessage( "Added 1 new AKA group.", false, outputWriter );
-							else
-								renderMessage( "Failed to add AKA group!", true, outputWriter );
-							statement.close();
+						else if ( action.equals( ACTION_NEW_AKA ) ) {
+							if ( playerName == null )
+								renderMessage( "Player name has to be provided!", true, outputWriter );
+							else if ( akaGroupId == null )
+								renderMessage( "AKA group does not exist!", true, outputWriter );
+							else {
+								statement = connection.prepareStatement( "UPDATE player SET aka_group=" + akaGroupId + " WHERE name=?" );
+								statement.setString( 1, playerName );
+								if ( statement.executeUpdate() == 1 )
+									renderMessage( "Added 1 new AKA.", false, outputWriter );
+								else
+									renderMessage( "Failed to add AKA!", true, outputWriter );
+								statement.close();
+							}
 						}
 					}
-					else if ( action.equals( ACTION_NEW_AKA ) ) {
-						if ( playerName == null )
-							renderMessage( "Player name has to be provided!", true, outputWriter );
-						else if ( akaGroupId == null )
-							renderMessage( "AKA group does not exist!", true, outputWriter );
-						else {
-							statement = connection.prepareStatement( "UPDATE player SET aka_group=" + akaGroupId + " WHERE name=?" );
-							statement.setString( 1, playerName );
-							if ( statement.executeUpdate() == 1 )
-								renderMessage( "Added 1 new AKA.", false, outputWriter );
-							else
-								renderMessage( "Failed to add AKA!", true, outputWriter );
-							statement.close();
-						}
-					}
-				}
 			}
 			
 			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.MANAGE_AKAS.name() + "' method=POST><table border=1>" );
@@ -696,8 +701,6 @@ public class AdminServlet extends BaseServlet {
 			
 			outputWriter.println( "<tr><td>Player name:<input type=text name='" + REQUEST_PARAM_PLAYER_NAME + "'><input type=submit name='" + REQUEST_PARAM_AKA_ACTION + "' value='" + ACTION_NEW_AKA + "'>" );
 			outputWriter.println( "</table></form>" );
-			
-			connection = dataSource.getConnection();
 			
 			renderFooter( outputWriter );
 			
@@ -720,41 +723,47 @@ public class AdminServlet extends BaseServlet {
 	 * @param request the http servlet request
 	 * @param response the http servlet repsonse
 	 */
-	private synchronized void handleChangePassword( final HttpServletRequest request, final HttpServletResponse response ) throws IOException, ServletException {
+	private void handleChangePassword( final HttpServletRequest request, final HttpServletResponse response ) throws IOException, ServletException {
 		Connection        connection   = null;
 		PreparedStatement statement    = null;
 		PrintWriter       outputWriter = null;
 		
 		try {
+			final boolean fullAdmin = (Boolean) request.getSession( false ).getAttribute( ATTRIBUTE_FULL_ADMIN );
+			
 			outputWriter = response.getWriter();
 			renderHeader( request, outputWriter );
-			outputWriter.println( "<h3>" + Page.CHANGE_PASSWORD.displayName + "</h3>" );
+			outputWriter.println( "<h3>" + Page.CHANGE_PASSWORD.displayName + ( fullAdmin ? "" : " <i>(limited access)</i>" ) + "</h3>" );
 			connection = dataSource.getConnection();
 			
+			final String userName      = fullAdmin ? getNullStringParamValue( request, REQUEST_PARAM_USER_NAME ) : null;
 			final String password      = getNullStringParamValue( request, REQUEST_PARAM_PASSWORD       );
 			final String passwordAgain = getNullStringParamValue( request, REQUEST_PARAM_PASSWORD_AGAIN );
 			
 			if ( password != null && passwordAgain != null ) {
 				if ( !password.equals( passwordAgain ) )
 					renderMessage( "Passwords do not match!", true, outputWriter );
-				else {
-					statement = connection.prepareStatement( "UPDATE person set password=? WHERE id=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) );
-					statement.setString( 1, encodePassword( password ) );
-					if ( statement.executeUpdate() == 1 )
-						renderMessage( "Password is changed.", false, outputWriter );
-					else
-						renderMessage( "Could not change password!", true, outputWriter );
-					statement.close();
-				}
+				else 
+					synchronized ( Page.CHANGE_PASSWORD ) {
+						statement = connection.prepareStatement( "UPDATE person set password=? WHERE " + ( fullAdmin ? "name=?" : "id=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) ) );
+						statement.setString( 1, encodePassword( password ) );
+						if ( fullAdmin )
+							statement.setString( 2, userName );
+						if ( statement.executeUpdate() == 1 )
+							renderMessage( "Password is changed.", false, outputWriter );
+						else
+							renderMessage( "Could not change password!", true, outputWriter );
+						statement.close();
+					}
 			}
 			
 			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.CHANGE_PASSWORD.name() + "' method=POST><table border=0>" );
+			if ( fullAdmin )
+				outputWriter.println( "<tr><td>User name:<td><input type=text name='" + REQUEST_PARAM_USER_NAME + "' value='" + encodeHtmlString( (String) request.getSession( false ).getAttribute( ATTRIBUTE_USER_NAME ) ) + "'>" );
 			outputWriter.println( "<tr><td>New password:<td><input id='passwordFieldId' type=password name='" + REQUEST_PARAM_PASSWORD + "'>" );
 			outputWriter.println( "<tr><td>New password again:<td><input type=password name='" + REQUEST_PARAM_PASSWORD_AGAIN + "'>" );
 			outputWriter.println( "<tr><td colspan=2 align=center><input type=submit value='Change'></table></form>" );
 			outputWriter.println( "<script>document.getElementById('passwordFieldId').focus();</script>" );
-			
-			connection = dataSource.getConnection();
 			
 			renderFooter( outputWriter );
 			
@@ -829,9 +838,10 @@ public class AdminServlet extends BaseServlet {
 	 * Returns the menu HTML for the current user.<br>
 	 * The menu will only contain pages to which the user has access.
 	 * @param pageAccess page access bitmask
+	 * @param userName name of the user
 	 * @return the menu HTML for the current user.
 	 */
-	private static String getMenuHtml( final int pageAccess ) {
+	private static String getMenuHtml( final int pageAccess, final String userName ) {
 		final StringBuilder menuBuilder = new StringBuilder( "<p>" );
 		
 		boolean firstPage = true;
@@ -842,7 +852,7 @@ public class AdminServlet extends BaseServlet {
 				else
 					menuBuilder.append( "&nbsp;&nbsp;|&nbsp;&nbsp;" );
 				menuBuilder.append( "<a href='admin?" ).append( REQUEST_PARAM_PAGE_NAME ).append( '=' ).append( page.name() )
-					.append( "'>" ).append( page.displayName ).append( "</a>" );
+					.append( "'>" ).append( page.displayName ).append( page == Page.LOGOUT ? " " + encodeHtmlString( userName ) : "" ).append( "</a>" );
 			}
 		
 		return menuBuilder.toString();
