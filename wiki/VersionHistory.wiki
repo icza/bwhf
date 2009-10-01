@@ -6,6 +6,7 @@
 
 ----
 ===Features and changes in the upcoming new release===
+ * Added game info text to the Charts tab.
  * Added help text about opening replays on the Player matcher tab.
 
 ----
