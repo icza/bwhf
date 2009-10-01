@@ -5,6 +5,10 @@
 <wiki:toc max_depth="3" />
 
 ----
+===Features and changes in the upcoming new release===
+* Added help text about opening replays on the Player matcher tab.
+
+----
 ===2.61 2009-08-26===
  * Map size was taken from the map data section of the replays which contains 0 width and height in some cases. In these cases the data recorded in the replay header is used. This fixes false build anywhere hack alerts.
 
