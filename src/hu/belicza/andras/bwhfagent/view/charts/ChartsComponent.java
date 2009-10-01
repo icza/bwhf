@@ -801,7 +801,7 @@ public class ChartsComponent extends JPanel {
 						}
 					}
 					yPoints[ pointIndex ]++;
-					if ( eapm && isActionEffective( allActions, ai, action ) ) {
+					if ( eapm && EapmUtil.isActionEffective( allActions, ai, action ) ) {
 						yPointsEapm[ pointIndex ]++;
 						effectiveActionsCounts[ i ]++;
 					}
@@ -912,20 +912,17 @@ public class ChartsComponent extends JPanel {
 					}
 			}
 			
-			drawPlayerDescription( graphics, chartsParams, i, inGameColor, eapm ? effectiveActionsCounts[ i ] * 60 / Math.max( 1, replay.replayHeader.getDurationSeconds() ) : null );
+			String eapmString = null;
+			if ( eapm ) {
+				final int playerActionsCount = replay.replayActions.players[ playerIndexToShowList.get( i ) ].actions.length;
+				eapmString = "EAPM: " + effectiveActionsCounts[ i ] * 60 / Math.max( 1, replay.replayHeader.getDurationSeconds() ) + ", redundancy: ";
+				if ( playerActionsCount > 0 )
+					eapmString += 100 * ( playerActionsCount - effectiveActionsCounts[ i ] ) / playerActionsCount + "%";
+				else
+					eapmString += "0%";
+			}
+			drawPlayerDescription( graphics, chartsParams, i, inGameColor, eapmString );
 		}
-	}
-	
-	/**
-	 * Implementation of EAPM.<br>
-	 * Decides if the action is considered <i>effective</i>.
-	 * @param actions     actions of the player
-	 * @param actionIndex index of the action to be decided
-	 * @param action      shortcut reference to the action to be decided
-	 * @return true if the action is considered <i>effective</i>; false otherwise
-	 */
-	private static boolean isActionEffective( final Action[] actions, final int actionIndex, final Action action ) {
-		return Math.random() > 0.5;
 	}
 	
 	/**
@@ -1152,13 +1149,13 @@ public class ChartsComponent extends JPanel {
 	 * @param chartsParams parameters of the charts to be drawn
 	 * @param chartIndex   index of chart being queried
 	 * @param inGameColor  in-game color of the player
-	 * @param eapm         EAPM of the player if known; can be <code>null</code>
+	 * @param eapmText     EAPM text to display; can be <code>null</code>
 	 */
-	private void drawPlayerDescription( final Graphics graphics, final ChartsParams chartsParams, final int chartIndex, final Color inGameColor, final Integer eapm ) {
+	private void drawPlayerDescription( final Graphics graphics, final ChartsParams chartsParams, final int chartIndex, final Color inGameColor, final String eapmText ) {
 		graphics.setFont( CHART_MAIN_FONT );
 		graphics.setColor( inGameColor == null ? CHART_PLAYER_DESCRIPTION_COLOR : inGameColor );
 		final String description = replay.replayHeader.getPlayerDescription( replay.replayActions.players[ playerIndexToShowList.get( chartIndex ) ].playerName );
-		graphics.drawString( eapm == null ? description : description + ", EAPM: " + eapm,
+		graphics.drawString( eapmText == null ? description : description + ", " + eapmText,
 				             chartsParams.x1 + 2,
 				             chartsParams.getY1ForChart( chartIndex ) + ( chartsParams.allPlayersOnOneChart ? chartIndex * 14 - 22 : -12 ) );
 	}
