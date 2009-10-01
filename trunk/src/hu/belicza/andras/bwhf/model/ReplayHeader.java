@@ -205,7 +205,7 @@ public class ReplayHeader {
 			return null;
 		
 		final int actionsCount = playerIds[ playerIndex ] < playerIdActionsCounts.length ? playerIdActionsCounts[ playerIds[ playerIndex ] ] : 0;
-		final Integer apm =  actionsCount * 60 / Math.max( getDurationSeconds(), 1 );
+		final Integer apm =  actionsCount * 60 / Math.max( 1, getDurationSeconds() );
 		return playerNames[ playerIndex ] + " (" + RACE_CHARACTERS[ playerRaces[ playerIndex ] ] + "), actions: " + actionsCount + ", APM: " + apm;
 	}
 	
