@@ -406,6 +406,8 @@ public class PlayerMatcherTab extends Tab {
 		} );
 		contentBox.add( Utils.wrapInPanel( stopAnalyzingButton ) );
 		
+		contentBox.add( Utils.wrapInPanel( new JLabel( "Tip: Double click with LEFT button opens replay #1, double click with RIGHT button opens replay #2." ) ) );
+		
 		progressBar.setMaximumSize( Utils.getMaxDimension() );
 		contentBox.add( progressBar );
 		

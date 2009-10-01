@@ -11,6 +11,8 @@ import hu.belicza.andras.bwhfagent.view.ChartsTab;
 import hu.belicza.andras.bwhfagent.view.IconResourceManager;
 import hu.belicza.andras.bwhfagent.view.Utils;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -34,7 +36,6 @@ import swingwt.awt.event.KeyAdapter;
 import swingwt.awt.event.KeyEvent;
 import swingwt.awt.event.MouseAdapter;
 import swingwt.awt.event.MouseEvent;
-import swingwtx.swing.BorderFactory;
 import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
@@ -99,6 +100,9 @@ public class ChartsComponent extends JPanel {
 	/** Auto disabling APM limit.                                */
 	private static final int    AUTO_DISABLING_APM_LIMIT       = 30;
 	
+	/** Date format to format replay dates. */
+	private static final DateFormat REPLAY_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd" );
+	
 	/**
 	 * The supported types of charts.
 	 * @author Andras Belicza
@@ -131,6 +135,8 @@ public class ChartsComponent extends JPanel {
 	private final JPanel            contentPanel      = new JPanel( new BorderLayout() );
 	/** Panel containing options of the selected chart type.          */
 	private final JPanel            chartOptionsPanel = Utils.createWrapperPanel();
+	/** Game details label.                                           */
+	private final JLabel            gameDetailsLabel  = new JLabel( "&lt;Game info&gt;", JLabel.CENTER );
 	/** Panel containing checkboxes of players.                       */
 	private final JPanel            playersPanel      = Utils.createWrapperPanel();
 	/** Replay whose charts to be visualized.                         */
@@ -199,11 +205,12 @@ public class ChartsComponent extends JPanel {
 	 * Builds the GUI of the content panel.
 	 */
 	private void buildConentGUI() {
-		final JPanel controlPanel = new JPanel( new BorderLayout() );
-		chartOptionsPanel.setBorder( BorderFactory.createTitledBorder( "Selected chart's settings:" ) );
-		controlPanel.add( chartOptionsPanel, BorderLayout.NORTH );
-		controlPanel.add( playersPanel, BorderLayout.CENTER );
-		contentPanel.add( controlPanel, BorderLayout.NORTH );
+		final Box controlBox = Box.createVerticalBox();
+		//chartOptionsPanel.setBorder( BorderFactory.createTitledBorder( "Selected chart's settings:" ) );
+		controlBox.add( chartOptionsPanel );
+		controlBox.add( gameDetailsLabel );
+		controlBox.add( playersPanel );
+		contentPanel.add( controlBox, BorderLayout.NORTH );
 		
 		addMouseListener( new MouseAdapter() {
 			@Override
@@ -543,6 +550,20 @@ public class ChartsComponent extends JPanel {
 			playersPanel.remove( playersPanel.getComponentCount() - 1 );
 		
 		if ( replay != null ) {
+			final ReplayHeader replayHeader = replay.replayHeader;
+			
+			final StringBuilder gameInfoBuilder = new StringBuilder();
+			// character 0x255 is used instead of spaces (because it is interpreted as HTML and multiple spaces will appear only as 1 space!
+			gameInfoBuilder.append( "Engine: " ).append( replayHeader.gameEngine < ReplayHeader.GAME_ENGINE_SHORT_NAMES.length ? ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] : "N/A" );
+			gameInfoBuilder.append( "  |  Duration: " ).append( replayHeader.getDurationString( false ) );
+			gameInfoBuilder.append( "  |  Saved on: " ).append( REPLAY_DATE_FORMAT.format( replayHeader.saveTime ) );
+			gameInfoBuilder.append( "  |  Version: " ).append( replayHeader.guessVersionFromDate() );
+			final String gameTypeName = replayHeader.gameType < ReplayHeader.GAME_TYPE_NAMES.length ? ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ] : null;
+			gameInfoBuilder.append( "  |  Type: " ).append( gameTypeName == null ? "N/A" : gameTypeName );
+			gameInfoBuilder.append( "  |  Map: " ).append( replayHeader.mapName );
+			gameInfoBuilder.append( "  |  Map size: " ).append( replayHeader.getMapSize() );
+			gameDetailsLabel.setText( gameInfoBuilder.toString() );
+			
 			hackDescriptionList = ReplayScanner.scanReplayForHacks( replay, false );
 			
 			final PlayerActions[] playerActions = replay.replayActions.players;
@@ -565,7 +586,7 @@ public class ChartsComponent extends JPanel {
 					syncMarkerFromChartToActionList( markerPosition );
 				}
 			};
-			final int autoDisablingActionsCountLimit = AUTO_DISABLING_APM_LIMIT * replay.replayHeader.getDurationSeconds() / 60;
+			final int autoDisablingActionsCountLimit = AUTO_DISABLING_APM_LIMIT * replayHeader.getDurationSeconds() / 60;
 			for ( int i = 0; i < players.length; i++ ) {
 				players[ i ][ 0 ] = new JCheckBox( playerActions[ i ].playerName, !chartsTab.autoDisableInactivePlayersCheckBox.isSelected() || playerActions[ i ].actions.length > autoDisablingActionsCountLimit );
 				players[ i ][ 1 ] = i;
