@@ -6,7 +6,7 @@
 
 ----
 ===Features and changes in the upcoming new release===
-* Added help text about opening replays on the Player matcher tab.
+ * Added help text about opening replays on the Player matcher tab.
 
 ----
 ===2.61 2009-08-26===
