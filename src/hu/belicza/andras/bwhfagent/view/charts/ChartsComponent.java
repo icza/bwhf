@@ -295,7 +295,7 @@ public class ChartsComponent extends JPanel {
 		actionListOptionsPanel.add( filterTextField );
 		
 		optionsBox.add( Utils.wrapInPanel( actionListOptionsPanel ) );
-		// I put clear filter button in a different grid panel, because button's height is significantly greater than texfields'.
+		// I put clear filter button in a different grid panel, because buttons' height is significantly greater than texfields'.
 		final JPanel clearFilterButtonPanel = new JPanel( new GridLayout( 1, 2 ) );
 		clearFilterButtonPanel.add( new JLabel() );
 		final JButton clearFilterButton = new JButton( "Clear filter", IconResourceManager.ICON_UNDO );
@@ -307,6 +307,7 @@ public class ChartsComponent extends JPanel {
 		} );
 		clearFilterButtonPanel.add( clearFilterButton );
 		optionsBox.add( clearFilterButtonPanel );
+		optionsBox.add( new JLabel( "You can use OR between filter words." ) );
 		final JComponent verticalFillerComponent = new JLabel();
 		verticalFillerComponent.setMaximumSize( new Dimension( 1, Integer.MAX_VALUE ) );
 		optionsBox.add( verticalFillerComponent );
@@ -675,7 +676,7 @@ public class ChartsComponent extends JPanel {
 		actionsListTextArea.setText( actionsListTextBuilder.toString() );
 		actionsListTextBuilder.setLength( 0 ); // To indicate that this does not yet contain the lowercased version for searching
 	}
-	static int asdf=0;
+	
 	/**
 	 * Creates the filter groups from the <code>filterTextField</code>.<br>
 	 * Filters in a group are connected with logical AND condition, and the groups are connected
@@ -775,6 +776,8 @@ public class ChartsComponent extends JPanel {
 		graphics.drawString( overall ? "Overall APM" : "APM", 1, 0 );
 		
 		// First count the actions
+		final int[] effectiveActionsCounts = eapm ? new int[ chartsParams.playersCount ] : null;
+		
 		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
 			final PlayerActions playerActions = replay.replayActions.players[ playerIndexToShowList.get( i ) ];
 			final int[] yPoints     = yPointss[ i ];
@@ -798,8 +801,10 @@ public class ChartsComponent extends JPanel {
 						}
 					}
 					yPoints[ pointIndex ]++;
-					if ( eapm )
-						if ( Math.random() > 0.5 ) yPointsEapm[ pointIndex ]++;
+					if ( eapm && isActionEffective( allActions, ai, action ) ) {
+						yPointsEapm[ pointIndex ]++;
+						effectiveActionsCounts[ i ]++;
+					}
 				} catch ( final ArrayIndexOutOfBoundsException aioobe ) {
 					// The last few actions might be over the last domain, we ignore them.
 				}
@@ -907,8 +912,20 @@ public class ChartsComponent extends JPanel {
 					}
 			}
 			
-			drawPlayerDescription( graphics, chartsParams, i, inGameColor );
+			drawPlayerDescription( graphics, chartsParams, i, inGameColor, eapm ? effectiveActionsCounts[ i ] * 60 / Math.max( 1, replay.replayHeader.getDurationSeconds() ) : null );
 		}
+	}
+	
+	/**
+	 * Implementation of EAPM.<br>
+	 * Decides if the action is considered <i>effective</i>.
+	 * @param actions     actions of the player
+	 * @param actionIndex index of the action to be decided
+	 * @param action      shortcut reference to the action to be decided
+	 * @return true if the action is considered <i>effective</i>; false otherwise
+	 */
+	private static boolean isActionEffective( final Action[] actions, final int actionIndex, final Action action ) {
+		return Math.random() > 0.5;
 	}
 	
 	/**
@@ -967,7 +984,7 @@ public class ChartsComponent extends JPanel {
 			}
 			( (Graphics2D) graphics ).setBackground( CHART_BACKGROUND_COLOR );
 			
-			drawPlayerDescription( graphics, chartsParams, i, inGameColor );
+			drawPlayerDescription( graphics, chartsParams, i, inGameColor, null );
 		}
 	}
 	
@@ -1018,7 +1035,7 @@ public class ChartsComponent extends JPanel {
 				}
 			}
 			
-			drawPlayerDescription( graphics, chartsParams, i, inGameColor );
+			drawPlayerDescription( graphics, chartsParams, i, inGameColor, null );
 		}
 	}
 	
@@ -1078,7 +1095,7 @@ public class ChartsComponent extends JPanel {
 				}
 			}
 			
-			drawPlayerDescription( graphics, chartsParams, i, inGameColor );
+			drawPlayerDescription( graphics, chartsParams, i, inGameColor, null );
 		}
 	}
 	
@@ -1135,12 +1152,14 @@ public class ChartsComponent extends JPanel {
 	 * @param chartsParams parameters of the charts to be drawn
 	 * @param chartIndex   index of chart being queried
 	 * @param inGameColor  in-game color of the player
+	 * @param eapm         EAPM of the player if known; can be <code>null</code>
 	 */
-	private void drawPlayerDescription( final Graphics graphics, final ChartsParams chartsParams, final int chartIndex, final Color inGameColor ) {
+	private void drawPlayerDescription( final Graphics graphics, final ChartsParams chartsParams, final int chartIndex, final Color inGameColor, final Integer eapm ) {
 		graphics.setFont( CHART_MAIN_FONT );
 		graphics.setColor( inGameColor == null ? CHART_PLAYER_DESCRIPTION_COLOR : inGameColor );
-		graphics.drawString( replay.replayHeader.getPlayerDescription( replay.replayActions.players[ playerIndexToShowList.get( chartIndex ) ].playerName ),
-				             chartsParams.x1,
+		final String description = replay.replayHeader.getPlayerDescription( replay.replayActions.players[ playerIndexToShowList.get( chartIndex ) ].playerName );
+		graphics.drawString( eapm == null ? description : description + ", EAPM: " + eapm,
+				             chartsParams.x1 + 2,
 				             chartsParams.getY1ForChart( chartIndex ) + ( chartsParams.allPlayersOnOneChart ? chartIndex * 14 - 22 : -12 ) );
 	}
 	
