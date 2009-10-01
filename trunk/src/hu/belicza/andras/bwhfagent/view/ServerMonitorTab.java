@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import swingwt.awt.Font;
 import swingwt.awt.GridLayout;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
@@ -237,7 +236,7 @@ public class ServerMonitorTab extends Tab {
 	 */
 	private static JLabel createHeaderLabel( final String text ) {
 		final JLabel headerLabel = new JLabel( text, JLabel.CENTER );
-		headerLabel.setFont( new Font( "Default", Font.BOLD, 9 ) );
+		headerLabel.setFont( Utils.DEFAULT_BOLD_FONT );
 		return headerLabel;
 	}
 	

@@ -30,6 +30,7 @@ import swingwt.awt.BorderLayout;
 import swingwt.awt.Component;
 import swingwt.awt.Dimension;
 import swingwt.awt.FlowLayout;
+import swingwt.awt.Font;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwtx.swing.JButton;
@@ -51,6 +52,9 @@ public class Utils {
 	public static final DateFormat DATE_FORMAT       = new SimpleDateFormat( "yyyy-MM-dd HH-mm-ss" );
 	/** Date format to create short timestamps for file names. */
 	public static final DateFormat SHORT_DATE_FORMAT = new SimpleDateFormat( "yyMMdd HHmmss" );
+	
+	/** Default bold font to be used when bold font is needed. */
+	public static final Font DEFAULT_BOLD_FONT = new Font( "Default", Font.BOLD, 9 );
 	
 	/** Size of buffer to use to play wav files.  */
 	private static final int WAV_BUFFER_SIZE       = 64*1024;

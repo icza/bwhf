@@ -24,7 +24,6 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 
 import swingwt.awt.BorderLayout;
-import swingwt.awt.Font;
 import swingwt.awt.GridBagConstraints;
 import swingwt.awt.GridBagLayout;
 import swingwt.awt.event.ActionEvent;
@@ -215,7 +214,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		contentBox.add( Utils.wrapInPanel( settingsPanel ) );
 		
 		final JLabel noteLabel = new JLabel( "Note that you will only be notified of players reported with the gateway set on your autoscan tab! (Always keep it synchronized with the gateway you play on.)" );
-		noteLabel.setFont( new Font( "Default", Font.BOLD, 9 ) );
+		noteLabel.setFont( Utils.DEFAULT_BOLD_FONT );
 		contentBox.add( Utils.wrapInPanel( noteLabel ) );
 		
 		super.buildGUI();
