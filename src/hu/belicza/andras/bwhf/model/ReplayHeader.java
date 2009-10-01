@@ -51,6 +51,12 @@ public class ReplayHeader {
 		"Team capture the flag", null, "Top vs bottom"
 	};
 	
+	public static final String[] GAME_TYPE_SHORT_NAMES = {
+		null, null, "Melee", "FFA", "1vs1", "CTF", "Greed", "Slaughter",
+		null, "Sudden death", "UMS", "Team melee", "Team FFA",
+		"Team CTF", null, "TvB"
+	};
+	
 	public static final short GAME_TYPE_MELEE         = 0x02;
 	public static final short GAME_TYPE_FFA           = 0x03; // Free for all
 	public static final short GAME_TYPE_ONE_ON_ONE    = 0x04;

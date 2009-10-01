@@ -141,6 +141,8 @@ public class Consts {
 	public static final String PROPERTY_DISPLAY_ACTIONS_IN_SECONDS     = "displayActionsInSeconds";
 	/** APM chart detail level property.         */
 	public static final String PROPERTY_APM_CHART_DETAIL_LEVEL         = "apmChartDetailLevel";
+	/** Show EAPM property.                      */
+	public static final String PROPERTY_SHOW_EAPM                      = "showEapm";
 	/** Show select hotkeys property.            */
 	public static final String PROPERTY_SHOW_SELECT_HOTKEYS            = "showSelectHotkeys";
 	/** Build order display levels property.     */
@@ -153,6 +155,8 @@ public class Consts {
 	public static final String PROPERTY_STRATEGY_DISPLAY_LEVELS        = "strategyDisplayLevels";
 	/** Overall APM chart detail level property. */
 	public static final String PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL = "overallApmChartDetailLevel";
+	/** Show overall EAPM property.              */
+	public static final String PROPERTY_SHOW_OVERALL_EAPM              = "showOverallEapm";
 	/** Player checker enabled property.         */
 	public static final String PROPERTY_HIDE_SEARCH_FILTERS            = "hideSearchFilters";
 	/** Player checker enabled property.         */
@@ -229,12 +233,14 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DISPLAY_ACTIONS_IN_SECONDS    , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_APM_CHART_DETAIL_LEVEL        , "4" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SHOW_EAPM                     , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SHOW_SELECT_HOTKEYS           , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_BUILD_ORDER_DISPLAY_LEVELS    , "4" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SHOW_UNITS_ON_BUILD_ORDER     , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HIDE_WORKER_UNITS             , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_STRATEGY_DISPLAY_LEVELS       , "4" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL, "7" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SHOW_OVERALL_EAPM             , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HIDE_SEARCH_FILTERS           , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_APPEND_RESULTS_TO_TABLE       , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAYER_CHECKER_ENABLED        , "true" );

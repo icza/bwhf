@@ -154,6 +154,8 @@ public class ChartsComponent extends JPanel {
 	/** APM chart detail level in pixels combo box.         */
 	private final JComboBox apmChartDetailLevelComboBox          = new JComboBox( DETAIL_LEVELS );
 	/** Show select hotkeys checkbox.                       */
+	private final JCheckBox showEapmCheckBox                     = new JCheckBox( "Show EAPM", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_EAPM ) ) );
+	/** Show select hotkeys checkbox.                       */
 	private final JCheckBox showSelectHotkeysCheckBox            = new JCheckBox( "Show select hotkeys", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS ) ) );
 	/** Build order display levels combo box.               */
 	private final JComboBox buildOrderDisplayLevelComboBox       = new JComboBox( DISPLAY_LEVELS );
@@ -165,6 +167,8 @@ public class ChartsComponent extends JPanel {
 	private final JComboBox strategyDisplayLevelComboBox         = new JComboBox( DISPLAY_LEVELS );
 	/** Overall APM chart detail level in pixels combo box. */
 	private final JComboBox overallApmChartDetailLevelComboBox   = new JComboBox( DETAIL_LEVELS );
+	/** Show select hotkeys checkbox.                       */
+	private final JCheckBox showOverallEapmCheckBox              = new JCheckBox( "Show overall EAPM", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_OVERALL_EAPM ) ) );
 	
 	/** Split pane to display the charts component and the players' action list. */
 	private final JSplitPane            splitPane                = new JSplitPane( JSplitPane.VERTICAL_SPLIT, true );
@@ -206,9 +210,9 @@ public class ChartsComponent extends JPanel {
 	 */
 	private void buildConentGUI() {
 		final Box controlBox = Box.createVerticalBox();
-		//chartOptionsPanel.setBorder( BorderFactory.createTitledBorder( "Selected chart's settings:" ) );
 		controlBox.add( chartOptionsPanel );
-		controlBox.add( gameDetailsLabel );
+		gameDetailsLabel.setFont( Utils.DEFAULT_BOLD_FONT );
+		controlBox.add( Utils.wrapInPanel( gameDetailsLabel ) );
 		controlBox.add( playersPanel );
 		contentPanel.add( controlBox, BorderLayout.NORTH );
 		
@@ -317,6 +321,7 @@ public class ChartsComponent extends JPanel {
 			}
 		};
 		apmChartDetailLevelComboBox.addChangeListener( repainterChangeListener );
+		showEapmCheckBox.addChangeListener( repainterChangeListener );
 		showSelectHotkeysCheckBox.addChangeListener( repainterChangeListener );
 		buildOrderDisplayLevelComboBox.addChangeListener( repainterChangeListener );
 		showUnitsOnBuildOrderCheckBox.addChangeListener( new ChangeListener() {
@@ -327,10 +332,9 @@ public class ChartsComponent extends JPanel {
 		showUnitsOnBuildOrderCheckBox.addChangeListener( repainterChangeListener );
 		hideWorkerUnitsCheckBox.addChangeListener( repainterChangeListener );
 		hideWorkerUnitsCheckBox.setEnabled( showUnitsOnBuildOrderCheckBox.isSelected() );
-		
 		strategyDisplayLevelComboBox.addChangeListener( repainterChangeListener );
-		
 		overallApmChartDetailLevelComboBox.addChangeListener( repainterChangeListener );
+		showOverallEapmCheckBox.addChangeListener( repainterChangeListener );
 	}
 	
 	/**
@@ -501,6 +505,7 @@ public class ChartsComponent extends JPanel {
 				chartOptionsPanel.add( new JLabel( "Detail level: " ) );
 				chartOptionsPanel.add( apmChartDetailLevelComboBox );
 				chartOptionsPanel.add( new JLabel( " pixels." ) );
+				chartOptionsPanel.add( showEapmCheckBox );
 				break;
 			case HOTKEYS :
 				chartOptionsPanel.add( showSelectHotkeysCheckBox );
@@ -520,6 +525,7 @@ public class ChartsComponent extends JPanel {
 				chartOptionsPanel.add( new JLabel( "Detail level: " ) );
 				chartOptionsPanel.add( overallApmChartDetailLevelComboBox );
 				chartOptionsPanel.add( new JLabel( " pixels." ) );
+				chartOptionsPanel.add( showOverallEapmCheckBox );
 				break;
 		}
 		
@@ -554,15 +560,15 @@ public class ChartsComponent extends JPanel {
 			
 			final StringBuilder gameInfoBuilder = new StringBuilder();
 			// character 0x255 is used instead of spaces (because it is interpreted as HTML and multiple spaces will appear only as 1 space!
-			gameInfoBuilder.append( "Engine: " ).append( replayHeader.gameEngine < ReplayHeader.GAME_ENGINE_SHORT_NAMES.length ? ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] : "N/A" );
-			gameInfoBuilder.append( "  |  Duration: " ).append( replayHeader.getDurationString( false ) );
+			gameInfoBuilder.append( "Ver.: " ).append( replayHeader.gameEngine < ReplayHeader.GAME_ENGINE_SHORT_NAMES.length ? ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] : "" ).append( ' ' ).append( replayHeader.guessVersionFromDate() );
 			gameInfoBuilder.append( "  |  Saved on: " ).append( REPLAY_DATE_FORMAT.format( replayHeader.saveTime ) );
-			gameInfoBuilder.append( "  |  Version: " ).append( replayHeader.guessVersionFromDate() );
-			final String gameTypeName = replayHeader.gameType < ReplayHeader.GAME_TYPE_NAMES.length ? ReplayHeader.GAME_TYPE_NAMES[ replayHeader.gameType ] : null;
+			final String gameTypeName = replayHeader.gameType < ReplayHeader.GAME_TYPE_SHORT_NAMES.length ? ReplayHeader.GAME_TYPE_SHORT_NAMES[ replayHeader.gameType ] : null;
+			gameInfoBuilder.append( "  |  Creator: " ).append( replayHeader.creatorName );
+			gameInfoBuilder.append( "  |  Name: " ).append( replayHeader.gameName );
 			gameInfoBuilder.append( "  |  Type: " ).append( gameTypeName == null ? "N/A" : gameTypeName );
 			gameInfoBuilder.append( "  |  Map: " ).append( replayHeader.mapName );
-			gameInfoBuilder.append( "  |  Map size: " ).append( replayHeader.getMapSize() );
-			gameDetailsLabel.setText( gameInfoBuilder.toString() );
+			gameInfoBuilder.append( "  |  Size: " ).append( replayHeader.getMapSize() );
+			gameDetailsLabel.setText( gameInfoBuilder.toString().replace( "<", "&lt;" ).replace( ">", "&gt;" ) );
 			
 			hackDescriptionList = ReplayScanner.scanReplayForHacks( replay, false );
 			
@@ -753,10 +759,13 @@ public class ChartsComponent extends JPanel {
 		if ( getWidth() < chartGranularity )
 			return;
 		
-		final int     chartPoints = chartsParams.maxXInChart / chartGranularity + 1;
+		final boolean eapm = ( overall ? showOverallEapmCheckBox : showEapmCheckBox ).isSelected();
 		
-		final int[]   xPoints     = new int[ chartPoints + 1 ];
-		final int[][] yPointss    = new int[ chartsParams.playersCount ][ chartPoints + 1 ];
+		final int     chartPoints  = chartsParams.maxXInChart / chartGranularity + 1;
+		
+		final int[]   xPoints      = new int[ chartPoints + 1 ];
+		final int[][] yPointss     = new int[ chartsParams.playersCount ][ chartPoints + 1 ];
+		final int[][] yPointssEapm = eapm ? new int[ chartsParams.playersCount ][ chartPoints + 1 ] : null;
 		int pointIndex = 0;
 		for ( int x = chartsParams.x1; pointIndex < xPoints.length ; pointIndex++, x+= chartGranularity )
 			xPoints[ pointIndex ] = x;
@@ -768,30 +777,44 @@ public class ChartsComponent extends JPanel {
 		// First count the actions
 		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
 			final PlayerActions playerActions = replay.replayActions.players[ playerIndexToShowList.get( i ) ];
-			final int[] yPoints = yPointss[ i ];
+			final int[] yPoints     = yPointss[ i ];
+			final int[] yPointsEapm = eapm ? yPointssEapm[ i ] : null;
 			
-			int lastPointIndex = 1;
-			for ( final Action action : playerActions.actions )
+			int lastPointIndex = 1, lastPointIndexEapm = 1;
+			final Action[] allActions = playerActions.actions;
+			final int allActionsCount = allActions.length;
+			for ( int ai = 0; ai < allActionsCount; ai++ )
 				try {
+					final Action action = allActions[ ai ];
 					pointIndex = 1 + action.iteration * chartPoints / chartsParams.frames;
 					if ( overall && lastPointIndex < pointIndex ) {
 						final int actionsCount = yPoints[ lastPointIndex ];
 						while ( lastPointIndex < pointIndex )
 							yPoints[ ++lastPointIndex ] = actionsCount;
+						if ( eapm ) {
+							final int actionsCountEapm = yPointsEapm[ lastPointIndexEapm ];
+							while ( lastPointIndexEapm < pointIndex )
+								yPointsEapm[ ++lastPointIndexEapm ] = actionsCountEapm;
+						}
 					}
 					yPoints[ pointIndex ]++;
+					if ( eapm )
+						if ( Math.random() > 0.5 ) yPointsEapm[ pointIndex ]++;
 				} catch ( final ArrayIndexOutOfBoundsException aioobe ) {
 					// The last few actions might be over the last domain, we ignore them.
 				}
 		}
 		
-		// Next calculate max actions
+		// Next calculate max actions (this does not include/effect eapm which cannot be higher than apm)
 		final int[] maxActionss = new int[ chartsParams.playersCount ];
 		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
-			final int[] yPoints    = yPointss[ i ];
-			int         maxActions = maxActionss[ i ]; 
+			final int[] yPoints     = yPointss[ i ];
+			final int[] yPointsEapm = eapm ? yPointssEapm[ i ] : null;
+			int         maxActions  = maxActionss[ i ]; 
 			for ( pointIndex = yPoints.length - 1; pointIndex > 0; pointIndex-- ) {
 				final int actionsInDomain = overall ? yPoints[ pointIndex ] /= pointIndex : yPoints[ pointIndex ];
+				if ( overall && eapm )
+					yPointsEapm[ pointIndex ] /= pointIndex;
 				if ( maxActions < actionsInDomain )
 					maxActions = actionsInDomain;
 			}
@@ -808,23 +831,33 @@ public class ChartsComponent extends JPanel {
 		// Normalize charts to their heights
 		final int maxY = chartsParams.maxYInChart;
 		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
-			final int[] yPoints    = yPointss[ i ];
-			final int   maxActions = maxActionss[ i ];
-			final int   y1         = chartsParams.getY1ForChart( i );
+			final int[] yPoints     = yPointss[ i ];
+			final int[] yPointsEapm = eapm ? yPointssEapm[ i ] : null;
+			final int   maxActions  = maxActionss[ i ];
+			final int   y1          = chartsParams.getY1ForChart( i );
 			if ( maxActions > 0 ) {
-				for ( pointIndex = yPoints.length - 1; pointIndex > 0; pointIndex-- )
+				for ( pointIndex = yPoints.length - 1; pointIndex > 0; pointIndex-- ) {
 					yPoints[ pointIndex ] = y1 + maxY - yPoints[ pointIndex ] * maxY / maxActions;
+					if ( eapm )
+						yPointsEapm[ pointIndex ] = y1 + maxY - yPointsEapm[ pointIndex ] * maxY / maxActions;
+				}
 				// Chart should not start from zero, we "double" the first point:
 				yPoints[ 0 ] = yPoints[ 1 ];
+				if ( eapm )
+					yPointsEapm[ 0 ] = yPointsEapm[ 1 ];
 			}
-			else
-				Arrays.fill( yPoints, y1 + maxY ); // No actions, we cannot divide by zero, just fill with maxY
+			else {
+				// No actions, we cannot divide by zero, just fill with maxY
+				Arrays.fill( yPoints    , y1 + maxY );
+				Arrays.fill( yPointsEapm, y1 + maxY );
+			}
 		}
 		
 		// Finally draw the axis, labels, player descriptions and charts
 		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
 			final PlayerActions playerActions = replay.replayActions.players[ playerIndexToShowList.get( i ) ];
 			final int[]         yPoints       = yPointss[ i ];
+			final int[]         yPointsEapm   = eapm ? yPointssEapm[ i ] : null;
 			final int           y1            = chartsParams.getY1ForChart( i );
 			final Color         inGameColor   = getPlayerInGameColor( playerActions );
 			
@@ -849,8 +882,14 @@ public class ChartsComponent extends JPanel {
 			
 			// Draw the charts
 			final Color chartColor = inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor;
-			graphics.setColor( chartColor );
+			// Draw eapm first if we have 
+			if ( eapm ) {
+				graphics.setColor( chartColor.brighter().brighter().brighter() );
+				graphics.drawPolyline( xPoints, yPointsEapm, xPoints.length - 1 ); // Last point is excluded, it might not be a whole domain
+			}
+			// Now the apm
 			( (Graphics2D) graphics ).setStroke( CHART_STROKE );
+			graphics.setColor( chartColor );
 			graphics.drawPolyline( xPoints, yPoints, xPoints.length - 1 ); // Last point is excluded, it might not be a whole domain
 			( (Graphics2D) graphics ).setStroke( CHART_REST_STROKE );
 			
@@ -1106,16 +1145,18 @@ public class ChartsComponent extends JPanel {
 	}
 	
 	/**
-	 * Assignes the used properties of this component.
+	 * Assigns the used properties of this component.
 	 */
 	public void assignUsedProperties() {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_APM_CHART_DETAIL_LEVEL        , Integer.toString( apmChartDetailLevelComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_EAPM                     , Boolean.toString( showEapmCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_SELECT_HOTKEYS           , Boolean.toString( showSelectHotkeysCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_BUILD_ORDER_DISPLAY_LEVELS    , Integer.toString( buildOrderDisplayLevelComboBox.getSelectedIndex() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_UNITS_ON_BUILD_ORDER     , Boolean.toString( showUnitsOnBuildOrderCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_HIDE_WORKER_UNITS             , Boolean.toString( hideWorkerUnitsCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_STRATEGY_DISPLAY_LEVELS       , Integer.toString( strategyDisplayLevelComboBox.getSelectedIndex() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL, Integer.toString( overallApmChartDetailLevelComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_OVERALL_EAPM             , Boolean.toString( showOverallEapmCheckBox.isSelected() ) );
 	}
 	
 }
