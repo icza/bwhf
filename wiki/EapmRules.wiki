@@ -6,7 +6,7 @@ The APM/EAPM charts calculates and shows APM and EAPM values based on my algorit
 
 *Commands that are considered to be _ineffective_:*
 
- * Unit queue overflow: if more than 5 units/subunit is trained in a short time
+ * Unit queue overflow: if more than 5 units/subunits are trained in a short time
  * Too fast cancel: if a train, research, upgrade, hatch command gets cancelled right away
  * Too fast repetition of some command: move, stop, hold, hotkey assign
  * Too fast switch away from a selected unit or reselecting the same units (by too fast I mean there is not even time to check the state of the units); double tapping a hotkey to center a group of units is NOT considered ineffective
