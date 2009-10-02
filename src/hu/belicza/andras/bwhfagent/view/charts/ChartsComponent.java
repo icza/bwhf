@@ -109,7 +109,7 @@ public class ChartsComponent extends JPanel {
 	 */
 	public enum ChartType {
 		/** APM charts of the players of the replay.         */
-		APM( "APM" ),
+		APM( "APM/EAPM" ),
 		/** Hotkeys charts of the players of the replay.     */
 		HOTKEYS( "Hotkeys" ),
 		/** Build order charts of the players of the replay. */
@@ -117,7 +117,7 @@ public class ChartsComponent extends JPanel {
 		/** Strategy charts of the players of the replay.    */
 		STRATEGY( "Strategy" ),
 		/** Overall APM charts of the players of the replay. */
-		OVERALL_APM( "Overall APM" );
+		OVERALL_APM( "Overall APM/EAPM" );
 		
 		private final String name;
 		private ChartType( final String name ) {

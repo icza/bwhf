@@ -18,11 +18,24 @@ public class EapmUtil {
 	 */
 	public static boolean isActionEffective( final Action[] actions, final int actionIndex, final Action action ) {
 		// Unit queue overflow
-		if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN || action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD_SUBUNIT )
+		if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN || action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD_SUBUNIT ) {
 			if ( countSameActions( actions, actionIndex, action ) >= 6 )
 				return false;
+		}
 		
-		final Action prevAction = actions[ actionIndex - 1 ]; // Shortcut to the previous action
+		final Action prevAction = actionIndex > 0 ? actions[ actionIndex - 1 ] : null; // Shortcut to the previous action
+		
+		// Too fast cancel
+		if ( actionIndex > 0 && action.iteration - prevAction.iteration <= 20 ) {
+			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN && prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_CANCEL_TRAIN )
+				return false;
+			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_RESEARCH && prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_CANCEL_RESEARCH )
+				return false;
+			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_UPGRADE && prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_CANCEL_UPGRADE )
+				return false;
+			if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HATCH && prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_CANCEL_HATCH )
+				return false;
+		}
 		
 		// Too fast repetition of commands (regardless of its destination, if destination is different/far, then the first one was useless)
 		if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_MOVE || action.actionNameIndex == Action.ACTION_NAME_INDEX_STOP
@@ -33,22 +46,29 @@ public class EapmUtil {
 				return false;
 		}
 		
-		// Too fast switch away from or reselectign the same selected unit = no use of selecting it. By too fast I mean it isn't even enough to check the object state
-		// TODO exclude double tapping a hotkey
-		if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.startsWith( "Select" ) ) {
-			if ( actionIndex > 0 && prevAction.actionNameIndex == action.actionNameIndex 
+		// Too fast switch away from or reselecting the same selected unit = no use of selecting it. By too fast I mean it isn't even enough to check the object state
+		if ( actionIndex > 0 && ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.startsWith( "Select" ) ) ) {
+			if ( prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.startsWith( "Select" )
 					&& action.iteration - prevAction.iteration <= 15 )
-				return false;
+				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.equals( prevAction.parameters ) ) {
+					// Exclude double tapping a hotkey, it's only ineffective if it was pressed more than 3 times
+					if ( actionIndex > 1 ) {
+						final Action prevPrevAction = actions[ actionIndex - 2 ]; // Shortcut to the previous action before the previous
+						if ( prevAction.iteration - prevPrevAction.iteration <= 15 && prevPrevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY
+								&& action.parameters.equals( prevPrevAction.parameters ) )
+							return false;
+					}
+				}
+				else
+					return false;
 		}
 		
-		// Fast hotkey selection repeation more than twice
-		// If we're here, it cannot be a different hotkey, because it would've been qualified ineffective (previous rule) 
-		if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.startsWith( "Select" ) 
-				&& prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && prevAction.parameters.startsWith( "Select" )
-				&& actions[ actionIndex - 2 ].actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && actions[ actionIndex - 2 ].parameters.startsWith( "Select" ) )
-			return false;
-		
-		// TODO too fast cancel after train
+		// Repetition of commands without time restriction
+		if ( actionIndex > 0 && ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HATCH || action.actionNameIndex == Action.ACTION_NAME_INDEX_MORPH 
+				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_UPGRADE || action.actionNameIndex == Action.ACTION_NAME_INDEX_RESEARCH
+				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD || action.actionNameIndex == Action.ACTION_NAME_INDEX_CANCEL ) )
+			if ( prevAction.actionNameIndex == action.actionNameIndex )
+				return false;
 		
 		return true;
 	}
