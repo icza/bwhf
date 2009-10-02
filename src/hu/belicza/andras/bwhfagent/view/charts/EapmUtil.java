@@ -42,19 +42,19 @@ public class EapmUtil {
 				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_HOLD
 				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.startsWith( "Assign" ) ) {
 			if ( actionIndex > 0 && prevAction.actionNameIndex == action.actionNameIndex 
-					&& action.iteration - prevAction.iteration <= 20 )
+					&& action.iteration - prevAction.iteration <= 10 )
 				return false;
 		}
 		
 		// Too fast switch away from or reselecting the same selected unit = no use of selecting it. By too fast I mean it isn't even enough to check the object state
 		if ( actionIndex > 0 && ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.startsWith( "Select" ) ) ) {
 			if ( prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.startsWith( "Select" )
-					&& action.iteration - prevAction.iteration <= 15 )
+					&& action.iteration - prevAction.iteration <= 10 )
 				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.equals( prevAction.parameters ) ) {
 					// Exclude double tapping a hotkey, it's only ineffective if it was pressed more than 3 times
 					if ( actionIndex > 1 ) {
 						final Action prevPrevAction = actions[ actionIndex - 2 ]; // Shortcut to the previous action before the previous
-						if ( prevAction.iteration - prevPrevAction.iteration <= 15 && prevPrevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY
+						if ( prevAction.iteration - prevPrevAction.iteration <= 10 && prevPrevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY
 								&& action.parameters.equals( prevPrevAction.parameters ) )
 							return false;
 					}
@@ -64,10 +64,11 @@ public class EapmUtil {
 		}
 		
 		// Repetition of commands without time restriction
-		if ( actionIndex > 0 && ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HATCH || action.actionNameIndex == Action.ACTION_NAME_INDEX_MORPH 
+		if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HATCH || action.actionNameIndex == Action.ACTION_NAME_INDEX_MORPH 
 				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_UPGRADE || action.actionNameIndex == Action.ACTION_NAME_INDEX_RESEARCH
-				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD || action.actionNameIndex == Action.ACTION_NAME_INDEX_CANCEL ) )
-			if ( prevAction.actionNameIndex == action.actionNameIndex )
+				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD || action.actionNameIndex == Action.ACTION_NAME_INDEX_CANCEL
+				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_MERGE_ARCHON || action.actionNameIndex == Action.ACTION_NAME_INDEX_MERGE_DARK_ARCHON )
+			if ( actionIndex > 0 && prevAction.actionNameIndex == action.actionNameIndex )
 				return false;
 		
 		return true;
