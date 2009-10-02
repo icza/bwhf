@@ -22,6 +22,8 @@ Displays information about a replay and draws various charts of replays like APM
 
 Check out the screenshots for example charts: [Screenshots]
 
+You can read more about APM/EAPM here: EapmRules
+
 ===Replay search===
 You can search replays by *any* of the replay header fields. In case of text fields you can even define _regular expressions_. The result list of the search can be saved and loaded. Comments can be appended to replays (saved with the list). You can perform various operations on the replays such as extract game chat, show on charts, scan for hacks, move-delete-copy-rename them, group rename them etc.
 
