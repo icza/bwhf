@@ -76,6 +76,7 @@ public class Action implements Comparable< Action > {
 	public static final byte ACTION_NAME_INDEX_CANCEL_UPGRADE    = (byte) 0x33;
 	public static final byte ACTION_NAME_INDEX_MERGE_ARCHON      = (byte) 0x2a;
 	public static final byte ACTION_NAME_INDEX_MERGE_DARK_ARCHON = (byte) 0x5a;
+	public static final byte ACTION_NAME_INDEX_LIFT              = (byte) 0x2f;
 	
 	/** Action IDs we're interested in when parsing exported text by BWChart.<br>
 	 *  Parsing from exported BWChart text is no longer a goal. This might be inaccurate. */

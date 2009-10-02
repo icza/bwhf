@@ -37,18 +37,19 @@ public class EapmUtil {
 				return false;
 		}
 		
-		// Too fast repetition of commands (regardless of its destination, if destination is different/far, then the first one was useless)
+		// Too fast repetition of commands in a short time (regardless of its destination, if destination is different/far, then the first one was useless)
 		if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_MOVE || action.actionNameIndex == Action.ACTION_NAME_INDEX_STOP
-				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_HOLD
-				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.startsWith( "Assign" ) ) {
+				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_HOLD || action.actionNameIndex == Action.ACTION_NAME_INDEX_ATTACK_MOVE
+				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_SET_RALLY 
+				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.charAt( 0 ) == 'A' ) {
 			if ( actionIndex > 0 && prevAction.actionNameIndex == action.actionNameIndex 
 					&& action.iteration - prevAction.iteration <= 10 )
 				return false;
 		}
 		
 		// Too fast switch away from or reselecting the same selected unit = no use of selecting it. By too fast I mean it isn't even enough to check the object state
-		if ( actionIndex > 0 && ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.startsWith( "Select" ) ) ) {
-			if ( prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.startsWith( "Select" )
+		if ( actionIndex > 0 && ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.charAt( 0 ) == 'S' ) ) {
+			if ( prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.charAt( 0 ) == 'S'
 					&& action.iteration - prevAction.iteration <= 10 )
 				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.equals( prevAction.parameters ) ) {
 					// Exclude double tapping a hotkey, it's only ineffective if it was pressed more than 3 times
@@ -67,9 +68,15 @@ public class EapmUtil {
 		if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HATCH || action.actionNameIndex == Action.ACTION_NAME_INDEX_MORPH 
 				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_UPGRADE || action.actionNameIndex == Action.ACTION_NAME_INDEX_RESEARCH
 				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD || action.actionNameIndex == Action.ACTION_NAME_INDEX_CANCEL
-				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_MERGE_ARCHON || action.actionNameIndex == Action.ACTION_NAME_INDEX_MERGE_DARK_ARCHON )
+				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_MERGE_ARCHON || action.actionNameIndex == Action.ACTION_NAME_INDEX_MERGE_DARK_ARCHON
+				|| action.actionNameIndex == Action.ACTION_NAME_INDEX_LIFT )
 			if ( actionIndex > 0 && prevAction.actionNameIndex == action.actionNameIndex )
 				return false;
+		
+		// Repetition of the same hotkey assign
+		if ( actionIndex > 0 && action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.charAt( 0 ) == 'A'
+				&& prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.equals( prevAction.parameters ) )
+			return false;
 		
 		return true;
 	}
@@ -97,7 +104,7 @@ public class EapmUtil {
 			}
 			else if ( action2.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action2.actionNameIndex == Action.ACTION_NAME_INDEX_SHIFT_SELECT
 				   || action2.actionNameIndex == Action.ACTION_NAME_INDEX_SHIFT_DESELECT
-				   || ( action2.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action2.parameters.startsWith( "Select" ) ) )
+				   || ( action2.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action2.parameters.charAt( 0 ) == 'S' ) )
 				break;
 		}
 		
