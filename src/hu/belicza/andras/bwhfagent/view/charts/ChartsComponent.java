@@ -593,9 +593,8 @@ public class ChartsComponent extends JPanel {
 					syncMarkerFromChartToActionList( markerPosition );
 				}
 			};
-			final int autoDisablingActionsCountLimit = AUTO_DISABLING_APM_LIMIT * replayHeader.getDurationSeconds() / 60;
 			for ( int i = 0; i < players.length; i++ ) {
-				players[ i ][ 0 ] = new JCheckBox( playerActions[ i ].playerName, !chartsTab.autoDisableInactivePlayersCheckBox.isSelected() || playerActions[ i ].actions.length > autoDisablingActionsCountLimit );
+				players[ i ][ 0 ] = new JCheckBox( playerActions[ i ].playerName, replayHeader.gameFrames < ReplayHeader.FRAMES_IN_TWO_MINUTES || !chartsTab.autoDisableInactivePlayersCheckBox.isSelected() || replayHeader.getPlayerApm( replayHeader.getPlayerIndexByName( playerActions[ i ].playerName ) ) >= AUTO_DISABLING_APM_LIMIT );
 				players[ i ][ 1 ] = i;
 				( (JCheckBox) players[ i ][ 0 ] ).addActionListener( playerCheckBoxActionListener );
 			}
@@ -803,7 +802,8 @@ public class ChartsComponent extends JPanel {
 					yPoints[ pointIndex ]++;
 					if ( eapm && EapmUtil.isActionEffective( allActions, ai, action ) ) {
 						yPointsEapm[ pointIndex ]++;
-						effectiveActionsCounts[ i ]++;
+						if ( action.iteration > ReplayHeader.FRAMES_IN_TWO_MINUTES )
+							effectiveActionsCounts[ i ]++;
 					}
 				} catch ( final ArrayIndexOutOfBoundsException aioobe ) {
 					// The last few actions might be over the last domain, we ignore them.
@@ -914,8 +914,10 @@ public class ChartsComponent extends JPanel {
 			
 			String eapmString = null;
 			if ( eapm ) {
-				final int playerActionsCount = replay.replayActions.players[ playerIndexToShowList.get( i ) ].actions.length;
-				eapmString = "EAPM: " + effectiveActionsCounts[ i ] * 60 / Math.max( 1, replay.replayHeader.getDurationSeconds() ) + ", redundancy: ";
+				final ReplayHeader replayHeader = replay.replayHeader;
+				final int playerIndex = replayHeader.getPlayerIndexByName( playerActions.playerName );
+				final int playerActionsCount = replayHeader.playerIdActionsCounts[ replayHeader.playerIds[ playerIndex ] ] - replayHeader.playerIdActionsCountBefore2Mins[ replayHeader.playerIds[ playerIndex ] ];
+				eapmString = "EAPM: " + replayHeader.getPlayerApmForActionsCount( playerIndex, effectiveActionsCounts[ i ] ) + ", redundancy: ";
 				if ( playerActionsCount > 0 )
 					eapmString += 100 * ( playerActionsCount - effectiveActionsCounts[ i ] ) / playerActionsCount + "%";
 				else

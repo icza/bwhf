@@ -50,12 +50,12 @@ public class EapmUtil {
 		// Too fast switch away from or reselecting the same selected unit = no use of selecting it. By too fast I mean it isn't even enough to check the object state
 		if ( actionIndex > 0 && ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.charAt( 0 ) == 'S' ) ) {
 			if ( prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.charAt( 0 ) == 'S'
-					&& action.iteration - prevAction.iteration <= 10 )
+					&& action.iteration - prevAction.iteration <= 8 )
 				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.equals( prevAction.parameters ) ) {
 					// Exclude double tapping a hotkey, it's only ineffective if it was pressed more than 3 times
 					if ( actionIndex > 1 ) {
 						final Action prevPrevAction = actions[ actionIndex - 2 ]; // Shortcut to the previous action before the previous
-						if ( prevAction.iteration - prevPrevAction.iteration <= 10 && prevPrevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY
+						if ( prevAction.iteration - prevPrevAction.iteration <= 8 && prevPrevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY
 								&& action.parameters.equals( prevPrevAction.parameters ) )
 							return false;
 					}

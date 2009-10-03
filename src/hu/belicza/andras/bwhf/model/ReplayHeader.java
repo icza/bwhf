@@ -70,6 +70,8 @@ public class ReplayHeader {
 	public static final short GAME_TYPE_TEAM_CTF      = 0x0d;
 	public static final short GAME_TYPE_TVB           = 0x0f;
 	
+	public static final int FRAMES_IN_TWO_MINUTES = 120 * 1000 / 42;
+	
 	// Header fields
 	
 	public byte     gameEngine;
@@ -93,7 +95,9 @@ public class ReplayHeader {
 	public int[]    playerIds         = new int[ 12 ];
 	
 	// Calculated data when parsing the replay
-	public int[]     playerIdActionsCounts = new int[ 12 ];
+	public int[]    playerIdActionsCounts           = new int[ 12 ];
+	public int[]    playerIdLastActionFrame         = new int[ 12 ];
+	public int[]    playerIdActionsCountBefore2Mins = new int[ 12 ]; // Actions count before 2 minutes 
 	
 	/**
 	 * Converts the specified amount of frames to seconds.
@@ -205,8 +209,7 @@ public class ReplayHeader {
 			return null;
 		
 		final int actionsCount = playerIds[ playerIndex ] < playerIdActionsCounts.length ? playerIdActionsCounts[ playerIds[ playerIndex ] ] : 0;
-		final Integer apm =  actionsCount * 60 / Math.max( 1, getDurationSeconds() );
-		return playerNames[ playerIndex ] + " (" + RACE_CHARACTERS[ playerRaces[ playerIndex ] ] + "), actions: " + actionsCount + ", APM: " + apm;
+		return playerNames[ playerIndex ] + " (" + RACE_CHARACTERS[ playerRaces[ playerIndex ] ] + "), actions: " + actionsCount + ", APM: " + getPlayerApm( playerIndex );
 	}
 	
 	/**
@@ -219,6 +222,46 @@ public class ReplayHeader {
 			if ( playerNames[ i ] != null && playerNames[ i ].equals( playerName ) )
 				return i;
 		return -1;
+	}
+	
+	/**
+	 * Returns the APM of a player.
+	 * @param playerIndex index of the player whose APM to be returned
+	 * @return the APM of the specified player
+	 */
+	public int getPlayerApm( final int playerIndex ) {
+		if ( playerIds[ playerIndex ] >= playerIdActionsCounts.length )
+			return 0; // Computers
+		return getPlayerApmForActionsCount( playerIndex, playerIdActionsCounts[ playerIds[ playerIndex ] ] - playerIdActionsCountBefore2Mins[ playerIds[ playerIndex ] ] );
+	}
+	
+	/**
+	 * Calculates the APM of a player for the specified number of actions (useful to calculate EAPM for example). 
+	 * @param playerIndex  index of player whose APM to be returned
+	 * @param actionsCount number of actions to base APM calcualtion on
+	 * @return the APM of a player for the specified number of actions
+	 */
+	public int getPlayerApmForActionsCount( final int playerIndex, final int actionsCount ) {
+		final int activeDurationFrames = getPlayerActiveDurationFrames( playerIndex );
+		if ( activeDurationFrames == 0 )
+			return 0;
+		
+		return activeDurationFrames == 0 ? 0 : actionsCount * 1000 * 60 / ( activeDurationFrames * 42 );
+	}
+	
+	/**
+	 * Returns the number of frames when the player was active.<br>
+	 * The first 2 minutes are ommitted.
+	 * The last frame is the frame of the last action of the player.
+	 * If the player does not have actions after 2 minutes, 0 is returned
+	 * @param playerIndex
+	 * @return the number of frames when the player was active
+	 */
+	public int getPlayerActiveDurationFrames( final int playerIndex ) {
+		if ( playerIds[ playerIndex ] >= playerIdLastActionFrame.length )
+			return 0; // Computers
+		final int lastActionFrame = playerIdLastActionFrame[ playerIds[ playerIndex ] ];
+		return lastActionFrame < FRAMES_IN_TWO_MINUTES ? 0 : lastActionFrame - FRAMES_IN_TWO_MINUTES;
 	}
 	
 	/**
@@ -236,7 +279,6 @@ public class ReplayHeader {
 		output.println( "Map name: " + mapName );
 		output.println( "Players: " );
 		
-		final int seconds = getDurationSeconds();
 		// We want to sort players by the number of their actions (which is basically sorting by APM)
 		final List< Object[] > playerDescriptionList = new ArrayList< Object[] >( 12 );
 		for ( int i = 0; i < playerNames.length; i++ )
@@ -251,7 +293,7 @@ public class ReplayHeader {
 				final int actionsCount = playerIds[ i ] < playerIdActionsCounts.length ? playerIdActionsCounts[ playerIds[ i ] ] : 0;
 				final String playerDescription = "    " + playerNames[ i ] + " (" + RACE_CHARACTERS[ playerRaces[ i ] ] 
 				                + "), color: " + colorName + ", actions: " + actionsCount 
-				                + ", APM: " + ( actionsCount * 60 / Math.max( seconds, 1 ) );
+				                + ", APM: " + getPlayerApm( i );
 				playerDescriptionList.add( new Object[] { actionsCount, playerDescription } );
 			}
 		
