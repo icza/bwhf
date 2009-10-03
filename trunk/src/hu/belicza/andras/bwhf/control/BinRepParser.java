@@ -158,12 +158,22 @@ public class BinRepParser {
 					final int playerId = commandsBuffer.get() & 0xff;
 					final Action action = readNextAction( frame, commandsBuffer, commandBlocksEndPos, gameChatWrapper );
 					if ( action != null ) {
-						replayHeader.playerIdActionsCounts[ playerId ]++; // If playerId is outside the index range, throw the implicit exception and fail to parse replay, else it may contain incorrect actions which may lead to false hack reports!
+						replayHeader.playerIdActionsCounts  [ playerId ]++; // If playerId is outside the index range, throw the implicit exception and fail to parse replay, else it may contain incorrect actions which may lead to false hack reports!
+						if ( frame < ReplayHeader.FRAMES_IN_TWO_MINUTES )
+							replayHeader.playerIdActionsCountBefore2Mins[ playerId ]++;
 						if ( playerActionLists != null )
 							playerActionLists[ playerId ].add( action );
 					}
 				}
 			}
+			
+			// Fill the last action frames array
+			if ( playerActionLists != null )
+				for ( int i = 0; i < playerActionLists.length; i++ ) {
+					final List< Action > playerActionList = playerActionLists[ i ];
+					if ( !playerActionList.isEmpty() )
+						replayHeader.playerIdLastActionFrame[ i ] = playerActionList.get( playerActionList.size() - 1 ).iteration;
+				}
 			
 			ReplayActions replayActions = null;
 			if ( !gameChatOnly ) {

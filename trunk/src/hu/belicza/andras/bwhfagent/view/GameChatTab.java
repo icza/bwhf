@@ -114,6 +114,7 @@ public class GameChatTab extends ProgressLoggedTab {
 			progressBar.setValue( 0 );
 			progressBar.setMaximum( 1 );
 			final Replay replay = BinRepParser.parseReplay( replayFile, true, true, true );
+			// TODO extract everything and calculate EAPM too?
 			logMessage( "\n", false ); // Prints 2 empty lines
 			if ( replay == null )
 				logMessage( "Could not extract game chat from '" + Consts.LAST_REPLAY_FILE_NAME + "'!" );
