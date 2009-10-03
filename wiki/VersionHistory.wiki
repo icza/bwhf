@@ -7,6 +7,7 @@
 ----
 ===Features and changes in the upcoming new release===
  * *Added EAPM support: there are options on both the APM and Overall Apm charts to display EAPM and Overall EAPM.* The calculated EAPM values might differ somewhat from the values calculated by bwRepInfo because I used my own algorithm. The rules I used can be read here: EapmRules
+ * APM/EAPM calculation: the first 2 minutes are ommitted, and the time of the players' last action is used for calculation (if a player leaves after 5 minutes, APM is calculated with a 3 minute long game).
  * Added game info text to the Charts tab.
  * Added help text about opening replays on the Player matcher tab.
 
