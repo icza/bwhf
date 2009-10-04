@@ -2,7 +2,6 @@ package hu.belicza.andras.hackerdb;
 
 import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_AKA;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.FILTER_NAME_REPORTED_WITH_KEY;
-import static hu.belicza.andras.hackerdb.ServerApiConsts.GATEWAYS;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_LIST;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_LIST;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY;
@@ -68,36 +67,40 @@ public class AdminServlet extends BaseServlet {
 	/** Full admin session attribute.  */
 	private static final String ATTRIBUTE_FULL_ADMIN  = "fullAdmin";
 	
-	/** Page name request param.             */
-	private static final String REQUEST_PARAM_PAGE_NAME      = "pn";
-	/** User name request param.             */
-	private static final String REQUEST_PARAM_USER_NAME      = "userName";
-	/** Password request param.              */
-	private static final String REQUEST_PARAM_PASSWORD       = "password";
-	/** Hacker name request param.           */
-	private static final String REQUEST_PARAM_HACKER_NAME    = "hackername";
-	/** Last reports limit request param.    */
-	private static final String REQUEST_PARAM_LASTREPS_LIMIT = "lastrepslimit";
-	/** Revocate report id request param.    */
-	private static final String REQUEST_PARAM_REVOCATE_ID    = "revocate_id";
-	/** Reinstate report id request param.   */
-	private static final String REQUEST_PARAM_REINSTATE_ID   = "reinstate_id";
-	/** Number of keys request param.        */
-	private static final String REQUEST_PARAM_NUMBER_OF_KEYS = "numberofkeys";
-	/** Name of hte person request param.    */
-	private static final String REQUEST_PARAM_PERSON_NAME    = "personname";
-	/** Email of the person request param.   */
-	private static final String REQUEST_PARAM_PERSON_EMAIL   = "personemail";
-	/** Comment to the person request param. */
-	private static final String REQUEST_PARAM_PERSON_COMMENT = "personcomment";
-	/** Aka group name request param.        */
-	private static final String REQUEST_PARAM_AKA_GROUP_NAME = "akagroupname";
-	/** Player name request param.           */
-	private static final String REQUEST_PARAM_PLAYER_NAME    = "playername";
-	/** AKA managing action request param.   */
-	private static final String REQUEST_PARAM_AKA_ACTION     = "akaaction";
-	/** Password again request param.        */
-	private static final String REQUEST_PARAM_PASSWORD_AGAIN = "passwordagain";
+	/** Page name request param.                   */
+	private static final String REQUEST_PARAM_PAGE_NAME         = "pn";
+	/** User name request param.                   */
+	private static final String REQUEST_PARAM_USER_NAME         = "userName";
+	/** Password request param.                    */
+	private static final String REQUEST_PARAM_PASSWORD          = "password";
+	/** Hacker name request param.                 */
+	private static final String REQUEST_PARAM_HACKER_NAME       = "hackername";
+	/** Last reports limit request param.          */
+	private static final String REQUEST_PARAM_LASTREPS_LIMIT    = "lastrepslimit";
+	/** Revocate report id request param.          */
+	private static final String REQUEST_PARAM_REVOCATE_ID       = "revocate_id";
+	/** Reinstate report id request param.         */
+	private static final String REQUEST_PARAM_REINSTATE_ID      = "reinstate_id";
+	/** Change gateway of report id request param. */
+	private static final String REQUEST_PARAM_CHANGE_GATEWAY_ID = "changegw_id";
+	/** New gateway request param.                 */
+	private static final String REQUEST_PARAM_NEW_GATEWAY       = "new_gw";
+	/** Number of keys request param.              */
+	private static final String REQUEST_PARAM_NUMBER_OF_KEYS    = "numberofkeys";
+	/** Name of hte person request param.          */
+	private static final String REQUEST_PARAM_PERSON_NAME       = "personname";
+	/** Email of the person request param.         */
+	private static final String REQUEST_PARAM_PERSON_EMAIL      = "personemail";
+	/** Comment to the person request param.       */
+	private static final String REQUEST_PARAM_PERSON_COMMENT    = "personcomment";
+	/** Aka group name request param.              */
+	private static final String REQUEST_PARAM_AKA_GROUP_NAME    = "akagroupname";
+	/** Player name request param.                 */
+	private static final String REQUEST_PARAM_PLAYER_NAME       = "playername";
+	/** AKA managing action request param.         */
+	private static final String REQUEST_PARAM_AKA_ACTION        = "akaaction";
+	/** Password again request param.              */
+	private static final String REQUEST_PARAM_PASSWORD_AGAIN    = "passwordagain";
 	
 	/** Time format to format report times. */
 	private static final DateFormat TIME_FORMAT         = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss.SSS" );
@@ -284,25 +287,94 @@ public class AdminServlet extends BaseServlet {
 			
 			connection = dataSource.getConnection();
 			
-			final String revocateId  = getNullStringParamValue( request, REQUEST_PARAM_REVOCATE_ID  );
-			final String reinstateId = getNullStringParamValue( request, REQUEST_PARAM_REINSTATE_ID );
+			final Integer revocateId      = getIntegerParamValue( request, REQUEST_PARAM_REVOCATE_ID       );
+			final Integer reinstateId     = getIntegerParamValue( request, REQUEST_PARAM_REINSTATE_ID      );
+			final Integer changeGatewayId = getIntegerParamValue( request, REQUEST_PARAM_CHANGE_GATEWAY_ID );
+			final Integer newGateway      = getIntegerParamValue( request, REQUEST_PARAM_NEW_GATEWAY       );
 			
 			if ( revocateId != null || reinstateId != null ) {
-				Integer id = null;
-				try {
-					id = Integer.valueOf( revocateId != null ? revocateId : reinstateId );
+				synchronized ( Page.LAST_REPORTS ) {
+					statement = connection.prepareStatement( "UPDATE report set revocated=" + ( revocateId == null ? "false" : "true" ) + ", changed_by=" + ( request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) ) + " WHERE id=" + ( revocateId != null ? revocateId : reinstateId ) );
+					if ( statement.executeUpdate() == 1 )
+						renderMessage( "Report has been " + ( revocateId == null ? "reinstated" : "revocated" ) + " successfully.", false, outputWriter );
+					else
+						renderMessage( "Failed to " + ( revocateId == null ? "reinstate" : "revocate" ) + " the report!", true, outputWriter );
+					statement.close();
 				}
-				catch ( final Exception e ) {
-				}
-				if ( id != null )
-					synchronized ( Page.LAST_REPORTS ) {
-						statement = connection.prepareStatement( "UPDATE report set revocated=" + ( revocateId == null ? "false" : "true" ) + ", changed_by=" + ( request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) ) + " WHERE id=" + id );
-						if ( statement.executeUpdate() == 1 )
-							renderMessage( "Report has been " + ( revocateId == null ? "reinstated" : "revocated" ) + " successfully.", false, outputWriter );
-						else
-							renderMessage( "Failed to " + ( revocateId == null ? "reinstate" : "revocate" ) + " the report!", true, outputWriter );
+			}
+			
+			if ( changeGatewayId != null && newGateway != null ) {
+				// Change gateway of report:
+				// -if hacker has only 1 report, and no hacker with new gateway, then simply change gateway of hacker
+				// -else if there is hacker with new gateway then simply change hacker reference in report and if the "old" hacker has no reports, remove it
+				// -else just insert a new hacker, and update the report
+				synchronized ( HackerDbServlet.class ) {
+					
+					statement = connection.prepareStatement( "SELECT hacker.id, hacker.name, hacker.gateway FROM report JOIN hacker on report.hacker=hacker.id WHERE report.id=" + changeGatewayId );
+					resultSet = statement.executeQuery();
+					Integer hackerId      = null;
+					String  hackerName    = null;
+					if ( resultSet.next() ) {
+						hackerId      = resultSet.getInt   ( 1 );
+						hackerName    = resultSet.getString( 2 );
+					}
+					resultSet.close();
+					statement.close();
+					
+					statement = connection.prepareStatement( "SELECT COUNT(*) FROM report WHERE hacker=" + hackerId );
+					resultSet = statement.executeQuery();
+					Integer hackerReportsCount = null;
+					if ( resultSet.next() )
+						hackerReportsCount = resultSet.getInt( 1 );
+					resultSet.close();
+					statement.close();
+					
+					statement = connection.prepareStatement( "SELECT id FROM hacker WHERE name=? AND gateway=" + newGateway );
+					statement.setString( 1, hackerName );
+					resultSet = statement.executeQuery();
+					Integer hackerIdWithNewGateway = null;
+					if ( resultSet.next() )
+						hackerIdWithNewGateway = resultSet.getInt( 1 );
+					resultSet.close();
+					statement.close();
+					
+					boolean changeSucceeded = false;
+					if ( hackerReportsCount == 1 && hackerIdWithNewGateway == null ) {
+						statement = connection.prepareStatement( "UPDATE hacker SET gateway=" + newGateway + " WHERE id=" + hackerId );
+						changeSucceeded = statement.executeUpdate() == 1;
 						statement.close();
 					}
+					else if ( hackerIdWithNewGateway != null ) {
+						statement = connection.prepareStatement( "UPDATE report SET hacker=" + hackerIdWithNewGateway + " WHERE id=" + changeGatewayId );
+						changeSucceeded = statement.executeUpdate() == 1;
+						statement.close();
+						if ( hackerReportsCount == 1 ) {
+							// Now it has 0 reports, remove it
+							statement = connection.prepareStatement( "DELETE FROM hacker WHERE id=" + hackerId );
+							if ( statement.executeUpdate() != 1 )
+								getServletContext().log( "Failed to delete hacker with id: " + hackerId + "!" );
+							statement.close();
+						}
+					}
+					else {
+						statement = connection.prepareStatement( "INSERT INTO hacker (name,gateway) VALUES (?," + newGateway + ")" );
+						statement.setString( 1, hackerName );
+						final boolean newHackerInserted = statement.executeUpdate() == 1;
+						statement.close();
+						
+						if ( newHackerInserted ) {
+							statement = connection.prepareStatement( "UPDATE report SET hacker=(SELECT id FROM hacker WHERE name=? AND gateway=" + newGateway + ") WHERE id=" + changeGatewayId );
+							statement.setString( 1, hackerName );
+							changeSucceeded = statement.executeUpdate() == 1;
+							statement.close();
+						}
+					}
+					
+					if ( changeSucceeded )
+						renderMessage( "Successfully changed the gateway of the report.", false, outputWriter );
+					else
+						renderMessage( "Failed to changed the gateway of the report!", true, outputWriter );
+				}
 			}
 			
 			String hackerName = getNullStringParamValue( request, REQUEST_PARAM_HACKER_NAME );
@@ -337,8 +409,10 @@ public class AdminServlet extends BaseServlet {
 			if ( hackerName != null )
 				statement.setString( 1, hackerName );
 			
-			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_REVOCATE_ID  + "'>" );
-			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_REINSTATE_ID + "'>" );
+			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_REVOCATE_ID       + "'>" );
+			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_REINSTATE_ID      + "'>" );
+			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_CHANGE_GATEWAY_ID + "'>" );
+			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_NEW_GATEWAY       + "'>" );
 			
 			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
 			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME + "><th>#" + ( fullAdmin ? "<th>IP" : "" ) + "<th>Report<th>Reporter<th>Key<th>Hacker<th>Hacker name<th>Gateway<th>Engine<th>Date<th>Agver<th>Game id<th>Revocated" + ( fullAdmin ? "<th>Changed by" : "" ) );
@@ -352,7 +426,8 @@ public class AdminServlet extends BaseServlet {
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
 						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 13 ) + "' target='_blank'>" + resultSet.getString( 13 ) + "</a>&uarr;" : "" ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) 
 						+ "<td align=right>" + ( fullAdmin ? getHackerRecordsByKeyLink( resultSet.getString( 12 ), Integer.toString( resultSet.getInt( 3 ) ), "keyreportsform" ) : resultSet.getInt( 3 ) ) + "<td align=right>" + resultSet.getInt( 4 )
-						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 5 ) ) + "<td>" + GATEWAYS[ gateway ]
+						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 5 ) )
+						+ "<td>" + getGatewayComboHtml( gateway, reportId )
 						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 7 ) ] + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 8 ) )
 						+ "<td align=right>" + resultSet.getString( 9 ) + "<td align=right>" + ( resultSet.getObject( 10 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 10 ), Integer.toString( resultSet.getInt( 10 ) ) ) ) + "<td>" + ( revocated ? "Yes" : "No" ) );
 				outputWriter.println( revocated ? "<input type=submit value='Reinstate' onclick='javascript:this.form." + REQUEST_PARAM_REINSTATE_ID + ".value=\"" + reportId + "\";'>" : "<input type=submit value='Revocate' onclick='javascript:this.form." + REQUEST_PARAM_REVOCATE_ID + ".value=\"" + reportId + "\";'>" );
@@ -376,6 +451,27 @@ public class AdminServlet extends BaseServlet {
 			if ( connection != null )
 				try { connection.close(); } catch ( final SQLException se ) {}
 		}
+	}
+	
+	/**
+	 * Generates HTML code for a combo to display and change the gateway of a report.
+	 * @param gateway  current gateway
+	 * @param reportId id of the report
+	 * @return HTML code for a combo to display and change the gateway of a report
+	 */
+	private static String getGatewayComboHtml( final int gateway, final int reportId ) {
+		final StringBuilder htmlBuilder = new StringBuilder();
+		
+		htmlBuilder.append( "<select style='width:100%' id='crg" ).append( reportId )
+			.append( "' onchange=\"javascript:if (confirm('Are you sure you want to change the gateway of the report?')){this.form." )
+			.append( REQUEST_PARAM_CHANGE_GATEWAY_ID ).append( ".value='" ).append( reportId ).append( "';this.form." )
+			.append( REQUEST_PARAM_NEW_GATEWAY ).append( ".value=document.getElementById('crg" ).append( reportId ).append( "').selectedIndex;this.form.submit();}\">" );
+		
+		for ( int i = 0; i < ServerApiConsts.GATEWAYS.length; i++ )
+			htmlBuilder.append( "<option" ).append( i == gateway ? " selected='selected'>" : ">" ).append( ServerApiConsts.GATEWAYS[ i ] );
+		htmlBuilder.append( "</select>" );
+		
+		return htmlBuilder.toString();
 	}
 	
 	/**
