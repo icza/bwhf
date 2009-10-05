@@ -73,6 +73,8 @@ public class AdminServlet extends BaseServlet {
 	private static final String REQUEST_PARAM_USER_NAME         = "userName";
 	/** Password request param.                    */
 	private static final String REQUEST_PARAM_PASSWORD          = "password";
+	/** Key id request param.                 */
+	private static final String REQUEST_PARAM_KEY_ID            = "keyid";
 	/** Hacker name request param.                 */
 	private static final String REQUEST_PARAM_HACKER_NAME       = "hackername";
 	/** Last reports limit request param.          */
@@ -385,32 +387,29 @@ public class AdminServlet extends BaseServlet {
 				}
 			}
 			
+			final Integer keyId = getIntegerParamValue( request, REQUEST_PARAM_KEY_ID );
 			String hackerName = getNullStringParamValue( request, REQUEST_PARAM_HACKER_NAME );
 			if ( hackerName != null )
 				hackerName = hackerName.toLowerCase();
 			
-			String lastRepsLimitParam = request.getParameter( REQUEST_PARAM_LASTREPS_LIMIT );
-			int lastRepsLimit;
-			try {
-				lastRepsLimit = Integer.parseInt( lastRepsLimitParam );
-				if ( lastRepsLimit < 0 )
-					lastRepsLimit = 23;
-			}
-			catch ( final Exception e ) {
+			Integer lastRepsLimit = getIntegerParamValue( request, REQUEST_PARAM_LASTREPS_LIMIT );
+			if ( lastRepsLimit == null )
 				lastRepsLimit = 23;
-			}
 			
 			outputWriter.println( "<form id='keyreportsform' action='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_LIST + "' method=POST target='_blank'><input type=hidden name='" + FILTER_NAME_REPORTED_WITH_KEY + "'></form>" );
 			
-			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + "=" + Page.LAST_REPORTS.name() + "' method=POST><p>Hacker name:<input type=text name='" + REQUEST_PARAM_HACKER_NAME + "'"
+			outputWriter.println( "<form id='lastReportsFormId' action='admin?" + REQUEST_PARAM_PAGE_NAME + "=" + Page.LAST_REPORTS.name()
+					+ "' method=POST><p>Key id:<input type=text name='" + REQUEST_PARAM_KEY_ID + "' value='" + ( keyId == null ? "" : keyId.toString() )+ "' size=1>&nbsp;&nbsp;|&nbsp;&nbsp;Hacker name:<input type=text name='" + REQUEST_PARAM_HACKER_NAME + "'"
 					+ ( hackerName != null ? " value='" + encodeHtmlString( hackerName ) + "'" : "" ) + ">&nbsp;&nbsp;|&nbsp;&nbsp;Limit:<input type=text name='" + REQUEST_PARAM_LASTREPS_LIMIT + "'" 
 					+ " value='" + lastRepsLimit + "' size=1>&nbsp;&nbsp;|&nbsp;&nbsp;<input type=submit value='Apply'></p>" );
 			
 			String query = "SELECT report.id, reporter.name, key.id, hacker.id, hacker.name, hacker.gateway, game_engine, report.version, substr(report.agent_version,1,4), game.id, report.revocated"
 					+ ( fullAdmin ? ", key.value, report.ip, changer.name" : "" ) + " FROM report JOIN key on report.key=key.id JOIN person as reporter on key.person=reporter.id JOIN hacker on report.hacker=hacker.id LEFT OUTER JOIN game on report.replay_md5=game.replay_md5"
 					+ ( fullAdmin ? " LEFT OUTER JOIN person as changer on report.changed_by=changer.id" : "" );
+			if ( keyId != null )
+				query += " WHERE key.id=" + keyId;
 			if ( hackerName != null )
-				query += " WHERE hacker.name=?";
+				query += ( keyId == null ? " WHERE " : " AND " ) + "hacker.name=?";
 			query += " ORDER BY report.id DESC LIMIT " + lastRepsLimit;
 			
 			statement = connection.prepareStatement( query ); 
@@ -433,7 +432,7 @@ public class AdminServlet extends BaseServlet {
 				
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
 						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 13 ) + "' target='_blank'>" + resultSet.getString( 13 ) + "</a>&uarr;" : "" ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) 
-						+ "<td align=right>" + ( fullAdmin ? getHackerRecordsByKeyLink( resultSet.getString( 12 ), Integer.toString( resultSet.getInt( 3 ) ), "keyreportsform" ) : resultSet.getInt( 3 ) ) + "<td align=right>" + resultSet.getInt( 4 )
+						+ "<td align=right><a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_KEY_ID + "')[0].value='" + resultSet.getInt( 3 ) + "';document.forms['lastReportsFormId'].submit();\">" + resultSet.getInt( 3 ) + "</a> " + ( fullAdmin ? getHackerRecordsByKeyLink( resultSet.getString( 12 ), "", "keyreportsform" ) : "" ) + "<td align=right>" + resultSet.getInt( 4 )
 						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 5 ) )
 						+ "<td>" + getGatewayComboHtml( gateway, reportId )
 						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 7 ) ] + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 8 ) )
@@ -493,7 +492,7 @@ public class AdminServlet extends BaseServlet {
 	 * @return an HTML link to the records of a hacker search by key
 	 */
 	private static String getHackerRecordsByKeyLink( final String key, final String text, final String formId ) {
-		return "<a href=\"javascript:document.forms['" + formId + "']." + FILTER_NAME_REPORTED_WITH_KEY + ".value='" + key + "';document.forms['" + formId + "'].submit();\">" + text + "</a>&uarr;";
+		return "<a href=\"javascript:document.forms['" + formId + "']." + FILTER_NAME_REPORTED_WITH_KEY + ".value='" + key + "';document.forms['" + formId + "'].submit();\">" + text + "&uarr;</a>";
 	}
 	
 	/**
