@@ -314,68 +314,74 @@ public class AdminServlet extends BaseServlet {
 					resultSet = statement.executeQuery();
 					Integer hackerId      = null;
 					String  hackerName    = null;
+					Integer hackerGateway = null;
 					if ( resultSet.next() ) {
 						hackerId      = resultSet.getInt   ( 1 );
 						hackerName    = resultSet.getString( 2 );
+						hackerGateway = resultSet.getInt   ( 3 );
 					}
 					resultSet.close();
 					statement.close();
 					
-					statement = connection.prepareStatement( "SELECT COUNT(*) FROM report WHERE hacker=" + hackerId );
-					resultSet = statement.executeQuery();
-					Integer hackerReportsCount = null;
-					if ( resultSet.next() )
-						hackerReportsCount = resultSet.getInt( 1 );
-					resultSet.close();
-					statement.close();
-					
-					statement = connection.prepareStatement( "SELECT id FROM hacker WHERE name=? AND gateway=" + newGateway );
-					statement.setString( 1, hackerName );
-					resultSet = statement.executeQuery();
-					Integer hackerIdWithNewGateway = null;
-					if ( resultSet.next() )
-						hackerIdWithNewGateway = resultSet.getInt( 1 );
-					resultSet.close();
-					statement.close();
-					
-					boolean changeSucceeded = false;
-					if ( hackerReportsCount == 1 && hackerIdWithNewGateway == null ) {
-						statement = connection.prepareStatement( "UPDATE hacker SET gateway=" + newGateway + " WHERE id=" + hackerId );
-						changeSucceeded = statement.executeUpdate() == 1;
-						statement.close();
-						statement = connection.prepareStatement( "UPDATE report SET changed_by=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) + " WHERE id=" + changeGatewayId );
-						statement.executeUpdate();
-					}
-					else if ( hackerIdWithNewGateway != null ) {
-						statement = connection.prepareStatement( "UPDATE report SET hacker=" + hackerIdWithNewGateway + ", changed_by=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) + " WHERE id=" + changeGatewayId );
-						changeSucceeded = statement.executeUpdate() == 1;
-						statement.close();
-						if ( hackerReportsCount == 1 ) {
-							// Now it has 0 reports, remove it
-							statement = connection.prepareStatement( "DELETE FROM hacker WHERE id=" + hackerId );
-							if ( statement.executeUpdate() != 1 )
-								getServletContext().log( "Failed to delete hacker with id: " + hackerId + "!" );
-							statement.close();
-						}
-					}
-					else {
-						statement = connection.prepareStatement( "INSERT INTO hacker (name,gateway) VALUES (?," + newGateway + ")" );
-						statement.setString( 1, hackerName );
-						final boolean newHackerInserted = statement.executeUpdate() == 1;
+					if ( hackerGateway != null && !hackerGateway.equals( newGateway ) ) {
+						statement = connection.prepareStatement( "SELECT COUNT(*) FROM report WHERE hacker=" + hackerId );
+						resultSet = statement.executeQuery();
+						Integer hackerReportsCount = null;
+						if ( resultSet.next() )
+							hackerReportsCount = resultSet.getInt( 1 );
+						resultSet.close();
 						statement.close();
 						
-						if ( newHackerInserted ) {
-							statement = connection.prepareStatement( "UPDATE report SET hacker=(SELECT id FROM hacker WHERE name=? AND gateway=" + newGateway + "), changed_by=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) + " WHERE id=" + changeGatewayId );
-							statement.setString( 1, hackerName );
+						statement = connection.prepareStatement( "SELECT id FROM hacker WHERE name=? AND gateway=" + newGateway );
+						statement.setString( 1, hackerName );
+						resultSet = statement.executeQuery();
+						Integer hackerIdWithNewGateway = null;
+						if ( resultSet.next() )
+							hackerIdWithNewGateway = resultSet.getInt( 1 );
+						resultSet.close();
+						statement.close();
+						
+						boolean changeSucceeded = false;
+						if ( hackerReportsCount == 1 && hackerIdWithNewGateway == null ) {
+							statement = connection.prepareStatement( "UPDATE hacker SET gateway=" + newGateway + " WHERE id=" + hackerId );
 							changeSucceeded = statement.executeUpdate() == 1;
 							statement.close();
+							statement = connection.prepareStatement( "UPDATE report SET changed_by=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) + " WHERE id=" + changeGatewayId );
+							statement.executeUpdate();
 						}
+						else if ( hackerIdWithNewGateway != null ) {
+							statement = connection.prepareStatement( "UPDATE report SET hacker=" + hackerIdWithNewGateway + ", changed_by=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) + " WHERE id=" + changeGatewayId );
+							changeSucceeded = statement.executeUpdate() == 1;
+							statement.close();
+							if ( hackerReportsCount == 1 ) {
+								// Now it has 0 reports, remove it
+								statement = connection.prepareStatement( "DELETE FROM hacker WHERE id=" + hackerId );
+								if ( statement.executeUpdate() != 1 )
+									getServletContext().log( "Failed to delete hacker with id: " + hackerId + "!" );
+								statement.close();
+							}
+						}
+						else {
+							statement = connection.prepareStatement( "INSERT INTO hacker (name,gateway) VALUES (?," + newGateway + ")" );
+							statement.setString( 1, hackerName );
+							final boolean newHackerInserted = statement.executeUpdate() == 1;
+							statement.close();
+							
+							if ( newHackerInserted ) {
+								statement = connection.prepareStatement( "UPDATE report SET hacker=(SELECT id FROM hacker WHERE name=? AND gateway=" + newGateway + "), changed_by=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) + " WHERE id=" + changeGatewayId );
+								statement.setString( 1, hackerName );
+								changeSucceeded = statement.executeUpdate() == 1;
+								statement.close();
+							}
+						}
+						
+						if ( changeSucceeded )
+							renderMessage( "Successfully changed the gateway of the report.", false, outputWriter );
+						else
+							renderMessage( "Failed to changed the gateway of the report!", true, outputWriter );
 					}
-					
-					if ( changeSucceeded )
-						renderMessage( "Successfully changed the gateway of the report.", false, outputWriter );
 					else
-						renderMessage( "Failed to changed the gateway of the report!", true, outputWriter );
+						renderMessage( "The old and the new gateways are the same!", true, outputWriter );
 				}
 			}
 			
