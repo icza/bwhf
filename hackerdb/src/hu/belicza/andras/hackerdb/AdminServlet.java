@@ -294,7 +294,7 @@ public class AdminServlet extends BaseServlet {
 			
 			if ( revocateId != null || reinstateId != null ) {
 				synchronized ( Page.LAST_REPORTS ) {
-					statement = connection.prepareStatement( "UPDATE report set revocated=" + ( revocateId == null ? "false" : "true" ) + ", changed_by=" + ( request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) ) + " WHERE id=" + ( revocateId != null ? revocateId : reinstateId ) );
+					statement = connection.prepareStatement( "UPDATE report set revocated=" + ( revocateId == null ? "false" : "true" ) + ", changed_by=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) + " WHERE id=" + ( revocateId != null ? revocateId : reinstateId ) );
 					if ( statement.executeUpdate() == 1 )
 						renderMessage( "Report has been " + ( revocateId == null ? "reinstated" : "revocated" ) + " successfully.", false, outputWriter );
 					else
@@ -343,9 +343,11 @@ public class AdminServlet extends BaseServlet {
 						statement = connection.prepareStatement( "UPDATE hacker SET gateway=" + newGateway + " WHERE id=" + hackerId );
 						changeSucceeded = statement.executeUpdate() == 1;
 						statement.close();
+						statement = connection.prepareStatement( "UPDATE report SET changed_by=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) + " WHERE id=" + changeGatewayId );
+						statement.executeUpdate();
 					}
 					else if ( hackerIdWithNewGateway != null ) {
-						statement = connection.prepareStatement( "UPDATE report SET hacker=" + hackerIdWithNewGateway + " WHERE id=" + changeGatewayId );
+						statement = connection.prepareStatement( "UPDATE report SET hacker=" + hackerIdWithNewGateway + ", changed_by=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) + " WHERE id=" + changeGatewayId );
 						changeSucceeded = statement.executeUpdate() == 1;
 						statement.close();
 						if ( hackerReportsCount == 1 ) {
@@ -363,7 +365,7 @@ public class AdminServlet extends BaseServlet {
 						statement.close();
 						
 						if ( newHackerInserted ) {
-							statement = connection.prepareStatement( "UPDATE report SET hacker=(SELECT id FROM hacker WHERE name=? AND gateway=" + newGateway + ") WHERE id=" + changeGatewayId );
+							statement = connection.prepareStatement( "UPDATE report SET hacker=(SELECT id FROM hacker WHERE name=? AND gateway=" + newGateway + "), changed_by=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) + " WHERE id=" + changeGatewayId );
 							statement.setString( 1, hackerName );
 							changeSucceeded = statement.executeUpdate() == 1;
 							statement.close();
