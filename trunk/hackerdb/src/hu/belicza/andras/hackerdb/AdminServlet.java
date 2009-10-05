@@ -432,7 +432,7 @@ public class AdminServlet extends BaseServlet {
 				
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
 						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 13 ) + "' target='_blank'>" + resultSet.getString( 13 ) + "&uarr;</a>" : "" ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) 
-						+ "<td align=right><a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_KEY_ID + "')[0].value='" + resultSet.getInt( 3 ) + "';document.forms['lastReportsFormId'].submit();\">" + resultSet.getInt( 3 ) + "</a> " + ( fullAdmin ? getHackerRecordsByKeyLink( resultSet.getString( 12 ), "", "keyreportsform" ) : "" ) + "<td align=right>" + resultSet.getInt( 4 )
+						+ "<td align=right><a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_KEY_ID + "')[0].value='" + resultSet.getInt( 3 ) + "';document.forms['lastReportsFormId'].submit();\">" + resultSet.getInt( 3 ) + "</a>" + ( fullAdmin ? ' ' + getHackerRecordsByKeyLink( resultSet.getString( 12 ), "", "keyreportsform" ) : "" ) + "<td align=right>" + resultSet.getInt( 4 )
 						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 5 ) )
 						+ "<td>" + getGatewayComboHtml( gateway, reportId )
 						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 7 ) ] + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 8 ) )
@@ -724,7 +724,7 @@ public class AdminServlet extends BaseServlet {
 			int rowCounter = 0;
 			while ( resultSet.next() ) {
 				outputWriter.println( "<tr><td align=right>" + (++rowCounter)
-						+ "<td align=right>" + ( fullAdmin ? getHackerRecordsByKeyLink( resultSet.getString( 2 ), Integer.toString( resultSet.getInt( 1 ) ), "keyreportsform" ) : resultSet.getInt( 1 ) ) + "<td>" + encodeHtmlString( resultSet.getString( 3 ) )
+						+ "<td align=right><a href='admin?" +  REQUEST_PARAM_PAGE_NAME + '=' + Page.LAST_REPORTS.name() + '&' + REQUEST_PARAM_KEY_ID + "=" + resultSet.getInt( 1 ) + "'>" + resultSet.getInt( 1 ) + "</a>" + ( fullAdmin ? ' ' + getHackerRecordsByKeyLink( resultSet.getString( 2 ), "", "keyreportsform" ) : "" ) + "<td>" + encodeHtmlString( resultSet.getString( 3 ) )
 						+ "<td align=right>" + resultSet.getInt( 4 ) + "<td align=right>" + resultSet.getInt( 5 ) + "<td align=right>" + resultSet.getInt( 6 )
 						+ "<td align=right>" + String.format( "%.3f", resultSet.getFloat( 7 ) )
 						+ "<td align=center>" + formatDays( resultSet.getInt( 10 ) )
