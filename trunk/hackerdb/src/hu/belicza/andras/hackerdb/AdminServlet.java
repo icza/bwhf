@@ -409,12 +409,12 @@ public class AdminServlet extends BaseServlet {
 			if ( keyId != null )
 				query += " WHERE key.id=" + keyId;
 			if ( hackerName != null )
-				query += ( keyId == null ? " WHERE " : " AND " ) + "hacker.name=?";
+				query += ( keyId == null ? " WHERE " : " AND " ) + "hacker.name LIKE ?";
 			query += " ORDER BY report.id DESC LIMIT " + lastRepsLimit;
 			
 			statement = connection.prepareStatement( query ); 
 			if ( hackerName != null )
-				statement.setString( 1, hackerName );
+				statement.setString( 1, "%" + hackerName + "%" );
 			
 			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_REVOCATE_ID       + "'>" );
 			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_REINSTATE_ID      + "'>" );
@@ -431,7 +431,7 @@ public class AdminServlet extends BaseServlet {
 				final boolean revocated = resultSet.getBoolean( 11 );
 				
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
-						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 13 ) + "' target='_blank'>" + resultSet.getString( 13 ) + "</a>&uarr;" : "" ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) 
+						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 13 ) + "' target='_blank'>" + resultSet.getString( 13 ) + "&uarr;</a>" : "" ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) 
 						+ "<td align=right><a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_KEY_ID + "')[0].value='" + resultSet.getInt( 3 ) + "';document.forms['lastReportsFormId'].submit();\">" + resultSet.getInt( 3 ) + "</a> " + ( fullAdmin ? getHackerRecordsByKeyLink( resultSet.getString( 12 ), "", "keyreportsform" ) : "" ) + "<td align=right>" + resultSet.getInt( 4 )
 						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 5 ) )
 						+ "<td>" + getGatewayComboHtml( gateway, reportId )
