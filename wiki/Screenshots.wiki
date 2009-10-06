@@ -4,6 +4,9 @@
 
 <wiki:toc max_depth="3" />
 
+===EAPM chart:===
+http://lh4.ggpht.com/_jDMClHrENz8/SstDcFZElYI/AAAAAAAAOes/vmQ-eCK7HKg/s800/eapm_chart.png
+
 ===Player matcher:===
 http://lh5.ggpht.com/_jDMClHrENz8/SpThi731p4I/AAAAAAAAObM/tv9Y_Cgadb0/s800/player_matcher.png.jpg
 
