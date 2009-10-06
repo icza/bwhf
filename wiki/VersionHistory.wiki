@@ -10,6 +10,7 @@
  * APM/EAPM calculation: the first 2 minutes are ommitted, and the time of the players' last actions is used for calculation (if a player leaves after 5 minutes, the player's APM is calculated with a 3-minute long game).
  * Added game info text to the Charts tab.
  * Added help text about opening replays on the Player matcher tab.
+ * Added subversion numbers on the About tab.
 
 ----
 ===2.61 2009-08-26===
