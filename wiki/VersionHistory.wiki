@@ -12,7 +12,7 @@
  * *Added detection of the delayed autogather/autotrain hack.*
  * Added game info text to the Charts tab.
  * Added help text about opening replays on the Player matcher tab.
- * Added subversion numbers on the About tab.
+ * Added sub-version numbers on the About tab.
 
 ----
 ===2.61 2009-08-26===
