@@ -70,7 +70,7 @@ public class ChartsComponent extends JPanel {
 	/** Default color to use for the chart curve.                */
 	private static final Color  CHART_DEFAULT_COLOR            = Color.WHITE;
 	/** Color to use for axis and info texts.                    */
-	private static final Color  CHART_ASSIST_LINES_COLOR       = new Color( 80, 80, 80 );
+	private static final Color  CHART_ASSIST_LINES_COLOR       = new Color( 60, 60, 60 );
 	/** Color to use for axis labels.                            */
 	private static final Color  CHART_AXIS_LABEL_COLOR         = Color.CYAN;
 	/** Color to use for player descriptions.                    */

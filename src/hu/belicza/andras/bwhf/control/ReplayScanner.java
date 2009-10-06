@@ -16,6 +16,9 @@ import java.util.List;
  */
 public class ReplayScanner {
 	
+	/** Version of the scan engine. */
+	public static final String ENGINE_VERSION = "1.41";
+	
 	/**
 	 * Scans the replay actions for hacks.
 	 * 
@@ -67,6 +70,29 @@ public class ReplayScanner {
 				}
 			if ( actionsAtIteration5Count > 10 || !hasActionAtIteration10 )
 				hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_AUTOGATHER_AUTOTRAIN, 5 ) );
+		}
+		
+		// Delayed autogather/autotrain hack: select+train/hatch, select+move, select+move, select+move, select+move;
+		// Selects with different targets, moves with different targets and all in the same iteration (which is the first action)
+		if ( actionsCount >= 10 
+				&& playerActions[ 0 ].actionNameIndex == Action.ACTION_NAME_INDEX_SELECT && ( playerActions[ 1 ].actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN || playerActions[ 1 ].actionNameIndex == Action.ACTION_NAME_INDEX_HATCH )
+			    && playerActions[ 0 ].iteration == playerActions[ 9 ].iteration ) {
+			boolean isHack = true;
+			for ( int i = 2; i < 10; i += 2 ) {
+				if ( playerActions[ i ].actionNameIndex != Action.ACTION_NAME_INDEX_SELECT || playerActions[ i+1 ].actionNameIndex != Action.ACTION_NAME_INDEX_MOVE ) {
+					isHack = false;
+					break;
+				}
+				if ( i < 8 ) {
+					if ( playerActions[ i ].parameters == null || playerActions[ i ].parameters.equals( playerActions[ i+2 ].parameters )
+							|| playerActions[ i+1 ].parameters == null || playerActions[ i+1 ].parameters.equals( playerActions[ i+3 ].parameters ) ) {
+						isHack = false;
+						break;
+					}
+				}
+			}
+			if ( isHack )
+				hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_AUTOGATHER_AUTOTRAIN, playerActions[ 0 ].iteration ) );
 		}
 		
 		
