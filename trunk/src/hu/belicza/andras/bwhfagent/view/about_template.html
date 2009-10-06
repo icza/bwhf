@@ -5,9 +5,14 @@
 	<tr><td width='100%' align='center'>
 		<h2>%APPLICATION_NAME%</h2>
 		<table border=1 cellspacing=0 cellpadding=2>
-			<tr><td>Version:<td><b>%APPLICATION_VERSION%</b>
-			<tr><td>Author:<td><b>%APPLICATION_AUTHOR%</b>
-			<tr><td>Battle.net account:<td><b>Dakota_Fanning@USEast</b>
+			<tr><td>Author:<td colspan=2><b>%APPLICATION_AUTHOR%</b>
+			<tr><td>E-mail:<td colspan=2><b>%AUTHOR_EMAIL%</b>
+			<tr><td>Battle.net account:<td colspan=2><b>Dakota_Fanning@USEast</b>
+			<tr><td>Main version:<td colspan=2><b>%APPLICATION_VERSION%</b>
+			<tr><td rowspan=3>Sub-versions:
+				<td>Scan engine:<td><b>%APP_SUBVERSION_SCAN_ENGINE%</b>
+				<tr><td>Player matcher algorithm:<td><b>%APP_SUBVERSION_PLAYER_MATCHER_ALGORITHM%</b>
+				<tr><td>EAPM algorithm:<td><b>%APP_SUBVERSION_EAPM_ALGORITHM%</b>
 		</table>
 	<td align=right><a href='http://bwhf.googlecode.com/svn/trunk/donation.html' target='_blank'><img src='http://www.paypal.com/en_US/i/btn/btn_donateCC_LG_global.gif' border=0></a>
 </table>
@@ -19,7 +24,8 @@
 <p>%APPLICATION_NAME% is a java utility program that runs in the background and automatically checks the last replays of Starcraft for hacks. It can be used as a launcher too.<br>
 It has many useful features such as replay autosave, charts visualizer, replay search, player matcher (AKA finder), PCX screenshot auto-converter, game chat extractor, server monitor. You can list, search, filter players' actions.<br>
 You can check players in the game lobby BEFORE game whether they have been reported to the BWHF hacker database earlier. Just hit 'Print Screen' on your keyboard any time in the game lobby if you want to have the players checked.<br>
-<font style="color:red;background:yellow">NEW!</font> Now you can add any games to the Players' Network with BWHF Agent.</p>
+You can add any games to the Players' Network with BWHF Agent.<br>
+<font style="color:red;background:yellow">NEW!</font> Now APM charts can show you EAPM values!</p>
 
 <p>You can also run a check on any of your saved replays or on entire folders of replays (no BWChart required). It logs the results and if it finds a hacker in your last replay, it can bring its window to front or play an alert sound.</p>
 

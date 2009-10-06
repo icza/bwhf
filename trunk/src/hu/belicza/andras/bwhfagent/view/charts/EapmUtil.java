@@ -9,6 +9,9 @@ import hu.belicza.andras.bwhf.model.Action;
  */
 public class EapmUtil {
 	
+	/** EAPM algorithm version. */
+	public static final String EAPM_ALGORITHM_VERSION = "1.00";
+	
 	/**
 	 * Decides if an action is <i>effective</i> so it can be part of the EAPM calculation.
 	 * @param actions     actions of the player

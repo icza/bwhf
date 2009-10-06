@@ -130,7 +130,7 @@ public class ChartsTab extends Tab {
 		
 		final JPanel chartsCommonControlPanel = Utils.createWrapperPanel();
 		chartsCommonControlPanel.setBorder( BorderFactory.createTitledBorder( "General chart settings:" ) );
-		chartsCommonControlPanel.add( new JLabel( "Chart type:" ) );
+		chartsCommonControlPanel.add( new JLabel( "Chart:" ) );
 		chartTypeComboBox.addChangeListener( new ChangeListener() {
 			public void stateChanged( final ChangeEvent event ) {
 				chartsComponent.setChartType( (ChartType) chartTypeComboBox.getSelectedItem() );

@@ -74,12 +74,12 @@ public class BinRepParser {
 	 * 
 	 * @param replayFile           replay file to be parsed
 	 * @param parseCommandsSection tells if player actions have to be parsed from the commands section 
-	 * @param gameChatOnly         tells if only game chat is desired but not other actions
+	 * @param parseGameChat        tells if game chat has to be parsed
 	 * @param parseMapDataSection  tells if map data section has to be parsed
 	 * @return a {@link Replay} object describing the replay; or <code>null</code> if replay cannot be parsed 
 	 */
 	@SuppressWarnings("unchecked")
-	public static Replay parseReplay( final File replayFile, final boolean parseCommandsSection, final boolean gameChatOnly, final boolean parseMapDataSection ) {
+	public static Replay parseReplay( final File replayFile, final boolean parseCommandsSection, final boolean parseGameChat, final boolean parseMapDataSection ) {
 		BinReplayUnpacker unpacker = null;
 		try {
 			unpacker = new BinReplayUnpacker( replayFile );
@@ -136,14 +136,11 @@ public class BinRepParser {
 			final ByteBuffer commandsBuffer = ByteBuffer.wrap( unpacker.unpackSection( playerCommandsLength ) );
 			commandsBuffer.order( ByteOrder.LITTLE_ENDIAN );
 			
-			final List< Action >[] playerActionLists;
-			final GameChatWrapper  gameChatWrapper;
-			if ( gameChatOnly ) {
+			List< Action >[] playerActionLists = null;
+			GameChatWrapper  gameChatWrapper   = null;
+			if ( parseGameChat )
 				gameChatWrapper   = new GameChatWrapper( replayHeader.playerNames, replayHeader.playerIds );
-				playerActionLists = null;
-			}
-			else {
-				gameChatWrapper   = null;
+			if ( parseCommandsSection ){
 				playerActionLists = new ArrayList[ replayHeader.playerNames.length ]; // This will be indexed by playerId!
 				for ( int i = 0; i < playerActionLists.length; i++ )
 					playerActionLists[ i ] = new ArrayList< Action >();
@@ -176,7 +173,7 @@ public class BinRepParser {
 				}
 			
 			ReplayActions replayActions = null;
-			if ( !gameChatOnly ) {
+			if ( parseCommandsSection ) {
 				// Now create the ReplayActions object
 				final Map< String, List< Action > > playerNameActionListMap = new HashMap< String, List< Action > >();
 				for ( int i = 0; i < replayHeader.playerNames.length; i++ )

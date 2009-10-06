@@ -116,6 +116,9 @@ public class MainFrame extends JFrame {
 	/** Tells if we're in Wonderland (newew version is available). */
 	private boolean inWonderland = false;
 	
+	/** The state of the navigation bar: true = collapsed, false = expanded. */
+	private boolean navigationBarCollapsed;
+	
 	/**
 	 * Creates a new MainFrame.
 	 * @param applicationVersion the application version string
@@ -188,6 +191,7 @@ public class MainFrame extends JFrame {
 	private void buildGUI() {
 		final JPanel northBox = new JPanel( new BorderLayout() );
 		JPanel panel = new JPanel( new BorderLayout() );
+		panel.add( new JLabel( "Ver.: " + applicationVersion.substring( 0, applicationVersion.indexOf( ' ' ) ) + " © " + Consts.APPLICATION_AUTHOR ), BorderLayout.WEST );
 		final JPanel startStarcraftPanel = Utils.createWrapperPanel();
 		startScButton.setMnemonic( startScButton.getText().charAt( 0 ) );
 		startScButton.addActionListener( new ActionListener() {
@@ -229,8 +233,39 @@ public class MainFrame extends JFrame {
 			tabLinePanel.add( titleLabel );
 			navigationBox.add( tabLinePanel );
 		}
-		navigationBox.add( new JPanel( new BorderLayout() ) ); // To consume the available space
+		
+		navigationBox.add( new JPanel( new BorderLayout( 0, 0 ) ) ); // To consume the available space
+		
+		// Collapse expand label
+		final JPanel        tabLinePanel  = Utils.createWrapperPanelLeftAligned();
+		final JLabel        iconLabel     = new JLabel( IconResourceManager.ICON_ARROW_IN, SwingConstants.LEFT );
+		final JLabel        titleLabel    = new JLabel( "Collapse" );
+		final MouseListener mouseListener = new MouseAdapter() {
+			@Override
+			public void mousePressed( final MouseEvent event ) {
+				final Dimension titleLabelDimension = navigationBarCollapsed ? null : new Dimension( 0, 0 );
+				
+				for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ )
+					tabs[ tabIndex ].getTitleLabel().setPreferredSize( titleLabelDimension );
+				titleLabel.setPreferredSize( titleLabelDimension );
+				iconLabel.setIcon( navigationBarCollapsed ? IconResourceManager.ICON_ARROW_IN : IconResourceManager.ICON_ARROW_OUT );
+				
+				navigationBarCollapsed = !navigationBarCollapsed;
+				navigationBox.getParent().validate();
+			}
+		};
+		iconLabel   .addMouseListener( mouseListener );
+		titleLabel  .addMouseListener( mouseListener );
+		tabLinePanel.addMouseListener( mouseListener );
+		tabLinePanel.setCursor( new Cursor( Cursor.HAND_CURSOR ) );
+		tabLinePanel.add( iconLabel  );
+		tabLinePanel.add( titleLabel );
+		navigationBox.add( tabLinePanel );
+		
 		getContentPane().add( navigationBox, BorderLayout.WEST );
+		navigationBarCollapsed = false;
+		if ( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_NAVIGATION_BAR_COLLAPSED ) ) )
+			mouseListener.mousePressed( null );
 		getContentPane().add( tabsContentPanel, BorderLayout.CENTER );
 		
 		
@@ -394,6 +429,9 @@ public class MainFrame extends JFrame {
 	 * Saves the properties and closes the agent.
 	 */
 	private void closeAgent() {
+		// First our properties
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_NAVIGATION_BAR_COLLAPSED, Boolean.toString( navigationBarCollapsed ) );
+		// And now the properties of the tabs
 		for ( final Tab tab : tabs )
 			tab.assignUsedProperties();
 		

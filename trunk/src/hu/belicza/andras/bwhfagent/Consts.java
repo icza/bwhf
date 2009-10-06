@@ -12,56 +12,58 @@ import swingwtx.swing.SwingWTUtils;
 public class Consts {
 	
 	/** Name of the application.                                               */
-	public static final String APPLICATION_NAME                 = "BWHF Agent";
+	public static final String APPLICATION_NAME                        = "BWHF Agent";
 	/** Author of the application.                                             */
-	public static final String APPLICATION_AUTHOR               = "András Belicza";
+	public static final String APPLICATION_AUTHOR                      = "András Belicza";
+	/** Email of the author.                                                   */
+	public static final String AUTHOR_EMAIL                            = new String( new char[] { 'i', 'c', 'z', 'a', 'a', 'a', '@', 'g', 'm', 'a', 'i', 'l', '.', 'c', 'o', 'm' } );
 	
 	/** Home page url string.                                                  */
-	public static final String HOME_PAGE_URL                    = "http://code.google.com/p/bwhf/";
+	public static final String HOME_PAGE_URL                           = "http://code.google.com/p/bwhf/";
 	/** Name of the current version resource file.                             */
-	public static final String VERSION_RESOURCE_NAME            = "current_version.txt";
+	public static final String VERSION_RESOURCE_NAME                   = "current_version.txt";
 	/** URL pointing to the latest stable version text.                        */
-	public static final String LATEST_STABLE_VERSION_TEXT_URL   = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version.txt";
+	public static final String LATEST_STABLE_VERSION_TEXT_URL          = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version.txt";
 	/** Search help page url string.                                           */
-	public static final String SEARCH_HELP_PAGE_URL             = "http://code.google.com/p/bwhf/wiki/ReplaySearchInBWHFAgent";
+	public static final String SEARCH_HELP_PAGE_URL                    = "http://code.google.com/p/bwhf/wiki/ReplaySearchInBWHFAgent";
 	/** Player matcher help page url string.                                   */
-	public static final String PLAYER_MATCHER_HELP_PAGE_URL     = "http://code.google.com/p/bwhf/wiki/PlayerMatcherInBWHFAgent";
+	public static final String PLAYER_MATCHER_HELP_PAGE_URL            = "http://code.google.com/p/bwhf/wiki/PlayerMatcherInBWHFAgent";
 	/** Players' Network page url string.                                      */
-	public static final String PLAYERS_NETWORK_PAGE_URL         = "http://bwhf.net/hackerdb/players";
+	public static final String PLAYERS_NETWORK_PAGE_URL                = "http://bwhf.net/hackerdb/players";
 	
 	/** URL of the BWHF hacker data base server.                               */
-	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL = "http://bwhf.net/hackerdb/hackers";
+	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL        = "http://bwhf.net/hackerdb/hackers";
 	/** URL of the Players' Network processor server.                          */
-	public static final String PLAYERS_NETWORK_DATA_BASE_URL    = "http://bwhf.net/hackerdb/players";
+	public static final String PLAYERS_NETWORK_DATA_BASE_URL           = "http://bwhf.net/hackerdb/players";
 	
 	/** Name of the resource containing the about html template.               */
-	public static final String ABOUT_TEMLATE_RESOURCE_NAME      = "about_template.html";
+	public static final String ABOUT_TEMLATE_RESOURCE_NAME             = "about_template.html";
 	
 	/** Default Starcraft directory.                                           */
-	public static final String DEFAULT_STARCRAFT_DIRECTORY      = SwingWTUtils.isWindows() ? "C:/Program Files/Starcraft" : "/mnt/c/Program Files/Starcraft";
+	public static final String DEFAULT_STARCRAFT_DIRECTORY             = SwingWTUtils.isWindows() ? "C:/Program Files/Starcraft" : "/mnt/c/Program Files/Starcraft";
 	/** Starcraft replay folder relative to the Starcraft folder.              */
-	public static final String STARCRAFT_REPLAY_FOLDER          = "maps/replays";
+	public static final String STARCRAFT_REPLAY_FOLDER                 = "maps/replays";
 	/** Starcraft replay folder relative to the Starcraft folder.              */
-	public static final String DEFAULT_REPLAY_LISTS_FOLDER      = "Replay lists";
+	public static final String DEFAULT_REPLAY_LISTS_FOLDER             = "Replay lists";
 	/** Name of the last replay file relative to the starcraft folder.         */
-	public static final String LAST_REPLAY_FILE_NAME            = "maps/replays/LastReplay.rep";
+	public static final String LAST_REPLAY_FILE_NAME                   = "maps/replays/LastReplay.rep";
 	/** Name of the Starcraft executable file.                                 */
-	public static final String STARCRAFT_EXECUTABLE_FILE_NAME   = "StarCraft.exe";
+	public static final String STARCRAFT_EXECUTABLE_FILE_NAME          = "StarCraft.exe";
 	/** Name of directory containing sound samples.                            */
-	public static final String SOUNDS_DIRECTORY_NAME            = "sounds";
+	public static final String SOUNDS_DIRECTORY_NAME                   = "sounds";
 	/** Name of directory containing utility programs.                         */
-	public static final String UTILS_DIRECTORY_NAME             = "utils";
+	public static final String UTILS_DIRECTORY_NAME                    = "utils";
 	/** Name of directory containing the HTML summary reports of manual scans. */
-	public static final String HTML_REPORT_DIRECTORY_NAME       = "HTML Reports";
+	public static final String HTML_REPORT_DIRECTORY_NAME              = "HTML Reports";
 	/** Name of directory containing cache of the hacker list.                 */
-	public static final String HACKER_LIST_DIRECTORY_NAME       = "Hacker list cache";
+	public static final String HACKER_LIST_DIRECTORY_NAME              = "Hacker list cache";
 	
 	/** Labels for the possible values of flag hacker replays position. */
-	public static final String[] FLAG_HACKER_REPS_POSITION_LABELS = new String[] { "beginning", "end" };
+	public static final String[] FLAG_HACKER_REPS_POSITION_LABELS      = new String[] { "beginning", "end" };
 	/** Index for the beginning flag hacker reps position. */
-	public static final int FLAG_HACKER_REPS_POSITION_BEGINNING = 0;
+	public static final int FLAG_HACKER_REPS_POSITION_BEGINNING        = 0;
 	/** Index for the end flag hacker reps position.       */
-	public static final int FLAG_HACKER_REPS_POSITION_END       = 1;
+	public static final int FLAG_HACKER_REPS_POSITION_END              = 1;
 	
 	
 	/** Name of the settings properties file. */
@@ -193,6 +195,8 @@ public class Consts {
 	public static final String PROPERTY_MAX_DISPLAYABLE_RESULTS        = "maxDisplayableResults";
 	/** Monitor re-check time interval property. */
 	public static final String PROPERTY_MONITOR_RECHECK_INTERVAL       = "monitorRecheckInterval";
+	/** NavigationBarCollapsed property.         */
+	public static final String PROPERTY_NAVIGATION_BAR_COLLAPSED       = "navigationBarCollapsed";
 	
 	/** Properties holding the default settings. */
 	public static final Properties DEFAULT_SETTINGS_PROPERTIES = new Properties();
@@ -260,6 +264,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_MATCHING_PROBABILITY_THRESHOLD, "2" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_MAX_DISPLAYABLE_RESULTS       , "2" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_MONITOR_RECHECK_INTERVAL      , "2" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_NAVIGATION_BAR_COLLAPSED      , "false" );
 	}
 	
 }

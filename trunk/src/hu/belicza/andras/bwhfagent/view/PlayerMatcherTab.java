@@ -43,6 +43,9 @@ import swingwtx.swing.table.DefaultTableModel;
  */
 public class PlayerMatcherTab extends Tab {
 	
+	/** Player matcher algorithm version. */
+	public static final String PLAYER_MATCHER_ALGORITHM_VERSION = "1.00";
+	
 	/** Don't compare players with same name checkbox. */
 	private final JCheckBox dontCompareSameNamesCheckBox          = new JCheckBox( "Don't compare players with same names", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES ) ) );
 	/** Show only matches of players text field.       */
