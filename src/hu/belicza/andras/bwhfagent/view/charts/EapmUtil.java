@@ -10,7 +10,7 @@ import hu.belicza.andras.bwhf.model.Action;
 public class EapmUtil {
 	
 	/** EAPM algorithm version. */
-	public static final String EAPM_ALGORITHM_VERSION = "1.00";
+	public static final String EAPM_ALGORITHM_VERSION = "1.01";
 	
 	/**
 	 * Decides if an action is <i>effective</i> so it can be part of the EAPM calculation.
@@ -52,7 +52,7 @@ public class EapmUtil {
 		
 		// Too fast switch away from or reselecting the same selected unit = no use of selecting it. By too fast I mean it isn't even enough to check the object state
 		if ( actionIndex > 0 && ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.charAt( 0 ) == 'S' ) ) {
-			if ( prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.charAt( 0 ) == 'S'
+			if ( ( prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && prevAction.parameters.charAt( 0 ) == 'S' )
 					&& action.iteration - prevAction.iteration <= 8 )
 				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && prevAction.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.equals( prevAction.parameters ) ) {
 					// Exclude double tapping a hotkey, it's only ineffective if it was pressed more than 3 times
