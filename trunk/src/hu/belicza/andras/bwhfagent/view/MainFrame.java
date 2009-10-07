@@ -213,12 +213,15 @@ public class MainFrame extends JFrame {
 		getContentPane().add( northBox, BorderLayout.NORTH );
 		
 		navigationBox.setBorder( BorderFactory.createTitledBorder( "Navigation:" ) );
+		final JPanel[] tabLinePanels = new JPanel[ tabs.length ];
+		final JLabel[] iconLabels    = new JLabel[ tabs.length ];
+		final JLabel[] titleLabels   = new JLabel[ tabs.length ];
 		for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ ) {
 			final Tab tab = tabs[ tabIndex ];
 			tabsContentPanel.add( tab.getTitle(), tab.getContent() );
-			final JPanel        tabLinePanel  = Utils.createWrapperPanelLeftAligned();
-			final JLabel        iconLabel     = new JLabel( tab.getIcon(), SwingConstants.LEFT );
-			final JLabel        titleLabel    = tab.getTitleLabel();
+			final JPanel        tabLinePanel  = tabLinePanels[ tabIndex ] = Utils.createWrapperPanelLeftAligned();
+			final JLabel        iconLabel     = iconLabels   [ tabIndex ] =  new JLabel( tab.getIcon(), SwingConstants.LEFT );
+			final JLabel        titleLabel    = titleLabels  [ tabIndex ] = tab.getTitleLabel();
 			final MouseListener mouseListener = new MouseAdapter() {
 				@Override
 				public void mousePressed( final MouseEvent event ) {
@@ -240,15 +243,28 @@ public class MainFrame extends JFrame {
 		final JPanel        tabLinePanel  = Utils.createWrapperPanelLeftAligned();
 		final JLabel        iconLabel     = new JLabel( IconResourceManager.ICON_ARROW_IN, SwingConstants.LEFT );
 		final JLabel        titleLabel    = new JLabel( "Collapse" );
+		tabLinePanel.setToolTipText( "Collapse" );
+		iconLabel   .setToolTipText( "Collapse" );
+		titleLabel  .setToolTipText( "Collapse" );
 		final MouseListener mouseListener = new MouseAdapter() {
 			@Override
 			public void mousePressed( final MouseEvent event ) {
 				final Dimension titleLabelDimension = navigationBarCollapsed ? null : new Dimension( 0, 0 );
 				
-				for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ )
-					tabs[ tabIndex ].getTitleLabel().setPreferredSize( titleLabelDimension );
+				for ( int tabIndex = 0; tabIndex < tabs.length; tabIndex++ ) {
+					titleLabels  [ tabIndex ].setPreferredSize( titleLabelDimension );
+					final String toolTipText = navigationBarCollapsed ? null : titleLabels[ tabIndex ].getText();
+					tabLinePanels[ tabIndex ].setToolTipText( toolTipText );
+					iconLabels   [ tabIndex ].setToolTipText( toolTipText );
+					titleLabels  [ tabIndex ].setToolTipText( toolTipText );
+				}
+				
 				titleLabel.setPreferredSize( titleLabelDimension );
 				iconLabel.setIcon( navigationBarCollapsed ? IconResourceManager.ICON_ARROW_IN : IconResourceManager.ICON_ARROW_OUT );
+				final String toolTipText = navigationBarCollapsed ? "Collapse navigation bar" : "Expand navigation bar";
+				tabLinePanel.setToolTipText( toolTipText );
+				iconLabel   .setToolTipText( toolTipText );
+				titleLabel  .setToolTipText( toolTipText );
 				
 				navigationBarCollapsed = !navigationBarCollapsed;
 				navigationBox.getParent().validate();
