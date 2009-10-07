@@ -261,7 +261,7 @@ public class MainFrame extends JFrame {
 				
 				titleLabel.setPreferredSize( titleLabelDimension );
 				iconLabel.setIcon( navigationBarCollapsed ? IconResourceManager.ICON_ARROW_IN : IconResourceManager.ICON_ARROW_OUT );
-				final String toolTipText = navigationBarCollapsed ? "Collapse navigation bar" : "Expand navigation bar";
+				final String toolTipText = navigationBarCollapsed ? "Collapse the navigation bar" : "Expand the navigation bar";
 				tabLinePanel.setToolTipText( toolTipText );
 				iconLabel   .setToolTipText( toolTipText );
 				titleLabel  .setToolTipText( toolTipText );
