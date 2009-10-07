@@ -5,6 +5,10 @@
 <wiki:toc max_depth="3" />
 
 ----
+===2.72 2009-10-07===
+ * A small bugfix in the delayed autogather/autotrain detection.
+
+----
 ===2.71 2009-10-07===
  * Added tooltip texts to the elements of the collapsed navigation bar.
  * Replaced the sound which is played when a monitored server comes back online. The new sound says: "Server is back online."
