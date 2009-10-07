@@ -7,7 +7,7 @@
 ----
 ===New features and changes in the upcoming new release===
  * Added tooltip texts to the elements of the collapsed navigation bar.
- * Replaced the sound played when a server is back online. The new sound says: "Server is back online."
+ * Replaced the sound which is played when a monitored server comes back online. The new sound says: "Server is back online."
 
 ----
 ===2.70 2009-10-06===
