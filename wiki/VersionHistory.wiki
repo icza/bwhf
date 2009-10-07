@@ -5,6 +5,11 @@
 <wiki:toc max_depth="3" />
 
 ----
+===New features and changes in the upcoming new release===
+ * Added tooltip texts to the elements of the collapsed navigation bar.
+ * Replaced the sound played when a server is back online. The new sound says: "Server is back online."
+
+----
 ===2.70 2009-10-06===
  * *Added EAPM support: there are options on both the APM and Overall Apm charts to display EAPM and Overall EAPM.* The calculated EAPM values might differ somewhat from the values calculated by bwRepInfo because I used my own algorithm. The rules I used can be read here: EapmRules
  * APM/EAPM calculation: the first 2 minutes are ommitted, and the times of the players' last actions are used for calculation (if a player leaves after 5 minutes, the player's APM is calculated with a 3-minute long game).
