@@ -2,7 +2,7 @@
 
 =EAPM Rules=
 
-The APM/EAPM charts calculates and shows APM and EAPM values based on my algorithm. APM stands for Actions Per Minute. APM measures the amount of commands that would be given by a player in 1 minute. Higher APM means more activity. EAPM stands for Effective APM. EAPM measures the amount of useful/effective commands that would be given by a player in 1 minute. The algorithm uses different rules to classify actions _effective_ or _ineffective_. The first 2 minutes of games are always excluded.
+The APM/EAPM charts calculates and shows APM and EAPM values based on my algorithm. APM stands for Actions Per Minute. APM measures the amount of commands that would be given by a player in 1 minute. Higher APM means more activity. EAPM stands for Effective APM. EAPM measures the amount of useful/effective commands that would be given by a player in 1 minute. The algorithm uses different rules to classify actions _effective_ or _ineffective_. The first 2 minutes of games are always excluded from APM/EAPM calculation.
 
 *Commands that are considered to be _ineffective_:*
 
