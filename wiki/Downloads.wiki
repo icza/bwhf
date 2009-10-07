@@ -4,8 +4,8 @@
 
 BWHF Agent can be used on windows and linux.
 
-||Download latest BWHF Agent for windows:||[http://bwhf.googlecode.com/files/BWHFAgent%202.71%20windows.zip http://lh3.ggpht.com/_jDMClHrENz8/ShFo6OThnSI/AAAAAAAAN1E/4LcVEUVjDwA/s800/windows_icon.png.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%202.71%20windows.zip BWHF Agent 2.71 for windows] 3.2 MB||
-||Download latest BWHF Agent for linux:||[http://bwhf.googlecode.com/files/BWHFAgent%202.71%20linux.zip http://lh5.ggpht.com/_jDMClHrENz8/ShFo6MbPePI/AAAAAAAAN1I/wdIE3RXg3zY/s800/linux_icon.png.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%202.71%20linux.zip BWHF Agent 2.71 for linux] 3.3 MB||
+||Download latest BWHF Agent for windows:||[http://bwhf.googlecode.com/files/BWHFAgent%202.72%20windows.zip http://lh3.ggpht.com/_jDMClHrENz8/ShFo6OThnSI/AAAAAAAAN1E/4LcVEUVjDwA/s800/windows_icon.png.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%202.72%20windows.zip BWHF Agent 2.72 for windows] 3.2 MB||
+||Download latest BWHF Agent for linux:||[http://bwhf.googlecode.com/files/BWHFAgent%202.72%20linux.zip http://lh5.ggpht.com/_jDMClHrENz8/ShFo6MbPePI/AAAAAAAAN1I/wdIE3RXg3zY/s800/linux_icon.png.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%202.72%20linux.zip BWHF Agent 2.72 for linux] 3.3 MB||
 
 Basically all windows are supported where you can install the 32-bit version Java 6.0 or higher (Windows XP / Vista / 7 / Server).
 
