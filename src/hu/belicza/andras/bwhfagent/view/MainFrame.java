@@ -242,7 +242,7 @@ public class MainFrame extends JFrame {
 		// Collapse expand label
 		final JPanel        tabLinePanel  = Utils.createWrapperPanelLeftAligned();
 		final JLabel        iconLabel     = new JLabel( IconResourceManager.ICON_ARROW_IN, SwingConstants.LEFT );
-		final JLabel        titleLabel    = new JLabel( "Collapse" );
+		final JLabel        titleLabel    = new JLabel( "Collapse the navigation bar" );
 		tabLinePanel.setToolTipText( "Collapse" );
 		iconLabel   .setToolTipText( "Collapse" );
 		titleLabel  .setToolTipText( "Collapse" );
