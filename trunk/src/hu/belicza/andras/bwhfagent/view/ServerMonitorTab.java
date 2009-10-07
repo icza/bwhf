@@ -287,7 +287,7 @@ public class ServerMonitorTab extends Tab {
 						if ( monitoredServerButtonList.contains( checkButton ) ) {
 							monitoredServerButtonList.remove( checkButton );
 							enableMonitorButton( monitorButton );
-							Utils.playWavFile( new File( "sounds/pager.wav"), false );
+							Utils.playWavFile( new File( "sounds/server_is_back_online.wav"), false );
 						}
 					}
 				}
