@@ -7,12 +7,16 @@ import hu.belicza.andras.bwhfagent.view.charts.ChartsComponent;
 import hu.belicza.andras.bwhfagent.view.charts.ChartsComponent.ChartType;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.util.Arrays;
+import java.util.Comparator;
 
 import swingwt.awt.Color;
 import swingwt.awt.Cursor;
-import swingwt.awt.Dimension;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwt.awt.event.ComponentAdapter;
+import swingwt.awt.event.ComponentEvent;
 import swingwtx.swing.BorderFactory;
 import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
@@ -20,7 +24,9 @@ import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
 import swingwtx.swing.JFileChooser;
 import swingwtx.swing.JLabel;
+import swingwtx.swing.JOptionPane;
 import swingwtx.swing.JPanel;
+import swingwtx.swing.SwingUtilities;
 import swingwtx.swing.event.ChangeEvent;
 import swingwtx.swing.event.ChangeListener;
 
@@ -31,19 +37,60 @@ import swingwtx.swing.event.ChangeListener;
  */
 public class ChartsTab extends Tab {
 	
-	/** Button to display game chat from the last replay.      */
-	private final JButton   openLastReplayButton = new JButton( "Open 'LastReplay.rep'", IconResourceManager.ICON_LASTREPLAY );
-	/** Button to select files to extract game chat.           */
-	private final JButton   selectFileButton     = new JButton( "Select file to open...", IconResourceManager.ICON_FILE_CHOOSER );
-	/** Button to open previous replay from replay search tab. */
-	private final JButton   previousReplayButton = new JButton( "Previous replay", IconResourceManager.ICON_ARROW_LEFT );
-	/** Button to open next replay from replay search tab. */
-	private final JButton   nextReplayButton     = new JButton( "Next replay", IconResourceManager.ICON_ARROW_RIGHT );
-	/** Label to display the loaded replay.                    */
-	private final JLabel    loadedReplayLabel    = new JLabel( "No replay loaded." );
+	/** Replay file filter. */
+	private static final FileFilter IO_REPLAY_FILE_FILTER = new FileFilter() {
+		public boolean accept( final File pathname ) {
+			return pathname.isFile() && pathname.getName().toLowerCase().endsWith( ".rep" );
+		}
+	};
+	
+	/** A comparator that compares files based on their last modified property. */
+	private static final Comparator< File > REPLAY_LAST_MODIFIED_COMPARATOR = new Comparator< File >() {
+		public int compare( final File o1, final File o2 ) {
+			final long diff = o1.lastModified() - o2.lastModified();
+			return diff > 0l ? 1 : diff < 0l ? -1 : 0;
+		}
+	};
+	
+	/**
+	 * Creates a clone file which is equal to the source based on the comparision provided by this comparator.<br>
+	 * The returned file cannot be used as a real File object!<br>
+	 * The reason for me to create and use clones is because if the user deletes or moves the replay being loaded,
+	 * I want the next call to load prev-next autorep to be the right in the order. If the original file would be stored,
+	 * its lastModified() method would returned 0L.
+	 * @param sourceFile source file to be cloned
+	 * @return a clone file which is equal to the source based on the comparision provided by this comparator
+	 */
+	private static File createCloneForComparision( final File sourceFile ) {
+		final long lastModified = sourceFile.lastModified();
+		return new File( "" ) {
+			@Override
+			public long lastModified() {
+				return lastModified;
+			}
+		};
+	}
+	
+	/** Button to open previous replay from the autoreplay folder. */
+	private final JButton   previousAutoReplayButton   = new JButton( "Prev autorep", IconResourceManager.ICON_ARROW_LEFT );
+	/** Button to open next replay from the autoreplay folder.     */
+	private final JButton   nextAutoReplayButton       = new JButton( "Next autorep", IconResourceManager.ICON_ARROW_RIGHT );
+	/** Button to display game chat from the last replay.          */
+	private final JButton   openLastReplayButton       = new JButton( "Open 'LastReplay.rep'", IconResourceManager.ICON_LASTREPLAY );
+	/** Button to select files to extract game chat.               */
+	private final JButton   selectFileButton           = new JButton( "Select file to open...", IconResourceManager.ICON_FILE_CHOOSER );
+	/** Button to open previous replay from replay search tab.     */
+	private final JButton   previousSearchReplayButton = new JButton( "Prev listed rep", IconResourceManager.ICON_ARROW_LEFT );
+	/** Button to open next replay from replay search tab.         */
+	private final JButton   nextSearchReplayButton     = new JButton( "Next listed rep", IconResourceManager.ICON_ARROW_RIGHT );
+	/** Label to display the loaded replay.                        */
+	private final JLabel    loadedReplayLabel          = new JLabel( "No replay loaded." );
 	
 	/** Wrapper for the index of the opened replay from the result list of the replay search tab. */
 	private final Integer[] openedIndexFromResultListWrapper = new Integer[ 1 ];
+	
+	/** Reference to the clone of last autoreplay file that was loaded with the prev-next autorep buttons. */
+	private File lastAutoreplayFileClone;
 	
 	/** Combobox to select the chart type.                                   */
 	public final JComboBox chartTypeComboBox                  = new JComboBox( ChartsComponent.ChartType.values() );
@@ -78,12 +125,79 @@ public class ChartsTab extends Tab {
 		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
 		
 		final Box buttonsPanel = Box.createHorizontalBox();
+		// We need to issue a validate() if the state of a maximized window changes (SwingWT bug). 
+		buttonsPanel.addComponentListener( new ComponentAdapter() {
+			@Override
+			public void componentResized( final ComponentEvent ce ) {
+				SwingUtilities.invokeLater( new Runnable() {
+					public void run() {
+						contentBox.validate();
+					}
+				} );
+			}
+		} );
+		buttonsPanel.setMaximumSize( Utils.getMaxDimension() );
+		// Previous-next replay from search tab
 		JPanel panel = Utils.createWrapperPanel();
-		panel.setMaximumSize( new Dimension( Integer.MAX_VALUE, 100 ) );
+		previousAutoReplayButton.setMnemonic( 'r' );
+		previousAutoReplayButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				final File[] replayFiles = getAutorepFiles();
+				
+				if ( replayFiles != null ) {
+					if ( lastAutoreplayFileClone == null ) {
+						lastAutoreplayFileClone = createCloneForComparision( replayFiles[ replayFiles.length - 1 ] );
+						setReplayFile( replayFiles[ replayFiles.length - 1 ] );
+					}
+					else {
+						int index = Arrays.binarySearch( replayFiles, lastAutoreplayFileClone, REPLAY_LAST_MODIFIED_COMPARATOR );
+						if ( index < 0 )
+							index = -( index + 1 );
+						if ( index > 0 ) {
+							lastAutoreplayFileClone = createCloneForComparision( replayFiles[ index - 1 ] );
+							setReplayFile( replayFiles[ index - 1 ] );
+						}
+						else
+							JOptionPane.showMessageDialog( contentBox, "There are no older replays in your autoreplay folder!", "Info", JOptionPane.INFORMATION_MESSAGE );
+					}
+				}
+			}
+		} );
+		panel.add( previousAutoReplayButton );
+		nextAutoReplayButton.setMnemonic( 'e' );
+		nextAutoReplayButton.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				final File[] replayFiles = getAutorepFiles();
+				
+				if ( replayFiles != null ) {
+					if ( lastAutoreplayFileClone == null ) {
+						lastAutoreplayFileClone = createCloneForComparision( replayFiles[ replayFiles.length - 1 ] );
+						setReplayFile( replayFiles[ replayFiles.length - 1 ] );
+					}
+					else {
+						int index = Arrays.binarySearch( replayFiles, lastAutoreplayFileClone, REPLAY_LAST_MODIFIED_COMPARATOR );
+						if ( index < 0 )
+							index = -( index + 1 ) - 1;
+						if ( index < replayFiles.length - 1 ) {
+							lastAutoreplayFileClone = createCloneForComparision( replayFiles[ index + 1 ] );
+							setReplayFile( replayFiles[ index + 1 ] );
+						}
+						else
+							JOptionPane.showMessageDialog( contentBox, "There are no newer replays in your autoreplay folder!", "Info", JOptionPane.INFORMATION_MESSAGE );
+					}
+				}
+			}
+		} );
+		panel.add( nextAutoReplayButton );
+		buttonsPanel.add( panel );
+		// Last replay and user selected replay
+		panel = Utils.createWrapperPanel();
 		openLastReplayButton.setMnemonic( 'l' );
 		openLastReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				setReplayFile( new File( MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME ) );
+				final File lastReplayFile = new File( MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField.getText(), Consts.LAST_REPLAY_FILE_NAME );
+				lastAutoreplayFileClone = createCloneForComparision( lastReplayFile );
+				setReplayFile( lastReplayFile );
 			}
 		} );
 		panel.add( openLastReplayButton );
@@ -99,33 +213,36 @@ public class ChartsTab extends Tab {
 				
 				fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
 				
-				if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION )
+				if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION ) {
+					lastAutoreplayFileClone = null;
 					setReplayFile( fileChooser.getSelectedFile() );
+				}
 			}
 		} );
 		panel.add( selectFileButton );
+		// Previous-next replay from search tab
 		buttonsPanel.add( panel );
 		panel = Utils.createWrapperPanel();
-		previousReplayButton.setMnemonic( 'p' );
-		previousReplayButton.setEnabled( false );
-		previousReplayButton.addActionListener( new ActionListener() {
+		previousSearchReplayButton.setMnemonic( 'p' );
+		previousSearchReplayButton.setEnabled( false );
+		previousSearchReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
+				lastAutoreplayFileClone = null;
 				setReplayFile( MainFrame.getInstance().replaySearchTab.getPreviousReplayFile( openedIndexFromResultListWrapper ) );
 			}
 		} );
-		panel.add( previousReplayButton );
-		nextReplayButton.setMnemonic( 'n' );
-		nextReplayButton.setEnabled( false );
-		nextReplayButton.addActionListener( new ActionListener() {
+		panel.add( previousSearchReplayButton );
+		nextSearchReplayButton.setMnemonic( 'n' );
+		nextSearchReplayButton.setEnabled( false );
+		nextSearchReplayButton.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
+				lastAutoreplayFileClone = null;
 				setReplayFile( MainFrame.getInstance().replaySearchTab.getNextReplayFile( openedIndexFromResultListWrapper ) );
 			}
 		} );
-		panel.add( nextReplayButton );
+		panel.add( nextSearchReplayButton );
 		buttonsPanel.add( panel );
-		// We wrap it in another panel so it gets some border space;
-		// This is needed because SwingWT resizes components wrongly when window is maximized and de-maximized
-		// The extra space still lets the content be seen.
+		
 		contentBox.add( buttonsPanel );
 		
 		final JPanel chartsCommonControlPanel = Utils.createWrapperPanel();
@@ -171,6 +288,32 @@ public class ChartsTab extends Tab {
 	}
 	
 	/**
+	 * Returns the replay file in the autorep folder.<br>
+	 * The autorep folder is taken from the autoscan tab. The returned files are sorted by the last modified property.
+	 * @return the replay file in the autorep folder; or <code>null</code> if the autorep folder does not exist or is not a folder
+	 */
+	private File[] getAutorepFiles() {
+		final File autoRepsFolder = new File( MainFrame.getInstance().autoscanTab.allRepsDestinationTextField.getText() );
+		
+		if ( autoRepsFolder.exists() && autoRepsFolder.isDirectory() ) {
+			final File[] autoreplayFiles = autoRepsFolder.listFiles( IO_REPLAY_FILE_FILTER );
+			
+			if ( autoreplayFiles == null || autoreplayFiles.length == 0 ) {
+				JOptionPane.showMessageDialog( contentBox, "You do not have replays in your autoreplay folder!", "Error", JOptionPane.ERROR_MESSAGE );
+				return null;
+			}
+			else {
+				Arrays.sort( autoreplayFiles, REPLAY_LAST_MODIFIED_COMPARATOR );
+				return autoreplayFiles;
+			}
+		}
+		else {
+			JOptionPane.showMessageDialog( contentBox, "Autoreplay folder does not exist!", "Error", JOptionPane.ERROR_MESSAGE );
+			return null;
+		}
+	}
+	
+	/**
 	 * Sets the replay file displayed on the charts tab.
 	 * @param file replay file to be set
 	 */
@@ -208,8 +351,8 @@ public class ChartsTab extends Tab {
 	public void onReplayResultListChange( final boolean hasResultReplay ) {
 		if ( !hasResultReplay )
 			openedIndexFromResultListWrapper[ 0 ] = null;
-		previousReplayButton.setEnabled( hasResultReplay );
-		nextReplayButton    .setEnabled( hasResultReplay );
+		previousSearchReplayButton.setEnabled( hasResultReplay );
+		nextSearchReplayButton    .setEnabled( hasResultReplay );
 	}
 	
 	@Override

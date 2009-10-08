@@ -242,10 +242,10 @@ public class MainFrame extends JFrame {
 		// Collapse expand label
 		final JPanel        tabLinePanel  = Utils.createWrapperPanelLeftAligned();
 		final JLabel        iconLabel     = new JLabel( IconResourceManager.ICON_ARROW_IN, SwingConstants.LEFT );
-		final JLabel        titleLabel    = new JLabel( "Collapse the navigation bar" );
-		tabLinePanel.setToolTipText( "Collapse" );
-		iconLabel   .setToolTipText( "Collapse" );
-		titleLabel  .setToolTipText( "Collapse" );
+		final JLabel        titleLabel    = new JLabel( "Collapse" );
+		tabLinePanel.setToolTipText( "Collapse the navigation bar" );
+		iconLabel   .setToolTipText( "Collapse the navigation bar" );
+		titleLabel  .setToolTipText( "Collapse the navigation bar" );
 		final MouseListener mouseListener = new MouseAdapter() {
 			@Override
 			public void mousePressed( final MouseEvent event ) {

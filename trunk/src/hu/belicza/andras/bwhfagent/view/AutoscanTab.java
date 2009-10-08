@@ -52,7 +52,7 @@ public class AutoscanTab extends LoggedTab {
 	/** Checkbox to enable/disable autosaving all reps.                         */
 	private   final JCheckBox  saveAllRepsCheckBox              = new JCheckBox( "Save all replays to folder:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAVE_ALL_REPS ) ) );
 	/** Save hacker replays to this folder.                                     */
-	private   final JTextField allRepsDestinationTextField      = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_REPS_DESTINATION ) );
+	public    final JTextField allRepsDestinationTextField      = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_REPS_DESTINATION ) );
 	/** Checkbox to use short names for autosaved replays.                      */
 	private   final JCheckBox  useShortNamesForAutosaveCheckBox = new JCheckBox( "Use short names for autosaved replays (short format: 'YYMMDD hhmmss.rep', default: 'YYYY-MM-DD hh-mm-ss LastRep.rep' )", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_USE_SHORT_NAMES_FOR_AUTOSAVE ) ) );
 	/** Checkbox to enable/disable playing sound if found hacks.                */
