@@ -6,7 +6,9 @@
 
 ----
 ===New features and changes in the upcoming release===
+ * Added 2 new buttons to the charts tab: *"Prev autorep"* and *"Next autorep"*. With these buttons you can easily navigate between the autosaved replays.
  * Displaying game chat did not display the correct name of the replay file (always displayed the name of last replay).
+ * Fixed a bug wich cause some layout problems when the state of the maximized window changed.
 
 ----
 ===2.72 2009-10-07===
