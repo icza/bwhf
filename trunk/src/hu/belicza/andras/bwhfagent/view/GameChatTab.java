@@ -107,6 +107,8 @@ public class GameChatTab extends ProgressLoggedTab {
 		if ( !selectFileToDisplayFromButton.isEnabled() )
 			return;
 		
+		final String replayFileAbsolutePath = replayFile.getAbsolutePath();
+		
 		selectFilesToExtractFromButton.setEnabled( false );
 		selectFileToDisplayFromButton.setEnabled( false );
 		displayFromLastReplayButton.setEnabled( false );
@@ -116,18 +118,18 @@ public class GameChatTab extends ProgressLoggedTab {
 			final Replay replay = BinRepParser.parseReplay( replayFile, true, true, true );
 			logMessage( "\n", false ); // Prints 2 empty lines
 			if ( replay == null )
-				logMessage( "Could not extract game chat from '" + Consts.LAST_REPLAY_FILE_NAME + "'!" );
+				logMessage( "Could not extract game chat from '" + replayFileAbsolutePath + "'!" );
 			else {
 				if ( includeReplayHeaderCheckBox.isSelected() ) {
-					logMessage( "Replay header information of '" + Consts.LAST_REPLAY_FILE_NAME + "':" );
+					logMessage( "Replay header information of '" + replayFileAbsolutePath + "':" );
 					final StringWriter headerInfoWriter = new StringWriter();
 					replay.replayHeader.printHeaderInformation( new PrintWriter( headerInfoWriter ) );
 					logMessage( headerInfoWriter.toString(), false );
 					logMessage( "", false ); // Prints an empty line
 				}
-				logMessage( "Game chat of '" + Consts.LAST_REPLAY_FILE_NAME + "':" );
+				logMessage( "Game chat of '" + replayFileAbsolutePath + "':" );
 				logMessage( replay.gameChat, false );
-				logMessage( "End of game chat of '" + Consts.LAST_REPLAY_FILE_NAME + "'." );
+				logMessage( "End of game chat of '" + replayFileAbsolutePath + "'." );
 			}
 			progressBar.setValue( 1 );
 		}
