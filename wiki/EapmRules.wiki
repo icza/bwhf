@@ -11,7 +11,7 @@ APM calculation is pretty simple: one just have to divide the number of actions 
  * Unit queue overflow: if more than 5 units/subunits are trained in a short time (~1.05 sec)
  * Too fast cancel (~0.84 sec): if a train, research, upgrade, hatch command gets cancelled right away
  * Too fast repetition of some commands (~0.42 sec): move, attack move, set rally, stop, hold, hotkey assign
- * Too fast switch away from a selected unit or reselecting the same units without giving them any commands (~0.336 sec) (by too fast I mean there is not even time to check the state of the units); double tapping a hotkey to center a group of units is NOT considered ineffective
+ * Too fast switch away from a selected unit or reselecting the same units without giving them any commands (~0.336 sec) (by too fast I mean there is not even time to check the state of the units and optionally react to it accordingly); double tapping a hotkey to center a group of units is NOT considered ineffective
  * Repetition of some commands (without time restriction): hatch, morph, upgrade, research, build, cancel, merge archon, merge dark archon, lift, hotkey assign to same group
 
 *Commands that are _NOT_ considered ineffective:*
