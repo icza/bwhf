@@ -17,6 +17,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.text.DateFormat;
@@ -46,6 +47,7 @@ public class AdminServlet extends BaseServlet {
 		REPORTERS_STAT ( 0x08, "Reporters stats"     ),
 		MANAGE_AKAS    ( 0x10, "Manage AKAs"         ),
 		CHANGE_PASSWORD( 0x40, "Change password"     ),
+		SQL_TOOL       ( 0x80, "SQL Tool"            ),
 		LOGOUT         ( 0x20, "Logout"              );
 		
 		public final int    pageId;
@@ -103,6 +105,10 @@ public class AdminServlet extends BaseServlet {
 	private static final String REQUEST_PARAM_AKA_ACTION        = "akaaction";
 	/** Password again request param.              */
 	private static final String REQUEST_PARAM_PASSWORD_AGAIN    = "passwordagain";
+	/** SQL comamnd request param.                 */
+	private static final String REQUEST_PARAM_SQL_COMMAND       = "sqlcommand";
+	/** SQL comamnd type request param.            */
+	private static final String REQUEST_PARAM_SQL_COMMAND_TYPE  = "sqlcommandtype";
 	
 	/** Time format to format report times. */
 	private static final DateFormat TIME_FORMAT         = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss.SSS" );
@@ -150,6 +156,9 @@ public class AdminServlet extends BaseServlet {
 				break;
 			case CHANGE_PASSWORD :
 				handleChangePassword( request, response );
+				break;
+			case SQL_TOOL :
+				handleSqlTool( request, response );
 				break;
 			case LOGOUT :
 				if ( session != null )
@@ -255,7 +264,8 @@ public class AdminServlet extends BaseServlet {
 			else
 				request.getRequestDispatcher( "admin" ).forward( request, response );
 			
-		} catch ( final SQLException se ) {
+		}
+		catch ( final SQLException se ) {
 			se.printStackTrace();
 			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
 		}
@@ -403,7 +413,7 @@ public class AdminServlet extends BaseServlet {
 					+ ( hackerName != null ? " value='" + encodeHtmlString( hackerName ) + "'" : "" ) + ">&nbsp;&nbsp;|&nbsp;&nbsp;Limit:<input type=text name='" + REQUEST_PARAM_LASTREPS_LIMIT + "'" 
 					+ " value='" + lastRepsLimit + "' size=1>&nbsp;&nbsp;|&nbsp;&nbsp;<input type=submit value='Apply'></p>" );
 			
-			String query = "SELECT report.id, reporter.name, key.id, hacker.id, hacker.name, hacker.gateway, game_engine, report.version, substr(report.agent_version,1,4), game.id, report.revocated"
+			String query = "SELECT report.id, reporter.name, key.id, hacker.id, hacker.name, hacker.gateway, game_engine, report.version, substr(report.agent_version,1,4), game.id, report.revocated, key.revocated"
 					+ ( fullAdmin ? ", key.value, report.ip, changer.name" : "" ) + " FROM report JOIN key on report.key=key.id JOIN person as reporter on key.person=reporter.id JOIN hacker on report.hacker=hacker.id LEFT OUTER JOIN game on report.replay_md5=game.replay_md5"
 					+ ( fullAdmin ? " LEFT OUTER JOIN person as changer on report.changed_by=changer.id" : "" );
 			if ( keyId != null )
@@ -431,22 +441,24 @@ public class AdminServlet extends BaseServlet {
 				final boolean revocated = resultSet.getBoolean( 11 );
 				
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
-						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 13 ) + "' target='_blank'>" + resultSet.getString( 13 ) + "&uarr;</a>" : "" ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) 
-						+ "<td align=right><a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_KEY_ID + "')[0].value='" + resultSet.getInt( 3 ) + "';document.forms['lastReportsFormId'].submit();\">" + resultSet.getInt( 3 ) + "</a>" + ( fullAdmin ? ' ' + getHackerRecordsByKeyLink( resultSet.getString( 12 ), "", "keyreportsform" ) : "" ) + "<td align=right>" + resultSet.getInt( 4 )
+						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 14 ) + "' target='_blank'>" + resultSet.getString( 14 ) + "&uarr;</a>" : "" ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) 
+						+ "<td align=right>" + ( resultSet.getBoolean( 12 ) ? "(revocated) " : "" ) + "<a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_KEY_ID + "')[0].value='" + resultSet.getInt( 3 ) + "';document.forms['lastReportsFormId'].submit();\">" + resultSet.getInt( 3 ) + "</a>" + ( fullAdmin ? ' ' + getHackerRecordsByKeyLink( resultSet.getString( 13 ), "", "keyreportsform" ) : "" ) 
+						+ "<td align=right>" + resultSet.getInt( 4 )
 						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 5 ) )
 						+ "<td>" + getGatewayComboHtml( gateway, reportId )
 						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 7 ) ] + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 8 ) )
 						+ "<td align=right>" + resultSet.getString( 9 ) + "<td align=right>" + ( resultSet.getObject( 10 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 10 ), Integer.toString( resultSet.getInt( 10 ) ) ) ) + "<td>" + ( revocated ? "Yes" : "No" ) );
 				outputWriter.println( revocated ? "<input type=submit value='Reinstate' onclick='javascript:this.form." + REQUEST_PARAM_REINSTATE_ID + ".value=\"" + reportId + "\";'>" : "<input type=submit value='Revocate' onclick='javascript:this.form." + REQUEST_PARAM_REVOCATE_ID + ".value=\"" + reportId + "\";'>" );
 				if ( fullAdmin )
-					outputWriter.println( "<td>" + ( resultSet.getString( 14 ) == null ? "&nbsp;" : encodeHtmlString( resultSet.getString( 14 ) ) ) );
+					outputWriter.println( "<td>" + ( resultSet.getString( 15 ) == null ? "&nbsp;" : encodeHtmlString( resultSet.getString( 15 ) ) ) );
 			}
 			resultSet.close();
 			statement.close();
 			outputWriter.println( "</table></form>" );
 			
 			renderFooter( outputWriter );
-		} catch ( final SQLException se ) {
+		}
+		catch ( final SQLException se ) {
 			se.printStackTrace();
 			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
 		}
@@ -595,7 +607,8 @@ public class AdminServlet extends BaseServlet {
 			}
 			
 			renderFooter( outputWriter );
-		} catch ( final SQLException se ) {
+		}
+		catch ( final SQLException se ) {
 			se.printStackTrace();
 			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
 		}
@@ -628,9 +641,15 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "<table border=1>" );
 			statement = connection.createStatement();
 			
-			resultSet = statement.executeQuery( "select ((select count(*) from game)+0.0)/(select count(*) from player)" );
+			resultSet = statement.executeQuery( "SELECT ((SELECT COUNT(*) FROM game)+0.0)/(SELECT COUNT(*) FROM player)" );
 			if ( resultSet.next() ) {
 				outputWriter.println( "<tr><th align=left>Games Per Players quota:<td align=right>" + String.format( "%.5f", resultSet.getFloat( 1 ) ) );
+			}
+			resultSet.close();
+			
+			resultSet = statement.executeQuery( "SELECT ((SELECT COUNT(*) FROM report JOIN key on key.id=report.key WHERE report.revocated=FALSE AND key.revocated=FALSE)+0.0)/(SELECT COUNT(*) FROM (SELECT hacker.id FROM hacker JOIN report on report.hacker=hacker.id JOIN key on report.key=key.id WHERE report.revocated=FALSE AND key.revocated=FALSE GROUP BY hacker.id HAVING COUNT(*)>0) as dummy)" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr><th align=left>Reports Per Hackers quota:<td align=right>" + String.format( "%.5f", resultSet.getFloat( 1 ) ) );
 			}
 			resultSet.close();
 			
@@ -682,7 +701,8 @@ public class AdminServlet extends BaseServlet {
 			
 			renderFooter( outputWriter );
 			
-		} catch ( final SQLException se ) {
+		}
+		catch ( final SQLException se ) {
 			se.printStackTrace();
 			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
 		}
@@ -739,7 +759,8 @@ public class AdminServlet extends BaseServlet {
 			
 			renderFooter( outputWriter );
 			
-		} catch ( final SQLException se ) {
+		}
+		catch ( final SQLException se ) {
 			se.printStackTrace();
 			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
 		}
@@ -836,7 +857,8 @@ public class AdminServlet extends BaseServlet {
 			
 			renderFooter( outputWriter );
 			
-		} catch ( final SQLException se ) {
+		}
+		catch ( final SQLException se ) {
 			se.printStackTrace();
 			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
 		}
@@ -875,7 +897,7 @@ public class AdminServlet extends BaseServlet {
 			if ( password != null && passwordAgain != null ) {
 				if ( !password.equals( passwordAgain ) )
 					renderMessage( "Passwords do not match!", true, outputWriter );
-				else 
+				else
 					synchronized ( Page.CHANGE_PASSWORD ) {
 						statement = connection.prepareStatement( "UPDATE person set password=? WHERE " + ( fullAdmin ? "name=?" : "id=" + request.getSession( false ).getAttribute( ATTRIBUTE_USER_ID ) ) );
 						statement.setString( 1, encodePassword( password ) );
@@ -899,13 +921,105 @@ public class AdminServlet extends BaseServlet {
 			
 			renderFooter( outputWriter );
 			
-		} catch ( final SQLException se ) {
+		}
+		catch ( final SQLException se ) {
 			se.printStackTrace();
 			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
 		}
 		finally {
 			if ( statement != null )
 				try { statement.close(); } catch ( final SQLException se ) {}
+			if ( connection != null )
+				try { connection.close(); } catch ( final SQLException se ) {}
+		}
+	}
+	
+	/**
+	 * Handles changing password.
+	 * @param request the http servlet request
+	 * @param response the http servlet repsonse
+	 */
+	private void handleSqlTool( final HttpServletRequest request, final HttpServletResponse response ) throws IOException, ServletException {
+		Connection  connection   = null;
+		Statement   statement    = null;
+		ResultSet   resultSet    = null;
+		PrintWriter outputWriter = null;
+		
+		try {
+			outputWriter = response.getWriter();
+			renderHeader( request, outputWriter );
+			outputWriter.println( "<h3>" + Page.SQL_TOOL.displayName + "</h3>" );
+			
+			final String  sqlCommand     = getNullStringParamValue( request, REQUEST_PARAM_SQL_COMMAND      );
+			final Integer sqlCommandType = getIntegerParamValue   ( request, REQUEST_PARAM_SQL_COMMAND_TYPE );
+			
+			if ( sqlCommandType != null && sqlCommand == null )
+				renderMessage( "Missing SQL command!", true, outputWriter );
+			
+			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.SQL_TOOL.name() + "' method=POST>" );
+			outputWriter.println( "<textarea id='sqlCommandAreaId' rows=10 cols=100 name='" + REQUEST_PARAM_SQL_COMMAND + "'>" );
+			if ( sqlCommand != null )
+				outputWriter.println( encodeHtmlString( sqlCommand ) );
+			outputWriter.println( "</textarea>" );
+			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_SQL_COMMAND_TYPE + "'>" );
+			outputWriter.println( "<br><input type=submit value='Execute Query' onclick='javascript:this.form." + REQUEST_PARAM_SQL_COMMAND_TYPE + ".value=\"0\";return true;'>" );
+			outputWriter.println( "<input type=submit value='Execute Update' onclick='javascript:this.form." + REQUEST_PARAM_SQL_COMMAND_TYPE + ".value=\"1\";return true;'>" );
+			outputWriter.println( "</form>" );
+			outputWriter.println( "<script>document.getElementById('sqlCommandAreaId').focus();</script>" );
+			
+			connection = dataSource.getConnection();
+			
+			if ( sqlCommand != null && sqlCommandType != null ) {
+				try {
+					statement = connection.createStatement();
+					if ( sqlCommandType == 0 ) {
+						outputWriter.println( "<b>SQL query result:</b>" );
+						resultSet = statement.executeQuery( sqlCommand );
+						final ResultSetMetaData metaData = resultSet.getMetaData();
+						
+						outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
+						final int columnCount = metaData.getColumnCount();
+						outputWriter.print( "<tr align=center><td><b>#</b>" );
+						for ( int i = 1; i <= columnCount; i++ )
+							outputWriter.print( "<td><b>" + encodeHtmlString( metaData.getColumnLabel( i ) ) + "</b><br>" + encodeHtmlString( metaData.getColumnTypeName( i ) ) );
+						outputWriter.println();
+						
+						int counter = 0;
+						while ( resultSet.next() ) {
+							outputWriter.print( "<tr><td align=right>" + (++counter) );
+							for ( int i = 1; i <= columnCount; i++ ) {
+								final Object object = resultSet.getObject( i );
+								outputWriter.print( "<td>" + ( encodeHtmlString( object == null ? "<null>" : resultSet.getObject( i ).toString() ) ) );
+							}
+							outputWriter.println();
+						}
+						outputWriter.println( "</table>" );
+					}
+					else if ( sqlCommandType == 1 ) {
+						outputWriter.println( "<b>SQL update result:</b>" );
+						final int result = statement.executeUpdate( sqlCommand );
+						outputWriter.println( " <b>" + result + "</b>" );
+					}
+				}
+				catch ( final SQLException se ) {
+					outputWriter.println( "<b>" + se.getMessage() + "</b>" );
+				}
+				finally {
+					if ( resultSet != null )
+						try { resultSet.close(); } catch ( final SQLException se ) {}
+					if ( statement != null )
+						try { statement.close(); } catch ( final SQLException se ) {}
+				}
+			}
+			
+			renderFooter( outputWriter );
+			
+		}
+		catch ( final SQLException se ) {
+			se.printStackTrace();
+			sendBackErrorMessage( response, "SQL error: " + se.getMessage() );
+		}
+		finally {
 			if ( connection != null )
 				try { connection.close(); } catch ( final SQLException se ) {}
 		}
