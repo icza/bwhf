@@ -956,8 +956,32 @@ public class AdminServlet extends BaseServlet {
 			if ( sqlCommandType != null && sqlCommand == null )
 				renderMessage( "Missing SQL command!", true, outputWriter );
 			
+			boolean commandAllowed = false;
+			if ( sqlCommand != null && sqlCommandType != null ) {
+				final String command = " " + ( sqlCommand.toLowerCase().replace( '\n', ' ' ).replace( '\r', ' ' ).replace( ';', ' ' ) ) + " ";
+				if ( command.contains( " drop " ) )
+					renderMessage( "SQL command contains DROP, execution not allowed!", true, outputWriter );
+				else if ( command.contains( " alter " ) )
+					renderMessage( "SQL command contains ALTER, execution not allowed!", true, outputWriter );
+				else if ( command.contains( " create " ) )
+					renderMessage( "SQL command contains CREATE, execution not allowed!", true, outputWriter );
+				else if ( command.contains( " delete " ) ) {
+					if ( !command.contains( " where " ) )
+						renderMessage( "SQL command contains DELETE without WHERE, execution not allowed!", true, outputWriter );
+					else
+						commandAllowed = true;
+				}
+				else if ( command.contains( " update " ) ) {
+					if ( !command.contains( " where " ) )
+						renderMessage( "SQL command contains UPDATE without WHERE, execution not allowed!", true, outputWriter );
+					else
+						commandAllowed = true;
+				}
+				else
+					commandAllowed = true;
+			}
 			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.SQL_TOOL.name() + "' method=POST>" );
-			outputWriter.println( "<textarea id='sqlCommandAreaId' rows=10 cols=100 name='" + REQUEST_PARAM_SQL_COMMAND + "'>" );
+			outputWriter.println( "<textarea id='sqlCommandAreaId' rows=10 cols=80 name='" + REQUEST_PARAM_SQL_COMMAND + "'>" );
 			if ( sqlCommand != null )
 				outputWriter.println( encodeHtmlString( sqlCommand ) );
 			outputWriter.println( "</textarea>" );
@@ -969,7 +993,7 @@ public class AdminServlet extends BaseServlet {
 			
 			connection = dataSource.getConnection();
 			
-			if ( sqlCommand != null && sqlCommandType != null ) {
+			if ( commandAllowed ) {
 				try {
 					statement = connection.createStatement();
 					if ( sqlCommandType == 0 ) {
