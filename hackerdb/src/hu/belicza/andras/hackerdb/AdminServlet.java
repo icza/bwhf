@@ -441,13 +441,18 @@ public class AdminServlet extends BaseServlet {
 				final boolean revocated = resultSet.getBoolean( 11 );
 				
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
-						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 14 ) + "' target='_blank'>" + resultSet.getString( 14 ) + "&uarr;</a>" : "" ) + "<td align=right>" + reportId + "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) 
+						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 14 ) + "' target='_blank'>" + resultSet.getString( 14 ) + "&uarr;</a>" : "" )
+						+ "<td align=right>" + reportId
+						+ "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) 
 						+ "<td align=right>" + ( resultSet.getBoolean( 12 ) ? "(revocated) " : "" ) + "<a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_KEY_ID + "')[0].value='" + resultSet.getInt( 3 ) + "';document.forms['lastReportsFormId'].submit();\">" + resultSet.getInt( 3 ) + "</a>" + ( fullAdmin ? ' ' + getHackerRecordsByKeyLink( resultSet.getString( 13 ), "", "keyreportsform" ) : "" ) 
 						+ "<td align=right>" + resultSet.getInt( 4 )
 						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 5 ) )
 						+ "<td>" + getGatewayComboHtml( gateway, reportId )
-						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 7 ) ] + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 8 ) )
-						+ "<td align=right>" + resultSet.getString( 9 ) + "<td align=right>" + ( resultSet.getObject( 10 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 10 ), Integer.toString( resultSet.getInt( 10 ) ) ) ) + "<td>" + ( revocated ? "Yes" : "No" ) );
+						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 7 ) ]
+						+ "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 8 ) )
+						+ "<td align=right>" + resultSet.getString( 9 )
+						+ "<td align=right>" + ( resultSet.getObject( 10 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 10 ), Integer.toString( resultSet.getInt( 10 ) ) ) )
+						+ "<td>" + ( revocated ? "Yes" : "No" ) );
 				outputWriter.println( revocated ? "<input type=submit value='Reinstate' onclick='javascript:this.form." + REQUEST_PARAM_REINSTATE_ID + ".value=\"" + reportId + "\";'>" : "<input type=submit value='Revocate' onclick='javascript:this.form." + REQUEST_PARAM_REVOCATE_ID + ".value=\"" + reportId + "\";'>" );
 				if ( fullAdmin )
 					outputWriter.println( "<td>" + ( resultSet.getString( 15 ) == null ? "&nbsp;" : encodeHtmlString( resultSet.getString( 15 ) ) ) );
@@ -739,16 +744,19 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
 			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME + "><th>#<th>Key<th>Key owner<th>Reports<br>sent<th>Hackers<br>caught<th>Revocated<br>count<th>Avg daily<br>reports<th>Active period<th>First report<th>Last report" );
 			statement = connection.createStatement();
-			resultSet = statement.executeQuery( "SELECT key.id, key.value, person.name, COUNT(report.id), COUNT(DISTINCT hacker.id), COUNT(CASE WHEN report.revocated=TRUE OR key.revocated=TRUE THEN 1 END), COUNT(report.id)/(1.000+CAST(CAST(MAX(report.version) AS DATE)-CAST(MIN(report.version) AS DATE) AS bigint)), MIN(report.version), MAX(report.version), 1 + date(MAX(report.version)) - date(MIN(report.version)) FROM report JOIN key on report.key=key.id JOIN person on key.person=person.id JOIN hacker on report.hacker=hacker.id GROUP BY key.id, key.value, person.name ORDER BY COUNT(report.id) DESC;" );
+			resultSet = statement.executeQuery( "SELECT key.id, key.value, key.revocated, person.name, COUNT(report.id), COUNT(DISTINCT hacker.id), COUNT(CASE WHEN report.revocated=TRUE OR key.revocated=TRUE THEN 1 END), COUNT(report.id)/(1.000+CAST(CAST(MAX(report.version) AS DATE)-CAST(MIN(report.version) AS DATE) AS bigint)), MIN(report.version), MAX(report.version), 1 + date(MAX(report.version)) - date(MIN(report.version)) FROM report JOIN key on report.key=key.id JOIN person on key.person=person.id JOIN hacker on report.hacker=hacker.id GROUP BY key.id, key.value, person.name ORDER BY COUNT(report.id) DESC;" );
 			
 			int rowCounter = 0;
 			while ( resultSet.next() ) {
 				outputWriter.println( "<tr><td align=right>" + (++rowCounter)
-						+ "<td align=right><a href='admin?" +  REQUEST_PARAM_PAGE_NAME + '=' + Page.LAST_REPORTS.name() + '&' + REQUEST_PARAM_KEY_ID + "=" + resultSet.getInt( 1 ) + "'>" + resultSet.getInt( 1 ) + "</a>" + ( fullAdmin ? ' ' + getHackerRecordsByKeyLink( resultSet.getString( 2 ), "", "keyreportsform" ) : "" ) + "<td>" + encodeHtmlString( resultSet.getString( 3 ) )
-						+ "<td align=right>" + resultSet.getInt( 4 ) + "<td align=right>" + resultSet.getInt( 5 ) + "<td align=right>" + resultSet.getInt( 6 )
-						+ "<td align=right>" + String.format( "%.3f", resultSet.getFloat( 7 ) )
-						+ "<td align=center>" + formatDays( resultSet.getInt( 10 ) )
-						+ "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 8 ) ) + "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 9 ) ) );
+						+ "<td align=right>" + ( resultSet.getBoolean( 3 ) ? "(revocated) " : "" ) + "<a href='admin?" +  REQUEST_PARAM_PAGE_NAME + '=' + Page.LAST_REPORTS.name() + '&' + REQUEST_PARAM_KEY_ID + "=" + resultSet.getInt( 1 ) + "'>" + resultSet.getInt( 1 ) + "</a>" + ( fullAdmin ? ' ' + getHackerRecordsByKeyLink( resultSet.getString( 2 ), "", "keyreportsform" ) : "" )
+						+ "<td>" + encodeHtmlString( resultSet.getString( 4 ) )
+						+ "<td align=right>" + resultSet.getInt( 5 ) + "<td align=right>" + resultSet.getInt( 6 )
+						+ "<td align=right>" + resultSet.getInt( 7 )
+						+ "<td align=right>" + String.format( "%.3f", resultSet.getFloat( 8 ) )
+						+ "<td align=center>" + formatDays( resultSet.getInt( 11 ) )
+						+ "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 9 ) )
+						+ "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 10 ) ) );
 			}
 			resultSet.close();
 			statement.close();
