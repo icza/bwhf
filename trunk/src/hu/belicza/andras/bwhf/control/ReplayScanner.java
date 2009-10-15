@@ -17,7 +17,7 @@ import java.util.List;
 public class ReplayScanner {
 	
 	/** Version of the scan engine. */
-	public static final String ENGINE_VERSION = "1.42";
+	public static final String ENGINE_VERSION = "1.43";
 	
 	/**
 	 * Scans the replay actions for hacks.
@@ -53,7 +53,7 @@ public class ReplayScanner {
 		int actionsAtIteration5Count = 0;
 		for ( int actionIndex = 0; actionIndex < actionsCount && actionIndex < 25; actionIndex++ )
 			if ( playerActions[ actionIndex ].iteration == 5 ) {
-				if ( playerActions[ actionIndex ].actionNameIndex != Action.ACTION_NAME_INDEX_UNKNOWN )
+				if ( playerActions[ actionIndex ].actionNameIndex != Action.ACTION_NAME_INDEX_UNKNOWN && playerActions[ actionIndex ].actionNameIndex != Action.ACTION_NAME_INDEX_LEAVE )
 					actionsAtIteration5Count++;
 			}
 			else
