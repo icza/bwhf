@@ -122,19 +122,23 @@ public class AboutTab extends Tab {
 			contentBox.add( wrapperScrollPane );
 		}
 		else {
-			final JPanel aboutPanel = new JPanel( new GridLayout( 6, 2, 0, 12 ) );
+			final JPanel aboutPanel = new JPanel( new GridLayout( 8, 2, 0, 12 ) );
 			aboutPanel.add( new JLabel( "Application name:" ) );
 			aboutPanel.add( new JLabel( Consts.APPLICATION_NAME + "\u2122" ) );  // \u2122 is the unicode of trade mark ('™')
 			aboutPanel.add( new JLabel( "Version " ) );
 			aboutPanel.add( new JLabel( MainFrame.getInstance().applicationVersion ) );
 			aboutPanel.add( new JLabel( "Author:" ) );
 			aboutPanel.add( new JLabel( Consts.APPLICATION_AUTHOR ) );
+			aboutPanel.add( new JLabel( "Author e-mail:" ) );
+			aboutPanel.add( new JLabel( Consts.AUTHOR_EMAIL ) );
 			aboutPanel.add( new JLabel( "Battle.net account:" ) );
 			aboutPanel.add( new JLabel( "Dakota_Fanning@USEast" ) );
 			aboutPanel.add( new JLabel( "Home page:" ) );
 			aboutPanel.add( new JLabel( Consts.HOME_PAGE_URL ) );
 			aboutPanel.add( new JLabel( "Online hacker database:" ) );
 			aboutPanel.add( new JLabel( Consts.BWHF_HACKER_DATA_BASE_SERVER_URL ) );
+			aboutPanel.add( new JLabel( "Player's Network:" ) );
+			aboutPanel.add( new JLabel( Consts.PLAYERS_NETWORK_PAGE_URL ) );
 			
 			contentBox.add( Utils.wrapInPanel( aboutPanel ) );
 			
