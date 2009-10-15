@@ -744,7 +744,7 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
 			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME + "><th>#<th>Key<th>Key owner<th>Reports<br>sent<th>Hackers<br>caught<th>Revocated<br>count<th>Avg daily<br>reports<th>Active period<th>First report<th>Last report" );
 			statement = connection.createStatement();
-			resultSet = statement.executeQuery( "SELECT key.id, key.value, key.revocated, person.name, COUNT(report.id), COUNT(DISTINCT hacker.id), COUNT(CASE WHEN report.revocated=TRUE OR key.revocated=TRUE THEN 1 END), COUNT(report.id)/(1.000+CAST(CAST(MAX(report.version) AS DATE)-CAST(MIN(report.version) AS DATE) AS bigint)), MIN(report.version), MAX(report.version), 1 + date(MAX(report.version)) - date(MIN(report.version)) FROM report JOIN key on report.key=key.id JOIN person on key.person=person.id JOIN hacker on report.hacker=hacker.id GROUP BY key.id, key.value, person.name ORDER BY COUNT(report.id) DESC;" );
+			resultSet = statement.executeQuery( "SELECT key.id, key.value, key.revocated, person.name, COUNT(report.id), COUNT(DISTINCT hacker.id), COUNT(CASE WHEN report.revocated=TRUE OR key.revocated=TRUE THEN 1 END), COUNT(report.id)/(1.000+CAST(CAST(MAX(report.version) AS DATE)-CAST(MIN(report.version) AS DATE) AS bigint)), MIN(report.version), MAX(report.version), 1 + date(MAX(report.version)) - date(MIN(report.version)) FROM report JOIN key on report.key=key.id JOIN person on key.person=person.id JOIN hacker on report.hacker=hacker.id GROUP BY key.id, key.value, key.revocated, person.name ORDER BY COUNT(report.id) DESC;" );
 			
 			int rowCounter = 0;
 			while ( resultSet.next() ) {
