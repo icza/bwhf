@@ -28,6 +28,7 @@ A: There can be several reasons:
  * Manual scan does not report. Only autoscan.
  * The server might have been down when you detected the hacker. You can check this in your "autoscan.log" file.
  * The hacker you reported might have been removed (due to spoof or key revocation or being an invalid report).
+ * The player you reported might be guarded (white-listed).
 
 ===Q: Why doesn't work the player checker for me in the game lobby?===
 A: The 3 main important things to keep in mind about player checker:
@@ -39,6 +40,7 @@ A: The 3 main important things to keep in mind about player checker:
 A: If the player checker works for you, then these can be the reasons:
  * If he got reported recently, your local cache of the hacker list might not yet contain his name. It is updated automatically, or you can issue an update at any time by pressing the "Update now" button on the Player checker tab.
  * If he was reported not so recently, you might had some trouble reacing the BWHF hacker database when your Agent tried to update your local cache (either you had a connection blackout or the server was down). Try to update it manually with the "Update now" button on the Player checker tab.
+ * The player might be guarded (white-listed).
 
 ===Q: I used the player checker feature and it said: "possible hacker at slot x". What does this mean?===
 A: In the game lobby Starcraft uses a font in which the capital i and the small L looks the same, there is no way to differentiate between them just by looking at them. In cases when a name detected in the lobby which consists some capital i's or small L's and at least one of the variations is on the hacker list, it will say _"possible hacker at slot x"_.
