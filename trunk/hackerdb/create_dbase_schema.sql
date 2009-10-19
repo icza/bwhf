@@ -70,6 +70,7 @@ CREATE TABLE hacker
   id serial NOT NULL,
   "name" character varying,
   gateway integer,
+  guarded boolean NOT NULL DEFAULT false,
   "version" timestamp without time zone DEFAULT now(),
   CONSTRAINT hacker_pkey PRIMARY KEY (id)
 )
@@ -95,6 +96,15 @@ CREATE INDEX idx_hacker_name
   ON hacker
   USING btree
   (name);
+
+-- Index: idx_hacker_guarded
+
+-- DROP INDEX idx_hacker_guarded;
+
+CREATE INDEX idx_hacker_guarded
+  ON hacker
+  USING btree
+  (guarded);
 
 
 -- Table: report

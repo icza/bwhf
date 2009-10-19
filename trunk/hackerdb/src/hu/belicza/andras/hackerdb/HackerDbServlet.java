@@ -424,7 +424,7 @@ public class HackerDbServlet extends BaseServlet {
 		else
 			queryBuilder.append( "SELECT h.name, h.gateway, COUNT(h.gateway) AS reportsCount, 1 + date(MAX(r.version)) - date(MIN(r.version)) AS hackingPeriod, MIN(r.version) AS firstReported, MAX(r.version) AS lastReported" );
 		
-		queryBuilder.append( " FROM hacker h, report r, key k WHERE r.hacker=h.id AND r.key=k.id AND k.revocated=FALSE AND r.revocated=FALSE" );
+		queryBuilder.append( " FROM hacker h, report r, key k WHERE r.hacker=h.id AND r.key=k.id AND k.revocated=FALSE AND r.revocated=FALSE AND h.guarded=FALSE" );
 		
 		int sqlParamsCounter  = 0;
 		int nameParamIndex    = 0;
@@ -534,7 +534,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Last days daily reports chart data
 			final int LAST_DAYS_REPORTS = 30;
 			statement = connection.createStatement();
-			resultSet = statement.executeQuery( "SELECT date_trunc('day',report.version), COUNT(*) FROM report JOIN key on key.id=report.key WHERE report.version>=current_date-INTEGER '" + LAST_DAYS_REPORTS + "' AND report.revocated=FALSE AND key.revocated=FALSE GROUP BY date_trunc('day',report.version) ORDER BY date_trunc('day',report.version)" );
+			resultSet = statement.executeQuery( "SELECT date_trunc('day',report.version), COUNT(*) FROM report JOIN key on key.id=report.key JOIN hacker on report.hacker=hacker.id WHERE report.version>=current_date-INTEGER '" + LAST_DAYS_REPORTS + "' AND report.revocated=FALSE AND key.revocated=FALSE AND hacker.guarded=FALSE GROUP BY date_trunc('day',report.version) ORDER BY date_trunc('day',report.version)" );
 			final List< Object[] > dailyReportsList = new ArrayList< Object[] >( LAST_DAYS_REPORTS );
 			final DateFormat dayFormat = new SimpleDateFormat( "dd" );
 			int lastDaysReportsCount = 0;
@@ -551,7 +551,7 @@ public class HackerDbServlet extends BaseServlet {
 			
 			// Gateway distribution chart data
 			statement = connection.createStatement();
-			resultSet = statement.executeQuery( "SELECT hacker.gateway, COUNT(DISTINCT hacker.id) FROM report JOIN key on report.key=key.id JOIN hacker on report.hacker=hacker.id WHERE key.revocated=FALSE AND report.revocated=FALSE GROUP BY hacker.gateway ORDER BY COUNT(DISTINCT hacker.id) DESC" );
+			resultSet = statement.executeQuery( "SELECT hacker.gateway, COUNT(DISTINCT hacker.id) FROM report JOIN key on report.key=key.id JOIN hacker on report.hacker=hacker.id WHERE key.revocated=FALSE AND report.revocated=FALSE AND hacker.guarded=FALSE GROUP BY hacker.gateway ORDER BY COUNT(DISTINCT hacker.id) DESC" );
 			final List< int[] > gatewayDistributionList = new ArrayList< int[] >();
 			int hackersCount = 0;
 			while ( resultSet.next() ) {
@@ -565,7 +565,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Monthly reports chart data
 			final List< Object[] > monthlyReportsList = new ArrayList< Object[] >();
 			statement = connection.createStatement();
-			resultSet = statement.executeQuery( "SELECT date_trunc('month',report.version), COUNT(*) FROM report JOIN key on report.key=key.id WHERE key.revocated=FALSE AND report.revocated=FALSE GROUP BY date_trunc('month',report.version) ORDER BY date_trunc('month',report.version)" );
+			resultSet = statement.executeQuery( "SELECT date_trunc('month',report.version), COUNT(*) FROM report JOIN key on report.key=key.id JOIN hacker on report.hacker=hacker.id WHERE key.revocated=FALSE AND report.revocated=FALSE AND hacker.guarded=FALSE GROUP BY date_trunc('month',report.version) ORDER BY date_trunc('month',report.version)" );
 			final DateFormat monthDateFormat = new SimpleDateFormat( "yyyy-MM" );
 			int totalReportsCount = 0;
 			int maxMonthlyReportsCount = 0;
@@ -758,7 +758,7 @@ public class HackerDbServlet extends BaseServlet {
 			connection = dataSource.getConnection();
 			
 			statement = connection.createStatement();
-			resultSet = statement.executeQuery( "SELECT DISTINCT gateway, name from hacker JOIN report on report.hacker=hacker.id JOIN key on report.key=key.id WHERE key.revocated=FALSE AND report.revocated=FALSE" );
+			resultSet = statement.executeQuery( "SELECT DISTINCT gateway, name from hacker JOIN report on report.hacker=hacker.id JOIN key on report.key=key.id WHERE hacker.guarded=FALSE AND key.revocated=FALSE AND report.revocated=FALSE" );
 			outputWriter = response.getWriter();
 			
 			while ( resultSet.next() )
