@@ -224,7 +224,7 @@ public class HackerDbServlet extends BaseServlet {
 	}
 	
 	/** Hacker list menu HTML code to be sent. */
-	private static final String HACKER_LIST_MENU_HTML = "<p><a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a>"
+	private static final String HACKER_LIST_MENU_HTML = "<p><a href='http://code.google.com/p/bwhf/'>BWHF Agent home page</a>"
 			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + "=" + OPERATION_STATISTICS + "'>Statistics</a>"
 			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players'>BWHF Players' Network</a>"
 			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help (filters, sorting)</a></p>";
@@ -667,7 +667,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Header section
 			outputWriter.println( getCurrentTimeCode() );
 			outputWriter.println( "<h2>BWHF Hacker Database Statistics</h2>" );
-			outputWriter.println( "<table border=0><tr><td><a href='hackers'>Back to the hacker list</a><td>&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf'>BWHF Agent home page</a></table>" );
+			outputWriter.println( "<table border=0><tr><td><a href='hackers'>Back to the hacker list</a><td>&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/'>BWHF Agent home page</a></table>" );
 			outputWriter.println( GOOGLE_AD_HTML_HEADER );
 			outputWriter.flush();
 			
