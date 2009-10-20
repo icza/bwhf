@@ -413,7 +413,7 @@ public class AdminServlet extends BaseServlet {
 					+ ( hackerName != null ? " value='" + encodeHtmlString( hackerName ) + "'" : "" ) + ">&nbsp;&nbsp;|&nbsp;&nbsp;Limit:<input type=text name='" + REQUEST_PARAM_LASTREPS_LIMIT + "'" 
 					+ " value='" + lastRepsLimit + "' size=1>&nbsp;&nbsp;|&nbsp;&nbsp;<input type=submit value='Apply'></p>" );
 			
-			String query = "SELECT report.id, reporter.name, key.id, hacker.id, hacker.name, hacker.gateway, game_engine, report.version, substr(report.agent_version,1,4), game.id, report.revocated, key.revocated, hacker.guarded"
+			String query = "SELECT report.id, reporter.name, key.id, hacker.id, hacker.name, hacker.gateway, game_engine, report.version, substr(report.agent_version,1,5), game.id, report.revocated, key.revocated, hacker.guarded"
 					+ ( fullAdmin ? ", key.value, report.ip, changer.name" : "" ) + " FROM report JOIN key on report.key=key.id JOIN person as reporter on key.person=reporter.id JOIN hacker on report.hacker=hacker.id LEFT OUTER JOIN game on report.replay_md5=game.replay_md5"
 					+ ( fullAdmin ? " LEFT OUTER JOIN person as changer on report.changed_by=changer.id" : "" );
 			if ( keyId != null )
@@ -450,7 +450,7 @@ public class AdminServlet extends BaseServlet {
 						+ "<td>" + getGatewayComboHtml( gateway, reportId )
 						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 7 ) ]
 						+ "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 8 ) )
-						+ "<td align=right>" + resultSet.getString( 9 )
+						+ "<td>" + resultSet.getString( 9 ).trim()
 						+ "<td align=right>" + ( resultSet.getObject( 10 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 10 ), Integer.toString( resultSet.getInt( 10 ) ) ) )
 						+ "<td>" + ( revocated ? "Yes" : "No" ) );
 				outputWriter.println( revocated ? "<input type=submit value='Reinstate' onclick='javascript:this.form." + REQUEST_PARAM_REINSTATE_ID + ".value=\"" + reportId + "\";'>" : "<input type=submit value='Revocate' onclick='javascript:this.form." + REQUEST_PARAM_REVOCATE_ID + ".value=\"" + reportId + "\";'>" );
