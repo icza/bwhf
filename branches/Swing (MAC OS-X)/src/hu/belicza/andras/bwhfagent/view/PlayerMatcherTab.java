@@ -7,7 +7,6 @@ import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
 import hu.belicza.andras.bwhfagent.Consts;
 
-import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
