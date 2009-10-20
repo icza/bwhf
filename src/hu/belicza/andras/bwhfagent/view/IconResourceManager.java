@@ -1,6 +1,6 @@
 package hu.belicza.andras.bwhfagent.view;
 
-import swingwtx.swing.ImageIcon;
+import javax.swing.ImageIcon;
 
 /**
  * Icon resource manager.

@@ -15,15 +15,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
-import swingwt.awt.GridLayout;
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwtx.swing.BorderFactory;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JComboBox;
-import swingwtx.swing.JLabel;
-import swingwtx.swing.JPanel;
-import swingwtx.swing.JScrollPane;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 /**
  * Server monitor tab.
@@ -112,7 +113,9 @@ public class ServerMonitorTab extends Tab {
 		
 		final JScrollPane scrollPane = new JScrollPane( serversPanel );
 		scrollPane.setBorder( BorderFactory.createTitledBorder( "Server list:" ) );
-		contentBox.add( scrollPane );
+		contentBox.add( Utils.wrapInPanel( scrollPane ) );
+		
+		contentBox.add( new JPanel( new BorderLayout() ) );
 	}
 	
 	/**

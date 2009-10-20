@@ -22,17 +22,17 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.Map.Entry;
 
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwtx.swing.Box;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JCheckBox;
-import swingwtx.swing.JComboBox;
-import swingwtx.swing.JFileChooser;
-import swingwtx.swing.JLabel;
-import swingwtx.swing.JOptionPane;
-import swingwtx.swing.JPanel;
-import swingwtx.swing.filechooser.FileFilter;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.filechooser.FileFilter;
 
 
 /**
@@ -105,8 +105,6 @@ public class ManualScanTab extends ProgressLoggedTab {
 				}
 				final JFileChooser fileChooser = new JFileChooser( htmlReportDirectory );
 				
-				// This is for SwingWT:
-				fileChooser.setExtensionFilters( new String[] { "*.html", "*.*" }, new String[] { "HTML report files (*.html)", "All files (*.*)" } );
 				// This is for Swing:
 				fileChooser.addChoosableFileFilter( HTML_FILE_FILTER ); 
 				
@@ -125,8 +123,6 @@ public class ManualScanTab extends ProgressLoggedTab {
 			public void actionPerformed( final ActionEvent event ) {
 				final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.getReplayStartFolder() );
 				
-				// This is for SwingWT:
-				fileChooser.setExtensionFilters( new String[] { "*.rep", "*.*" }, new String[] { "Replay Files (*.rep)", "All files (*.*)" } );
 				// This is for Swing:
 				fileChooser.addChoosableFileFilter( Utils.SWING_REPLAY_FILE_FILTER ); 
 				
@@ -170,6 +166,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 		flagHackerRepsBox.add( flagHackerRepsPositionComboBox );
 		flagHackerRepsBox.add( Utils.wrapInPanel( new JLabel( "of their names" ) ) );
 		settingsBox.add( flagHackerRepsBox );
+		flagHackerRepsBox.setAlignmentX( 0.0f );
 		settingsBox.add( cleanHackFlagCheckBox );
 		settingsBox.add( createHtmlSummaryReportCheckBox );
 		contentBox.add( Utils.wrapInPanel( settingsBox ) );

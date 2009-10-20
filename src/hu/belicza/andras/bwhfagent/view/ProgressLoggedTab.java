@@ -1,7 +1,7 @@
 package hu.belicza.andras.bwhfagent.view;
 
-import swingwtx.swing.Icon;
-import swingwtx.swing.JProgressBar;
+import javax.swing.Icon;
+import javax.swing.JProgressBar;
 
 
 /**

@@ -6,29 +6,27 @@ import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.bwhfagent.view.charts.ChartsComponent;
 import hu.belicza.andras.bwhfagent.view.charts.ChartsComponent.ChartType;
 
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import swingwt.awt.Color;
-import swingwt.awt.Cursor;
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwt.awt.event.ComponentAdapter;
-import swingwt.awt.event.ComponentEvent;
-import swingwtx.swing.BorderFactory;
-import swingwtx.swing.Box;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JCheckBox;
-import swingwtx.swing.JComboBox;
-import swingwtx.swing.JFileChooser;
-import swingwtx.swing.JLabel;
-import swingwtx.swing.JOptionPane;
-import swingwtx.swing.JPanel;
-import swingwtx.swing.SwingUtilities;
-import swingwtx.swing.event.ChangeEvent;
-import swingwtx.swing.event.ChangeListener;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 /**
  * Charts tab.
@@ -206,8 +204,6 @@ public class ChartsTab extends Tab {
 			public void actionPerformed( final ActionEvent event ) {
 				final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.getReplayStartFolder() );
 				
-				// This is for SwingWT:
-				fileChooser.setExtensionFilters( new String[] { "*.rep", "*.*" }, new String[] { "Replay Files (*.rep)", "All files (*.*)" } );
 				// This is for Swing:
 				fileChooser.addChoosableFileFilter( Utils.SWING_REPLAY_FILE_FILTER ); 
 				
@@ -248,8 +244,8 @@ public class ChartsTab extends Tab {
 		final JPanel chartsCommonControlPanel = Utils.createWrapperPanel();
 		chartsCommonControlPanel.setBorder( BorderFactory.createTitledBorder( "General chart settings:" ) );
 		chartsCommonControlPanel.add( new JLabel( "Chart:" ) );
-		chartTypeComboBox.addChangeListener( new ChangeListener() {
-			public void stateChanged( final ChangeEvent event ) {
+		chartTypeComboBox.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
 				chartsComponent.setChartType( (ChartType) chartTypeComboBox.getSelectedItem() );
 			}
 		} );

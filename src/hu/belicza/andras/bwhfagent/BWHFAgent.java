@@ -1,10 +1,11 @@
 package hu.belicza.andras.bwhfagent;
 
-import java.awt.SplashScreen;
-
 import hu.belicza.andras.bwhfagent.view.MainFrame;
 import hu.belicza.andras.bwhfagent.view.Utils;
-import swingwtx.swing.SwingWTUtils;
+
+import java.awt.SplashScreen;
+
+import javax.swing.UIManager;
 
 /**
  * The main class of BWHFAgent.
@@ -20,17 +21,7 @@ public class BWHFAgent {
 	 * @param arguments used to take arguments from the running environment - not used here
 	 */
 	public static void main( final String[] arguments ) {
-		SwingWTUtils.setShowSwingWTInfoOnStartup( false );
-		
-		if ( SwingWTUtils.isMacOSX() ) {
-			SwingWTUtils.initialiseMacOSX( new Runnable() {
-				public void run() {
-					startAgent( arguments );
-				}
-			} );
-		}
-		else
-			startAgent( arguments );
+		startAgent( arguments );
 	}
 	
 	/**
@@ -42,11 +33,10 @@ public class BWHFAgent {
 	private static void startAgent( final String[] arguments ) {
 		final String applicationVersion = Utils.readVersionStringFromStream( BWHFAgent.class.getResourceAsStream( Consts.VERSION_RESOURCE_NAME ) );
 		
-		// No need of changing to system LAF with SwingWT, it already uses native components
-		/*try {
+		try {
 			UIManager.setLookAndFeel( UIManager.getSystemLookAndFeelClassName() );
 		} catch ( final Exception e  ) {
-		}*/
+		}
 	    
 		new MainFrame( applicationVersion == null ? "" : applicationVersion, arguments );
 		

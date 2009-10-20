@@ -18,12 +18,12 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JCheckBox;
-import swingwtx.swing.JFileChooser;
-import swingwtx.swing.JPanel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
 
 
 /**
@@ -74,8 +74,6 @@ public class PlayersNetworkTab extends ProgressLoggedTab {
 			public void actionPerformed( final ActionEvent event ) {
 				final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.getReplayStartFolder() );
 				
-				// This is for SwingWT:
-				fileChooser.setExtensionFilters( new String[] { "*.rep", "*.*" }, new String[] { "Replay Files (*.rep)", "All files (*.*)" } );
 				// This is for Swing:
 				fileChooser.addChoosableFileFilter( Utils.SWING_REPLAY_FILE_FILTER ); 
 				

@@ -5,29 +5,29 @@ import hu.belicza.andras.bwhfagent.Consts;
 import java.io.File;
 import java.net.URL;
 
-import swingwt.awt.BorderLayout;
-import swingwt.awt.Color;
-import swingwt.awt.Dimension;
-import swingwt.awt.Font;
-import swingwt.awt.GridBagConstraints;
-import swingwt.awt.GridBagLayout;
-import swingwt.awt.GridLayout;
-import swingwt.awt.Rectangle;
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwt.awt.event.KeyEvent;
-import swingwt.awt.event.KeyListener;
-import swingwtx.swing.BorderFactory;
-import swingwtx.swing.Box;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JCheckBox;
-import swingwtx.swing.JFileChooser;
-import swingwtx.swing.JFrame;
-import swingwtx.swing.JLabel;
-import swingwtx.swing.JOptionPane;
-import swingwtx.swing.JPanel;
-import swingwtx.swing.JSlider;
-import swingwtx.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.JTextField;
 
 /**
  * General settings tab.
@@ -47,7 +47,7 @@ public class GeneralSettingsTab extends Tab {
 	/** Check for updates button.                                            */
 	private   final JButton    checkUpdatesButton                 = new JButton( CHECK_UPDATES_BUTTON_TEXT, IconResourceManager.ICON_SERVER_CONNECT );
 	/** Starcraft directory.                                                 */
-	protected final JTextField starcraftFolderTextField           = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ) );
+	protected final JTextField starcraftFolderTextField           = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_STARCRAFT_FOLDER ), 35 );
 	/** Start folder when selecting replay flies.                            */
 	protected final JTextField replayStartFolderTextField         = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_REPLAY_START_FOLDER ) );
 	/** Default folder for replay lists.                                     */
@@ -210,7 +210,7 @@ public class GeneralSettingsTab extends Tab {
 		panel.add( button );
 		
 		label = new JLabel( "(Note that if you select a big list with thousands of replays, it might significantly slow down the startup of BWHF Agent.)" );
-		label.setFont( new Font( "Default", Font.ITALIC, 9 ) );
+		label.setFont( new Font( Font.SANS_SERIF, Font.ITALIC, 12 ) );
 		final JPanel wrapperPanel = Utils.wrapInPanel( label );
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		gridBagLayout.setConstraints( wrapperPanel, constraints );
@@ -246,7 +246,7 @@ public class GeneralSettingsTab extends Tab {
 		panel.add( alwaysMinimizeToTrayCheckBox );
 		panel.add( startAgentMinimizedToTrayCheckBox );
 		// Initialize system tray related checkboxes
-		enableSystemTrayIconCheckBox.doClick(); // This does not change the state of the checkbox
+		Utils.callActionListeners( enableSystemTrayIconCheckBox );
 		titledPanel = Utils.wrapInPanel( panel );
 		titledPanel.setBorder( BorderFactory.createTitledBorder( "Tray icon settings:" ) );
 		contentBox2.add( titledPanel );

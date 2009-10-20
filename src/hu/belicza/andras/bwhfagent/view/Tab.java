@@ -1,9 +1,9 @@
 package hu.belicza.andras.bwhfagent.view;
 
-import swingwtx.swing.Box;
-import swingwtx.swing.Icon;
-import swingwtx.swing.JComponent;
-import swingwtx.swing.JLabel;
+import javax.swing.Box;
+import javax.swing.Icon;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
 
 /**
  * Defines a tab to be added to the main frame.

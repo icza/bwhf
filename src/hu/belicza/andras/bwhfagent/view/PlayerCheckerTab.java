@@ -23,19 +23,19 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
-import swingwt.awt.BorderLayout;
-import swingwt.awt.GridBagConstraints;
-import swingwt.awt.GridBagLayout;
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwtx.swing.BorderFactory;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JCheckBox;
-import swingwtx.swing.JComboBox;
-import swingwtx.swing.JFileChooser;
-import swingwtx.swing.JLabel;
-import swingwtx.swing.JPanel;
-import swingwtx.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 
 /**
  * Player checker tab.<br>
@@ -73,7 +73,7 @@ public class PlayerCheckerTab extends LoggedTab {
 	/** Checkbox to include custom player list.                        */
 	private   final JCheckBox  includeCustomPlayerListCheckBox    = new JCheckBox( "Include this custom player list:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST ) ) );
 	/** File of the custom player list.                                */
-	private   final JTextField customPlayerListFileTextField      = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_CUSTOM_PLAYER_LIST_FILE ) );
+	private   final JTextField customPlayerListFileTextField      = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_CUSTOM_PLAYER_LIST_FILE ), 30 );
 	/** Button to reload custom player list.                           */
 	private   final JButton    reloadButton                       = new JButton( "Reload", IconResourceManager.ICON_ARROW_REFRESH );
 	/** Checkbox to enable/disable saying "clean" if no hackers found. */
@@ -104,7 +104,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		refreshLastUpdatedLabel();
 		
 		reloadPlayerList( HACKER_LIST_CACHE_FILE, gatewayBwhfHackerSetMap );
-		includeCustomPlayerListCheckBox.doClick();
+		Utils.callActionListeners( includeCustomPlayerListCheckBox );
 		
 		// Load the CharDef class (and the definitions from file) to avoid delays later on
 		try {

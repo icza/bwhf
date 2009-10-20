@@ -2,8 +2,6 @@ package hu.belicza.andras.bwhfagent;
 
 import java.util.Properties;
 
-import swingwtx.swing.SwingWTUtils;
-
 /**
  * Application wide constants.
  * 
@@ -23,7 +21,7 @@ public class Consts {
 	/** Name of the current version resource file.                             */
 	public static final String VERSION_RESOURCE_NAME                   = "current_version.txt";
 	/** URL pointing to the latest stable version text.                        */
-	public static final String LATEST_STABLE_VERSION_TEXT_URL          = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version.txt";
+	public static final String LATEST_STABLE_VERSION_TEXT_URL          = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version_os-x.txt";
 	/** Search help page url string.                                           */
 	public static final String SEARCH_HELP_PAGE_URL                    = "http://code.google.com/p/bwhf/wiki/ReplaySearchInBWHFAgent";
 	/** Player matcher help page url string.                                   */
@@ -40,7 +38,7 @@ public class Consts {
 	public static final String ABOUT_TEMLATE_RESOURCE_NAME             = "about_template.html";
 	
 	/** Default Starcraft directory.                                           */
-	public static final String DEFAULT_STARCRAFT_DIRECTORY             = SwingWTUtils.isWindows() ? "C:/Program Files/Starcraft" : "/mnt/c/Program Files/Starcraft";
+	public static final String DEFAULT_STARCRAFT_DIRECTORY             = "/Applications/Starcraft Folder";
 	/** Starcraft replay folder relative to the Starcraft folder.              */
 	public static final String STARCRAFT_REPLAY_FOLDER                 = "maps/replays";
 	/** Starcraft replay folder relative to the Starcraft folder.              */
@@ -48,7 +46,7 @@ public class Consts {
 	/** Name of the last replay file relative to the starcraft folder.         */
 	public static final String LAST_REPLAY_FILE_NAME                   = "maps/replays/LastReplay.rep";
 	/** Name of the Starcraft executable file.                                 */
-	public static final String STARCRAFT_EXECUTABLE_FILE_NAME          = "StarCraft.exe";
+	public static final String STARCRAFT_EXECUTABLE_FILE_NAME          = "Starcraft (Carbon)";
 	/** Name of directory containing sound samples.                            */
 	public static final String SOUNDS_DIRECTORY_NAME                   = "sounds";
 	/** Name of directory containing utility programs.                         */
@@ -204,10 +202,10 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_STARCRAFT_FOLDER              , DEFAULT_STARCRAFT_DIRECTORY );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTOSCAN_ENABLED              , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SAVE_HACKER_REPS              , "true" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HACKER_REPS_DESTINATION       , SwingWTUtils.isWindows() ? "c:/replays/hackerreps" : System.getProperty( "user.home" ) + "/replays/hackerreps" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HACKER_REPS_DESTINATION       , System.getProperty( "user.home" ) + "/replays/hackerreps" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SAVE_ALL_REPS                 , "true" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_REPS_DESTINATION          , SwingWTUtils.isWindows() ? "c:/replays/allreps" : System.getProperty( "user.home" ) + "/replays/allreps" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_CONVERT_PCX_ENABLED      , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ALL_REPS_DESTINATION          , System.getProperty( "user.home" ) + "/replays/allreps" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_CONVERT_PCX_ENABLED      , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PCX_OUTPUT_FORMAT             , "JPG" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_RESIZE_CONVERTED_IMAGES       , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_RESIZED_IMAGE_WIDTH           , "320" );
@@ -256,7 +254,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CUSTOM_PLAYER_LIST_FILE       , "" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DEFAULT_REPLAY_LISTS_FOLDER   , DEFAULT_REPLAY_LISTS_FOLDER );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPLAY_LIST_TO_LOAD_ON_STARTUP, "" );
-		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_EDITOR_PROGRAM                , "notepad.exe" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_EDITOR_PROGRAM                , "open" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPLAY_COLUMN_MODEL_INDICES   , "" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_SEND_INFO_ABOUT_LAST_REP , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DONT_COMPARE_SAME_NAMES       , "true" );
