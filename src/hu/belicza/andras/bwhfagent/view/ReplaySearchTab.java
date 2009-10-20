@@ -17,6 +17,7 @@ import hu.belicza.andras.bwhfagent.view.replayfilter.PlayerRaceReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.ReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.SaveTimeReplayFilter;
 
+import java.awt.Desktop;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -825,6 +826,12 @@ public class ReplaySearchTab extends Tab {
 				try {
 					Runtime.getRuntime().exec( new String[] { "explorer", lastSearchResultFileList.get( resultTable.getSelectedRow() ).getParent() } );
 				} catch ( final Exception e ) {
+					if ( Desktop.isDesktopSupported() ) {
+						try {
+							Desktop.getDesktop().open( lastSearchResultFileList.get( resultTable.getSelectedRow() ).getParentFile() );
+						} catch ( final Exception e2 ) {
+						}
+					}
 				}
 			}
 		} );
