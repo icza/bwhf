@@ -4,41 +4,39 @@ import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.hackerdb.ServerApiConsts;
 
 import java.awt.AWTException;
+import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.CheckboxMenuItem;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Cursor;
+import java.awt.Dimension;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
+import java.awt.Toolkit;
 import java.awt.TrayIcon;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.StringTokenizer;
 
-import swingwt.awt.BorderLayout;
-import swingwt.awt.CardLayout;
-import swingwt.awt.Color;
-import swingwt.awt.Component;
-import swingwt.awt.Cursor;
-import swingwt.awt.Dimension;
-import swingwt.awt.Toolkit;
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwt.awt.event.MouseAdapter;
-import swingwt.awt.event.MouseEvent;
-import swingwt.awt.event.MouseListener;
-import swingwt.awt.event.WindowAdapter;
-import swingwt.awt.event.WindowEvent;
-import swingwtx.swing.BorderFactory;
-import swingwtx.swing.Box;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JFrame;
-import swingwtx.swing.JLabel;
-import swingwtx.swing.JOptionPane;
-import swingwtx.swing.JPanel;
-import swingwtx.swing.SwingConstants;
-import swingwtx.swing.event.ChangeEvent;
-import swingwtx.swing.event.ChangeListener;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 /**
  * The main frame of BWHFAgent.
@@ -267,6 +265,7 @@ public class MainFrame extends JFrame {
 				titleLabel  .setToolTipText( toolTipText );
 				
 				navigationBarCollapsed = !navigationBarCollapsed;
+				navigationBox.invalidate();
 				navigationBox.getParent().validate();
 			}
 		};
@@ -325,8 +324,8 @@ public class MainFrame extends JFrame {
 				gatewayChangerPopupMenu.add( gatewayMenuItem );
 			}
 			setGatewayMenuItemStatesTask.run(); // To select the initial gateway
-			autoscanTab.gatewayComboBox.addChangeListener( new ChangeListener() {
-				public void stateChanged( final ChangeEvent event ) {
+			autoscanTab.gatewayComboBox.addActionListener( new ActionListener() {
+				public void actionPerformed( final ActionEvent event ) {
 					setGatewayMenuItemStatesTask.run();
 				}
 			} );
@@ -383,7 +382,7 @@ public class MainFrame extends JFrame {
 			disableTrayIconMenuItem.addActionListener( new java.awt.event.ActionListener() {
 				public void actionPerformed( final java.awt.event.ActionEvent event ) {
 					generalSettingsTab.enableSystemTrayIconCheckBox.setSelected( false );
-					generalSettingsTab.enableSystemTrayIconCheckBox.doClick(); // This does not change the state of the checkbox
+					Utils.callActionListeners( generalSettingsTab.enableSystemTrayIconCheckBox );
 				}
 			} );
 			popupMenu.add( disableTrayIconMenuItem );

@@ -6,17 +6,18 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import swingwt.awt.BorderLayout;
-import swingwt.awt.Font;
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwtx.swing.BorderFactory;
-import swingwtx.swing.Icon;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JCheckBox;
-import swingwtx.swing.JPanel;
-import swingwtx.swing.JScrollPane;
-import swingwtx.swing.JTextArea;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import javax.swing.BorderFactory;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
 /**
  * A tab with log and log control capabilities.
@@ -66,13 +67,12 @@ public abstract class LoggedTab extends Tab {
 	 */
 	protected void buildGUI() {
 		final JPanel logPanel = new JPanel( new BorderLayout() );
-		logPanel.setMaximumSize( Utils.getMaxDimension() );
 		
 		logTextArea.setEditable( false );
 		logTextArea.setLineWrap( true );
 		logTextArea.setWrapStyleWord( true );
 		logTextArea.setTabSize( 4 );
-		logTextArea.setFont( new Font( "default", Font.PLAIN, 10 ) );
+		logTextArea.setFont( new Font( Font.SANS_SERIF, Font.PLAIN, 12 ) );
 		logPanel.add( new JScrollPane( logTextArea ), BorderLayout.CENTER );
 		
 		final JPanel controlPanel = Utils.createWrapperPanel();
@@ -123,8 +123,9 @@ public abstract class LoggedTab extends Tab {
 		final int caretPosition = logTextArea.getCaretPosition();
 		logTextArea.append( formattedMessage );
 		
-		// SwingWT scrolls automatically
-		if ( scrollLockCheckBox.isSelected() )
+		if ( !scrollLockCheckBox.isSelected() )
+			logTextArea.setCaretPosition( logTextArea.getDocument().getLength() );
+		else
 			logTextArea.setCaretPosition( caretPosition );
 		
 		if ( logFileWriter != null )

@@ -3,7 +3,14 @@ package hu.belicza.andras.bwhfagent.view;
 import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.hackerdb.ServerApiConsts;
 
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Desktop;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -25,21 +32,13 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.SourceDataLine;
-
-import swingwt.awt.BorderLayout;
-import swingwt.awt.Component;
-import swingwt.awt.Dimension;
-import swingwt.awt.FlowLayout;
-import swingwt.awt.Font;
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JComponent;
-import swingwtx.swing.JFileChooser;
-import swingwtx.swing.JPanel;
-import swingwtx.swing.JTextField;
-import swingwtx.swing.SwingWTUtils;
-import swingwtx.swing.filechooser.FileFilter;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * Utility methods related to view and GUI.
@@ -54,7 +53,7 @@ public class Utils {
 	public static final DateFormat SHORT_DATE_FORMAT = new SimpleDateFormat( "yyMMdd HHmmss" );
 	
 	/** Default bold font to be used when bold font is needed. */
-	public static final Font DEFAULT_BOLD_FONT = new Font( "Default", Font.BOLD, 9 );
+	public static final Font DEFAULT_BOLD_FONT = new Font( Font.SANS_SERIF, Font.BOLD, 12 );
 	
 	/** Size of buffer to use to play wav files.  */
 	private static final int WAV_BUFFER_SIZE       = 64*1024;
@@ -104,6 +103,15 @@ public class Utils {
 		}
 	}
 	
+	/**
+	 * Calls the registered action listeners of a checkbox. 
+	 * @param checkBox checkbox whose action listeners to be called
+	 */
+	public static void callActionListeners( final JCheckBox checkBox ) {
+		for ( final ActionListener actionListener : checkBox.getActionListeners() )
+			actionListener.actionPerformed( null );
+	}
+	
 	public static Dimension getMaxDimension() {
 		return new Dimension( 10000, 10000 );
 	}
@@ -116,7 +124,6 @@ public class Utils {
 	 */
 	public static JPanel createWrapperPanel() {
 		final JPanel panel = new JPanel();
-		panel.setMaximumSize( getMaxDimension() );
 		return panel;
 	}
 	
@@ -128,7 +135,6 @@ public class Utils {
 	 */
 	public static JPanel createWrapperPanelLeftAligned() {
 		final JPanel panel = new JPanel( new FlowLayout( FlowLayout.LEFT ) );
-		panel.setMaximumSize( getMaxDimension() );
 		return panel;
 	}
 	
@@ -191,8 +197,6 @@ public class Utils {
 				
 				if ( choosableFileFilter != null )
 					fileChooser.addChoosableFileFilter( choosableFileFilter ); 
-				if ( choosableFileFilterSWT != null )
-					fileChooser.setExtensionFilters( choosableFileFilterSWT[ 0 ], choosableFileFilterSWT[ 1 ] );
 				
 				fileChooser.setFileSelectionMode( fileSelectionMode );
 				if ( fileChooser.showOpenDialog( parent ) == JFileChooser.APPROVE_OPTION )
@@ -211,36 +215,12 @@ public class Utils {
 	 * @param url url to be opened
 	 */
 	public static void showURLInBrowser( final String url ) {
-		try {
-			boolean useOwnMethod = true;
-			if ( Desktop.isDesktopSupported() )
-				try {
-					Desktop.getDesktop().browse( new URL( url ).toURI() );
-					useOwnMethod = false;
-				}
-				catch ( final Exception e ) {
-				}
-			
-			if ( useOwnMethod ) {
-				String[] cmdArray = null;
-				if ( SwingWTUtils.isWindows() ) {
-					cmdArray = new String[] { "rundll32", "url.dll,FileProtocolHandler", url };
-				}
-				else {
-					// Linux
-					final String[] browsers = { "firefox", "opera", "konqueror", "epiphany", "mozilla", "netscape" };
-					for ( final String browser : browsers )
-						if ( Runtime.getRuntime().exec( new String[] { "which", browser } ).waitFor() == 0 ) {
-							cmdArray = new String[] { browser, url };
-							break;
-						}
-				}
-				
-				if ( cmdArray != null )
-					Runtime.getRuntime().exec( cmdArray );
+		if ( Desktop.isDesktopSupported() )
+			try {
+				Desktop.getDesktop().browse( new URL( url ).toURI() );
 			}
-		} catch ( final Exception e ) {
-		}
+			catch ( final Exception e ) {
+			}
 	}
 	
 	/**

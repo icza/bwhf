@@ -7,6 +7,12 @@ import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
 import hu.belicza.andras.bwhfagent.Consts;
 
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,25 +22,19 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import swingwt.awt.Dimension;
-import swingwt.awt.GridLayout;
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwt.awt.event.MouseAdapter;
-import swingwt.awt.event.MouseEvent;
-import swingwtx.swing.BorderFactory;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JCheckBox;
-import swingwtx.swing.JComboBox;
-import swingwtx.swing.JFileChooser;
-import swingwtx.swing.JLabel;
-import swingwtx.swing.JPanel;
-import swingwtx.swing.JProgressBar;
-import swingwtx.swing.JScrollPane;
-import swingwtx.swing.JTable;
-import swingwtx.swing.JTextField;
-import swingwtx.swing.ListSelectionModel;
-import swingwtx.swing.table.DefaultTableModel;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * Player matcher tab.
@@ -49,9 +49,9 @@ public class PlayerMatcherTab extends Tab {
 	/** Don't compare players with same name checkbox. */
 	private final JCheckBox dontCompareSameNamesCheckBox          = new JCheckBox( "Don't compare players with same names", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DONT_COMPARE_SAME_NAMES ) ) );
 	/** Show only matches of players text field.       */
-	private final JTextField showOnlyPlayersTextField             = new JTextField( 1 );
+	private final JTextField showOnlyPlayersTextField             = new JTextField( 5 );
 	/** Exclude players text field.                    */
-	private final JTextField excludePlayersTextField              = new JTextField( 1 );
+	private final JTextField excludePlayersTextField              = new JTextField( 5 );
 	/** Authoritativeness threshold combobox.          */
 	private final JComboBox  authoritativenessThresholdComboBox;
 	/** Matching probability threshold combobox.       */
@@ -369,8 +369,6 @@ public class PlayerMatcherTab extends Tab {
 			public void actionPerformed( final ActionEvent event ) {
 				final JFileChooser fileChooser = new JFileChooser( MainFrame.getInstance().generalSettingsTab.getReplayStartFolder() );
 				
-				// This is for SwingWT:
-				fileChooser.setExtensionFilters( new String[] { "*.rep", "*.*" }, new String[] { "Replay Files (*.rep)", "All files (*.*)" } );
 				// This is for Swing:
 				fileChooser.addChoosableFileFilter( Utils.SWING_REPLAY_FILE_FILTER ); 
 				
@@ -419,7 +417,6 @@ public class PlayerMatcherTab extends Tab {
 		panel.add( resultsCountLabel );
 		contentBox.add( panel );
 		
-		resultTable.setPreferredSize( new Dimension( 50, 50 ) );
 		resultTable.setRowSelectionAllowed( true );
 		resultTable.getSelectionModel().setSelectionMode( ListSelectionModel.SINGLE_SELECTION );
 		resultTable.setColumnSelectionAllowed( true );
@@ -445,7 +442,7 @@ public class PlayerMatcherTab extends Tab {
 				sortResultTable( -1 );
 			}
 		} );
-		contentBox.add( new JScrollPane( resultTable ) );
+		contentBox.add( Utils.wrapInBorderLayoutPanel( new JScrollPane( resultTable ) ) );
 	}
 	
 	/**

@@ -1,6 +1,6 @@
 package hu.belicza.andras.bwhfagent.view.charts;
 
-import swingwtx.swing.JComponent;
+import javax.swing.JComponent;
 import hu.belicza.andras.bwhfagent.view.ChartsTab;
 
 /**

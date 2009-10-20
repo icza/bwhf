@@ -11,6 +11,22 @@ import hu.belicza.andras.bwhfagent.view.ChartsTab;
 import hu.belicza.andras.bwhfagent.view.IconResourceManager;
 import hu.belicza.andras.bwhfagent.view.Utils;
 
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.GridLayout;
+import java.awt.Stroke;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -20,35 +36,19 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.StringTokenizer;
 
-import swingwt.awt.BasicStroke;
-import swingwt.awt.BorderLayout;
-import swingwt.awt.Color;
-import swingwt.awt.Dimension;
-import swingwt.awt.Font;
-import swingwt.awt.FontMetrics;
-import swingwt.awt.Graphics;
-import swingwt.awt.Graphics2D;
-import swingwt.awt.GridLayout;
-import swingwt.awt.Stroke;
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwt.awt.event.KeyAdapter;
-import swingwt.awt.event.KeyEvent;
-import swingwt.awt.event.MouseAdapter;
-import swingwt.awt.event.MouseEvent;
-import swingwtx.swing.Box;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JCheckBox;
-import swingwtx.swing.JComboBox;
-import swingwtx.swing.JComponent;
-import swingwtx.swing.JLabel;
-import swingwtx.swing.JPanel;
-import swingwtx.swing.JScrollPane;
-import swingwtx.swing.JSplitPane;
-import swingwtx.swing.JTextArea;
-import swingwtx.swing.JTextField;
-import swingwtx.swing.event.ChangeEvent;
-import swingwtx.swing.event.ChangeListener;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 /**
  * Component to visualize charts.
@@ -82,13 +82,13 @@ public class ChartsComponent extends JPanel {
 	/** 2nd color to use for indicating hacks.                   */
 	private static final Color  CHART_MARKER_COLOR             = new Color( 150, 150, 255 );
 	/** Font to use to draw descriptions and titles.             */
-	private static final Font   CHART_MAIN_FONT                = new Font( "Times", Font.BOLD, 10 );
+	private static final Font   CHART_MAIN_FONT                = new Font( "Times New Roman", Font.BOLD, 13 );
 	/** Font to use to draw axis labels.                         */
-	private static final Font   CHART_AXIS_LABEL_FONT          = new Font( "Courier New", Font.PLAIN, 8 );
+	private static final Font   CHART_AXIS_LABEL_FONT          = new Font( "Courier New", Font.PLAIN, 11 );
 	/** Font to use to draw hack markers.                        */
-	private static final Font   HACK_MARKER_FONT               = new Font( "Courier New", Font.BOLD, 13 );
+	private static final Font   HACK_MARKER_FONT               = new Font( "Courier New", Font.BOLD, 16 );
 	/** Font to use to draw texts as part of charts.             */
-	private static final Font   CHART_PART_TEXT_FONT           = new Font( "Courier New", Font.PLAIN, 8 );
+	private static final Font   CHART_PART_TEXT_FONT           = new Font( "Courier New", Font.PLAIN, 11 );
 	/** Stroke to be used to draw charts.                        */
 	private static final Stroke CHART_STROKE                   = new BasicStroke( 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND );
 	/** Stroke to be used to draw everything else.               */
@@ -136,7 +136,7 @@ public class ChartsComponent extends JPanel {
 	/** Panel containing options of the selected chart type.          */
 	private final JPanel            chartOptionsPanel = Utils.createWrapperPanel();
 	/** Game details label.                                           */
-	private final JLabel            gameDetailsLabel  = new JLabel( "&lt;Game info&gt;", JLabel.CENTER );
+	private final JLabel            gameDetailsLabel  = new JLabel( "<Game info>", JLabel.CENTER );
 	/** Panel containing checkboxes of players.                       */
 	private final JPanel            playersPanel      = Utils.createWrapperPanel();
 	/** Replay whose charts to be visualized.                         */
@@ -226,7 +226,7 @@ public class ChartsComponent extends JPanel {
 		splitPane.setTopComponent( Utils.wrapInBorderLayoutPanel( this ) );
 		
 		final Box actionListBox = Box.createHorizontalBox();
-		actionsListTextArea.setFont( new Font( "Courier New", Font.PLAIN, 8 ) );
+		actionsListTextArea.setFont( new Font( "Courier New", Font.PLAIN, 11 ) );
 		actionsListTextArea.addKeyListener( new KeyAdapter() {
 			@Override
 			public void keyReleased( final KeyEvent event ) {
@@ -244,7 +244,7 @@ public class ChartsComponent extends JPanel {
 		actionsListTextArea.setEditable( false );
 		actionsListTextArea.setBackground( Color.WHITE );
 		actionsListTextArea.setForeground( Color.BLACK );
-		actionListBox.add( new JScrollPane( actionsListTextArea ) );
+		actionListBox.add( Utils.wrapInBorderLayoutPanel( new JScrollPane( actionsListTextArea ) ) );
 		
 		final Box optionsBox = Box.createVerticalBox();
 		final JPanel actionListOptionsPanel = new JPanel( new GridLayout( 3, 2 ) );
@@ -294,7 +294,7 @@ public class ChartsComponent extends JPanel {
 		} );
 		actionListOptionsPanel.add( filterTextField );
 		
-		optionsBox.add( Utils.wrapInPanel( actionListOptionsPanel ) );
+		optionsBox.add( actionListOptionsPanel );
 		// I put clear filter button in a different grid panel, because buttons' height is significantly greater than texfields'.
 		final JPanel clearFilterButtonPanel = new JPanel( new GridLayout( 1, 2 ) );
 		clearFilterButtonPanel.add( new JLabel() );
@@ -307,7 +307,7 @@ public class ChartsComponent extends JPanel {
 		} );
 		clearFilterButtonPanel.add( clearFilterButton );
 		optionsBox.add( clearFilterButtonPanel );
-		optionsBox.add( new JLabel( "You can use OR between filter words." ) );
+		optionsBox.add( Utils.wrapInPanel( new JLabel( "You can use OR between filter words." ) ) );
 		final JComponent verticalFillerComponent = new JLabel();
 		verticalFillerComponent.setMaximumSize( new Dimension( 1, Integer.MAX_VALUE ) );
 		optionsBox.add( verticalFillerComponent );
@@ -316,26 +316,26 @@ public class ChartsComponent extends JPanel {
 		splitPane.setBottomComponent( actionListBox );
 		contentPanel.add( splitPane, BorderLayout.CENTER );
 		
-		final ChangeListener repainterChangeListener = new ChangeListener() {
-			public void stateChanged( final ChangeEvent event ) {
+		final ActionListener repainterActionListener = new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
 				repaint();
 			}
 		};
-		apmChartDetailLevelComboBox.addChangeListener( repainterChangeListener );
-		showEapmCheckBox.addChangeListener( repainterChangeListener );
-		showSelectHotkeysCheckBox.addChangeListener( repainterChangeListener );
-		buildOrderDisplayLevelComboBox.addChangeListener( repainterChangeListener );
+		apmChartDetailLevelComboBox.addActionListener( repainterActionListener );
+		showEapmCheckBox.addActionListener( repainterActionListener );
+		showSelectHotkeysCheckBox.addActionListener( repainterActionListener );
+		buildOrderDisplayLevelComboBox.addActionListener( repainterActionListener );
 		showUnitsOnBuildOrderCheckBox.addChangeListener( new ChangeListener() {
 			public void stateChanged( final ChangeEvent event ) {
 				hideWorkerUnitsCheckBox.setEnabled( showUnitsOnBuildOrderCheckBox.isSelected() );
 			}
 		} );
-		showUnitsOnBuildOrderCheckBox.addChangeListener( repainterChangeListener );
-		hideWorkerUnitsCheckBox.addChangeListener( repainterChangeListener );
+		showUnitsOnBuildOrderCheckBox.addActionListener( repainterActionListener );
+		hideWorkerUnitsCheckBox.addActionListener( repainterActionListener );
 		hideWorkerUnitsCheckBox.setEnabled( showUnitsOnBuildOrderCheckBox.isSelected() );
-		strategyDisplayLevelComboBox.addChangeListener( repainterChangeListener );
-		overallApmChartDetailLevelComboBox.addChangeListener( repainterChangeListener );
-		showOverallEapmCheckBox.addChangeListener( repainterChangeListener );
+		strategyDisplayLevelComboBox.addActionListener( repainterActionListener );
+		overallApmChartDetailLevelComboBox.addActionListener( repainterActionListener );
+		showOverallEapmCheckBox.addActionListener( repainterActionListener );
 	}
 	
 	/**
@@ -555,6 +555,7 @@ public class ChartsComponent extends JPanel {
 		// removeAll() does not work properly in SwingWT, we remove previous checkboxes manually!
 		while ( playersPanel.getComponentCount() > 1 )
 			playersPanel.remove( playersPanel.getComponentCount() - 1 );
+		playersPanel.getParent().validate();
 		
 		if ( replay != null ) {
 			final ReplayHeader replayHeader = replay.replayHeader;
@@ -615,6 +616,7 @@ public class ChartsComponent extends JPanel {
 			contentPanel.validate();
 		}
 		else {
+			gameDetailsLabel.setText( "<Game info>" );
 			hackDescriptionList = null;
 			repaint();
 			loadPlayerActionsIntoList();
@@ -673,6 +675,7 @@ public class ChartsComponent extends JPanel {
 				actionsListTextBuilder.setLength( actionsListTextBuilder.length() - 1 );
 		}
 		actionsListTextArea.setText( actionsListTextBuilder.toString() );
+		actionsListTextArea.setCaretPosition( 0 );
 		actionsListTextBuilder.setLength( 0 ); // To indicate that this does not yet contain the lowercased version for searching
 	}
 	
@@ -772,7 +775,7 @@ public class ChartsComponent extends JPanel {
 		
 		graphics.setFont( CHART_MAIN_FONT );
 		graphics.setColor( CHART_AXIS_COLOR );
-		graphics.drawString( overall ? "Overall APM" : "APM", 1, 0 );
+		graphics.drawString( overall ? "Overall APM" : "APM", 1, 10 );
 		
 		// First count the actions
 		final int[] effectiveActionsCounts = eapm ? new int[ chartsParams.playersCount ] : null;
@@ -877,7 +880,7 @@ public class ChartsComponent extends JPanel {
 					final int y   = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
 					final int apm = maxApm * j / ASSIST_LINES_COUNT;
 					graphics.setColor( CHART_AXIS_LABEL_COLOR );
-					graphics.drawString( ( apm < 100 ? ( apm < 10 ? "  " : " " ) : "" ) + apm, 1, y - 7 );
+					graphics.drawString( ( apm < 100 ? ( apm < 10 ? "  " : " " ) : "" ) + apm, 1, y + 4 );
 					if ( j > 0 ) {
 						graphics.setColor( CHART_ASSIST_LINES_COLOR );
 						graphics.drawLine( chartsParams.x1 + 1, y, chartsParams.x1 + chartsParams.maxXInChart, y );
@@ -908,7 +911,7 @@ public class ChartsComponent extends JPanel {
 						final float position = (float) ( hackDescription.iteration - pointIndex * chartsParams.frames / chartPoints ) * chartPoints / chartsParams.frames;
 						graphics.drawString( "!",
 								interpolate( xPoints[ pointIndex ], xPoints[ pointIndex + 1 ], position ) - 4,
-								interpolate( yPoints[ pointIndex ], yPoints[ pointIndex + 1 ], position ) - 18, true );
+								interpolate( yPoints[ pointIndex ], yPoints[ pointIndex + 1 ], position ) - 4 );
 					}
 			}
 			
@@ -966,7 +969,8 @@ public class ChartsComponent extends JPanel {
 						final int hotkey = Integer.parseInt( params[ 1 ] ) % 10; // Hotkey 10 is displayed where hotkey 0
 						
 						if ( isHotkeyAssign ) {
-							( (Graphics2D) graphics ).setBackground( chartColor );
+							graphics.setColor( chartColor );
+							graphics.fillRect( chartsParams.getXForIteration( action.iteration ) - 1, y1 + hotkey * ( chartsParams.maxYInChart - 14 ) / 9, 10, 13 );
 							graphics.setColor( chartColor2 );
 						}
 						else {
@@ -976,8 +980,7 @@ public class ChartsComponent extends JPanel {
 						
 						graphics.drawString( params[ 1 ],
 								chartsParams.getXForIteration( action.iteration ),
-								y1 + hotkey * ( chartsParams.maxYInChart - 14 ) / 9,
-								!isHotkeyAssign );
+								y1 + hotkey * ( chartsParams.maxYInChart - 14 ) / 9 + 10 );
 					}
 				}
 			}
@@ -1026,7 +1029,7 @@ public class ChartsComponent extends JPanel {
 						final int y = y1 + 14 + buildOrderLevel * ( chartsParams.maxYInChart - 23 ) / buildOrderDisplayLevels;
 						
 						graphics.drawLine( x, y, x, y2 );
-						graphics.drawString( buildingName, x - fontMetrics.stringWidth( buildingName ) / 2 - 4, y - 14, true );
+						graphics.drawString( buildingName, x - fontMetrics.stringWidth( buildingName ) / 2 + 2, y - 3 );
 						
 						if ( --buildOrderLevel < 0 )
 							buildOrderLevel = buildOrderDisplayLevels;
@@ -1087,7 +1090,7 @@ public class ChartsComponent extends JPanel {
 					final int y = y1 + 14 + strategyLevel * ( chartsParams.maxYInChart - 23 ) / strategyDisplayLevels;
 					
 					graphics.drawLine( x, y, x, y2 );
-					graphics.drawString( strategyName, x - fontMetrics.stringWidth( strategyName ) / 2 - 4, y - 14, true );
+					graphics.drawString( strategyName, x - fontMetrics.stringWidth( strategyName ) / 2 + 2, y - 3 );
 					
 					if ( --strategyLevel < 0 )
 						strategyLevel = strategyDisplayLevels;
@@ -1140,7 +1143,7 @@ public class ChartsComponent extends JPanel {
 				final String timeString = ReplayHeader.formatFrames( frames * j / TIME_LABELS_COUNT, new StringBuilder(), false ).toString();
 				final int x = chartsParams.x1 + ( chartsParams.maxXInChart * j / TIME_LABELS_COUNT )
 								- ( j == 0 ? 0 : ( j == TIME_LABELS_COUNT ? timeString.length() * 7 : timeString.length() * 7 / 2 ) );
-				graphics.drawString( timeString, x, y1 + chartsParams.maxYInChart + 1 );
+				graphics.drawString( timeString, x, y1 + chartsParams.maxYInChart + 11 );
 			}
 		}
 	}
@@ -1159,7 +1162,7 @@ public class ChartsComponent extends JPanel {
 		final String description = replay.replayHeader.getPlayerDescription( replay.replayActions.players[ playerIndexToShowList.get( chartIndex ) ].playerName );
 		graphics.drawString( eapmText == null ? description : description + ", " + eapmText,
 				             chartsParams.x1 + 2,
-				             chartsParams.getY1ForChart( chartIndex ) + ( chartsParams.allPlayersOnOneChart ? chartIndex * 14 - 22 : -12 ) );
+				             chartsParams.getY1ForChart( chartIndex ) + ( chartsParams.allPlayersOnOneChart ? chartIndex * 14 - 11 : -1 ) );
 	}
 	
 	/**

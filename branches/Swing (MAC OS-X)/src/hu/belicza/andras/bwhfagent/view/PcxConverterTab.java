@@ -12,18 +12,18 @@ import java.util.Set;
 
 import javax.imageio.ImageIO;
 
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwt.awt.event.KeyEvent;
-import swingwt.awt.event.KeyListener;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JCheckBox;
-import swingwtx.swing.JComboBox;
-import swingwtx.swing.JFileChooser;
-import swingwtx.swing.JLabel;
-import swingwtx.swing.JPanel;
-import swingwtx.swing.JTextField;
-import swingwtx.swing.filechooser.FileFilter;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * PCX converter tab.
@@ -62,7 +62,7 @@ public class PcxConverterTab extends ProgressLoggedTab {
 	/** Checkbox to enable/disable the autoscan.           */
 	private final JCheckBox  resizeConvertedImagesCheckBox = new JCheckBox( "Resize converted images,", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_RESIZE_CONVERTED_IMAGES ) ) );
 	/** Checkbox to enable/disable the autoscan.           */
-	private final JTextField resizedImageWidthTextField    = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_RESIZED_IMAGE_WIDTH ), 1 );
+	private final JTextField resizedImageWidthTextField    = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_RESIZED_IMAGE_WIDTH ), 4 );
 	/** Label to display the height of the resized images. */
 	private final JLabel     resizedImageHeightLabel       = new JLabel();
 	/** Button to select files to scan.                      */
@@ -114,7 +114,7 @@ public class PcxConverterTab extends ProgressLoggedTab {
 				resizedImageWidthTextField.setEnabled( resizeConvertedImagesCheckBox.isSelected() );
 			}
 		} );
-		resizeConvertedImagesCheckBox.doClick();
+		Utils.callActionListeners( resizeConvertedImagesCheckBox );
 		panel.add( resizeConvertedImagesCheckBox );
 		panel.add( new JLabel( "resized image width (" + MIN_RESIZED_WIDTH + ".." + MAX_RESIZED_WIDTH + "):" ) );
 		// This is a workaround becase SwingWT does not implement DocumentListener correctly :S
@@ -141,8 +141,6 @@ public class PcxConverterTab extends ProgressLoggedTab {
 			public void actionPerformed( final ActionEvent event ) {
 				final JFileChooser fileChooser = new JFileChooser( new File( MainFrame.getInstance().generalSettingsTab.starcraftFolderTextField.getText() ) );
 				
-				// This is for SwingWT:
-				fileChooser.setExtensionFilters( new String[] { "*.pcx", "*.*" }, new String[] { "PCX image files (*.pcx)", "All files (*.*)" } );
 				// This is for Swing:
 				fileChooser.addChoosableFileFilter( SWING_PCX_FILE_FILTER ); 
 				

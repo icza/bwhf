@@ -17,7 +17,18 @@ import hu.belicza.andras.bwhfagent.view.replayfilter.PlayerRaceReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.ReplayFilter;
 import hu.belicza.andras.bwhfagent.view.replayfilter.SaveTimeReplayFilter;
 
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Desktop;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -33,39 +44,27 @@ import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
-import swingwt.awt.BorderLayout;
-import swingwt.awt.Color;
-import swingwt.awt.Dimension;
-import swingwt.awt.Font;
-import swingwt.awt.GridBagConstraints;
-import swingwt.awt.GridBagLayout;
-import swingwt.awt.GridLayout;
-import swingwt.awt.Insets;
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwt.awt.event.MouseAdapter;
-import swingwt.awt.event.MouseEvent;
-import swingwtx.swing.BorderFactory;
-import swingwtx.swing.Box;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JCheckBox;
-import swingwtx.swing.JComboBox;
-import swingwtx.swing.JDialog;
-import swingwtx.swing.JFileChooser;
-import swingwtx.swing.JLabel;
-import swingwtx.swing.JMenuItem;
-import swingwtx.swing.JOptionPane;
-import swingwtx.swing.JPanel;
-import swingwtx.swing.JPopupMenu;
-import swingwtx.swing.JProgressBar;
-import swingwtx.swing.JScrollPane;
-import swingwtx.swing.JTable;
-import swingwtx.swing.JTextArea;
-import swingwtx.swing.JTextField;
-import swingwtx.swing.ListSelectionModel;
-import swingwtx.swing.event.ListSelectionEvent;
-import swingwtx.swing.event.ListSelectionListener;
-import swingwtx.swing.table.DefaultTableModel;
+import javax.swing.BorderFactory;
+import javax.swing.Box;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.table.DefaultTableModel;
 
 /**
  * Replay search tab.
@@ -216,7 +215,7 @@ public class ReplaySearchTab extends Tab {
 	/** Game engine filter checkboxes.                    */
 	private final JCheckBox[] gameEngineCheckBoxes          = new JCheckBox[ ReplayHeader.GAME_ENGINE_NAMES.length ];
 	/** Game name filter text field.                      */
-	private final JTextField  gameNameTextField             = new JTextField();
+	private final JTextField  gameNameTextField             = new JTextField( 33 );
 	/** Game name filter is regexp checkbox.              */
 	private final JCheckBox   gameNameRegexpCheckBox        = new JCheckBox( "Regexp" );
 	/** Game name filter must be exact match checkbox.    */
@@ -329,7 +328,7 @@ public class ReplaySearchTab extends Tab {
 		
 		buildGUI();
 		
-		appendResultsToTableCheckBox.doClick(); // To enable/disable dependant buttons (will not change anything, but logically needed; might change in the future).
+		Utils.callActionListeners( appendResultsToTableCheckBox ); // To enable/disable dependant buttons
 		
 		if ( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_SEARCH_FILTERS ) ) )
 			hideFiltersButton.doClick();
@@ -351,22 +350,22 @@ public class ReplaySearchTab extends Tab {
 				gameNameTextField.setText( "" );
 				gameNameTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 				gameNameExactMatchCheckBox.setSelected( false );
-				gameNameRegexpCheckBox.setSelected( false );
+				gameNameRegexpCheckBox.setSelected( true );
 				gameNameRegexpCheckBox.doClick();
 				creatorNameTextField.setText( "" );
 				creatorNameTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 				creatorNameExactMatchCheckBox.setSelected( false );
-				creatorNameRegexpCheckBox.setSelected( false );
+				creatorNameRegexpCheckBox.setSelected( true);
 				creatorNameRegexpCheckBox.doClick();
 				mapNameTextField.setText( "" );
 				mapNameTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 				mapNameExactMatchCheckBox.setSelected( false );
-				mapNameRegexpCheckBox.setSelected( false );
+				mapNameRegexpCheckBox.setSelected( true);
 				mapNameRegexpCheckBox.doClick();
 				playerNameTextField.setText( "" );
 				playerNameTextField.setBackground( NORMAL_BACKGROUND_COLOR );
 				playerNameExactMatchCheckBox.setSelected( false );
-				playerNameRegexpCheckBox.setSelected( false );
+				playerNameRegexpCheckBox.setSelected( true );
 				playerNameRegexpCheckBox.doClick();
 				for ( final JCheckBox checkBox : raceCheckBoxes )
 					checkBox.setSelected( false );
@@ -625,8 +624,6 @@ public class ReplaySearchTab extends Tab {
 			public void actionPerformed( final ActionEvent event ) {
 				final JFileChooser fileChooser = new JFileChooser( mainFrame.generalSettingsTab.getReplayStartFolder() );
 				
-				// This is for SwingWT:
-				fileChooser.setExtensionFilters( new String[] { "*.rep", "*.*" }, new String[] { "Replay Files (*.rep)", "All files (*.*)" } );
 				// This is for Swing:
 				fileChooser.addChoosableFileFilter( Utils.SWING_REPLAY_FILE_FILTER ); 
 				
@@ -748,7 +745,7 @@ public class ReplaySearchTab extends Tab {
 				boolean success = true;
 				if ( event.getSource() != deleteReplaysMenuItem ) {
 					final JFileChooser fileChooser = new JFileChooser( mainFrame.generalSettingsTab.getReplayStartFolder() );
-					fileChooser.setTitle( ( event.getSource() == copyReplaysMenuItem ? "Copy " : "Move ") + selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? "" : "s" ) + " to" );
+					fileChooser.setDialogTitle( ( event.getSource() == copyReplaysMenuItem ? "Copy " : "Move ") + selectedFiles.length + " replay" + ( selectedFiles.length == 1 ? "" : "s" ) + " to" );
 					fileChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
 					if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION ) {
 						final File destinationFolder = fileChooser.getSelectedFile();
@@ -824,7 +821,7 @@ public class ReplaySearchTab extends Tab {
 		openInExplorerMenuItem.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				try {
-					Runtime.getRuntime().exec( new String[] { "explorer", lastSearchResultFileList.get( resultTable.getSelectedRow() ).getParent() } );
+					Runtime.getRuntime().exec( new String[] { "open", lastSearchResultFileList.get( resultTable.getSelectedRow() ).getParent() } );
 				} catch ( final Exception e ) {
 					if ( Desktop.isDesktopSupported() ) {
 						try {
@@ -836,7 +833,6 @@ public class ReplaySearchTab extends Tab {
 			}
 		} );
 		disableReplayOperationMenuItems();
-		resultTable.setPreferredSize( new Dimension( 50, 50 ) );
 		resultTable.setRowSelectionAllowed( true );
 		resultTable.getSelectionModel().setSelectionMode( ListSelectionModel.MULTIPLE_INTERVAL_SELECTION );
 		resultTable.getSelectionModel().addListSelectionListener( new ListSelectionListener() {
@@ -885,7 +881,7 @@ public class ReplaySearchTab extends Tab {
 				refreshResultTable();
 			}
 		} );
-		contentBox.add( new JScrollPane( resultTable ) );
+		contentBox.add( Utils.wrapInBorderLayoutPanel( new JScrollPane( resultTable ) ) );
 	}
 	
 	/**
@@ -1006,7 +1002,7 @@ public class ReplaySearchTab extends Tab {
 		for ( int i = 0; i < columnModelIndicesClone.length; i++ ) {
 			final int i_ = i;
 			final JLabel columnNameLabel = new JLabel( RESULT_TABLE_COLUMN_NAMES[ columnModelIndicesClone[ i ] ] );
-			columnNameLabel.setFont( new Font( "Default", Font.BOLD, 9 ) );
+			columnNameLabel.setFont( new Font( Font.SANS_SERIF, Font.BOLD, 12 ) );
 			columnsGrid.add( columnNameLabel );
 			if ( i > 0 ) {
 				final JButton moveUpButton = new JButton( IconResourceManager.ICON_ARROW_UP );
@@ -1016,6 +1012,7 @@ public class ReplaySearchTab extends Tab {
 						columnModelIndicesClone[ i_ ] = columnModelIndicesClone[ i_ - 1 ];
 						columnModelIndicesClone[ i_ - 1 ] = tempIndex;
 						buildColumnsGrid( columnsGrid, columnModelIndicesClone );
+						columnsGrid.validate();
 					}
 				} );
 				columnsGrid.add( moveUpButton );
@@ -1030,6 +1027,7 @@ public class ReplaySearchTab extends Tab {
 						columnModelIndicesClone[ i_ ] = columnModelIndicesClone[ i_ + 1 ];
 						columnModelIndicesClone[ i_ + 1 ] = tempIndex;
 						buildColumnsGrid( columnsGrid, columnModelIndicesClone );
+						columnsGrid.validate();
 					}
 				} );
 				columnsGrid.add( moveDownButton );
@@ -1180,15 +1178,18 @@ public class ReplaySearchTab extends Tab {
 		for ( final int columnModelIndex : columnModelIndices )
 			columnNameVector.add( RESULT_TABLE_COLUMN_NAMES[ columnModelIndex ] );
 		
+		resultTable.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
 		resultTable.setModel( new DefaultTableModel( resultDataVector, columnNameVector ) {
 			@Override
 			public boolean isCellEditable( final int row, final int column ) {
 				return false;
 			}
 		} );
+		//resultTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
 		
 		// When model is replaced, the context menu is disposed (bug in SwingWT?). We have to rebuild it.
-		rebuildReplayOperationsPopupMenu();
+		//rebuildReplayOperationsPopupMenu();
+		
 		
 		mainFrame.chartsTab.onReplayResultListChange( !lastSearchResultRowsData.isEmpty() );
 	}
@@ -1545,10 +1546,9 @@ public class ReplaySearchTab extends Tab {
 	 */
 	private void saveReplayList() {
 		final JFileChooser fileChooser = new JFileChooser( mainFrame.generalSettingsTab.defaultReplayListsFolderTextField.getText() );
-		fileChooser.setTitle( "Save replay list to..." );
+		fileChooser.setDialogTitle( "Save replay list to..." );
 		
 		fileChooser.addChoosableFileFilter( Utils.SWING_TEXT_FILE_FILTER ); 
-		fileChooser.setExtensionFilters( new String[] { "*.txt", "*.*" }, new String[] { "Text files (*.txt)", "All files (*.*)" } );
 		
 		fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
 		if ( fileChooser.showSaveDialog( getContent() ) == JFileChooser.APPROVE_OPTION ) {
@@ -1594,10 +1594,9 @@ public class ReplaySearchTab extends Tab {
 		File listFile = null;
 		if ( listFileName == null ) {
 			final JFileChooser fileChooser = new JFileChooser( mainFrame.generalSettingsTab.defaultReplayListsFolderTextField.getText() );
-			fileChooser.setTitle( "Load result list..." );
+			fileChooser.setDialogTitle( "Load result list..." );
 			
 			fileChooser.addChoosableFileFilter( Utils.SWING_TEXT_FILE_FILTER ); 
-			fileChooser.setExtensionFilters( new String[] { "*.txt", "*.*" }, new String[] { "Text files (*.txt)", "All files (*.*)" } );
 			
 			fileChooser.setFileSelectionMode( JFileChooser.FILES_ONLY );
 			if ( fileChooser.showOpenDialog( getContent() ) == JFileChooser.APPROVE_OPTION )

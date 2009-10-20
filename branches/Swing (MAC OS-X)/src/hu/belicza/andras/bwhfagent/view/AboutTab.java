@@ -4,23 +4,18 @@ import hu.belicza.andras.bwhf.control.ReplayScanner;
 import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.bwhfagent.view.charts.EapmUtil;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.Map;
 
-import swingwt.awt.BorderLayout;
-import swingwt.awt.Dimension;
-import swingwt.awt.GridLayout;
-import swingwt.awt.event.ActionEvent;
-import swingwt.awt.event.ActionListener;
-import swingwtx.swing.JButton;
-import swingwtx.swing.JEditorPane;
-import swingwtx.swing.JLabel;
-import swingwtx.swing.JPanel;
-import swingwtx.swing.JScrollPane;
-import swingwtx.swing.SwingWTUtils;
+import javax.swing.JButton;
+import javax.swing.JEditorPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 /**
  * About tab.
@@ -83,67 +78,35 @@ public class AboutTab extends Tab {
 		buttonsPanel.add( button );
 		contentBox.add( buttonsPanel );
 		
-		if ( SwingWTUtils.isWindows() ) {
-			final StringBuilder aboutHtmlBuilder = new StringBuilder();
-			BufferedReader input = null;
-			try {
-				input = new BufferedReader( new InputStreamReader( getClass().getResourceAsStream( Consts.ABOUT_TEMLATE_RESOURCE_NAME ) ) );
-				while ( input.ready() )
-					aboutHtmlBuilder.append( input.readLine() );
-			} catch ( final IOException ie ) {
-			}
-			finally {
-				if ( input != null )
-					try { input.close(); } catch ( final IOException ie ) {}
-			}
-			
-			String aboutHtml = aboutHtmlBuilder.toString();
-			for ( final Map.Entry< String, String > entry : templateParameterValueMap.entrySet() )
-				aboutHtml = aboutHtml.replace( entry.getKey(), entry.getValue() );
-			
-			editorPane = new JEditorPane( "text/html", aboutHtml );
-			editorPane.setEditable( false );
-			/*editorPane.addHyperlinkListener( new HyperlinkListener() {
-				public void hyperlinkUpdate( final HyperlinkEvent event ) {
-					if ( event.getEventType() == HyperlinkEvent.EventType.ACTIVATED )
-						if ( event.getURL() != null )
-							Utils.showURLInBrowser( event.getURL().toString() );
-				}
-			} );*/
-			
-			// Why do we need this?
-			// Not setting preferred size of the editorPane results in really wide window size after pack,
-			// because the about html contains long lines which are not broke by default.
-			// Setting preferred size of the editorPane results in no scrollbars around it, so its
-			// full content wouldn't be visible.
-			// Solution: the component added to the content box should be sized and scrolled.
-			final JScrollPane wrapperScrollPane = new JScrollPane( editorPane );
-			wrapperScrollPane.setPreferredSize( new Dimension( 200, 200 ) );
-			contentBox.add( wrapperScrollPane );
+		final StringBuilder aboutHtmlBuilder = new StringBuilder();
+		BufferedReader input = null;
+		try {
+			input = new BufferedReader( new InputStreamReader( getClass().getResourceAsStream( Consts.ABOUT_TEMLATE_RESOURCE_NAME ) ) );
+			while ( input.ready() )
+				aboutHtmlBuilder.append( input.readLine() );
+		} catch ( final IOException ie ) {
 		}
-		else {
-			final JPanel aboutPanel = new JPanel( new GridLayout( 8, 2, 0, 12 ) );
-			aboutPanel.add( new JLabel( "Application name:" ) );
-			aboutPanel.add( new JLabel( Consts.APPLICATION_NAME + "\u2122" ) );  // \u2122 is the unicode of trade mark ('™')
-			aboutPanel.add( new JLabel( "Version " ) );
-			aboutPanel.add( new JLabel( MainFrame.getInstance().applicationVersion ) );
-			aboutPanel.add( new JLabel( "Author:" ) );
-			aboutPanel.add( new JLabel( Consts.APPLICATION_AUTHOR ) );
-			aboutPanel.add( new JLabel( "Author e-mail:" ) );
-			aboutPanel.add( new JLabel( Consts.AUTHOR_EMAIL ) );
-			aboutPanel.add( new JLabel( "Battle.net account:" ) );
-			aboutPanel.add( new JLabel( "Dakota_Fanning@USEast" ) );
-			aboutPanel.add( new JLabel( "Home page:" ) );
-			aboutPanel.add( new JLabel( Consts.HOME_PAGE_URL ) );
-			aboutPanel.add( new JLabel( "Online hacker database:" ) );
-			aboutPanel.add( new JLabel( Consts.BWHF_HACKER_DATA_BASE_SERVER_URL ) );
-			aboutPanel.add( new JLabel( "Player's Network:" ) );
-			aboutPanel.add( new JLabel( Consts.PLAYERS_NETWORK_PAGE_URL ) );
-			
-			contentBox.add( Utils.wrapInPanel( aboutPanel ) );
-			
-			contentBox.add( new JPanel( new BorderLayout() ) );
+		finally {
+			if ( input != null )
+				try { input.close(); } catch ( final IOException ie ) {}
 		}
+		
+		String aboutHtml = aboutHtmlBuilder.toString();
+		for ( final Map.Entry< String, String > entry : templateParameterValueMap.entrySet() )
+			aboutHtml = aboutHtml.replace( entry.getKey(), entry.getValue() );
+		
+		editorPane = new JEditorPane( "text/html", aboutHtml );
+		editorPane.setEditable( false );
+		/*editorPane.addHyperlinkListener( new HyperlinkListener() {
+			public void hyperlinkUpdate( final HyperlinkEvent event ) {
+				if ( event.getEventType() == HyperlinkEvent.EventType.ACTIVATED )
+					if ( event.getURL() != null )
+						Utils.showURLInBrowser( event.getURL().toString() );
+			}
+		} );*/
+		
+		final JScrollPane wrapperScrollPane = new JScrollPane( editorPane );
+		contentBox.add( wrapperScrollPane );
 	}
 	
 	@Override
