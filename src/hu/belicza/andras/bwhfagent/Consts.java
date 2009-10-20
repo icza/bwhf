@@ -21,7 +21,7 @@ public class Consts {
 	/** Name of the current version resource file.                             */
 	public static final String VERSION_RESOURCE_NAME                   = "current_version.txt";
 	/** URL pointing to the latest stable version text.                        */
-	public static final String LATEST_STABLE_VERSION_TEXT_URL          = "http://bwhf.googlecode.com/svn/trunk/latest_stable_version_os-x.txt";
+	public static final String LATEST_STABLE_VERSION_TEXT_URL          = "http://bwhf.googlecode.com/svn/branches/Swing%20(MAC%20OS-X)/latest_stable_version.txt";
 	/** Search help page url string.                                           */
 	public static final String SEARCH_HELP_PAGE_URL                    = "http://code.google.com/p/bwhf/wiki/ReplaySearchInBWHFAgent";
 	/** Player matcher help page url string.                                   */
