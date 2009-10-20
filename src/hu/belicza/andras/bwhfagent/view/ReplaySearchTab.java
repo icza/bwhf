@@ -1006,7 +1006,7 @@ public class ReplaySearchTab extends Tab {
 				moveUpButton.addActionListener( new ActionListener() {
 					public void actionPerformed( final ActionEvent event ) {
 						final int tempIndex = columnModelIndicesClone[ i_ ];
-						columnModelIndicesClone[ i_ ] = columnModelIndicesClone[  i_ - 1 ];
+						columnModelIndicesClone[ i_ ] = columnModelIndicesClone[ i_ - 1 ];
 						columnModelIndicesClone[ i_ - 1 ] = tempIndex;
 						buildColumnsGrid( columnsGrid, columnModelIndicesClone );
 					}
@@ -1020,7 +1020,7 @@ public class ReplaySearchTab extends Tab {
 				moveDownButton.addActionListener( new ActionListener() {
 					public void actionPerformed( final ActionEvent event ) {
 						final int tempIndex = columnModelIndicesClone[ i_ ];
-						columnModelIndicesClone[ i_ ] = columnModelIndicesClone[  i_ + 1 ];
+						columnModelIndicesClone[ i_ ] = columnModelIndicesClone[ i_ + 1 ];
 						columnModelIndicesClone[ i_ + 1 ] = tempIndex;
 						buildColumnsGrid( columnsGrid, columnModelIndicesClone );
 					}

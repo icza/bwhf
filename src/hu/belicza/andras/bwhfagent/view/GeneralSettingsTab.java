@@ -125,7 +125,7 @@ public class GeneralSettingsTab extends Tab {
 		constraints.fill = GridBagConstraints.BOTH;
 		
 		constraints.gridwidth = 1;
-		label = new JLabel( "Starcraft directory:", JLabel.WEST );
+		label = new JLabel( "Starcraft directory:", JLabel.LEFT );
 		gridBagLayout.setConstraints( label, constraints );
 		panel.add( label );
 		// This is a workaround becase SwingWT does not implement DocumentListener correctly :S
@@ -217,7 +217,7 @@ public class GeneralSettingsTab extends Tab {
 		panel.add( wrapperPanel );
 		
 		constraints.gridwidth = 1;
-		label = new JLabel( "Program to view/edit files:", JLabel.WEST );
+		label = new JLabel( "Program to view/edit files:", JLabel.LEFT );
 		gridBagLayout.setConstraints( label, constraints );
 		panel.add( label );
 		gridBagLayout.setConstraints( editorProgramTextField, constraints );
@@ -327,7 +327,7 @@ public class GeneralSettingsTab extends Tab {
 		}
 		else {
 			mainFrame.startScButton.setEnabled( false );
-			mainFrame.starcraftFolderStatusLabel.setText( "Cannot find 'StarCraft.exe'!" );
+			mainFrame.starcraftFolderStatusLabel.setText( "Cannot find '" + Consts.STARCRAFT_EXECUTABLE_FILE_NAME + "'!" );
 			mainFrame.starcraftFolderStatusLabel.setForeground( Color.RED );
 		}
 	}

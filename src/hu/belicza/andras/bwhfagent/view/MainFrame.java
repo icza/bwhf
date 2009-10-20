@@ -168,7 +168,7 @@ public class MainFrame extends JFrame {
 		if ( arguments.length > 0 )
 			argumentFile = new File( arguments[ 0 ] );
 		
-		if ( argumentFile.isFile() ) {
+		if ( argumentFile != null && argumentFile.isFile() ) {
 			setVisible( true );
 			selectTab( chartsTab );
 			chartsTab.setReplayFile( argumentFile );

@@ -55,7 +55,7 @@ public class PlayerMatcherTab extends Tab {
 	/** Authoritativeness threshold combobox.          */
 	private final JComboBox  authoritativenessThresholdComboBox;
 	/** Matching probability threshold combobox.       */
-	private final JComboBox  matchingProbabilityThresholdComboBox = new JComboBox( new Object[] { "100%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%", "0%" } );
+	private final JComboBox  matchingProbabilityThresholdComboBox = new JComboBox( new Object[] { "100%", "98%", "96%", "94%", "92%", "90%", "80%", "70%", "60%", "50%", "40%", "30%", "20%", "10%", "0%" } );
 	/** Max displayable results combobox.              */
 	private final JComboBox  maxDisplayableResultsComboBox        = new JComboBox( new Object[] { "100", "1,000", "5,000", "10,000", "20,000", "50,000", "100,000" } );
 	
