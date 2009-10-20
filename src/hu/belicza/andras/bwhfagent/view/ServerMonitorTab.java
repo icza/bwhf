@@ -225,7 +225,7 @@ public class ServerMonitorTab extends Tab {
 			catch ( final IOException ie ) {
 				ie.printStackTrace();
 			}
-			serversPanel.getParent().validate();
+			contentBox.validate();
 		}
 	}
 	
