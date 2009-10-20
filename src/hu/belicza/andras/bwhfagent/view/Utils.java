@@ -463,13 +463,24 @@ public class Utils {
 		
 		final String editorProgram = MainFrame.getInstance().generalSettingsTab.editorProgramTextField.getText();
 		
+		boolean tryDesktop = false;
 		if ( editorProgram.length() > 0 ) {
 			try {
 				Runtime.getRuntime().exec( new String[] { editorProgram, fileName } );
 			} catch ( final IOException ie ) {
 				ie.printStackTrace();
+				tryDesktop = true;
 			}
 		}
+		else
+			tryDesktop = true;
+		
+		if ( tryDesktop && Desktop.isDesktopSupported() )
+			try {
+				Desktop.getDesktop().edit( new File( fileName ) );
+			}
+			catch ( final Exception e ) {
+			}
 	}
 	
 	/**
