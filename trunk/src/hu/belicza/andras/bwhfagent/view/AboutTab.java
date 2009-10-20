@@ -41,15 +41,15 @@ public class AboutTab extends Tab {
 	public AboutTab() {
 		super( "About", IconResourceManager.ICON_ABOUT );
 		
-		templateParameterValueMap.put( "%APPLICATION_NAME%"                        , Consts.APPLICATION_NAME + "&#8482;" ); // &#8482; is the code of trade mark ('™')
-		templateParameterValueMap.put( "%APPLICATION_AUTHOR%"                      , Consts.APPLICATION_AUTHOR );
-		templateParameterValueMap.put( "%AUTHOR_EMAIL%"                            , Consts.AUTHOR_EMAIL );
-		templateParameterValueMap.put( "%APPLICATION_VERSION%"                     , MainFrame.getInstance().applicationVersion );
-		templateParameterValueMap.put( "%APP_SUBVERSION_SCAN_ENGINE%"              , ReplayScanner.ENGINE_VERSION );
-		templateParameterValueMap.put( "%APP_SUBVERSION_PLAYER_MATCHER_ALGORITHM%" , PlayerMatcherTab.PLAYER_MATCHER_ALGORITHM_VERSION );
-		templateParameterValueMap.put( "%APP_SUBVERSION_EAPM_ALGORITHM%"           , EapmUtil.EAPM_ALGORITHM_VERSION );
-		templateParameterValueMap.put( "%HOME_PAGE_URL%"                           , Consts.HOME_PAGE_URL );
-		templateParameterValueMap.put( "%BWHF_HACKER_DATA_BASE_SERVER_URL%"        , Consts.BWHF_HACKER_DATA_BASE_SERVER_URL );
+		templateParameterValueMap.put( "%APPLICATION_NAME%"                       , Consts.APPLICATION_NAME + "&#8482;" ); // &#8482; is the code of trade mark ('™')
+		templateParameterValueMap.put( "%APPLICATION_AUTHOR%"                     , Consts.APPLICATION_AUTHOR );
+		templateParameterValueMap.put( "%AUTHOR_EMAIL%"                           , Consts.AUTHOR_EMAIL );
+		templateParameterValueMap.put( "%APPLICATION_VERSION%"                    , MainFrame.getInstance().applicationVersion );
+		templateParameterValueMap.put( "%APP_SUBVERSION_SCAN_ENGINE%"             , ReplayScanner.ENGINE_VERSION );
+		templateParameterValueMap.put( "%APP_SUBVERSION_PLAYER_MATCHER_ALGORITHM%", PlayerMatcherTab.PLAYER_MATCHER_ALGORITHM_VERSION );
+		templateParameterValueMap.put( "%APP_SUBVERSION_EAPM_ALGORITHM%"          , EapmUtil.EAPM_ALGORITHM_VERSION );
+		templateParameterValueMap.put( "%HOME_PAGE_URL%"                          , Consts.HOME_PAGE_URL );
+		templateParameterValueMap.put( "%BWHF_HACKER_DATA_BASE_SERVER_URL%"       , Consts.BWHF_HACKER_DATA_BASE_SERVER_URL );
 		
 		buildGUI();
 	}
