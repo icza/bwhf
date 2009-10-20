@@ -107,7 +107,12 @@ public class PlayerCheckerTab extends LoggedTab {
 		includeCustomPlayerListCheckBox.doClick();
 		
 		// Load the CharDef class (and the definitions from file) to avoid delays later on
-		CharDef.class.toString();
+		try {
+			Class.forName( CharDef.class.getName() );
+		}
+		catch ( final ClassNotFoundException cnfe ) {
+			cnfe.printStackTrace();
+		}
 		
 		startCacheAutoUpdater();
 	}
