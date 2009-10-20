@@ -1,0 +1,20 @@
+# Every line contains a server. The server must contain the port separated with ':' (default is 80).
+# The rest of the line after a space is the name to be displayed. Format:
+# server:port display name
+
+useast.battle.net:6112 USEast
+uswest.battle.net:6112 USWest
+europe.battle.net:6112 Europe
+asia.battle.net:6112 Asia
+sc.theabyss.ru:6112 Iccup (Abyss)
+bwhf.net BWHF
+teamliquid.net Team Liquid
+gosugamers.net Gosugamers
+iccup.com Iccup
+starcraftdream.com Starcraft Dream
+vilegaming.com Vilegaming
+www.bghers.com BGHers
+www.thebgh.com TheBGH
+distant.no-ip.org:9367 Distant
+jbls.clanbnu.net:9367 ClanBNU
+jbls.org:9367 jbls.org
