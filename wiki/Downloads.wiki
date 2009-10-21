@@ -30,5 +30,3 @@ Check out the BWHF Agent developer documentation:
 
 ===Looking for older releases?===
 Check out this page: [http://code.google.com/p/bwhf/downloads/list All downloads]
-
-Bear in mind that the server was moved to a new location on 2009-09-18 which has a new IP address. Versions earlier than 2.61 used direct IP reference to the BWHF server which will not work anymore therefore they cannot reach the server. (Releases from 2.61 uses the working bwhf.net domain.)
