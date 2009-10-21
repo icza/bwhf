@@ -10,7 +10,8 @@
  * Added 2 new buttons to the charts tab: *"Prev autorep"* and *"Next autorep"*. With these buttons you can easily navigate between the autosaved replays. The autoreplay folder is taken from the autoscan tab. These 2 buttons will jump from replay to replay based on the *last modification dates* of the files. So even if you rename the replays, it will still iterate over them in the right cronological order.
  * More matching probability thresholds on the player matcher tab.
  * Displaying game chat did not display the correct name of the replay file (always displayed the name of last replay).
- * Fixed a bug wich cause some layout problems when the state of the maximized window changed.
+ * Fixed a bug wich caused some layout problems when the state of the maximized window changed.
+ * Other minor fixes and improvements.
 
 ----
 ===2.72 2009-10-07===
