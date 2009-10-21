@@ -570,7 +570,7 @@ public class ChartsComponent extends JPanel {
 			gameInfoBuilder.append( "  |  Type: " ).append( gameTypeName == null ? "N/A" : gameTypeName );
 			gameInfoBuilder.append( "  |  Map: " ).append( replayHeader.mapName );
 			gameInfoBuilder.append( "  |  Size: " ).append( replayHeader.getMapSize() );
-			gameDetailsLabel.setText( gameInfoBuilder.toString().replace( "<", "&lt;" ).replace( ">", "&gt;" ) );
+			gameDetailsLabel.setText( gameInfoBuilder.toString() );
 			
 			hackDescriptionList = ReplayScanner.scanReplayForHacks( replay, false );
 			
