@@ -879,6 +879,8 @@ public class ChartsComponent extends JPanel {
 				for ( int j = 0; j <= ASSIST_LINES_COUNT; j++ ) {
 					final int y   = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
 					final int apm = maxApm * j / ASSIST_LINES_COUNT;
+					graphics.setColor( CHART_BACKGROUND_COLOR );
+					graphics.fillRect( 1, y - 4, 20, 9 );
 					graphics.setColor( CHART_AXIS_LABEL_COLOR );
 					graphics.drawString( ( apm < 100 ? ( apm < 10 ? "  " : " " ) : "" ) + apm, 1, y + 4 );
 					if ( j > 0 ) {
