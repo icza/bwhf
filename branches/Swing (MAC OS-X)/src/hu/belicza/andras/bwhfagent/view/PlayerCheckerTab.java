@@ -496,7 +496,7 @@ public class PlayerCheckerTab extends LoggedTab {
 	 */
 	private void refreshLastUpdatedLabel() {
 		final long lastUpdated = HACKER_LIST_CACHE_FILE.lastModified();
-		hackerListLastUpdatedLabel.setText( lastUpdated > 0l ? DATE_FORMAT.format( new Date( lastUpdated ) ) : "&lt;never&gt;" );
+		hackerListLastUpdatedLabel.setText( lastUpdated > 0l ? DATE_FORMAT.format( new Date( lastUpdated ) ) : "<never>" );
 	}
 	
 	/**
