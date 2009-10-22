@@ -505,7 +505,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				else if ( player2 == null )
 					query = "SELECT game.id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99), game.version FROM game JOIN game_player on game.id=game_player.game WHERE " + ( nameFilter == null ? "" : "map_name LIKE ? AND " ) + "game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 );
 				else
-					query = "SELECT DISTINCT game.id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99), game.version FROM game JOIN game_player on game_player.game=game.id WHERE " + ( nameFilter == null ? "" : "map_name LIKE ? AND " ) + "(game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR game_player.player=" + player2 ) + ") GROUP BY game.id, engine, save_time, map_name, frames, type, gateway HAVING COUNT(*)=2";
+					query = "SELECT DISTINCT game.id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99), game.version FROM game JOIN game_player on game_player.game=game.id WHERE " + ( nameFilter == null ? "" : "map_name LIKE ? AND " ) + "(game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR game_player.player=" + player2 ) + ") GROUP BY game.id, engine, save_time, map_name, frames, type, gateway, game.version HAVING COUNT(*)=2";
 				
 				query += " ORDER BY " + tableHeader.sortingColumns[ sortingIndex ] + ( sortingDesc ? " DESC" : "" )
 				       + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
