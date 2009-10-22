@@ -2,7 +2,7 @@
 
 = BWHF Agent downloads =
 
-BWHF Agent can be used on windows and linux.
+BWHF Agent can be used on windows and linux and on MAC OS-X.
 
 ||Download latest BWHF Agent for windows:||[http://bwhf.googlecode.com/files/BWHFAgent%202.80%20windows.zip http://lh3.ggpht.com/_jDMClHrENz8/ShFo6OThnSI/AAAAAAAAN1E/4LcVEUVjDwA/s800/windows_icon.png.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%202.80%20windows.zip BWHF Agent 2.80 for windows] 3.2 MB||
 ||Download latest BWHF Agent for linux:||[http://bwhf.googlecode.com/files/BWHFAgent%202.80%20linux.zip http://lh5.ggpht.com/_jDMClHrENz8/ShFo6MbPePI/AAAAAAAAN1I/wdIE3RXg3zY/s800/linux_icon.png.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%202.80%20linux.zip BWHF Agent 2.80 for linux] 3.3 MB||
