@@ -313,7 +313,7 @@ public class ReplayHeader {
 	public static final String[] VERSION_NAMES = {
 		"1.0", "1.07", "1.08", "1.08b", "1.09", "1.09b", "1.10", "1.11", "1.11b",
 		"1.12", "1.12b", "1.13", "1.13b", "1.13c", "1.13d", "1.13e", "1.13f", "1.14",
-		"1.15", "1.15.1", "1.15.2", "1.15.3", "1.16", "1.16.1 or higher"
+		"1.15", "1.15.1", "1.15.2", "1.15.3", "1.16", ">=1.16.1"
 	};
 	
 	/** Starcraft release dates and version names. Source: ftp.blizzard.com/pub/broodwar/patches/PC */
