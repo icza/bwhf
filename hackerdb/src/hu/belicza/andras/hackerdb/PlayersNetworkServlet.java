@@ -49,9 +49,11 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class PlayersNetworkServlet extends BaseServlet {
 	
-	/** Simple date format to format and parse replay save time.   */
+	/** Simple date format to format and parse replay save time.           */
 	private static final DateFormat SIMPLE_DATE_FORMAT   = new SimpleDateFormat( "yyyy-MM-dd" );
-	/** Simple date format to format dates for the activity chart. */
+	/** Full date format to format and parse replay save and report times. */
+	private static final DateFormat FULL_DATE_FORMAT     = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
+	/** Simple date format to format dates for the activity chart.         */
 	private static final DateFormat ACTIVITY_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM" );
 	/** Earliest date of the replays. */
 	private static final long       EARLIEST_REPLAY_DATE; 
@@ -96,11 +98,10 @@ public class PlayersNetworkServlet extends BaseServlet {
 	
 	/** Header of the game table. */
 	private static final TableHeader GAME_TABLE_HEADER = new TableHeader(
-			new String[]  { "COALESCE(gateway,99)", "COALESCE(save_time,'1998-01-01')", "map_name", "frames"  , "type"     , "COALESCE(save_time,'1998-01-01')", null      },
-			new String[]  { "Details"             , "Engine"                          , "Map"     , "Duration", "Game type", "Played on"                       , "Players" },
-			new boolean[] { false                 , true                              , false     , true      , false      , true                              , false     },
-			5
-			
+			new String[]  { "COALESCE(gateway,99)", "COALESCE(save_time,'1998-01-01')", "map_name", "frames"  , "type", "COALESCE(save_time,'1998-01-01')", "game.version", null      },
+			new String[]  { "Details"             , "Engine"                          , "Map"     , "Duration", "Type", "Played on"                       , "Reported"    , "Players" },
+			new boolean[] { false                 , true                              , false     , true      , false , true                              , true          , false     },
+			6
 	);
 	/** Header of the player table. */
 	private static final TableHeader PLAYER_TABLE_HEADER = new TableHeader(
@@ -500,11 +501,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 				int recordCounter = ( page - 1 ) * PAGE_SIZE;
 				String query;
 				if ( player1 == null )
-					query = "SELECT id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99) FROM game" + ( nameFilter == null ? "" : " WHERE map_name LIKE ?" );
+					query = "SELECT id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99), game.version FROM game" + ( nameFilter == null ? "" : " WHERE map_name LIKE ?" );
 				else if ( player2 == null )
-					query = "SELECT game.id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99) FROM game JOIN game_player on game.id=game_player.game WHERE " + ( nameFilter == null ? "" : "map_name LIKE ? AND " ) + "game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 );
+					query = "SELECT game.id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99), game.version FROM game JOIN game_player on game.id=game_player.game WHERE " + ( nameFilter == null ? "" : "map_name LIKE ? AND " ) + "game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 );
 				else
-					query = "SELECT DISTINCT game.id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99) FROM game JOIN game_player on game_player.game=game.id WHERE " + ( nameFilter == null ? "" : "map_name LIKE ? AND " ) + "(game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR game_player.player=" + player2 ) + ") GROUP BY game.id, engine, save_time, map_name, frames, type, gateway HAVING COUNT(*)=2";
+					query = "SELECT DISTINCT game.id, engine, COALESCE(save_time,'1998-01-01'), map_name, frames, type, COALESCE(gateway,99), game.version FROM game JOIN game_player on game_player.game=game.id WHERE " + ( nameFilter == null ? "" : "map_name LIKE ? AND " ) + "(game_player.player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR game_player.player=" + player2 ) + ") GROUP BY game.id, engine, save_time, map_name, frames, type, gateway HAVING COUNT(*)=2";
 				
 				query += " ORDER BY " + tableHeader.sortingColumns[ sortingIndex ] + ( sortingDesc ? " DESC" : "" )
 				       + " LIMIT " + PAGE_SIZE + " OFFSET " + recordCounter;
@@ -540,9 +541,10 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.print( "<tr><td align=right class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + ">" + getGameDetailsHtmlLink( gameId, DECIMAL_FORMAT.format( ++recordCounter ) ) + "&nbsp;" );
 					outputWriter.print( "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ replayHeader.gameEngine ] + " " + ( replayHeader.saveTime == null ? "" : replayHeader.guessVersionFromDate() ) );
 					outputWriter.print( "<td>" + getGameListWithMapHtmlLink( replayHeader.mapName, replayHeader.mapName, player1, player2, includeAkas) );
-					outputWriter.print( "<td>" + replayHeader.getDurationString( true ) );
-					outputWriter.print( "<td>" + getGameTypeName( replayHeader.gameType ) );
+					outputWriter.print( "<td align=right>" + replayHeader.getDurationString( false ) );
+					outputWriter.print( "<td align=center>" + getGameTypeName( replayHeader.gameType, false ) );
 					outputWriter.print( "<td>" + ( replayHeader.saveTime == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( replayHeader.saveTime ) ) );
+					outputWriter.print( "<td>" + SIMPLE_DATE_FORMAT.format( resultSet.getTimestamp( 8 ) ) );
 					
 					statement2.setInt( 1, gameId );
 					resultSet2 = statement2.executeQuery();
@@ -837,7 +839,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				outputWriter.println( "<h3>Details of game id=" + entityId + " </h3>" );
 				
 				statement = connection.createStatement();
-				resultSet = statement.executeQuery( "SELECT engine, frames, save_time, name, map_width, map_height, type, creator_name, map_name, COALESCE(gateway,-1) FROM game WHERE id=" + entityId );
+				resultSet = statement.executeQuery( "SELECT engine, frames, save_time, name, map_width, map_height, type, creator_name, map_name, COALESCE(gateway,-1), version FROM game WHERE id=" + entityId );
 				
 				if ( resultSet.next() ) {
 					final ReplayHeader replayHeader = new ReplayHeader();
@@ -857,12 +859,13 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.println( "<tr><th align=left>Game engine:<td>" + replayHeader.getGameEngineString() );
 					outputWriter.println( "<tr><th align=left>Version:<td>" + ( replayHeader.saveTime == null ? UNKOWN_HTML_STRING : replayHeader.guessVersionFromDate() ) );
 					outputWriter.println( "<tr><th align=left>Duration:<td>" + replayHeader.getDurationString( false ) );
-					outputWriter.println( "<tr><th align=left>Saved on:<td>" + ( replayHeader.saveTime == null ? UNKOWN_HTML_STRING : replayHeader.saveTime ) );
+					outputWriter.println( "<tr><th align=left>Saved on:<td>" + ( replayHeader.saveTime == null ? UNKOWN_HTML_STRING : FULL_DATE_FORMAT.format( replayHeader.saveTime ) ) );
+					outputWriter.println( "<tr><th align=left>Reported on:<td>" + FULL_DATE_FORMAT.format( resultSet.getTimestamp( colCounter++ ) ) );
 					outputWriter.println( "<tr><th align=left>Game name:<td>" + replayHeader.gameName );
 					outputWriter.println( "<tr><th align=left>Map name:<td>" + getGameListWithMapHtmlLink( replayHeader.mapName, replayHeader.mapName, null, null, false ) );
 					outputWriter.println( "<tr><th align=left>Map size:<td>" + replayHeader.getMapSize() );
 					outputWriter.println( "<tr><th align=left>Creator name:<td>" + replayHeader.creatorName );
-					outputWriter.println( "<tr><th align=left>Game type:<td>" + getGameTypeName( replayHeader.gameType ) );
+					outputWriter.println( "<tr><th align=left>Game type:<td>" + getGameTypeName( replayHeader.gameType, true ) );
 					if ( gateway >= 0 && gateway < GATEWAYS.length )
 						outputWriter.print( "<tr><th align=left>Reported gateway:<td class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + ">" + GATEWAYS[ gateway ] );
 					
@@ -1291,11 +1294,12 @@ public class PlayersNetworkServlet extends BaseServlet {
 	/**
 	 * Safe method to get the name of a game type. Returns <code>UNKOWN_HTML_STRING</code> if game type is invalid/unknown.
 	 * @param gameType game type whose name to be return
+	 * @param longName tells if long or short name is to be returned
 	 * @return the name of a game type
 	 */
-	private static String getGameTypeName( final short gameType ) {
+	private static String getGameTypeName( final short gameType, final boolean longName ) {
 		try {
-			final String gameTypeName = ReplayHeader.GAME_TYPE_NAMES[ gameType ];
+			final String gameTypeName = ( longName ? ReplayHeader.GAME_TYPE_NAMES : ReplayHeader.GAME_TYPE_SHORT_NAMES )[ gameType ];
 			return gameTypeName == null ? UNKOWN_HTML_STRING : gameTypeName;
 		}
 		catch ( ArrayIndexOutOfBoundsException aioobe ) {
