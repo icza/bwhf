@@ -38,7 +38,7 @@ public class Consts {
 	public static final String ABOUT_TEMLATE_RESOURCE_NAME             = "about_template.html";
 	
 	/** Default Starcraft directory.                                           */
-	public static final String DEFAULT_STARCRAFT_DIRECTORY             = "/Applications/Starcraft Folder";
+	public static final String DEFAULT_STARCRAFT_DIRECTORY             = "/Applications/Starcraft Files";
 	/** Starcraft replay folder relative to the Starcraft folder.              */
 	public static final String STARCRAFT_REPLAY_FOLDER                 = "maps/replays";
 	/** Starcraft replay folder relative to the Starcraft folder.              */
