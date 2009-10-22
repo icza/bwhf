@@ -664,7 +664,7 @@ public class AdminServlet extends BaseServlet {
 			}
 			resultSet.close();
 			
-			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT ip) FROM download_log WHERE report.version+interval '30 days'>now()" );
+			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT ip) FROM download_log WHERE version+interval '30 days'>now()" );
 			if ( resultSet.next() ) {
 				outputWriter.println( "<tr><th align=left>Active IPs (have downloads in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
