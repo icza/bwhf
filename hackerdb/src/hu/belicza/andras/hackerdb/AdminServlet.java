@@ -664,9 +664,9 @@ public class AdminServlet extends BaseServlet {
 			}
 			resultSet.close();
 			
-			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT key.id) FROM key JOIN report on key.id=report.key WHERE key.revocated=FALSE AND report.version+interval '30 days'>now()" );
+			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT ip) FROM download_log WHERE report.version+interval '30 days'>now()" );
 			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Active keys (have reports in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+				outputWriter.println( "<tr><th align=left>Active IPs (have downloads in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
@@ -685,6 +685,12 @@ public class AdminServlet extends BaseServlet {
 			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM key WHERE key.revocated=FALSE" );
 			if ( resultSet.next() ) {
 				outputWriter.println( "<tr><th align=left>Keys in database:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+			}
+			resultSet.close();
+			
+			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT key.id) FROM key JOIN report on key.id=report.key WHERE key.revocated=FALSE AND report.version+interval '30 days'>now()" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr><th align=left>Active keys (have reports in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
