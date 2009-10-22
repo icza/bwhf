@@ -1178,18 +1178,12 @@ public class ReplaySearchTab extends Tab {
 		for ( final int columnModelIndex : columnModelIndices )
 			columnNameVector.add( RESULT_TABLE_COLUMN_NAMES[ columnModelIndex ] );
 		
-		resultTable.setAutoResizeMode( JTable.AUTO_RESIZE_ALL_COLUMNS );
 		resultTable.setModel( new DefaultTableModel( resultDataVector, columnNameVector ) {
 			@Override
 			public boolean isCellEditable( final int row, final int column ) {
 				return false;
 			}
 		} );
-		//resultTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
-		
-		// When model is replaced, the context menu is disposed (bug in SwingWT?). We have to rebuild it.
-		//rebuildReplayOperationsPopupMenu();
-		
 		
 		mainFrame.chartsTab.onReplayResultListChange( !lastSearchResultRowsData.isEmpty() );
 	}
