@@ -648,67 +648,67 @@ public class AdminServlet extends BaseServlet {
 			
 			resultSet = statement.executeQuery( "SELECT ((SELECT COUNT(*) FROM game)+0.0)/(SELECT COUNT(*) FROM player)" );
 			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Games Per Players quota:<td align=right>" + String.format( "%.5f", resultSet.getFloat( 1 ) ) );
+				outputWriter.println( "<tr style='background:#ffc0c0'><th align=left>Games Per Players quota:<td align=right>" + String.format( "%.5f", resultSet.getFloat( 1 ) ) );
 			}
 			resultSet.close();
 			
 			resultSet = statement.executeQuery( "SELECT ((SELECT COUNT(*) FROM report JOIN key on key.id=report.key JOIN hacker on report.hacker=hacker.id WHERE report.revocated=FALSE AND key.revocated=FALSE AND hacker.guarded=FALSE)+0.0)/(SELECT COUNT(*) FROM (SELECT hacker.id FROM hacker JOIN report on report.hacker=hacker.id JOIN key on report.key=key.id WHERE report.revocated=FALSE AND key.revocated=FALSE AND hacker.guarded=FALSE GROUP BY hacker.id HAVING COUNT(*)>0) as dummy)" );
 			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Reports Per Hackers quota:<td align=right>" + String.format( "%.5f", resultSet.getFloat( 1 ) ) );
+				outputWriter.println( "<tr style='background:#ffc0c0'><th align=left>Reports Per Hackers quota:<td align=right>" + String.format( "%.5f", resultSet.getFloat( 1 ) ) );
 			}
 			resultSet.close();
 			
 			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM (SELECT ip FROM download_log WHERE version>='2009-04-20' GROUP BY ip HAVING COUNT(*)>=10) as foo" );
 			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Different IPs with at least 10 downloads:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+				outputWriter.println( "<tr style='background:#c0ffc0'><th align=left>Different IPs with at least 10 downloads:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
 			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT ip) FROM download_log WHERE version+interval '30 days'>now()" );
 			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Active IPs (have downloads in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+				outputWriter.println( "<tr style='background:#c0ffc0'><th align=left>Active IPs (have downloads in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
 			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM download_log WHERE version + interval '24 hours'>now()" );
 			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Hacker list downloads in the last 24 hours:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+				outputWriter.println( "<tr style='background:#c0ffc0'><th align=left>Hacker list downloads in the last 24 hours:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
 			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM person" );
 			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Persons in database:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
-			}
-			resultSet.close();
-			
-			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM key WHERE key.revocated=FALSE" );
-			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Keys in database:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
-			}
-			resultSet.close();
-			
-			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT key.id) FROM key JOIN report on key.id=report.key WHERE key.revocated=FALSE AND report.version+interval '30 days'>now()" );
-			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Active keys (have reports in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+				outputWriter.println( "<tr style='background:#c0c0ff'><th align=left>Persons in database:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
 			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM person WHERE password IS NOT NULL" );
 			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Persons with login:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+				outputWriter.println( "<tr style='background:#c0c0ff'><th align=left>Persons with login:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+			}
+			resultSet.close();
+			
+			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM key WHERE key.revocated=FALSE" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr style='background:#ffffc0'><th align=left>Keys in database:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+			}
+			resultSet.close();
+			
+			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT key.id) FROM key JOIN report on key.id=report.key WHERE key.revocated=FALSE AND report.version+interval '30 days'>now()" );
+			if ( resultSet.next() ) {
+				outputWriter.println( "<tr style='background:#ffffc0'><th align=left>Active keys (have reports in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
 			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM player WHERE aka_group IS NOT NULL" );
 			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Players belonging to AKA groups:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+				outputWriter.println( "<tr style='background:#c0ffff'><th align=left>Players belonging to AKA groups:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
 			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM hacker WHERE guarded=TRUE" );
 			if ( resultSet.next() ) {
-				outputWriter.println( "<tr><th align=left>Guarded (white-listed) players:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
+				outputWriter.println( "<tr style='background:#c0ffff'><th align=left>Guarded (white-listed) players:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
