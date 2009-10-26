@@ -495,6 +495,9 @@ public class ChartsComponent extends JPanel {
 	}
 	
 	public void setChartType( final ChartType chartType ) {
+		if ( chartType == null )
+			return;
+		
 		// We store values on the options panel before we remove the components, they might lost their values in SwingWT
 		assignUsedProperties();
 		// removeAll() does not work properly in SwingWT, we remove components manually!
@@ -721,7 +724,7 @@ public class ChartsComponent extends JPanel {
 		( (Graphics2D) graphics ).setBackground( CHART_BACKGROUND_COLOR );
 		graphics.clearRect( 0, 0, getWidth(), getHeight() );
 		
-		if ( replay != null && playerIndexToShowList.size() > 0 ) {
+		if ( replay != null && playerIndexToShowList.size() > 0 && replay.replayHeader.gameFrames != 0 ) {
 			final ChartsParams chartsParams = new ChartsParams( chartsTab, replay.replayHeader.gameFrames, playerIndexToShowList.size(), this );
 			switch ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() ) {
 				case APM :
