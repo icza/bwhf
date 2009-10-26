@@ -1001,9 +1001,9 @@ public class AdminServlet extends BaseServlet {
 					commandAllowed = true;
 			}
 			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.SQL_TOOL.name() + "' method=POST>" );
-			outputWriter.println( "<textarea id='sqlCommandAreaId' rows=10 cols=80 name='" + REQUEST_PARAM_SQL_COMMAND + "'>" );
+			outputWriter.print( "<textarea id='sqlCommandAreaId' rows=10 cols=80 name='" + REQUEST_PARAM_SQL_COMMAND + "'>" );
 			if ( sqlCommand != null )
-				outputWriter.println( encodeHtmlString( sqlCommand ) );
+				outputWriter.print( encodeHtmlString( sqlCommand.replace( "\r\n", ";;" ).replace( "\n", ";;" ).replace( "\r", ";;" ) ).replace( encodeHtmlString( ";;" ), "\r\n" ) );
 			outputWriter.println( "</textarea>" );
 			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_SQL_COMMAND_TYPE + "'>" );
 			outputWriter.println( "<br><input type=submit value='Execute Query' onclick='javascript:this.form." + REQUEST_PARAM_SQL_COMMAND_TYPE + ".value=\"0\";return true;'>" );
