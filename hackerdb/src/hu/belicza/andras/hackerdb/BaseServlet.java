@@ -177,7 +177,7 @@ public class BaseServlet extends HttpServlet {
 			if ( ch >= 'a' && ch <='z' || ch >= 'A' && ch <= 'Z' || ch >= '0' && ch <= '9' )
 				encodedHtml.append( ch ); // safe
 			else if ( Character.isISOControl( ch ) )
-				encodedHtml.append( "&middot;" ); // Not safe, do not include it in the output
+				encodedHtml.append( "&middot;" ); // Not safe, substitute it in the output
 			else
 				encodedHtml.append( "&#" ).append( (int) ch ).append( ';' );
 		}
