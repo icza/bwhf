@@ -1023,7 +1023,7 @@ public class AdminServlet extends BaseServlet {
 						
 						outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
 						final int columnCount = metaData.getColumnCount();
-						outputWriter.print( "<tr align=center><td><b>#</b>" );
+						outputWriter.print( "<tr align=center class=" + TABLE_HEADER_STYLE_NAME + "><td><b>#</b>" );
 						for ( int i = 1; i <= columnCount; i++ )
 							outputWriter.print( "<td><b>" + encodeHtmlString( metaData.getColumnLabel( i ) ) + "</b><br>" + encodeHtmlString( metaData.getColumnTypeName( i ) ) );
 						outputWriter.println();
