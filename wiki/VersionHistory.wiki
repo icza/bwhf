@@ -6,7 +6,9 @@
 
 ----
 ===Changes and new features in the upcoming new release===
- * Some bugfix.
+ * Fixed a bug which might give false hack alerts in case of corrupted replays.
+ * Some other minor bugfix.
+
 ----
 ===2.80 2009-10-21===
  * *Now available for MAC OS-X too!*
