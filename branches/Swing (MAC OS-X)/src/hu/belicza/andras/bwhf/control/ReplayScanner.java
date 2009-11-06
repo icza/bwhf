@@ -17,7 +17,7 @@ import java.util.List;
 public class ReplayScanner {
 	
 	/** Version of the scan engine. */
-	public static final String ENGINE_VERSION = "1.43";
+	public static final String ENGINE_VERSION = "1.44";
 	
 	/**
 	 * Scans the replay actions for hacks.
@@ -29,8 +29,9 @@ public class ReplayScanner {
 	public static List< HackDescription > scanReplayForHacks( final Replay replay, final boolean skipLatterActionsOfHackers ) {
 		final List< HackDescription > hackDescriptionList = new ArrayList< HackDescription >();
 		
-		for ( final PlayerActions playerActions : replay.replayActions.players )
-			scanPlayerForHacks( replay.replayHeader, playerActions, hackDescriptionList, skipLatterActionsOfHackers );
+		if ( replay.replayHeader.gameFrames > 0 )
+			for ( final PlayerActions playerActions : replay.replayActions.players )
+				scanPlayerForHacks( replay.replayHeader, playerActions, hackDescriptionList, skipLatterActionsOfHackers );
 		
 		return hackDescriptionList;
 	}
