@@ -297,12 +297,12 @@ public class HackerDbServlet extends BaseServlet {
 			
 			// Filters
 			outputWriter.println( "<b>Filters</b> <button type=button onclick=\"" + getJavaScriptForResetFilters( filtersWrapper ) + "\">Reset filters</button><table border=1 cellspacing=0 cellpadding=2>" );
-			outputWriter.println( "<tr><th align=right>Hacker name:<td><input name='" + FILTER_NAME_NAME + "' type=text value='" + encodeHtmlString( filtersWrapper.name ) + "' style='width:100%'>" );
+			outputWriter.println( "<tr><th align=right>Hacker name:<td><input name='" + FILTER_NAME_NAME + "' type=text value='" + encodeHtmlString( filtersWrapper.name ) + "'>" );
 			// Render game engines here
 			outputWriter.print  ( "<th align=right>Game engines:<td>" );
 			for ( int i = 0; i < GAME_ENGINES.length; i++ )
 				outputWriter.println( "<input name='" + FILTER_NAME_GAME_ENGINE + i + "' type=checkbox " + ( filtersWrapper.gameEngines[ i ] ? "checked" : "" ) + ">" + GAME_ENGINES[ i ] );
-			outputWriter.println( "<tr><th align=right>Map name:<td><input name='" + FILTER_NAME_MAP_NAME + "' type=text value='" + encodeHtmlString( filtersWrapper.mapName ) + "' style='width:100%'>" );
+			outputWriter.println( "<tr><th align=right>Map name:<td><input name='" + FILTER_NAME_MAP_NAME + "' type=text value='" + encodeHtmlString( filtersWrapper.mapName ) + "'>" );
 			outputWriter.println( "<th align=right>Min report count:<td><input name='" + FILTER_NAME_MIN_REPORT_COUNT +"' type=text value='" + filtersWrapper.minReportCount + "' style='width:100%'>" );
 			// Render gateways here
 			outputWriter.print  ( "<tr><th align=right>Gateways:<td colspan=3>" );
