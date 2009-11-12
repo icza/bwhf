@@ -827,7 +827,6 @@ public class PlayersNetworkServlet extends BaseServlet {
 		Statement   statement2   = null;
 		ResultSet   resultSet2   = null;
 		
-		getServletContext().log( "DEBUG - handleDetails( request, response, \"" + entity + "\", " + entityId + ")" );
 		try {
 			connection = dataSource.getConnection();
 			
