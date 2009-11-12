@@ -827,6 +827,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 		Statement   statement2   = null;
 		ResultSet   resultSet2   = null;
 		
+		getServletContext().log( "DEBUG - handleDetails( request, response, \"" + entity + "\", " + entityId + ")" );
 		try {
 			connection = dataSource.getConnection();
 			
@@ -1540,8 +1541,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	private static final String MENU_HTML = "<p><a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_GAME   + "'>Game list</a>"
 					+ "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_PLAYER + "'>Player list</a>"
 					+ "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players?" + PN_REQUEST_PARAM_NAME_OPERATION + '=' + PN_OPERATION_LIST + '&' + PN_REQUEST_PARAM_NAME_ENTITY + '=' + ENTITY_AKA    + "'>AKA list</a>"
-					+ "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/PlayersNetwork'>Help</a>"
-				    + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://wineveryweek.com'>Win Every Week</a></p>";
+					+ "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/PlayersNetwork'>Help</a></p>";
 	
 	/**
 	 * Renders the header for the output pages.
