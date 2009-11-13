@@ -79,11 +79,11 @@ public class MainFrame extends JFrame {
 	protected final AutoscanTab        autoscanTab;
 	/** Reference to the manual scan tab.      */
 	protected final ManualScanTab      manualScanTab;
-	/** Reference to the manual scan tab.      */
-	protected final PlayerCheckerTab   playerCheckerTab;
+	/** Reference to the player checker tab.   */
+	public    final PlayerCheckerTab   playerCheckerTab;
 	/** Reference to the charts tab.           */
 	protected final ChartsTab          chartsTab;
-	/** Reference to the charts tab.           */
+	/** Reference to the replay search tab.    */
 	protected final ReplaySearchTab    replaySearchTab;
 	/** Reference to the game chat tab.        */
 	protected final GameChatTab        gameChatTab;

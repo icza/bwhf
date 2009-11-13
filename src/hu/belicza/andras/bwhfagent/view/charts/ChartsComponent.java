@@ -9,7 +9,9 @@ import hu.belicza.andras.bwhf.model.ReplayHeader;
 import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.bwhfagent.view.ChartsTab;
 import hu.belicza.andras.bwhfagent.view.IconResourceManager;
+import hu.belicza.andras.bwhfagent.view.MainFrame;
 import hu.belicza.andras.bwhfagent.view.Utils;
+import hu.belicza.andras.bwhfagent.view.PlayerCheckerTab.ListedAs;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -599,6 +601,11 @@ public class ChartsComponent extends JPanel {
 			};
 			for ( int i = 0; i < players.length; i++ ) {
 				players[ i ][ 0 ] = new JCheckBox( playerActions[ i ].playerName, replayHeader.gameFrames < ReplayHeader.FRAMES_IN_TWO_MINUTES || !chartsTab.autoDisableInactivePlayersCheckBox.isSelected() || replayHeader.getPlayerApm( replayHeader.getPlayerIndexByName( playerActions[ i ].playerName ) ) >= AUTO_DISABLING_APM_LIMIT );
+				final ListedAs listedAs = MainFrame.getInstance().playerCheckerTab.isPlayerListed( playerActions[ i ].playerName );
+				if ( listedAs == ListedAs.HACKER )
+					( (JCheckBox) players[ i ][ 0 ] ).setBackground( Color.RED );
+				else if ( listedAs == ListedAs.CUSTOM )
+					( (JCheckBox) players[ i ][ 0 ] ).setBackground( Color.YELLOW );
 				players[ i ][ 1 ] = i;
 				( (JCheckBox) players[ i ][ 0 ] ).addActionListener( playerCheckBoxActionListener );
 			}

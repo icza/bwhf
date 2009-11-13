@@ -50,6 +50,19 @@ public class PlayerCheckerTab extends LoggedTab {
 	/** Ms in an hour.                                                               */
 	private static final long   MS_IN_AN_HOUR                          = 60*60*1000l;
 	
+	/**
+	 * Enum to indicate how a player can be listed.
+	 * @author Andras Belicza
+	 */
+	public static enum ListedAs {
+		/** Not listed */
+		NOT,
+		/** Listed as hacker */
+		HACKER,
+		/** Listed as custom */
+		CUSTOM
+	}
+	
 	/** Text of the update now button.           */
 	private static final String UPDATE_NOW_BUTTON_TEXT      = "Update now";
 	/** Name of the bwhf hacker list cache file. */
@@ -489,6 +502,26 @@ public class PlayerCheckerTab extends LoggedTab {
 			if ( input != null )
 				try { input.close(); } catch ( final IOException ie ) { ie.printStackTrace(); }
 		}
+	}
+	
+	/**
+	 * Checks if a player is listed somehow (hacker or custom).
+	 * @param name name to be checked
+	 * @return enum to indicate how the player is listed
+	 */
+	public synchronized ListedAs isPlayerListed( String name ) {
+		if ( name != null )
+			name = name.toLowerCase();
+		
+		for ( final Set< String > nameSet : gatewayBwhfHackerSetMap.values() )
+			if ( nameSet.contains( name ) )
+				return ListedAs.HACKER;
+		
+		for ( final Set< String > nameSet : gatewayCustomPlayerSetMap.values() )
+			if ( nameSet.contains( name ) )
+				return ListedAs.CUSTOM;
+		
+		return ListedAs.NOT;
 	}
 	
 	/**
