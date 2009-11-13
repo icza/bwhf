@@ -6,6 +6,7 @@
 
 ----
 ===Changes and new features in the upcoming new release===
+ * *Added detection of a new variant of the delayed autogather/autotrain hack.*
  * Fixed a bug which might give false hack alerts in case of corrupted replays.
  * Some other minor bugfix.
 
