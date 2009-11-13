@@ -430,13 +430,21 @@ public class HackerDbServlet extends BaseServlet {
 		int nameParamIndex    = 0;
 		int mapNameParamIndex = 0;
 		int keyParamIndex     = 0;
+		final boolean exactHackerNameMatch = filtersWrapper.name   .length() > 0 && filtersWrapper.name   .charAt( 0 ) == '"' && filtersWrapper.name   .charAt( filtersWrapper.name   .length() - 1 ) == '"';
+		final boolean exactMapNameMatch    = filtersWrapper.mapName.length() > 0 && filtersWrapper.mapName.charAt( 0 ) == '"' && filtersWrapper.mapName.charAt( filtersWrapper.mapName.length() - 1 ) == '"';
 		if ( filtersWrapper.name.length() > 0 ) {
-			queryBuilder.append( " AND h.name LIKE ?" );
+			if ( exactHackerNameMatch )
+				queryBuilder.append( " AND h.name=?" );
+			else
+				queryBuilder.append( " AND h.name LIKE ?" );
 			nameParamIndex = ++sqlParamsCounter;
 		}
 		
 		if ( filtersWrapper.mapName.length() > 0 ) {
-			queryBuilder.append( " AND r.map_name LIKE ?" );
+			if ( exactMapNameMatch )
+				queryBuilder.append( " AND r.map_name=?" );
+			else
+				queryBuilder.append( " AND r.map_name LIKE ?" );
 			mapNameParamIndex = ++sqlParamsCounter;
 		}
 		
@@ -499,9 +507,9 @@ public class HackerDbServlet extends BaseServlet {
 		
 		final PreparedStatement statement = connection.prepareStatement( queryBuilder.toString() );
 		if ( nameParamIndex > 0 )
-			statement.setString( nameParamIndex, "%" + filtersWrapper.name + "%" );
+			statement.setString( nameParamIndex, exactHackerNameMatch ? filtersWrapper.name.substring( 1, filtersWrapper.name.length() - 1 ) : "%" + filtersWrapper.name + "%" );
 		if ( mapNameParamIndex > 0 )
-			statement.setString( mapNameParamIndex, "%" + filtersWrapper.mapName + "%" );
+			statement.setString( mapNameParamIndex, exactMapNameMatch ? filtersWrapper.mapName.substring( 1, filtersWrapper.mapName.length() - 1 ) : "%" + filtersWrapper.mapName + "%" );
 		if ( keyParamIndex > 0 )
 			statement.setString( keyParamIndex, filtersWrapper.reportedWithKey );
 		
