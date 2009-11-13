@@ -984,15 +984,17 @@ public class HackerDbServlet extends BaseServlet {
 	
 	/**
 	 * Generates and returns an HTML link to the records of a hacker search by name.<br>
-	 * An HTML anchor tag will be returned whose text is the value of <code>hackerName</code>.
+	 * An HTML anchor tag will be returned whose text is the value of <code>text</code>.
 	 * @param hackerName name of the hacker whose records to be listed
+	 * @param text       text to appear in the link (will not be encoded!)
+	 * @param newWindow  tells if link has to be opened in a new window
 	 * @return an HTML link to the records of a hacker search by name
 	 */
-	protected static String getHackerRecordsByNameLink( final String hackerName ) {
+	protected static String getHackerRecordsByNameLink( final String hackerName, final String text, final boolean newWindow ) {
 		try {
 			return "<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_LIST
 				 + '&' + FILTER_NAME_NAME + '=' + URLEncoder.encode( hackerName, "UTF-8" )
-				 + "'>" + encodeHtmlString( hackerName ) + "</a>";
+				 + "'" + ( newWindow ? " target='_blank'>" : ">" ) + text + "</a>";
 		} catch ( final UnsupportedEncodingException uee ) {
 			// This should never happen
 			uee.printStackTrace();

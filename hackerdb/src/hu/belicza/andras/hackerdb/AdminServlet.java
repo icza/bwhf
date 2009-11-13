@@ -401,6 +401,7 @@ public class AdminServlet extends BaseServlet {
 			String hackerName = getNullStringParamValue( request, REQUEST_PARAM_HACKER_NAME );
 			if ( hackerName != null )
 				hackerName = hackerName.toLowerCase();
+			final boolean exactHackerNameMatch = hackerName != null && hackerName.length() > 0 && hackerName.charAt( 0 ) == '"' && hackerName.charAt( hackerName.length() - 1 ) == '"';
 			
 			Integer lastRepsLimit = getIntegerParamValue( request, REQUEST_PARAM_LASTREPS_LIMIT );
 			if ( lastRepsLimit == null )
@@ -419,12 +420,12 @@ public class AdminServlet extends BaseServlet {
 			if ( keyId != null )
 				query += " WHERE key.id=" + keyId;
 			if ( hackerName != null )
-				query += ( keyId == null ? " WHERE " : " AND " ) + "hacker.name LIKE ?";
+				query += ( keyId == null ? " WHERE " : " AND " ) + "hacker.name" + ( exactHackerNameMatch ? "=?" : " LIKE ?" );
 			query += " ORDER BY report.id DESC LIMIT " + lastRepsLimit;
 			
 			statement = connection.prepareStatement( query ); 
 			if ( hackerName != null )
-				statement.setString( 1, "%" + hackerName + "%" );
+				statement.setString( 1, exactHackerNameMatch ? hackerName.substring( 1, hackerName.length() - 1 ) : "%" + hackerName + "%" );
 			
 			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_REVOCATE_ID       + "'>" );
 			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_REINSTATE_ID      + "'>" );
@@ -446,7 +447,8 @@ public class AdminServlet extends BaseServlet {
 						+ "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) 
 						+ "<td align=right>" + ( resultSet.getBoolean( 12 ) ? "(revocated) " : "" ) + "<a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_KEY_ID + "')[0].value='" + resultSet.getInt( 3 ) + "';document.forms['lastReportsFormId'].submit();\">" + resultSet.getInt( 3 ) + "</a>" + ( fullAdmin ? ' ' + getHackerRecordsByKeyLink( resultSet.getString( 14 ), "", "keyreportsform" ) : "" ) 
 						+ "<td align=right>" + resultSet.getInt( 4 )
-						+ "<td>" + HackerDbServlet.getHackerRecordsByNameLink( resultSet.getString( 5 ) ) + ( resultSet.getBoolean( 13 ) ? " (guarded)" : "" )
+						+ "<td><a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_HACKER_NAME + "')[0].value='" + encodeHtmlString( '"' + resultSet.getString( 5 ) + '"' ) + "';document.forms['lastReportsFormId'].submit();\">" + encodeHtmlString( resultSet.getString( 5 ) ) + "</a> " 
+							+ HackerDbServlet.getHackerRecordsByNameLink( '"' + resultSet.getString( 5 ) + '"', "&uarr;", true ) + ( resultSet.getBoolean( 13 ) ? " (guarded)" : "" )
 						+ "<td>" + getGatewayComboHtml( gateway, reportId )
 						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 7 ) ]
 						+ "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 8 ) )
