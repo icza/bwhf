@@ -420,9 +420,9 @@ public class HackerDbServlet extends BaseServlet {
 		if ( countOnly )
 			queryBuilder.append( "SELECT COUNT(*) FROM (SELECT h.gateway" );
 		else
-			queryBuilder.append( "SELECT h.name, h.gateway, COUNT(h.gateway) AS reportsCount, 1 + date(MAX(r.version)) - date(MIN(r.version)) AS hackingPeriod, MIN(r.version) AS firstReported, MAX(r.version) AS lastReported, player.id, h.id" );
+			queryBuilder.append( "SELECT h.name, h.gateway, COUNT(h.gateway) AS reportsCount, 1 + date(MAX(r.version)) - date(MIN(r.version)) AS hackingPeriod, MIN(r.version) AS firstReported, MAX(r.version) AS lastReported, (SELECT player.id FROM player WHERE player.name=h.name), h.id" );
 		
-		queryBuilder.append( " FROM hacker h JOIN report r on h.id=r.hacker JOIN key k on r.key=k.id LEFT OUTER JOIN player on h.name=player.name WHERE k.revocated=FALSE AND r.revocated=FALSE AND h.guarded=FALSE" );
+		queryBuilder.append( " FROM hacker h JOIN report r on h.id=r.hacker JOIN key k on r.key=k.id WHERE k.revocated=FALSE AND r.revocated=FALSE AND h.guarded=FALSE" );
 		
 		int sqlParamsCounter  = 0;
 		int nameParamIndex    = 0;
@@ -479,7 +479,7 @@ public class HackerDbServlet extends BaseServlet {
 			queryBuilder.append( -1 ).append( ')' );
 		}
 		
-		queryBuilder.append( " GROUP BY h.name, h.gateway, player.id, h.id HAVING COUNT(h.gateway)>=" ).append( filtersWrapper.minReportCount );
+		queryBuilder.append( " GROUP BY h.name, h.gateway, h.id HAVING COUNT(h.gateway)>=" ).append( filtersWrapper.minReportCount );
 		
 		if ( countOnly )
 			queryBuilder.append( ") as foo" );
