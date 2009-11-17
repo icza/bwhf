@@ -834,7 +834,7 @@ public class HackerDbServlet extends BaseServlet {
 			int counter = 0;
 			while ( resultSet.next() ) {
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) 
-						+ "><td align=right>" + (++counter)
+						+ "><td align=right>" + DECIMAL_FORMAT.format( ++counter )
 						+ "<td align=center>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 1 ) ]
 						+ "<td>" + encodeHtmlString( resultSet.getString( 2 ) )
 						+ "<td align=center>" + FULL_DATE_FORMAT.format( resultSet.getTimestamp( 3 ) )
