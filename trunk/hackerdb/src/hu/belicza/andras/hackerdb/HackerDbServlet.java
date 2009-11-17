@@ -15,6 +15,7 @@ import static hu.belicza.andras.hackerdb.ServerApiConsts.GAME_ENGINES;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.GATEWAYS;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_CHECK;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_DOWNLOAD;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_HACKER_DETAILS;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_LIST;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_REPORT;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.OPERATION_STATISTICS;
@@ -23,6 +24,7 @@ import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_FILTERS_PRESENT;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_GAME_ENGINE;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_GATEWAY;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_HACKER_ID;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_KEY;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_MAP_NAME;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_OPERATION;
@@ -39,6 +41,8 @@ import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_FIRST;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_LAST;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_NEXT;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_PREVIOUS;
+
+import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -78,8 +82,10 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class HackerDbServlet extends BaseServlet {
 	
-	/** Date format to be used to format output dates. */
-	private static final DateFormat DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd HH:mm" );
+	/** Date format to be used to format output dates.           */
+	private static final DateFormat DATE_FORMAT      = new SimpleDateFormat( "yyyy-MM-dd HH:mm" );
+	/** Full date format to be used to format output timestamps. */
+	private static final DateFormat FULL_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd HH:mm:ss" );
 	
 	/** Max players in a report. */
 	private static final int MAX_PLAYERS_IN_REPORT = 8;
@@ -160,23 +166,15 @@ public class HackerDbServlet extends BaseServlet {
 				if ( key == null )
 					throw new BadRequestException();
 				
-				int gatewayIndex = 0;
-				try {
-					gatewayIndex = Integer.parseInt( request.getParameter( REQUEST_PARAMETER_NAME_GATEWAY ) );
-				}
-				catch ( final Exception e ) {
+				final Integer gatewayIndex = getIntegerParamValue( request, REQUEST_PARAMETER_NAME_GATEWAY );
+				if ( gatewayIndex == null )
 					throw new BadRequestException();
-				}
 				if ( gatewayIndex < 0 || gatewayIndex >= GATEWAYS.length )
 					throw new BadRequestException();
 				
-				int gameEngine = 0;
-				try {
-					gameEngine = Integer.parseInt( request.getParameter( REQUEST_PARAMETER_NAME_GAME_ENGINE ) );
-				}
-				catch ( final Exception e ) {
+				final Integer gameEngine = getIntegerParamValue( request, REQUEST_PARAMETER_NAME_GAME_ENGINE );
+				if ( gameEngine == null )
 					throw new BadRequestException();
-				}
 				
 				String mapName = request.getParameter( REQUEST_PARAMETER_NAME_MAP_NAME );
 				if ( mapName == null )
@@ -216,6 +214,14 @@ public class HackerDbServlet extends BaseServlet {
 				
 				serveDownload( request, response );
 				
+			} else if ( operation.equals( OPERATION_HACKER_DETAILS ) ) {
+				
+				final Integer hackerId = getIntegerParamValue( request, REQUEST_PARAMETER_NAME_HACKER_ID );
+				if ( hackerId == null )
+					throw new BadRequestException();
+				
+				serveHackerDetails( hackerId, response );
+				
 			}
 		}
 		catch ( final BadRequestException bre ) {
@@ -224,9 +230,9 @@ public class HackerDbServlet extends BaseServlet {
 	}
 	
 	/** Hacker list menu HTML code to be sent. */
-	private static final String HACKER_LIST_MENU_HTML = "<p><a href='http://code.google.com/p/bwhf/'>BWHF Agent home page</a>"
+	private static final String HACKER_LIST_MENU_HTML =
+			     "<p><a href='hackers'>Hacker list</a>"
 			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + "=" + OPERATION_STATISTICS + "'>Statistics</a>"
-			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='players'>BWHF Players' Network</a>"
 			   + "&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/wiki/OnlineHackerDatabase'>Help (filters, sorting)</a></p>";
 	
 	/**
@@ -278,17 +284,7 @@ public class HackerDbServlet extends BaseServlet {
 			
 			outputWriter = response.getWriter();
 			
-			outputWriter.println( "<html><head>" );
-			outputWriter.println( COMMON_HTML_HEADER_ELEMENTS );
-			outputWriter.println( "<title>BWHF Hacker Database</title>" );
-			outputWriter.println( "</head><body><center>" );
-			
-			// Header section
-			outputWriter.println( getCurrentTimeCode() );
-			outputWriter.println( "<h2>BWHF Hacker Database</h2>" );
-			outputWriter.println( HACKER_LIST_MENU_HTML );
-			outputWriter.println( GOOGLE_AD_HTML_HEADER );
-			outputWriter.flush();
+			renderHeader( outputWriter, "Hacker list" );
 			
 			// Controls section
 			outputWriter.println( "<form id='" + FORM_ID + "' action='hackers' method='POST'>" );
@@ -331,7 +327,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Hackers table section
 			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
 			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME
-								+ "><th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">#"
+								+ "><th class=" + NON_SORTING_COLUMN_STYLE_NAME + "> # "
 								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_NAME          , filtersWrapper ) + "\">Name"           + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME           ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
 								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_GATEWAY       , filtersWrapper ) + "\">Gateway"        + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_GATEWAY        ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
 								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_REPORT_COUNT  , filtersWrapper ) + "\">Reports count"  + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_REPORT_COUNT   ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
@@ -346,10 +342,9 @@ public class HackerDbServlet extends BaseServlet {
 					final int gateway = resultSet.getInt( 2 );
 					outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME )
 							+ "><td align=right>" + DECIMAL_FORMAT.format( ++recordNumber )
-							// If no matching player, playerId=0 is returned which would not handle if playerId=0 would be the hacker, but this is not a problem...
-							+ "<td>" + ( resultSet.getInt( 7 ) == 0 ? encodeHtmlString( resultSet.getString( 1 ) ) : PlayersNetworkServlet.getPlayerDetailsHtmlLink( resultSet.getInt( 7 ), resultSet.getString( 1 ), null ) )
+							+ "<td>" + ( resultSet.getObject( 7 ) == null ? encodeHtmlString( resultSet.getString( 1 ) ) : PlayersNetworkServlet.getPlayerDetailsHtmlLink( resultSet.getInt( 7 ), resultSet.getString( 1 ), null ) )
 							+ "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ]
-							+ "<td align=center>" + resultSet.getInt( 3 )
+							+ "<td align=center><a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_HACKER_DETAILS + '&' + REQUEST_PARAMETER_NAME_HACKER_ID + "=" + resultSet.getInt( 8 ) + "'>" + resultSet.getInt( 3 ) + "</a>"
 							+ "<td align=center>" + formatDays( resultSet.getInt( 4 ) )
 							+ "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 5 ) )
 							+ "<td>" + DATE_FORMAT.format( resultSet.getTimestamp( 6 ) ) );
@@ -357,13 +352,8 @@ public class HackerDbServlet extends BaseServlet {
 			}
 			outputWriter.println( "</table>" );
 			
-			// Footer section
-			outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></p>" );
-			outputWriter.println( "</center>" );
-			outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
-			outputWriter.println( "</body></html>" );
+			renderFooter( outputWriter );
 			
-			outputWriter.flush();
 		} catch ( final SQLException se ) {
 			se.printStackTrace();
 			final String errorMessage = "<p>Sorry, the server has encountered an error, we cannot fulfill your request! We apologize.</p>";
@@ -430,7 +420,7 @@ public class HackerDbServlet extends BaseServlet {
 		if ( countOnly )
 			queryBuilder.append( "SELECT COUNT(*) FROM (SELECT h.gateway" );
 		else
-			queryBuilder.append( "SELECT h.name, h.gateway, COUNT(h.gateway) AS reportsCount, 1 + date(MAX(r.version)) - date(MIN(r.version)) AS hackingPeriod, MIN(r.version) AS firstReported, MAX(r.version) AS lastReported, player.id" );
+			queryBuilder.append( "SELECT h.name, h.gateway, COUNT(h.gateway) AS reportsCount, 1 + date(MAX(r.version)) - date(MIN(r.version)) AS hackingPeriod, MIN(r.version) AS firstReported, MAX(r.version) AS lastReported, player.id, h.id" );
 		
 		queryBuilder.append( " FROM hacker h JOIN report r on h.id=r.hacker JOIN key k on r.key=k.id LEFT OUTER JOIN player on h.name=player.name WHERE k.revocated=FALSE AND r.revocated=FALSE AND h.guarded=FALSE" );
 		
@@ -489,7 +479,7 @@ public class HackerDbServlet extends BaseServlet {
 			queryBuilder.append( -1 ).append( ')' );
 		}
 		
-		queryBuilder.append( " GROUP BY h.name, h.gateway, player.id HAVING COUNT(h.gateway)>=" ).append( filtersWrapper.minReportCount );
+		queryBuilder.append( " GROUP BY h.name, h.gateway, player.id, h.id HAVING COUNT(h.gateway)>=" ).append( filtersWrapper.minReportCount );
 		
 		if ( countOnly )
 			queryBuilder.append( ") as foo" );
@@ -675,17 +665,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Generate HTML output
 			outputWriter = response.getWriter();
 			
-			outputWriter.println( "<html><head>" );
-			outputWriter.println( COMMON_HTML_HEADER_ELEMENTS );
-			outputWriter.println( "<title>BWHF Hacker Database Statistics</title>" );
-			outputWriter.println( "</head><body><center>" );
-			
-			// Header section
-			outputWriter.println( getCurrentTimeCode() );
-			outputWriter.println( "<h2>BWHF Hacker Database Statistics</h2>" );
-			outputWriter.println( "<p><a href='hackers'>Back to the hacker list</a>&nbsp;&nbsp;|&nbsp;&nbsp;<a href='http://code.google.com/p/bwhf/'>BWHF Agent home page</a></p>" );
-			outputWriter.println( GOOGLE_AD_HTML_HEADER );
-			outputWriter.flush();
+			renderHeader( outputWriter, "BWHF Hacker Database Statistics" );
 			
 			outputWriter.println( "<h3>Last " + LAST_DAYS_REPORTS + " days' daily reports</h3>" );
 			outputWriter.println( "<table border=0><tr><td>" );
@@ -729,13 +709,8 @@ public class HackerDbServlet extends BaseServlet {
 				outputWriter.println( "<tr><td>" + monthReports[ 0 ] + "<td align=right>" + DECIMAL_FORMAT.format( monthReports[ 1 ] ) );
 			outputWriter.println( "</table></table>" );
 			
-			// Footer section
-			outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></p>" );
-			outputWriter.println( "</center>" );
-			outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
-			outputWriter.println( "</body></html>" );
+			renderFooter( outputWriter );
 			
-			outputWriter.flush();
 		} catch ( final SQLException se ) {
 			se.printStackTrace();
 			final String errorMessage = "<p>Sorry, the server has encountered an error, we cannot fulfill your request! We apologize.</p>";
@@ -804,6 +779,84 @@ public class HackerDbServlet extends BaseServlet {
 				}
 			}
 			
+			if ( resultSet != null )
+				try { resultSet.close(); } catch ( final SQLException se ) {}
+			if ( statement != null )
+				try { statement.close(); } catch ( final SQLException se ) {}
+			if ( connection != null )
+				try { connection.close(); } catch ( final SQLException se ) {}
+		}
+	}
+	
+	/**
+	 * Lists the report details of a hacker.
+	 * @param hackerId id of the hacker
+	 * @param response response to be used
+	 * @throws IOException
+	 * @throws BadRequestException thrown if hacker id is invalid
+	 */
+	private void serveHackerDetails( final int hackerId, final HttpServletResponse response ) throws IOException, BadRequestException {
+		setNoCache( response );
+		response.setContentType( "text/html" );
+		response.setCharacterEncoding( "UTF-8" );
+		
+		Connection connection = null;
+		Statement  statement  = null;
+		ResultSet  resultSet  = null;
+		
+		PrintWriter outputWriter = null;
+		try {
+			
+			connection = dataSource.getConnection();
+			
+			statement = connection.createStatement();
+			resultSet = statement.executeQuery( "SELECT hacker.name, player.id, hacker.gateway FROM hacker LEFT OUTER JOIN player on hacker.name=player.name WHERE hacker.id=" + hackerId );
+			String hackerNameHtml = null;
+			int gateway = 0;
+			if ( resultSet.next() ) {
+				gateway = resultSet.getInt( 3 );
+				hackerNameHtml = resultSet.getInt( 2 ) == 0 ? encodeHtmlString( resultSet.getString( 1 ) ) : PlayersNetworkServlet.getPlayerDetailsHtmlLink( resultSet.getInt( 2 ), resultSet.getString( 1 ), null ).toString();
+				hackerNameHtml += " (" + ServerApiConsts.GATEWAYS[ gateway ] + ")";
+			}
+			else
+				throw new BadRequestException();
+			resultSet.close();
+			
+			outputWriter = response.getWriter();
+			
+			renderHeader( outputWriter, "Details of hacker " + hackerNameHtml );
+			
+			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2><tr class='" + TABLE_HEADER_STYLE_NAME + " " + NON_SORTING_COLUMN_STYLE_NAME + "'>" );
+			outputWriter.println( "<th> # <th>Engine<th>Map<th>Reported at<th>Played at<th>Game details" ); 
+			
+			resultSet = statement.executeQuery( "SELECT r.game_engine, r.map_name, r.version, r.save_time, game.id FROM report r JOIN key on key.id=r.key JOIN hacker h on r.hacker=h.id LEFT OUTER JOIN game on r.replay_md5=game.replay_md5 WHERE h.id=" + hackerId
+					+ " AND r.revocated=FALSE AND h.guarded=FALSE AND key.revocated=FALSE ORDER BY version DESC" );
+			
+			int counter = 0;
+			while ( resultSet.next() ) {
+				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) 
+						+ "><td align=right>" + (++counter)
+						+ "<td align=center>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 1 ) ]
+						+ "<td>" + encodeHtmlString( resultSet.getString( 2 ) )
+						+ "<td align=center>" + FULL_DATE_FORMAT.format( resultSet.getTimestamp( 3 ) )
+						+ "<td align=center>" + ( resultSet.getTimestamp( 4 ) == null ? "N/A" : FULL_DATE_FORMAT.format( resultSet.getTimestamp( 4 ) ) )
+						+ "<td align=center>" + ( resultSet.getObject( 5 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 5 ), "details" ) )
+				);
+			}
+			
+			outputWriter.println( "</table>" );
+			
+			renderFooter( outputWriter );
+			
+		} catch ( final SQLException se ) {
+			se.printStackTrace();
+			final String errorMessage = "<p>Sorry, the server has encountered an error, we cannot fulfill your request! We apologize.</p>";
+			if ( outputWriter != null )
+				outputWriter.println( errorMessage );
+			else
+				sendBackErrorMessage( response, errorMessage );
+		}
+		finally {
 			if ( resultSet != null )
 				try { resultSet.close(); } catch ( final SQLException se ) {}
 			if ( statement != null )
@@ -1008,6 +1061,34 @@ public class HackerDbServlet extends BaseServlet {
 			uee.printStackTrace();
 			throw new RuntimeException( uee );
 		}
+	}
+	
+	private static void renderHeader( final PrintWriter outputWriter, final String pageTitle ) {
+		outputWriter.println( "<html><head>" );
+		outputWriter.println( COMMON_HTML_HEADER_ELEMENTS );
+		outputWriter.println( "<title>BWHF Hacker Database</title>" );
+		outputWriter.println( "</head><body><center>" );
+		
+		outputWriter.println( getCurrentTimeCode() );
+		outputWriter.println( "<h2>BWHF Hacker Database</h2>" );
+		
+		outputWriter.println( HACKER_LIST_MENU_HTML );
+		outputWriter.println( GOOGLE_AD_HTML_HEADER );
+		
+		outputWriter.print  ( "<h3>" );
+		outputWriter.print  ( pageTitle );
+		outputWriter.println( "</h3>" );
+		outputWriter.flush();
+	}
+	
+	private static void renderFooter( final PrintWriter outputWriter ) {
+		outputWriter.println( "<hr><table border=0 width='100%'><tr><td align='left'><a href='http://code.google.com/p/bwhf/'>BWHF Agent home page</a>&nbsp;&nbsp;<a href='players'>BWHF Players' Network</a>"
+				+ "<td align=right <i>&copy; Andr&aacute;s Belicza, 2008-2009</i></table>" );
+		outputWriter.println( "</center>" );
+		outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
+		outputWriter.println( "</body></html>" );
+		
+		outputWriter.flush();
 	}
 	
 }
