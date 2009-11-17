@@ -1465,7 +1465,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * @param builder    builder to use to build the link
 	 * @return the builder used to build the an HTML link to the details page of the player
 	 */
-	private static StringBuilder getPlayerDetailsHtmlLink( final int id, final String playerName, StringBuilder builder ) {
+	public static StringBuilder getPlayerDetailsHtmlLink( final int id, final String playerName, StringBuilder builder ) {
 		if ( builder == null )
 			builder = new StringBuilder();
 		
