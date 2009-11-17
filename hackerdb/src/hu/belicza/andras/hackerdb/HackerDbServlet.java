@@ -421,8 +421,7 @@ public class HackerDbServlet extends BaseServlet {
 			queryBuilder.append( "SELECT COUNT(*) FROM (SELECT h.gateway" );
 		else
 			queryBuilder.append( "SELECT h.name, h.gateway, COUNT(h.gateway) AS reportsCount, 1 + date(MAX(r.version)) - date(MIN(r.version)) AS hackingPeriod, MIN(r.version) AS firstReported, MAX(r.version) AS lastReported, (SELECT player.id FROM player WHERE player.name=h.name), h.id" );
-		
-		queryBuilder.append( " FROM hacker h JOIN report r on h.id=r.hacker JOIN key k on r.key=k.id WHERE k.revocated=FALSE AND r.revocated=FALSE AND h.guarded=FALSE" );
+		queryBuilder.append( " FROM report r JOIN hacker h on r.hacker=h.id JOIN key k on r.key=k.id WHERE k.revocated=FALSE AND r.revocated=FALSE AND h.guarded=FALSE" );
 		
 		int sqlParamsCounter  = 0;
 		int nameParamIndex    = 0;
@@ -824,7 +823,7 @@ public class HackerDbServlet extends BaseServlet {
 			
 			outputWriter = response.getWriter();
 			
-			renderHeader( outputWriter, "Details of hacker " + hackerNameHtml );
+			renderHeader( outputWriter, "Reports of hacker " + hackerNameHtml );
 			
 			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2><tr class='" + TABLE_HEADER_STYLE_NAME + " " + NON_SORTING_COLUMN_STYLE_NAME + "'>" );
 			outputWriter.println( "<th> # <th>Engine<th>Map<th>Reported at<th>Played at<th>Game details" ); 
