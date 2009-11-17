@@ -27,17 +27,21 @@ public class ServerApiConsts {
 	public static final String REQUEST_PARAMETER_NAME_REPLAY_MD5       = "md5";
 	/** Name of the filters present request parameter. */
 	public static final String REQUEST_PARAMETER_NAME_REPLAY_SAVE_TIME = "rst";
+	/** Hacker id request parameter.                   */
+	public static final String REQUEST_PARAMETER_NAME_HACKER_ID        = "hid";
 	
 	/** List hackers operation value.            */
-	public static final String OPERATION_LIST       = "lst";
+	public static final String OPERATION_LIST           = "lst";
 	/** Check authorization key operation value. */
-	public static final String OPERATION_CHECK      = "chk";
+	public static final String OPERATION_CHECK          = "chk";
 	/** Report hackers operation value.          */
-	public static final String OPERATION_REPORT     = "rep";
+	public static final String OPERATION_REPORT         = "rep";
 	/** Report hackers operation value.          */
-	public static final String OPERATION_STATISTICS = "sta";
+	public static final String OPERATION_STATISTICS     = "sta";
 	/** Download hacker list operation value.    */
-	public static final String OPERATION_DOWNLOAD   = "dhl";
+	public static final String OPERATION_DOWNLOAD       = "dhl";
+	/** Hacker report details operation value.   */
+	public static final String OPERATION_HACKER_DETAILS = "hrd";
 	
 	/** Message to be sent back to the client if his/her report was accepted and processed. */
 	public static final String REPORT_ACCEPTED_MESSAGE = "OK";
