@@ -327,7 +327,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Hackers table section
 			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
 			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME
-								+ "><th class=" + NON_SORTING_COLUMN_STYLE_NAME + "> # "
+								+ "><th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">&nbsp;#&nbsp;"
 								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_NAME          , filtersWrapper ) + "\">Name"           + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_NAME           ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
 								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_GATEWAY       , filtersWrapper ) + "\">Gateway"        + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_GATEWAY        ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
 								 + "<th class=" + SORTING_COLUMN_STYLE_NAME + " onclick=\"" + getJavaScriptForSortingColumn( SORT_BY_VALUE_REPORT_COUNT  , filtersWrapper ) + "\">Reports count"  + ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_REPORT_COUNT   ) ? ( filtersWrapper.ascendantSorting ? " &uarr;" : " &darr;" ) : "" )
@@ -825,7 +825,7 @@ public class HackerDbServlet extends BaseServlet {
 			renderHeader( outputWriter, "Reports of hacker " + hackerNameHtml );
 			
 			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2><tr class='" + TABLE_HEADER_STYLE_NAME + " " + NON_SORTING_COLUMN_STYLE_NAME + "'>" );
-			outputWriter.println( "<th> # <th>Engine<th>Map<th>Reported at<th>Played at<th>Game details" ); 
+			outputWriter.println( "<th>&nbsp;#&nbsp;<th>Engine<th>Map<th>Reported at<th>Played at<th>Game details" ); 
 			
 			resultSet = statement.executeQuery( "SELECT r.game_engine, r.map_name, r.version, r.save_time, game.id FROM report r JOIN key on key.id=r.key JOIN hacker h on r.hacker=h.id LEFT OUTER JOIN game on r.replay_md5=game.replay_md5 WHERE h.id=" + hackerId
 					+ " AND r.revocated=FALSE AND h.guarded=FALSE AND key.revocated=FALSE ORDER BY version DESC" );
