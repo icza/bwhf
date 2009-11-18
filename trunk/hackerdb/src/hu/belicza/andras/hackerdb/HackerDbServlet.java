@@ -418,9 +418,9 @@ public class HackerDbServlet extends BaseServlet {
 	private PreparedStatement buildHackersQueryStatement( final FiltersWrapper filtersWrapper, final boolean countOnly, final Connection connection ) throws SQLException {
 		final StringBuilder queryBuilder = new StringBuilder();
 		if ( countOnly )
-			queryBuilder.append( "SELECT COUNT(*) FROM (SELECT h.gateway" );
+			queryBuilder.append( "SELECT COUNT(*) FROM (SELECT h.id" );
 		else
-			queryBuilder.append( "SELECT h.name, h.gateway, COUNT(h.gateway) AS reportsCount, 1 + date(MAX(r.version)) - date(MIN(r.version)) AS hackingPeriod, MIN(r.version) AS firstReported, MAX(r.version) AS lastReported, (SELECT player.id FROM player WHERE player.name=h.name), h.id" );
+			queryBuilder.append( "SELECT h.name, h.gateway, COUNT(h.id) AS reportsCount, 1 + date(MAX(r.version)) - date(MIN(r.version)) AS hackingPeriod, MIN(r.version) AS firstReported, MAX(r.version) AS lastReported, (SELECT player.id FROM player WHERE player.name=h.name), h.id" );
 		queryBuilder.append( " FROM report r JOIN hacker h on r.hacker=h.id JOIN key k on r.key=k.id WHERE k.revocated=FALSE AND r.revocated=FALSE AND h.guarded=FALSE" );
 		
 		int sqlParamsCounter  = 0;
@@ -478,11 +478,10 @@ public class HackerDbServlet extends BaseServlet {
 			queryBuilder.append( -1 ).append( ')' );
 		}
 		
-		queryBuilder.append( " GROUP BY h.name, h.gateway, h.id HAVING COUNT(h.gateway)>=" ).append( filtersWrapper.minReportCount );
-		
 		if ( countOnly )
-			queryBuilder.append( ") as foo" );
+			queryBuilder.append( " GROUP BY h.id HAVING COUNT(h.id)>=" ).append( filtersWrapper.minReportCount ).append( ") as foo" );
 		else {
+			queryBuilder.append( " GROUP BY h.id, h.gateway, h.name HAVING COUNT(h.id)>=" ).append( filtersWrapper.minReportCount );
 			queryBuilder.append( " ORDER BY " );
 			if ( filtersWrapper.sortByValue.equals( SORT_BY_VALUE_LAST_REPORTED ) )
 				queryBuilder.append( "lastReported" );
@@ -1077,7 +1076,6 @@ public class HackerDbServlet extends BaseServlet {
 		outputWriter.print  ( "<h3>" );
 		outputWriter.print  ( pageTitle );
 		outputWriter.println( "</h3>" );
-		outputWriter.flush();
 	}
 	
 	private static void renderFooter( final PrintWriter outputWriter ) {
