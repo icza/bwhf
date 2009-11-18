@@ -17,6 +17,8 @@ On that page you can list, search, filter, sort existing hackers. The hackers ar
 ||iCCup||Black <font color="#000000">Black</font>||
 ||Other||Purple <font color="#f080f0">Purple</font>||
 
+Clicking on the name of a hacker (if it is a link) will show the player's profile on the BWHF Players' Network. Clicking on the reports count will list the reports of the hacker with some additional details. If more details are available from the games of the reports, an additional details link will be available (which points to the proper game detail page of the BWHF Players' Network.
+
 ==Filtering==
 
 You can filter the hackers with various properties. Only reports matching all the filters will be counted and displayed.
