@@ -1557,7 +1557,6 @@ public class PlayersNetworkServlet extends BaseServlet {
 		outputWriter.println( "<h2>BWHF Players' Network</h2>" );
 		outputWriter.println( MENU_HTML );
 		outputWriter.println( GOOGLE_AD_HTML_HEADER );
-		outputWriter.flush();
 	}
 	
 	/**
