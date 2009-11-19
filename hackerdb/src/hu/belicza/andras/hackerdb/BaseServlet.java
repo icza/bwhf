@@ -55,7 +55,7 @@ public class BaseServlet extends HttpServlet {
 		final StringBuilder commonHtmlHeaderElementsBuilder = new StringBuilder( "<meta http-equiv=\"content-type\" content=\"text/html; charset=UTF-8\">\n" );
 		commonHtmlHeaderElementsBuilder.append( "<link rel='shortcut icon' href='favicon.ico' type='image/x-icon'>\n" )
 			.append( "<style>body {background-image:url(\"BWHF-logo.png\");background-position:0 0;background-repeat:no-repeat;}\n" )
-			.append( "p,h2,h3 {margin:6;padding:0}\n." )
+			.append( "p,h2,h3 {margin:6;padding:0}\n.hacker {font-family:arial;vertical-align:super;background:red;color:yellow;font-size:60%}\n.note {font-size:90%;font-style:italic}\n." )
 			.append( SORTING_COLUMN_STYLE_NAME ).append( " {cursor:pointer}\n." )
 			.append( NON_SORTING_COLUMN_STYLE_NAME ).append( " {cursor:default}\n." )
 			.append( TABLE_HEADER_STYLE_NAME ).append( " {background:#cccccc}\n" );

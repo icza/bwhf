@@ -74,6 +74,12 @@ public class PlayersNetworkServlet extends BaseServlet {
 	/** Limit for obs mode frames per action (=30 APM).                    */
 	private static final int OBS_MODE_FPA_LIMIT     = 1000 * 60 / 30 / 42;   // 1000/42   * 60  / 30    => 1000/42=frames/sec, 60=seconds/min, 30=APM limit
 	
+	/** Query part to match a player name to a hacker. */
+	private static final String IS_HACKER_QUERY_PART = "(SELECT hacker.id FROM hacker JOIN report on report.hacker=hacker.id JOIN key on key.id=report.key WHERE name=player.name AND guarded=FALSE AND key.revocated=FALSE and report.revocated=FALSE LIMIT 1)";
+	/** Hacker tag HTML to be appended after hacker names. */
+	private static final String HACKER_TAG_HTML = "<span class='hacker'>hacker</span>";
+	
+	
 	/**
 	 * Defines the header of a table.<br>
 	 * @author Andras Belicza
@@ -439,16 +445,19 @@ public class PlayersNetworkServlet extends BaseServlet {
 				outputWriter.print( "<h3>Game list" );
 				String countQuery;
 				String player1Name = null, player2Name = null;
+				String[] playerNames1 = null, playerNames2 = null;
 				if ( player1 != null ) {
 					outputWriter.print( " of " );
-					outputWriter.print( getPlayerDetailsHtmlLink( player1, player1Name = getPlayerName( player1, connection ), null ) );
+					playerNames1 = getPlayerName( player1, connection );
+					outputWriter.print( getPlayerDetailsHtmlLink( player1, player1Name = playerNames1[ 0 ], playerNames1[ 1 ] != null, null ) );
 					if ( player2 != null ) {
 						if ( nameFilter == null )
 							countQuery = "SELECT COUNT(*) FROM (SELECT game FROM game_player WHERE player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR player=" + player2 ) + " GROUP BY game HAVING COUNT(*)=2) as foo";
 						else
 							countQuery = "SELECT COUNT(*) FROM (SELECT game FROM game_player JOIN game on game.id=game_player.game WHERE player" + ( hasAka ? " IN (" + akaIdList + ")" : "=" + player1 + " OR player=" + player2 ) + " AND map_name LIKE ? GROUP BY game HAVING COUNT(*)=2) as foo";
 						outputWriter.print( " and " );
-						outputWriter.print( getPlayerDetailsHtmlLink( player2, player2Name = getPlayerName( player2, connection ), null ) );
+						playerNames2 = getPlayerName( player2, connection );
+						outputWriter.print( getPlayerDetailsHtmlLink( player2, player2Name = playerNames2[ 0 ], playerNames2[ 1 ] != null, null ) );
 					}
 					else {
 						if ( nameFilter == null )
@@ -464,14 +473,14 @@ public class PlayersNetworkServlet extends BaseServlet {
 					statement = connection.createStatement();
 					outputWriter.print( "<p>AKAs included " );
 					if ( hasAka1 ) {
-						outputWriter.print( "from <b>" + encodeHtmlString( player1Name ) + "</b>: " );
-						resultSet = statement.executeQuery( "SELECT id, name FROM player WHERE id IN (" + akaIdList1 + ") AND id!=" + player1 );
+						outputWriter.print( "from <b>" + encodeHtmlString( player1Name ) + ( playerNames1[ 1 ] == null ? "" : HACKER_TAG_HTML ) + "</b>: " );
+						resultSet = statement.executeQuery( "SELECT id, name, " + IS_HACKER_QUERY_PART + " FROM player WHERE id IN (" + akaIdList1 + ") AND id!=" + player1 );
 						outputWriter.print( generatePlayerHtmlLinkListFromResultSet( resultSet ) );
 						resultSet.close();
 					}
 					if ( hasAka2 ) {
-						outputWriter.print( ( player1Name == null ? "" : "; " ) + "from <b>" + encodeHtmlString( player2Name ) + "</b>: " );
-						resultSet = statement.executeQuery( "SELECT id, name FROM player WHERE id IN (" + akaIdList2 + ") AND id!=" + player2 );
+						outputWriter.print( ( player1Name == null ? "" : "; " ) + "from <b>" + encodeHtmlString( player2Name ) + ( playerNames2[ 1 ] == null ? "" : HACKER_TAG_HTML ) + "</b>: " );
+						resultSet = statement.executeQuery( "SELECT id, name, " + IS_HACKER_QUERY_PART + " FROM player WHERE id IN (" + akaIdList2 + ") AND id!=" + player2 );
 						outputWriter.print( generatePlayerHtmlLinkListFromResultSet( resultSet ) );
 						resultSet.close();
 					}
@@ -524,7 +533,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				renderSortingTableHeaderRow( outputWriter, tableHeader, pagerUrlWithoutSorting, sortingIndex, sortingDesc, page );
 				final ReplayHeader replayHeader = new ReplayHeader();
 				int colCounter;
-				statement2 = connection.prepareStatement( "SELECT player.id, player.name FROM game_player JOIN player on game_player.player=player.id WHERE game_player.game=?" );
+				statement2 = connection.prepareStatement( "SELECT player.id, player.name, " + IS_HACKER_QUERY_PART + " FROM game_player JOIN player on game_player.player=player.id WHERE game_player.game=?" );
 				while ( resultSet.next() ) {
 					colCounter = 1;
 					final int gameId = resultSet.getInt( colCounter++ );
@@ -567,7 +576,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 				String player1Name = null;
 				if ( player1 != null ) {
 					outputWriter.print( " who played with " );
-					outputWriter.print( getPlayerDetailsHtmlLink( player1, player1Name = getPlayerName( player1, connection ), null ) );
+					final String[] playerNames = getPlayerName( player1, connection );
+					outputWriter.print( getPlayerDetailsHtmlLink( player1, player1Name = playerNames[ 0 ], playerNames[ 1 ] != null, null ) );
 					if ( nameFilter == null )
 						countQuery = "SELECT COUNT(DISTINCT player) FROM game_player WHERE player" + ( hasAka1 ? " NOT IN (" + akaIdList1 + ")" : "!=" + player1 ) + " AND game IN (SELECT game FROM game_player WHERE player" + ( hasAka1 ? " IN (" + akaIdList1 + ")" : "=" + player1 ) + ")";
 					else
@@ -580,7 +590,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				if ( hasAka1 ) {
 					statement = connection.createStatement();
 					outputWriter.print( "<p>AKAs included: " );
-					resultSet = statement.executeQuery( "SELECT id, name FROM player WHERE id IN (" + akaIdList1 + ") AND id!=" + player1 );
+					resultSet = statement.executeQuery( "SELECT id, name, " + IS_HACKER_QUERY_PART + " FROM player WHERE id IN (" + akaIdList1 + ") AND id!=" + player1 );
 					outputWriter.print( generatePlayerHtmlLinkListFromResultSet( resultSet ) );
 					resultSet.close();
 					statement.close();
@@ -633,7 +643,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				while ( resultSet.next() ) {
 					outputWriter.print( "<tr><td align=right>" + DECIMAL_FORMAT.format( ++recordCounter ) );
 					final int playerId = resultSet.getInt( 1 );
-					outputWriter.print( "<td>" + getPlayerDetailsHtmlLink( playerId, resultSet.getString( 2 ), null ) );
+					outputWriter.print( "<td>" + getPlayerDetailsHtmlLink( playerId, resultSet.getString( 2 ), getPlayerName( playerId, connection )[ 1 ] != null, null ) );
 					outputWriter.print( "<td align=center>" + ( player1 == null ? getGameListOfPlayerHtmlLink ( playerId, DECIMAL_FORMAT.format( resultSet.getInt( 3 ) ), false )
 							                                                    : getGameListOfPlayersHtmlLink( player1, playerId, DECIMAL_FORMAT.format( resultSet.getInt( 3 ) ), includeAkas ) + ( hasAka1 ? " *" : "" ) ) );
 					final Date firstGameDate = resultSet.getDate( 4 );
@@ -648,7 +658,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					statement2.close();
 				outputWriter.println( "</table>" );
 				if ( hasAka1 )
-					outputWriter.println( "<div style='font-size:90%;font-style:italic'>(* AKAs from the listed player are not included, only from " + encodeHtmlString( player1Name ) + ", the actual games count might be higher)</div>" );
+					outputWriter.println( "<span class='note'>(* AKAs from the listed player are not included, only from " + encodeHtmlString( player1Name ) + ", the actual games count might be higher)</span>" );
 			}
 			else if ( entity.equals( ENTITY_AKA ) ) {
 				
@@ -698,7 +708,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					statement3.setString( 1, queryParam );
 					resultSet = statement3.executeQuery();
 				}
-				statement2 = connection.prepareStatement( "SELECT id, name FROM player WHERE aka_group=?" );
+				statement2 = connection.prepareStatement( "SELECT id, name, " + IS_HACKER_QUERY_PART + " FROM player WHERE aka_group=?" );
 				while ( resultSet.next() ) {
 					outputWriter.print( "<tr><td align=right>" + DECIMAL_FORMAT.format( ++recordCounter ) );
 					final int akaGroupId = resultSet.getInt( 1 );
@@ -776,7 +786,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 		while ( resultSet.next() ) {
 			if ( playersBuilder.length() > 0 )
 				playersBuilder.append( ", " );
-			getPlayerDetailsHtmlLink( resultSet.getInt( 1 ), resultSet.getString( 2 ), playersBuilder );
+			getPlayerDetailsHtmlLink( resultSet.getInt( 1 ), resultSet.getString( 2 ), resultSet.getObject( 3 ) != null, playersBuilder );
 		}
 		
 		return playersBuilder.toString();
@@ -871,11 +881,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 					
 					final int seconds = replayHeader.getDurationSeconds();
 					statement2 = connection.createStatement();
-					resultSet2 = statement2.executeQuery( "SELECT player.id, player.name, game_player.race, game_player.actions_count, game_player.color FROM game_player JOIN player on game_player.player=player.id WHERE game_player.game=" + entityId + " ORDER BY game_player.actions_count DESC" );
+					resultSet2 = statement2.executeQuery( "SELECT player.id, player.name, game_player.race, game_player.actions_count, game_player.color, " + IS_HACKER_QUERY_PART + " FROM game_player JOIN player on game_player.player=player.id WHERE game_player.game=" + entityId + " ORDER BY game_player.actions_count DESC" );
 					outputWriter.print( "<tr><td colspan=2 align=center><table border=0 cellspacing=6><tr><th>Player<th>Race<th>Actions<th>APM<th>Color" );
 					while ( resultSet2.next() ) {
 						outputWriter.print( "<tr><td>" );
-						outputWriter.print( getPlayerDetailsHtmlLink( resultSet2.getInt( 1 ), resultSet2.getString( 2 ), null ) );
+						outputWriter.print( getPlayerDetailsHtmlLink( resultSet2.getInt( 1 ), resultSet2.getString( 2 ), resultSet2.getObject( 6 ) != null, null ) );
 						String colorName;
 						try {
 							colorName = ReplayHeader.IN_GAME_COLOR_NAMES[ resultSet2.getInt( 5 ) ];
@@ -900,9 +910,10 @@ public class PlayersNetworkServlet extends BaseServlet {
 				
 			} else if ( entity.equals( ENTITY_PLAYER ) ) {
 				
-				final String playerName     = getPlayerName( entityId, connection );
+				final String[] playerNames = getPlayerName( entityId, connection );
+				final String playerName     = playerNames[ 0 ];
 				final String playerNameHtml = encodeHtmlString( playerName );
-				outputWriter.println( "<h3>Details of player " + playerNameHtml + "</h3>" );
+				outputWriter.println( "<h3>Details of player " + playerNameHtml + ( playerNames[ 1 ] == null ? "" : HACKER_TAG_HTML ) + "</h3>" );
 				
 				statement  = connection.createStatement();
 				String query = "SELECT COUNT(*), MIN(save_time), MAX(save_time), SUM(frames), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " THEN frames END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN frames END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN actions_count END) FROM game_player JOIN game on game.id=game_player.game";
@@ -912,7 +923,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				final boolean hasAka = akaIdList != null;
 				if ( hasAka ) {
 					statement2 = connection.createStatement();
-					resultSet2 = statement2.executeQuery( "SELECT id, name FROM player WHERE id IN (" + akaIdList + ") AND id!=" + entityId );
+					resultSet2 = statement2.executeQuery( "SELECT id, name, " + IS_HACKER_QUERY_PART + " FROM player WHERE id IN (" + akaIdList + ") AND id!=" + entityId );
 					outputWriter.println( "<p>AKAs: " + generatePlayerHtmlLinkListFromResultSet( resultSet2 ) + "</p>" );
 					resultSet2.close();
 					
@@ -1015,7 +1026,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				resultSet.close();
 				
 				outputWriter.println( "</table>" );
-				outputWriter.println( "<div style='font-size:90%;font-style:italic'>(* games with less than 2 minutes are excluded)<br>" );
+				outputWriter.println( "<div class='note'>(* games with less than 2 minutes are excluded)<br>" );
 				outputWriter.println( "(** games with less than 2 minutes and with less than 30 APM are excluded, the shown value is a weighted average)</div>" ); 
 				
 				outputWriter.flush();
@@ -1408,23 +1419,23 @@ public class PlayersNetworkServlet extends BaseServlet {
 	}
 	
 	/**
-	 * Returns the name of the player specified by its id.
+	 * Returns the name of the player specified by its id.<br> It also returns if the player is a hacker.
 	 * @param id         id of the player
 	 * @param connection connection to be used
-	 * @return the name of the player specified by its id
+	 * @return an array with 2 values: the name of the player specified by its id, and null if the player is not a hacker or if there is a hacker with same name, his/her id as a string
 	 * @throws SQLException if SQLException occurs
 	 */
-	private static String getPlayerName( final int id, final Connection connection ) throws SQLException {
+	private static String[] getPlayerName( final int id, final Connection connection ) throws SQLException {
 		Statement statement = null;
 		ResultSet resultSet = null;
 		
 		try {
 			statement = connection.createStatement();
-			resultSet = statement.executeQuery( "SELECT name FROM player WHERE id=" + id );
+			resultSet = statement.executeQuery( "SELECT name, " + IS_HACKER_QUERY_PART + " FROM player WHERE id=" + id );
 			if ( resultSet.next() )
-				return resultSet.getString( 1 );
+				return new String[] { resultSet.getString( 1 ), resultSet.getString( 2 ) };
 			else
-				return "";
+				return new String[] { "", null };
 		}
 		finally {
 			if ( resultSet != null ) try { resultSet.close(); } catch ( final SQLException se ) {}
@@ -1462,16 +1473,19 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 * If <code>builder</code> is null, a new <code>StringBuilder</code> will be created and returned.
 	 * @param id         id of the player
 	 * @param playerName name of the player
+	 * @param isHacker   tells if the player is a hacker
 	 * @param builder    builder to use to build the link
 	 * @return the builder used to build the an HTML link to the details page of the player
 	 */
-	public static StringBuilder getPlayerDetailsHtmlLink( final int id, final String playerName, StringBuilder builder ) {
+	public static StringBuilder getPlayerDetailsHtmlLink( final int id, final String playerName, final boolean isHacker, StringBuilder builder ) {
 		if ( builder == null )
 			builder = new StringBuilder();
 		
 		builder.append( "<a href='players?" ).append( PN_REQUEST_PARAM_NAME_OPERATION ).append( '=' ).append( PN_OPERATION_DETAILS )
 							   .append( '&' ).append( PN_REQUEST_PARAM_NAME_ENTITY    ).append( '=' ).append( ENTITY_PLAYER )
 							   .append( '&' ).append( PN_REQUEST_PARAM_NAME_ENTITY_ID ).append( '=' ).append( id ).append( "'>" ).append( encodeHtmlString( playerName ) ).append( "</a>" );
+		if ( isHacker )
+			builder.append( HACKER_TAG_HTML );
 		
 		return builder;
 	}
