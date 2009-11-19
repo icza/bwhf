@@ -253,7 +253,6 @@ CREATE INDEX idx_game__replay_md5
 
 -- DROP TABLE player;
 
-
 CREATE TABLE player
 (
   id serial NOT NULL,
@@ -275,6 +274,33 @@ WITH (
 );
 ALTER TABLE player OWNER TO postgres;
 
+-- Index: idx_player__aka_group
+
+-- DROP INDEX idx_player__aka_group;
+
+CREATE INDEX idx_player__aka_group
+  ON player
+  USING btree
+  (aka_group);
+
+-- Index: idx_player__first_game
+
+-- DROP INDEX idx_player__first_game;
+
+CREATE INDEX idx_player__first_game
+  ON player
+  USING btree
+  (first_game);
+
+-- Index: idx_player__games_count
+
+-- DROP INDEX idx_player__games_count;
+
+CREATE INDEX idx_player__games_count
+  ON player
+  USING btree
+  (games_count);
+
 -- Index: idx_player__id_name
 
 -- DROP INDEX idx_player__id_name;
@@ -283,6 +309,24 @@ CREATE INDEX idx_player__id_name
   ON player
   USING btree
   (id, name);
+
+-- Index: idx_player__is_computer
+
+-- DROP INDEX idx_player__is_computer;
+
+CREATE INDEX idx_player__is_computer
+  ON player
+  USING btree
+  (is_computer);
+
+-- Index: idx_player__last_game
+
+-- DROP INDEX idx_player__last_game;
+
+CREATE INDEX idx_player__last_game
+  ON player
+  USING btree
+  (last_game);
 
 -- Index: idx_player__name
 
@@ -293,23 +337,16 @@ CREATE INDEX idx_player__name
   USING btree
   (name);
 
--- Index: idx_player__aka_group
+-- Index: idx_player__total_frames
 
--- DROP INDEX idx_player__aka_group;
+-- DROP INDEX idx_player__total_frames;
 
-CREATE INDEX idx_player__aka_group
+CREATE INDEX idx_player__total_frames
   ON player
   USING btree
-  (aka_group);
+  (total_frames);
 
--- Index: idx_player__is_computer
 
--- DROP INDEX idx_player__is_computer;
-
-CREATE INDEX idx_player__is_computer
-  ON player
-  USING btree
-  (is_computer);
 
 
 -- Table: game_player

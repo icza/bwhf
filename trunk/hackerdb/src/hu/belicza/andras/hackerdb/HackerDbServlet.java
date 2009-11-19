@@ -342,7 +342,7 @@ public class HackerDbServlet extends BaseServlet {
 					final int gateway = resultSet.getInt( 2 );
 					outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME )
 							+ "><td align=right>" + DECIMAL_FORMAT.format( ++recordNumber )
-							+ "<td>" + ( resultSet.getObject( 7 ) == null ? encodeHtmlString( resultSet.getString( 1 ) ) : PlayersNetworkServlet.getPlayerDetailsHtmlLink( resultSet.getInt( 7 ), resultSet.getString( 1 ), null ) )
+							+ "<td>" + ( resultSet.getObject( 7 ) == null ? encodeHtmlString( resultSet.getString( 1 ) ) : PlayersNetworkServlet.getPlayerDetailsHtmlLink( resultSet.getInt( 7 ), resultSet.getString( 1 ), false, null ) )
 							+ "<td>" + GATEWAYS[ resultSet.getInt( 2 ) ]
 							+ "<td align=center><a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_HACKER_DETAILS + '&' + REQUEST_PARAMETER_NAME_HACKER_ID + "=" + resultSet.getInt( 8 ) + "'>" + resultSet.getInt( 3 ) + "</a>"
 							+ "<td align=center>" + formatDays( resultSet.getInt( 4 ) )
@@ -813,7 +813,7 @@ public class HackerDbServlet extends BaseServlet {
 			int gateway = 0;
 			if ( resultSet.next() ) {
 				gateway = resultSet.getInt( 3 );
-				hackerNameHtml = resultSet.getInt( 2 ) == 0 ? encodeHtmlString( resultSet.getString( 1 ) ) : PlayersNetworkServlet.getPlayerDetailsHtmlLink( resultSet.getInt( 2 ), resultSet.getString( 1 ), null ).toString();
+				hackerNameHtml = resultSet.getInt( 2 ) == 0 ? encodeHtmlString( resultSet.getString( 1 ) ) : PlayersNetworkServlet.getPlayerDetailsHtmlLink( resultSet.getInt( 2 ), resultSet.getString( 1 ), false, null ).toString();
 				hackerNameHtml += " (" + ServerApiConsts.GATEWAYS[ gateway ] + ")";
 			}
 			else
