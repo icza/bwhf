@@ -602,12 +602,24 @@ public class ChartsComponent extends JPanel {
 			for ( int i = 0; i < players.length; i++ ) {
 				players[ i ][ 0 ] = new JCheckBox( playerActions[ i ].playerName, replayHeader.gameFrames < ReplayHeader.FRAMES_IN_TWO_MINUTES || !chartsTab.autoDisableInactivePlayersCheckBox.isSelected() || replayHeader.getPlayerApm( replayHeader.getPlayerIndexByName( playerActions[ i ].playerName ) ) >= AUTO_DISABLING_APM_LIMIT );
 				final ListedAs listedAs = MainFrame.getInstance().playerCheckerTab.isPlayerListed( playerActions[ i ].playerName );
-				if ( listedAs == ListedAs.HACKER )
-					( (JCheckBox) players[ i ][ 0 ] ).setBackground( Color.RED );
-				else if ( listedAs == ListedAs.CUSTOM )
-					( (JCheckBox) players[ i ][ 0 ] ).setBackground( Color.YELLOW );
+				final JCheckBox playerCheckBox = ( (JCheckBox) players[ i ][ 0 ] );
+				if ( listedAs == ListedAs.HACKER ) {
+					playerCheckBox.setBackground( Color.RED );
+					playerCheckBox.setToolTipText( "This player is a reported hacker." );
+				}
+				else if ( listedAs == ListedAs.CUSTOM ) {
+					playerCheckBox.setBackground( Color.YELLOW );
+					playerCheckBox.setToolTipText( "This player is listed in your custom list." );
+				}
 				players[ i ][ 1 ] = i;
-				( (JCheckBox) players[ i ][ 0 ] ).addActionListener( playerCheckBoxActionListener );
+				playerCheckBox.addActionListener( playerCheckBoxActionListener );
+				playerCheckBox.addMouseListener( new MouseAdapter() {
+					@Override
+					public void mouseClicked( final MouseEvent event ) {
+						if ( event.getButton() == MouseEvent.BUTTON3 ) {
+						}
+					}
+				} );
 			}
 			// Order players by the number of their actions
 			Arrays.sort( players, new Comparator< Object[] >() {
