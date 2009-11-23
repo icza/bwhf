@@ -69,7 +69,8 @@ public class MainFrame extends JFrame {
 		"You can set the start folder globally when opening replay files on the General settings tab.",
 		"Collapse the navigation bar once you're familiar with the tab's icons to save space for charts and tables.",
 		"Request an authorization key rather than managing a custom list of hackers you find, that way everyone else will benefit from your findings.",
-		"Right click on the player names on the Charts tab can open the player's profiles on different sites."
+		"Right click on the player names on the Charts tab can open the player's profiles on different sites.",
+		"You can execute important tasks form the popup menu of the tray icon like start Starcraft, change gateway, open last replay etc."
 	};
 	
 	/** Stores the reference of the main frame. */
@@ -315,7 +316,8 @@ public class MainFrame extends JFrame {
 		tipLabel.addMouseListener( new MouseAdapter() {
 			@Override
 			public void mouseClicked( final MouseEvent event ) {
-				tipLabel.setText( "Tip: " + TIPS[ (int) ( Math.random() * TIPS.length ) ] );
+				if ( event.getClickCount() == 1 ) // In order to not change tip due to double click
+					tipLabel.setText( "Tip: " + TIPS[ (int) ( Math.random() * TIPS.length ) ] );
 			}			
 		} );
 		tipLabel.setCursor( new Cursor( Cursor.HAND_CURSOR ) );
