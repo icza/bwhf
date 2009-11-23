@@ -57,7 +57,7 @@ public class GeneralSettingsTab extends Tab {
 	/** Program to view/edit files.                                          */
 	protected final JTextField editorProgramTextField             = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_EDITOR_PROGRAM ) );
 	/** Checkbox to tell whether check for updates automatically on startup. */
-	protected final JCheckBox  skipLatterActionsOfHackersCheckBox = new JCheckBox( "During a replay scan if a player is found hacking, skip scanning his latter actions", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS ) ) );
+	protected final JCheckBox  skipLatterActionsOfHackersCheckBox = new JCheckBox( "Short scan (during a replay scan if a player is found hacking, skip scanning his latter actions)", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SKIP_LATTER_ACTIONS_OF_HACKERS ) ) );
 	/** Slider to set the sound volume.                                      */
 	protected final JSlider    soundVolumeSlider                  = new JSlider( 0, 100, Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_SOUND_VOLUME ) ) );
 	/** Checkbox to enable system tray icon.                                 */
