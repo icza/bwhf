@@ -12,6 +12,7 @@ import hu.belicza.andras.bwhfagent.view.IconResourceManager;
 import hu.belicza.andras.bwhfagent.view.MainFrame;
 import hu.belicza.andras.bwhfagent.view.Utils;
 import hu.belicza.andras.bwhfagent.view.PlayerCheckerTab.ListedAs;
+import hu.belicza.andras.hackerdb.ServerApiConsts;
 
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
@@ -29,6 +30,8 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -44,7 +47,9 @@ import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -600,7 +605,8 @@ public class ChartsComponent extends JPanel {
 				}
 			};
 			for ( int i = 0; i < players.length; i++ ) {
-				players[ i ][ 0 ] = new JCheckBox( playerActions[ i ].playerName, replayHeader.gameFrames < ReplayHeader.FRAMES_IN_TWO_MINUTES || !chartsTab.autoDisableInactivePlayersCheckBox.isSelected() || replayHeader.getPlayerApm( replayHeader.getPlayerIndexByName( playerActions[ i ].playerName ) ) >= AUTO_DISABLING_APM_LIMIT );
+				final String playerName = playerActions[ i ].playerName;
+				players[ i ][ 0 ] = new JCheckBox( playerName, replayHeader.gameFrames < ReplayHeader.FRAMES_IN_TWO_MINUTES || !chartsTab.autoDisableInactivePlayersCheckBox.isSelected() || replayHeader.getPlayerApm( replayHeader.getPlayerIndexByName( playerActions[ i ].playerName ) ) >= AUTO_DISABLING_APM_LIMIT );
 				final ListedAs listedAs = MainFrame.getInstance().playerCheckerTab.isPlayerListed( playerActions[ i ].playerName );
 				final JCheckBox playerCheckBox = ( (JCheckBox) players[ i ][ 0 ] );
 				if ( listedAs == ListedAs.HACKER ) {
@@ -614,9 +620,38 @@ public class ChartsComponent extends JPanel {
 				players[ i ][ 1 ] = i;
 				playerCheckBox.addActionListener( playerCheckBoxActionListener );
 				playerCheckBox.addMouseListener( new MouseAdapter() {
+					private JPopupMenu playerMenu;
 					@Override
 					public void mouseClicked( final MouseEvent event ) {
 						if ( event.getButton() == MouseEvent.BUTTON3 ) {
+							if ( playerMenu == null ) {
+								playerMenu = new JPopupMenu();
+								final JMenuItem bwhfProfileMenuItem = new JMenuItem( "View BWHF profile", IconResourceManager.ICON_SMALL_RED_PILL );
+								bwhfProfileMenuItem.addActionListener( new ActionListener() {
+									public void actionPerformed( final ActionEvent event ) {
+										try {
+											Utils.showURLInBrowser( Consts.PLAYERS_NETWORK_PAGE_URL + "?" + ServerApiConsts.PN_REQUEST_PARAM_NAME_OPERATION + "=" + ServerApiConsts.PN_OPERATION_DETAILS
+													+ "&" + ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY + "=" + ServerApiConsts.ENTITY_PLAYER + "&" + ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY_NAME + "="
+													+ URLEncoder.encode( playerName, "UTF-8" ) );
+										}
+										catch ( final UnsupportedEncodingException uee ) {
+										}
+									}
+								} );
+								playerMenu.add( bwhfProfileMenuItem );
+								final JMenuItem iccupProfileMenuItem = new JMenuItem( "View iCCup profile", IconResourceManager.ICON_ICCUP );
+								iccupProfileMenuItem.addActionListener( new ActionListener() {
+									public void actionPerformed( final ActionEvent event ) {
+										try {
+											Utils.showURLInBrowser( "http://www.iccup.com/gamingprofile/" + URLEncoder.encode( playerName, "UTF-8" ) + ".html" );
+										}
+										catch ( final UnsupportedEncodingException uee ) {
+										}
+									}
+								} );
+								playerMenu.add( iccupProfileMenuItem );
+							}
+							playerMenu.show( event.getComponent(), event.getX(), event.getY() );
 						}
 					}
 				} );
