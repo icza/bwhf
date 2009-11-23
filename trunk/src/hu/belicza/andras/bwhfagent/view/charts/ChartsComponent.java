@@ -626,16 +626,14 @@ public class ChartsComponent extends JPanel {
 							if ( playerMenu == null ) {
 								playerMenu = new JPopupMenu();
 								
-								final JMenuItem bwhfProfileMenuItem = new JMenuItem( "View BWHF Player profile", IconResourceManager.ICON_SMALL_RED_PILL );
+								final JMenuItem bwhfProfileMenuItem = new JMenuItem( "View BWHF Player profile", IconResourceManager.ICON_BWHF );
 								bwhfProfileMenuItem.addActionListener( new ActionListener() {
 									public void actionPerformed( final ActionEvent event ) {
 										try {
 											Utils.showURLInBrowser( Consts.PLAYERS_NETWORK_PAGE_URL + "?" + ServerApiConsts.PN_REQUEST_PARAM_NAME_OPERATION + "=" + ServerApiConsts.PN_OPERATION_DETAILS
 													+ "&" + ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY + "=" + ServerApiConsts.ENTITY_PLAYER + "&" + ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY_NAME + "="
 													+ URLEncoder.encode( playerName, "UTF-8" ) );
-										}
-										catch ( final UnsupportedEncodingException uee ) {
-										}
+										} catch ( final UnsupportedEncodingException uee ) {}
 									}
 								} );
 								playerMenu.add( bwhfProfileMenuItem );
@@ -645,23 +643,39 @@ public class ChartsComponent extends JPanel {
 									public void actionPerformed( final ActionEvent event ) {
 										try {
 											Utils.showURLInBrowser( "http://www.iccup.com/gamingprofile/" + URLEncoder.encode( playerName, "UTF-8" ) + ".html" );
-										}
-										catch ( final UnsupportedEncodingException uee ) {
-										}
+										} catch ( final UnsupportedEncodingException uee ) {}
 									}
 								} );
 								playerMenu.add( iccupProfileMenuItem );
 								
+								final JMenuItem teamliquidProfileMenuItem = new JMenuItem( "View Teamliquid Player profile", IconResourceManager.ICON_TEAMLIQUID );
+								teamliquidProfileMenuItem.addActionListener( new ActionListener() {
+									public void actionPerformed( final ActionEvent event ) {
+										try {
+											Utils.showURLInBrowser( "http://www.teamliquid.net/forum/profile.php?user=" + URLEncoder.encode( playerName, "UTF-8" ) );
+										} catch ( final UnsupportedEncodingException uee ) {}
+									}
+								} );
+								playerMenu.add( teamliquidProfileMenuItem );
+								
+								final JMenuItem gosugamersProfileMenuItem = new JMenuItem( "View GosuGamers Player profile", IconResourceManager.ICON_GOSUGAMERS );
+								gosugamersProfileMenuItem.addActionListener( new ActionListener() {
+									public void actionPerformed( final ActionEvent event ) {
+										try {
+											Utils.showURLInBrowser( "http://www.gosugamers.net/starcraft/members/" + URLEncoder.encode( playerName, "UTF-8" ) );
+										} catch ( final UnsupportedEncodingException uee ) {}
+									}
+								} );
+								playerMenu.add( gosugamersProfileMenuItem );
+								
 								if ( listedAs == ListedAs.HACKER ) {
 									playerMenu.addSeparator();
-									final JMenuItem bwhfHackerRerortsMenuItem = new JMenuItem( "View BWHF Hacker reports", IconResourceManager.ICON_SMALL_RED_PILL );
+									final JMenuItem bwhfHackerRerortsMenuItem = new JMenuItem( "View BWHF Hacker reports", IconResourceManager.ICON_BWHF );
 									bwhfHackerRerortsMenuItem.addActionListener( new ActionListener() {
 										public void actionPerformed( final ActionEvent event ) {
 											try {
 												Utils.showURLInBrowser( Consts.BWHF_HACKER_DATA_BASE_SERVER_URL + "?" + ServerApiConsts.FILTER_NAME_NAME + "=" + URLEncoder.encode( '"' + playerName + '"', "UTF-8" ) );
-											}
-											catch ( final UnsupportedEncodingException uee ) {
-											}
+											} catch ( final UnsupportedEncodingException uee ) {}
 										}
 									} );
 									playerMenu.add( bwhfHackerRerortsMenuItem );
