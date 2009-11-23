@@ -10,8 +10,6 @@ import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.io.File;
 import java.io.FileFilter;
 import java.util.Arrays;
@@ -26,7 +24,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 
 /**
  * Charts tab.
@@ -123,17 +120,6 @@ public class ChartsTab extends Tab {
 		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
 		
 		final Box buttonsPanel = Box.createHorizontalBox();
-		// We need to issue a validate() if the state of a maximized window changes (SwingWT bug). 
-		buttonsPanel.addComponentListener( new ComponentAdapter() {
-			@Override
-			public void componentResized( final ComponentEvent ce ) {
-				SwingUtilities.invokeLater( new Runnable() {
-					public void run() {
-						contentBox.validate();
-					}
-				} );
-			}
-		} );
 		buttonsPanel.setMaximumSize( Utils.getMaxDimension() );
 		// Previous-next replay from search tab
 		JPanel panel = Utils.createWrapperPanel();
