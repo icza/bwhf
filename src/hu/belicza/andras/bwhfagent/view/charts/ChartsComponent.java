@@ -625,6 +625,7 @@ public class ChartsComponent extends JPanel {
 						if ( event.getButton() == MouseEvent.BUTTON3 ) {
 							if ( playerMenu == null ) {
 								playerMenu = new JPopupMenu();
+								
 								final JMenuItem bwhfProfileMenuItem = new JMenuItem( "View BWHF Player profile", IconResourceManager.ICON_SMALL_RED_PILL );
 								bwhfProfileMenuItem.addActionListener( new ActionListener() {
 									public void actionPerformed( final ActionEvent event ) {
@@ -638,6 +639,7 @@ public class ChartsComponent extends JPanel {
 									}
 								} );
 								playerMenu.add( bwhfProfileMenuItem );
+								
 								final JMenuItem iccupProfileMenuItem = new JMenuItem( "View iCCup Player profile", IconResourceManager.ICON_ICCUP );
 								iccupProfileMenuItem.addActionListener( new ActionListener() {
 									public void actionPerformed( final ActionEvent event ) {
@@ -649,7 +651,23 @@ public class ChartsComponent extends JPanel {
 									}
 								} );
 								playerMenu.add( iccupProfileMenuItem );
+								
+								if ( listedAs == ListedAs.HACKER ) {
+									playerMenu.addSeparator();
+									final JMenuItem bwhfHackerRerortsMenuItem = new JMenuItem( "View BWHF Hacker reports", IconResourceManager.ICON_SMALL_RED_PILL );
+									bwhfHackerRerortsMenuItem.addActionListener( new ActionListener() {
+										public void actionPerformed( final ActionEvent event ) {
+											try {
+												Utils.showURLInBrowser( Consts.BWHF_HACKER_DATA_BASE_SERVER_URL + "?" + ServerApiConsts.FILTER_NAME_NAME + "=" + URLEncoder.encode( '"' + playerName + '"', "UTF-8" ) );
+											}
+											catch ( final UnsupportedEncodingException uee ) {
+											}
+										}
+									} );
+									playerMenu.add( bwhfHackerRerortsMenuItem );
+								}
 							}
+							
 							playerMenu.show( event.getComponent(), event.getX(), event.getY() );
 						}
 					}
