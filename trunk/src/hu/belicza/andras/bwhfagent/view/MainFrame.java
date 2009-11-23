@@ -47,6 +47,31 @@ import swingwtx.swing.event.ChangeListener;
  */
 public class MainFrame extends JFrame {
 	
+	/** Tips and tricks. */
+	public static final String[] TIPS = {
+		"You can update your local cache of hacker list at any time by pressing the \"Update now\" button on the Player checker tab.",
+		"You can start the Agent minimized to tray by enabling it on the General settings tab.",
+		"By default only the first hack is displayed by scans. You can disable this short scan on the General settings tab.",
+		"Click on these tips to show a new tip.",
+		"If you pass a replay name to the starter .exe (or script) of BWHF Agent, it will be opened on the Charts tab.",
+		"On the Replay search tab use right click on the search results to see replay operations.",
+		"On the Replay search tab double clicking on a replay opens it on the Charts tab.",
+		"Clicking on the column headers on the Replay search tab and on the Player matcher tab will sort the table by that column.",
+		"If your network becomes unavailable, you can use the Server monitor tab to get alerted when it comes back.",
+		"On the Server monitor tab you can add any servers you're interested in: private bnet servers, your favourite web pages etc.",
+		"On the charts tab you can use the word \"OR\" between filter words to display all actions you want to see.",
+		"On the replay search tab you can create a list of replays from multiple searches by checking \"Append results to table\".",
+		"On the charts tab you can easily export the actions: just select the actions you want to export, and copy it (CTRL+C).",
+		"Replay lists saved on the Replay search tab can be opened with Excel for example for further processing.",
+		"If you download a new version of BWHF Agent, you can simply copy the \"settings.properties\" file to keep all your settigns.",
+		"By default manual scan renames replays by adding \"hack\" to their names, so you can easily find them in your file browser.",
+		"Advloader disables the Print Screen key in the game lobby, so you might not be able to use the Player checker feature with Advloader.",
+		"You can set the start folder globally when opening replay files on the General settings tab.",
+		"Collapse the navigation bar once you're familiar with the tab's icons to save space for charts and tables.",
+		"Request an authorization key rather than managing a custom list of hackers you found, that way everyone else will benefit from your findings.",
+		"Right clicking on the player names on the Charts tab can open the player's profiles on different sites."
+	};
+	
 	/** Stores the reference of the main frame. */
 	private static MainFrame mainFrame;
 	
@@ -109,6 +134,9 @@ public class MainFrame extends JFrame {
 	private MenuItem disableTrayIconMenuItem;
 	/** Tells if the tray icon has been successfully added to the system tray.             */
 	private boolean  trayIconInstalled;
+	
+	/** Label to display random tips and tricks. */
+	private final JLabel tipLabel = new JLabel( "Tip: " + TIPS[ (int) ( Math.random() * TIPS.length ) ], JLabel.CENTER );
 	
 	/** To know when we first make window visible. */
 	private boolean windowHasBeenShown;
@@ -284,6 +312,14 @@ public class MainFrame extends JFrame {
 			mouseListener.mousePressed( null );
 		getContentPane().add( tabsContentPanel, BorderLayout.CENTER );
 		
+		tipLabel.addMouseListener( new MouseAdapter() {
+			@Override
+			public void mouseClicked( final MouseEvent event ) {
+				tipLabel.setText( "Tip: " + TIPS[ (int) ( Math.random() * TIPS.length ) ] );
+			}			
+		} );
+		tipLabel.setCursor( new Cursor( Cursor.HAND_CURSOR ) );
+		getContentPane().add( tipLabel, BorderLayout.SOUTH );
 		
 		if ( SystemTray.isSupported() ) {
 			trayIcon = new TrayIcon( new javax.swing.ImageIcon( getClass().getResource( inWonderland ? IconResourceManager.ICON_RESOURCE_BLUE_PILL : IconResourceManager.ICON_RESOURCE_RED_PILL ) ).getImage() );
