@@ -1,5 +1,7 @@
 package hu.belicza.andras.bwhfagent.view;
 
+import java.awt.Image;
+
 import swingwtx.swing.ImageIcon;
 
 /**
@@ -130,5 +132,11 @@ public class IconResourceManager {
 	public static final ImageIcon ICON_GROUP_RENAME_REPLAY = new ImageIcon( IconResourceManager.class.getResource( "icons/page_white_edit.png" ) );
 	/** Folder icon.              */
 	public static final ImageIcon ICON_FOLDER              = new ImageIcon( IconResourceManager.class.getResource( "icons/folder.png" ) );
+	
+	
+	/** ICCup icon.               */
+	public static final ImageIcon ICON_ICCUP               = new ImageIcon( IconResourceManager.class.getResource( "icons/iccup.png" ) );
+	/** Small red pill icon.      */
+	public static final ImageIcon ICON_SMALL_RED_PILL      = new ImageIcon( IconResourceManager.ICON_RED_PILL.getImage().getScaledInstance( 16, 16, Image.SCALE_SMOOTH ) );
 	
 }

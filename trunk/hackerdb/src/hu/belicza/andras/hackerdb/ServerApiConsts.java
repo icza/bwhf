@@ -109,6 +109,8 @@ public class ServerApiConsts {
 	public static final String PN_REQUEST_PARAM_NAME_PAGE          = "page";
 	/** Name of the entity id request parameter.          */
 	public static final String PN_REQUEST_PARAM_NAME_ENTITY_ID     = "id";
+	/** Name of the entity name request parameter.        */
+	public static final String PN_REQUEST_PARAM_NAME_ENTITY_NAME   = "name";
 	/** Name of the sorting index request parameter.      */
 	public static final String PN_REQUEST_PARAM_NAME_SORTING_INDEX = "sortidx";
 	/** Name of the descendant sorting request parameter. */

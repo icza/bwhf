@@ -863,7 +863,7 @@ public class ReplaySearchTab extends Tab {
 			@Override
 			public void mouseClicked( final MouseEvent event ) {
 				if ( event.getButton() == MouseEvent.BUTTON3 )
-					replayOperationsPopupMenu.show( resultTable, event.getX(), event.getY() );
+					replayOperationsPopupMenu.show( event.getComponent(), event.getX(), event.getY() );
 				if ( event.getButton() == MouseEvent.BUTTON1 )
 					if ( resultTable.getSelectedRow() >= 0 && event.getClickCount() == 2 )
 						showOnChartsMenuItem.doClick();
