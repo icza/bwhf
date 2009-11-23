@@ -63,11 +63,11 @@ public class MainFrame extends JFrame {
 		"Replay lists saved on the Replay search tab can be opened with Excel for example for further processing.",
 		"If you download a new version of BWHF Agent, you can simply copy the \"settings.properties\" file to keep all your settigns.",
 		"By default manual scan renames replays by adding \"hack\" to their names, so you can easily find them in your file browser.",
-		"Advloader disables the Print Screen key in the game lobby, so you might not be able to use the Player checker feature with Advloader.",
+		"Advloader disables game lobby screenshots, so you might not be able to use the Player checker feature with Advloader.",
 		"You can set the start folder globally when opening replay files on the General settings tab.",
 		"Collapse the navigation bar once you're familiar with the tab's icons to save space for charts and tables.",
-		"Request an authorization key rather than managing a custom list of hackers you found, that way everyone else will benefit from your findings.",
-		"Right clicking on the player names on the Charts tab can open the player's profiles on different sites."
+		"Request an authorization key rather than managing a custom list of hackers you find, that way everyone else will benefit from your findings.",
+		"Right click on the player names on the Charts tab can open the player's profiles on different sites."
 	};
 	
 	/** Stores the reference of the main frame. */
