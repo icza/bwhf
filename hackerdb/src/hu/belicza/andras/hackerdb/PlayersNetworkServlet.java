@@ -9,6 +9,7 @@ import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_LIST;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_SEND;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY_ID;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_ENTITY_NAME;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_INCLUDE_AKAS;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_NAME_FILTER;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_OPERATION;
@@ -168,15 +169,19 @@ public class PlayersNetworkServlet extends BaseServlet {
 				if ( entity == null )
 					throw new BadRequestException();
 				
-				int entityId;
+				int entityId = -1;
+				String entityName = null;
 				try {
 					entityId = Integer.parseInt( request.getParameter( PN_REQUEST_PARAM_NAME_ENTITY_ID ) );
 				}
 				catch ( final Exception e ) {
-					throw new BadRequestException();
+					if ( entity.equals( ENTITY_PLAYER ) )
+						entityName = request.getParameter( PN_REQUEST_PARAM_NAME_ENTITY_NAME );
+					if ( entityName == null )
+						throw new BadRequestException();
 				}
 				
-				handleDetails( request, response, entity, entityId );
+				handleDetails( request, response, entity, entityId, entityName );
 			}
 		}
 		catch ( final BadRequestException bre ) {
@@ -824,12 +829,13 @@ public class PlayersNetworkServlet extends BaseServlet {
 	/**
 	 * Handles a details request.<br>
 	 * Sends details about an entity.
-	 * @param request  http request
-	 * @param response http response
-	 * @param entity   entity to be detailed
-	 * @param entityId id of entity to be detailed
+	 * @param request    http request
+	 * @param response   http response
+	 * @param entity     entity to be detailed
+	 * @param entityId   id of entity to be detailed
+	 * @param entityName optional, if id is not known, name can be provided in some cases; if provided (not <code>null</code>), entityId is irrelevant
 	 */
-	private void handleDetails( final HttpServletRequest request, final HttpServletResponse response, final String entity, final int entityId ) throws IOException {
+	private void handleDetails( final HttpServletRequest request, final HttpServletResponse response, final String entity, int entityId, final String entityName ) throws IOException {
 		PrintWriter outputWriter = null;
 		Connection  connection   = null;
 		Statement   statement    = null;
@@ -909,6 +915,17 @@ public class PlayersNetworkServlet extends BaseServlet {
 				statement.close();
 				
 			} else if ( entity.equals( ENTITY_PLAYER ) ) {
+				
+				if ( entityName != null ) {
+					final PreparedStatement ps = connection.prepareStatement( "SELECT id FROM player WHERE name=?" );
+					statement = ps; // Just so it will be closed in case of errors
+					ps.setString( 1, entityName.toLowerCase() );
+					resultSet = ps.executeQuery();
+					entityId = resultSet.next() ? resultSet.getInt( 1 ) : -1;
+					resultSet.close();
+					ps.close();
+					statement = null;
+				}
 				
 				final String[] playerNames = getPlayerName( entityId, connection );
 				final String playerName     = playerNames[ 0 ];
