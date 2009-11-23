@@ -15,11 +15,14 @@ import swingwt.awt.Dimension;
 import swingwt.awt.GridLayout;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwt.awt.event.ComponentAdapter;
+import swingwt.awt.event.ComponentEvent;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JEditorPane;
 import swingwtx.swing.JLabel;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JScrollPane;
+import swingwtx.swing.SwingUtilities;
 import swingwtx.swing.SwingWTUtils;
 
 /**
@@ -59,6 +62,17 @@ public class AboutTab extends Tab {
 	 */
 	private void buildGUI() {
 		final JPanel buttonsPanel = Utils.createWrapperPanel();
+		// We need to issue a validate() if the state of a maximized window changes (SwingWT bug). 
+		buttonsPanel.addComponentListener( new ComponentAdapter() {
+			@Override
+			public void componentResized( final ComponentEvent ce ) {
+				SwingUtilities.invokeLater( new Runnable() {
+					public void run() {
+						contentBox.validate();
+					}
+				} );
+			}
+		} );
 		JButton button = new JButton( "Visit home page", IconResourceManager.ICON_WORLD_GO );
 		button.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
