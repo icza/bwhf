@@ -626,7 +626,7 @@ public class ChartsComponent extends JPanel {
 						if ( event.getButton() == MouseEvent.BUTTON3 ) {
 							if ( playerMenu == null ) {
 								playerMenu = new JPopupMenu();
-								final JMenuItem bwhfProfileMenuItem = new JMenuItem( "View BWHF profile", IconResourceManager.ICON_SMALL_RED_PILL );
+								final JMenuItem bwhfProfileMenuItem = new JMenuItem( "View BWHF Player profile", IconResourceManager.ICON_SMALL_RED_PILL );
 								bwhfProfileMenuItem.addActionListener( new ActionListener() {
 									public void actionPerformed( final ActionEvent event ) {
 										try {
@@ -639,7 +639,7 @@ public class ChartsComponent extends JPanel {
 									}
 								} );
 								playerMenu.add( bwhfProfileMenuItem );
-								final JMenuItem iccupProfileMenuItem = new JMenuItem( "View iCCup profile", IconResourceManager.ICON_ICCUP );
+								final JMenuItem iccupProfileMenuItem = new JMenuItem( "View iCCup Player profile", IconResourceManager.ICON_ICCUP );
 								iccupProfileMenuItem.addActionListener( new ActionListener() {
 									public void actionPerformed( final ActionEvent event ) {
 										try {
