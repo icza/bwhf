@@ -140,6 +140,8 @@ public class IconResourceManager {
 	public static final ImageIcon ICON_TEAMLIQUID          = new ImageIcon( IconResourceManager.class.getResource( "icons/teamliquid.png" ) );
 	/** Starcraftdream icon.      */
 	public static final ImageIcon ICON_STARCRAFTDREAM      = new ImageIcon( IconResourceManager.class.getResource( "icons/starcraftdream.png" ) );
+	/** Vilegaming icon.          */
+	public static final ImageIcon ICON_VILEGAMING          = new ImageIcon( IconResourceManager.class.getResource( "icons/vilegaming.png" ) );
 	/** Gosugamers icon.          */
 	public static final ImageIcon ICON_GOSUGAMERS          = new ImageIcon( IconResourceManager.class.getResource( "icons/gosugamers.png" ) );
 	
