@@ -648,16 +648,6 @@ public class ChartsComponent extends JPanel {
 								} );
 								playerMenu.add( iccupProfileMenuItem );
 								
-								final JMenuItem teamliquidProfileMenuItem = new JMenuItem( "View Team Liquid Player profile", IconResourceManager.ICON_TEAMLIQUID );
-								teamliquidProfileMenuItem.addActionListener( new ActionListener() {
-									public void actionPerformed( final ActionEvent event ) {
-										try {
-											Utils.showURLInBrowser( "http://www.teamliquid.net/forum/profile.php?user=" + URLEncoder.encode( playerName, "UTF-8" ) );
-										} catch ( final UnsupportedEncodingException uee ) {}
-									}
-								} );
-								playerMenu.add( teamliquidProfileMenuItem );
-								
 								final JMenuItem starcraftdreamProfileMenuItem = new JMenuItem( "View StarCraft Dream Player profile", IconResourceManager.ICON_STARCRAFTDREAM );
 								starcraftdreamProfileMenuItem.addActionListener( new ActionListener() {
 									public void actionPerformed( final ActionEvent event ) {
@@ -667,6 +657,26 @@ public class ChartsComponent extends JPanel {
 									}
 								} );
 								playerMenu.add( starcraftdreamProfileMenuItem );
+								
+								final JMenuItem vilegamingProfileMenuItem = new JMenuItem( "View Vile Gaming Player profile", IconResourceManager.ICON_VILEGAMING );
+								vilegamingProfileMenuItem.addActionListener( new ActionListener() {
+									public void actionPerformed( final ActionEvent event ) {
+										try {
+											Utils.showURLInBrowser( "http://vilegaming.com/users.php?m=details&bwhfa=" + URLEncoder.encode( playerName, "UTF-8" ) );
+										} catch ( final UnsupportedEncodingException uee ) {}
+									}
+								} );
+								playerMenu.add( vilegamingProfileMenuItem );
+								
+								final JMenuItem teamliquidProfileMenuItem = new JMenuItem( "View Team Liquid Player profile", IconResourceManager.ICON_TEAMLIQUID );
+								teamliquidProfileMenuItem.addActionListener( new ActionListener() {
+									public void actionPerformed( final ActionEvent event ) {
+										try {
+											Utils.showURLInBrowser( "http://www.teamliquid.net/forum/profile.php?user=" + URLEncoder.encode( playerName, "UTF-8" ) );
+										} catch ( final UnsupportedEncodingException uee ) {}
+									}
+								} );
+								playerMenu.add( teamliquidProfileMenuItem );
 								
 								final JMenuItem gosugamersProfileMenuItem = new JMenuItem( "View GosuGamers Player profile", IconResourceManager.ICON_GOSUGAMERS );
 								gosugamersProfileMenuItem.addActionListener( new ActionListener() {
