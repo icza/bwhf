@@ -649,7 +649,7 @@ public class ChartsComponent extends JPanel {
 								} );
 								playerMenu.add( iccupProfileMenuItem );
 								
-								final JMenuItem teamliquidProfileMenuItem = new JMenuItem( "View Teamliquid Player profile", IconResourceManager.ICON_TEAMLIQUID );
+								final JMenuItem teamliquidProfileMenuItem = new JMenuItem( "View Team Liquid Player profile", IconResourceManager.ICON_TEAMLIQUID );
 								teamliquidProfileMenuItem.addActionListener( new ActionListener() {
 									public void actionPerformed( final ActionEvent event ) {
 										try {
@@ -658,6 +658,16 @@ public class ChartsComponent extends JPanel {
 									}
 								} );
 								playerMenu.add( teamliquidProfileMenuItem );
+								
+								final JMenuItem starcraftdreamProfileMenuItem = new JMenuItem( "View StarCraft Dream Player profile", IconResourceManager.ICON_STARCRAFTDREAM );
+								starcraftdreamProfileMenuItem.addActionListener( new ActionListener() {
+									public void actionPerformed( final ActionEvent event ) {
+										try {
+											Utils.showURLInBrowser( "http://www.starcraftdream.com/forums/member.php?uname=" + URLEncoder.encode( playerName, "UTF-8" ) );
+										} catch ( final UnsupportedEncodingException uee ) {}
+									}
+								} );
+								playerMenu.add( starcraftdreamProfileMenuItem );
 								
 								final JMenuItem gosugamersProfileMenuItem = new JMenuItem( "View GosuGamers Player profile", IconResourceManager.ICON_GOSUGAMERS );
 								gosugamersProfileMenuItem.addActionListener( new ActionListener() {
