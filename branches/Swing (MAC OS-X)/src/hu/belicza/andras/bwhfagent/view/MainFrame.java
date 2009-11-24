@@ -56,19 +56,25 @@ public class MainFrame extends JFrame {
 		"On the Replay search tab double clicking on a replay opens it on the Charts tab.",
 		"Clicking on the column headers on the Replay search tab and on the Player matcher tab will sort the table by that column.",
 		"If your network becomes unavailable, you can use the Server monitor tab to get alerted when it comes back.",
-		"On the Server monitor tab you can add any servers you're interested in: private bnet servers, your favourite web pages etc.",
-		"On the charts tab you can use the word \"OR\" between filter words to display all actions you want to see.",
+		"On the Server monitor tab you can add any servers you're interested in: private bnet servers, your favourite web pages etc (even FTP servers or streams).",
+		"On the charts tab you can use the word \"OR\" between filter words to display all actions you want to see at once.",
 		"On the replay search tab you can create a list of replays from multiple searches by checking \"Append results to table\".",
-		"On the charts tab you can easily export the actions: just select the actions you want to export, and copy it (CTRL+C).",
+		"On the charts tab you can easily export the actions: just select the actions you want to export, copy it (CTRL+C) and paste it to any editor (CTRL+V).",
 		"Replay lists saved on the Replay search tab can be opened with Excel for example for further processing.",
-		"If you download a new version of BWHF Agent, you can simply copy the \"settings.properties\" file to keep all your settigns.",
+		"If you download a new version of BWHF Agent, you can simply copy the \"settings.properties\" file to keep all your settings.",
 		"By default manual scan renames replays by adding \"hack\" to their names, so you can easily find them in your file browser.",
 		"Advloader disables game lobby screenshots, so you might not be able to use the Player checker feature with Advloader.",
 		"You can set the start folder globally when opening replay files on the General settings tab.",
 		"Collapse the navigation bar once you're familiar with the tab's icons to save space for charts and tables.",
 		"Request an authorization key rather than managing a custom list of hackers you find, that way everyone else will benefit from your findings.",
 		"Right click on the player names on the Charts tab can open the player's profiles on different sites.",
-		"You can execute important tasks form the popup menu of the tray icon like start Starcraft, change gateway, open last replay etc."
+		"You can execute important tasks form the popup menu of the tray icon like start Starcraft, change gateway, open last replay etc.",
+		"You can manually convert and resize Starcraft screenshots easily on the PCX converter tab, or have the Agent do it for you automatically.",
+		"The contents of the log/status text areas are saved to files and are available for review later at any time.",
+		"You can easily rename multiple replays at once on the Replay search tab. Right click on the selected replays and choose \"Group rename replays\".",
+		"BWHF Agent is independent of Starcraft, so you can start or close the Agent at any time, even during a game.",
+		"You can narrow a search result by refining the search terms and pressing the \"Search in previous results\" button.",
+		"If you understand regular expressions, it can be a great asset to quickly find the exact replays you're looking for."
 	};
 	
 	/** Stores the reference of the main frame. */
