@@ -944,7 +944,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				final String[] playerNames = getPlayerName( entityId, connection );
 				final String playerName     = playerNames[ 0 ];
 				final String playerNameHtml = encodeHtmlString( playerName );
-				outputWriter.println( "<h3>Details of player " + playerNameHtml + ( playerNames[ 1 ] == null ? "" : createHackerTagHtml( playerNameHtml ) ) + "</h3>" );
+				outputWriter.println( "<h3>Details of player " + playerNameHtml + ( playerNames[ 1 ] == null ? "" : createHackerTagHtml( playerName ) ) + "</h3>" );
 				
 				statement  = connection.createStatement();
 				String query = "SELECT COUNT(*), MIN(save_time), MAX(save_time), SUM(frames), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " THEN frames END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN frames END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN actions_count END) FROM game_player JOIN game on game.id=game_player.game";
