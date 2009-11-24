@@ -66,7 +66,7 @@ public class MainFrame extends JFrame {
 		"If you download a new version of BWHF Agent, you can simply copy the \"settings.properties\" file to keep all your settings.",
 		"By default manual scan renames replays by adding \"hack\" to their names, so you can easily find them in your file browser.",
 		"Advloader disables game lobby screenshots, so you might not be able to use the Player checker feature with Advloader.",
-		"You can set the start folder globally when opening replay files on the General settings tab.",
+		"You can set the start folder globally for opening replay files on the General settings tab.",
 		"Collapse the navigation bar once you're familiar with the tab's icons to save space for charts and tables.",
 		"Request an authorization key rather than managing a custom list of hackers you find, that way everyone else will benefit from your findings.",
 		"Right click on the player names on the Charts tab can open the player's profiles on different sites.",
