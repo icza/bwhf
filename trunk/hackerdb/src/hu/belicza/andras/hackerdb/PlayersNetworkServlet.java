@@ -77,9 +77,23 @@ public class PlayersNetworkServlet extends BaseServlet {
 	
 	/** Query part to match a player name to a hacker. */
 	private static final String IS_HACKER_QUERY_PART = "(SELECT hacker.id FROM hacker JOIN report on report.hacker=hacker.id JOIN key on key.id=report.key WHERE name=player.name AND guarded=FALSE AND key.revocated=FALSE and report.revocated=FALSE LIMIT 1)";
-	/** Hacker tag HTML to be appended after hacker names. */
-	private static final String HACKER_TAG_HTML = "<span class='hacker'>hacker</span>";
 	
+	/**
+	 * Creates a hacker tag that points to the reports of a named hacker.
+	 * @param playerName name of player who to create the tag for
+	 * @return the hacker tag HTML code
+	 */
+	private static String createHackerTagHtml( final String playerName ) {
+		try {
+			final StringBuilder tagBuilder = new StringBuilder( "<a class='hacker' href='hackers?" );
+			tagBuilder.append( ServerApiConsts.FILTER_NAME_NAME ).append( '=' ).append( URLEncoder.encode( '"' + playerName + '"', "UTF-8" ) );
+			tagBuilder.append( "'>&nbsp;H&nbsp;</a>" );
+			return tagBuilder.toString();
+		} catch ( final UnsupportedEncodingException uee ) {
+			uee.printStackTrace();
+			return "<span class='hacker'>&nbsp;H&nbsp;</span>";
+		}
+	}
 	
 	/**
 	 * Defines the header of a table.<br>
@@ -478,13 +492,13 @@ public class PlayersNetworkServlet extends BaseServlet {
 					statement = connection.createStatement();
 					outputWriter.print( "<p>AKAs included " );
 					if ( hasAka1 ) {
-						outputWriter.print( "from <b>" + encodeHtmlString( player1Name ) + ( playerNames1[ 1 ] == null ? "" : HACKER_TAG_HTML ) + "</b>: " );
+						outputWriter.print( "from <b>" + encodeHtmlString( player1Name ) + ( playerNames1[ 1 ] == null ? "" : createHackerTagHtml( player1Name ) ) + "</b>: " );
 						resultSet = statement.executeQuery( "SELECT id, name, " + IS_HACKER_QUERY_PART + " FROM player WHERE id IN (" + akaIdList1 + ") AND id!=" + player1 );
 						outputWriter.print( generatePlayerHtmlLinkListFromResultSet( resultSet ) );
 						resultSet.close();
 					}
 					if ( hasAka2 ) {
-						outputWriter.print( ( player1Name == null ? "" : "; " ) + "from <b>" + encodeHtmlString( player2Name ) + ( playerNames2[ 1 ] == null ? "" : HACKER_TAG_HTML ) + "</b>: " );
+						outputWriter.print( ( player1Name == null ? "" : "; " ) + "from <b>" + encodeHtmlString( player2Name ) + ( playerNames2[ 1 ] == null ? "" : createHackerTagHtml( player2Name ) ) + "</b>: " );
 						resultSet = statement.executeQuery( "SELECT id, name, " + IS_HACKER_QUERY_PART + " FROM player WHERE id IN (" + akaIdList2 + ") AND id!=" + player2 );
 						outputWriter.print( generatePlayerHtmlLinkListFromResultSet( resultSet ) );
 						resultSet.close();
@@ -930,7 +944,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				final String[] playerNames = getPlayerName( entityId, connection );
 				final String playerName     = playerNames[ 0 ];
 				final String playerNameHtml = encodeHtmlString( playerName );
-				outputWriter.println( "<h3>Details of player " + playerNameHtml + ( playerNames[ 1 ] == null ? "" : HACKER_TAG_HTML ) + "</h3>" );
+				outputWriter.println( "<h3>Details of player " + playerNameHtml + ( playerNames[ 1 ] == null ? "" : createHackerTagHtml( playerNameHtml ) ) + "</h3>" );
 				
 				statement  = connection.createStatement();
 				String query = "SELECT COUNT(*), MIN(save_time), MAX(save_time), SUM(frames), SUM(CASE WHEN race=0 THEN 1 END), SUM(CASE WHEN race=1 THEN 1 END), SUM(CASE WHEN race=2 THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " THEN 1 END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " THEN frames END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN frames END), SUM(CASE WHEN frames>" + SHORT_GAME_FRAME_LIMIT + " AND actions_count*" + OBS_MODE_FPA_LIMIT + ">frames THEN actions_count END) FROM game_player JOIN game on game.id=game_player.game";
@@ -1502,7 +1516,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 							   .append( '&' ).append( PN_REQUEST_PARAM_NAME_ENTITY    ).append( '=' ).append( ENTITY_PLAYER )
 							   .append( '&' ).append( PN_REQUEST_PARAM_NAME_ENTITY_ID ).append( '=' ).append( id ).append( "'>" ).append( encodeHtmlString( playerName ) ).append( "</a>" );
 		if ( isHacker )
-			builder.append( HACKER_TAG_HTML );
+			builder.append( createHackerTagHtml( playerName ) );
 		
 		return builder;
 	}
