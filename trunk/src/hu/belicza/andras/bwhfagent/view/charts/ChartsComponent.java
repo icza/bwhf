@@ -609,12 +609,12 @@ public class ChartsComponent extends JPanel {
 				final ListedAs listedAs = MainFrame.getInstance().playerCheckerTab.isPlayerListed( playerActions[ i ].playerName );
 				final JCheckBox playerCheckBox = ( (JCheckBox) players[ i ][ 0 ] );
 				if ( listedAs == ListedAs.HACKER ) {
-					playerCheckBox.setBackground( Color.RED );
-					playerCheckBox.setToolTipText( "This player is a reported hacker." );
+					playerCheckBox.setBackground( new Color( 255, 100, 100 ) );
+					playerCheckBox.setToolTipText( "There are hacker(s) reported with this name." );
 				}
 				else if ( listedAs == ListedAs.CUSTOM ) {
-					playerCheckBox.setBackground( Color.YELLOW );
-					playerCheckBox.setToolTipText( "This player is listed in your custom list." );
+					playerCheckBox.setBackground( new Color( 220, 220, 50 ) );
+					playerCheckBox.setToolTipText( "This name is on your custom list." );
 				}
 				players[ i ][ 1 ] = i;
 				playerCheckBox.addActionListener( playerCheckBoxActionListener );
