@@ -914,8 +914,6 @@ public class ReplaySearchTab extends Tab {
 	 * Rebuilds the replay operations popup menu.
 	 */
 	private void rebuildReplayOperationsPopupMenu() {
-		if (replayOperationsPopupMenu != null )
-			return;
 		replayOperationsPopupMenu = new JPopupMenu();
 		replayOperationsPopupMenu.add( showOnChartsMenuItem         );
 		replayOperationsPopupMenu.add( scanForHacksMenuItem         );
