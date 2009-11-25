@@ -67,7 +67,7 @@ public class MainFrame extends JFrame {
 		"You can set the start folder globally for opening replay files on the General settings tab.",
 		"Collapse the navigation bar once you're familiar with the tab's icons to save space for charts and tables.",
 		"Request an authorization key rather than managing a custom list of hackers you find, that way everyone else will benefit from your findings.",
-		"Right click on the player names on the Charts tab can open the player's profiles on different sites.",
+		"Right click on the player names on the Charts tab gives you access to direct player profile pages on many Starcraft sites.",
 		"You can execute important tasks form the popup menu of the tray icon like start Starcraft, change gateway, open last replay etc.",
 		"You can manually convert and resize Starcraft screenshots easily on the PCX converter tab, or have the Agent do it for you automatically.",
 		"The contents of the log/status text areas are saved to files and are available for review later at any time.",
