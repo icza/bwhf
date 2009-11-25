@@ -50,6 +50,7 @@ import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
@@ -177,6 +178,8 @@ public class ChartsComponent extends JPanel {
 	/** Show select hotkeys checkbox.                       */
 	private final JCheckBox showOverallEapmCheckBox              = new JCheckBox( "Show overall EAPM", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_OVERALL_EAPM ) ) );
 	
+	/** Scroll bar to scroll the zoomed charts.             */
+	private final JScrollBar            chartScrollBar           = new JScrollBar( JScrollBar.HORIZONTAL );
 	/** Split pane to display the charts component and the players' action list. */
 	private final JSplitPane            splitPane                = new JSplitPane( JSplitPane.VERTICAL_SPLIT, true );
 	/** List of the displayable actions, pairs of action+palyer name.            */
@@ -230,7 +233,10 @@ public class ChartsComponent extends JPanel {
 				repaint();
 			}
 		} );
-		splitPane.setTopComponent( Utils.wrapInBorderLayoutPanel( this ) );
+		final JPanel chartsHolderPanel = new JPanel( new BorderLayout() );
+		chartsHolderPanel.add( this, BorderLayout.CENTER );
+		chartsHolderPanel.add( chartScrollBar, BorderLayout.SOUTH );
+		splitPane.setTopComponent( chartsHolderPanel );
 		
 		final Box actionListBox = Box.createHorizontalBox();
 		actionsListTextArea.setFont( new Font( "Courier New", Font.PLAIN, 11 ) );
@@ -343,6 +349,15 @@ public class ChartsComponent extends JPanel {
 		strategyDisplayLevelComboBox.addActionListener( repainterActionListener );
 		overallApmChartDetailLevelComboBox.addActionListener( repainterActionListener );
 		showOverallEapmCheckBox.addActionListener( repainterActionListener );
+	}
+	
+	/**
+	 * Sets the zoom level.
+	 * @param zoom zoom level to be set.
+	 */
+	public void setZoom( final int zoom ) {
+		chartScrollBar.setVisible( zoom > 1 );
+		chartScrollBar.getParent().validate();
 	}
 	
 	/**
