@@ -26,6 +26,8 @@ import java.awt.GridLayout;
 import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -235,6 +237,11 @@ public class ChartsComponent extends JPanel {
 		} );
 		final JPanel chartsHolderPanel = new JPanel( new BorderLayout() );
 		chartsHolderPanel.add( this, BorderLayout.CENTER );
+		chartScrollBar.addAdjustmentListener( new AdjustmentListener() {
+			public void adjustmentValueChanged( final AdjustmentEvent event ) {
+				repaint();
+			}
+		} );
 		chartsHolderPanel.add( chartScrollBar, BorderLayout.SOUTH );
 		splitPane.setTopComponent( chartsHolderPanel );
 		
@@ -850,6 +857,10 @@ public class ChartsComponent extends JPanel {
 		
 		if ( replay != null && playerIndexToShowList.size() > 0 && replay.replayHeader.gameFrames != 0 ) {
 			final ChartsParams chartsParams = new ChartsParams( chartsTab, replay.replayHeader.gameFrames, playerIndexToShowList.size(), this );
+			
+			final int zoom = (Integer) chartsTab.zoomComboBox.getSelectedItem();
+			graphics.translate( -( getWidth() * zoom - getWidth() ) * chartScrollBar.getValue() / ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ), 0 );
+			
 			switch ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() ) {
 				case APM :
 					paintApmCharts( graphics, chartsParams, false );
