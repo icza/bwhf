@@ -201,6 +201,9 @@ public class ChartsComponent extends JPanel {
 	/** Position of the marker. */
 	private int markerPosition = -1;
 	
+	/** Reference to the last charts params object. */
+	private ChartsParams chartsParams;
+	
 	/**
 	 * Creates a new ChartsComponent.
 	 */
@@ -231,8 +234,10 @@ public class ChartsComponent extends JPanel {
 		addMouseListener( new MouseAdapter() {
 			@Override
 			public void mousePressed( final MouseEvent event ) {
-				syncMarkerFromChartToActionList( event.getX() );
-				repaint();
+				if ( chartsParams != null ) {
+					syncMarkerFromChartToActionList( event.getX() + chartsParams.dx );
+					repaint();
+				}
 			}
 		} );
 		final JPanel chartsHolderPanel = new JPanel( new BorderLayout() );
@@ -372,10 +377,10 @@ public class ChartsComponent extends JPanel {
 	 * @param x x coordinate on the chart
 	 */
 	private void syncMarkerFromChartToActionList( final int x ) {
-		if ( replay == null || playerIndexToShowList.isEmpty() )
+		if ( replay == null || playerIndexToShowList.isEmpty() || chartsParams == null )
 			return;
 		
-		final int iteration = ChartsParams.getIterationForX( x, replay.replayHeader.gameFrames, ChartsComponent.this );
+		final int iteration = chartsParams.getIterationForX( x, replay.replayHeader.gameFrames );
 		if ( iteration >= 0 ) {
 			markerPosition = x;
 			
@@ -468,7 +473,7 @@ public class ChartsComponent extends JPanel {
 			time    = Integer.parseInt( timeTokenizer.nextToken() );
 			maxTime = replay.replayHeader.gameFrames;
 		}
-		markerPosition = ChartsParams.getXForTime( time, maxTime, ChartsComponent.this );
+		markerPosition = chartsParams.getXForTime( time, maxTime );
 		
 		repaint();
 	}
@@ -858,25 +863,25 @@ public class ChartsComponent extends JPanel {
 		if ( replay != null && playerIndexToShowList.size() > 0 && replay.replayHeader.gameFrames != 0 ) {
 			final int zoom = (Integer) chartsTab.zoomComboBox.getSelectedItem();
 			final int dx   = ( getWidth() * zoom - getWidth() ) * chartScrollBar.getValue() / ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() );
-			final ChartsParams chartsParams = new ChartsParams( chartsTab, replay.replayHeader.gameFrames, playerIndexToShowList.size(), this, dx );
+			chartsParams   = new ChartsParams( chartsTab, replay.replayHeader.gameFrames, playerIndexToShowList.size(), this, dx );
 			
 			graphics.translate( -dx, 0 );
 			
 			switch ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() ) {
 				case APM :
-					paintApmCharts( graphics, chartsParams, false );
+					paintApmCharts( graphics, false );
 					break;
 				case HOTKEYS :
-					paintHotkeysCharts( graphics, chartsParams );
+					paintHotkeysCharts( graphics );
 					break;
 				case BUILD_ORDER :
-					paintBuildOrderCharts( graphics, chartsParams );
+					paintBuildOrderCharts( graphics );
 					break;
 				case STRATEGY :
-					paintStrategyCharts( graphics, chartsParams );
+					paintStrategyCharts( graphics );
 					break;
 				case OVERALL_APM :
-					paintApmCharts( graphics, chartsParams, true );
+					paintApmCharts( graphics, true );
 					break;
 			}
 			
@@ -890,10 +895,9 @@ public class ChartsComponent extends JPanel {
 	/**
 	 * Paints the APM charts of the players.
 	 * @param graphics     graphics to be used for painting
-	 * @param chartsParams parameters of the charts to be drawn
 	 * @param overall      tells if we have to paint momentary or overall APM charts
 	 */
-	private void paintApmCharts( final Graphics graphics, final ChartsParams chartsParams, final boolean overall ) {
+	private void paintApmCharts( final Graphics graphics, final boolean overall ) {
 		final int chartGranularity = (Integer) ( overall? overallApmChartDetailLevelComboBox : apmChartDetailLevelComboBox ).getSelectedItem();
 		if ( getWidth() < chartGranularity )
 			return;
@@ -1005,7 +1009,7 @@ public class ChartsComponent extends JPanel {
 			final int           y1            = chartsParams.getY1ForChart( i );
 			final Color         inGameColor   = getPlayerInGameColor( playerActions );
 			
-			drawAxisAndTimeLabels( graphics, chartsParams, i );
+			drawAxisAndTimeLabels( graphics, i );
 			
 			// Draw APM axis labels
 			if ( !chartsParams.allPlayersOnOneChart || i == 0 ) { // We draw labels once if all players are on one chart
@@ -1083,9 +1087,8 @@ public class ChartsComponent extends JPanel {
 	/**
 	 * Paints the hotkeys charts of the players.
 	 * @param graphics     graphics to be used for painting
-	 * @param chartsParams parameters of the charts to be drawn
 	 */
-	private void paintHotkeysCharts( final Graphics graphics, final ChartsParams chartsParams ) {
+	private void paintHotkeysCharts( final Graphics graphics ) {
 		final boolean showSelectHotkeys = showSelectHotkeysCheckBox.isSelected();
 		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
 			final PlayerActions playerActions = replay.replayActions.players[ playerIndexToShowList.get( i ) ];
@@ -1093,7 +1096,7 @@ public class ChartsComponent extends JPanel {
 			final Color         inGameColor   = getPlayerInGameColor( playerActions );
 			final Color         chartColor    = inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor;
 			
-			drawAxisAndTimeLabels( graphics, chartsParams, i );
+			drawAxisAndTimeLabels( graphics, i );
 			
 			graphics.setFont( CHART_PART_TEXT_FONT );
 			
@@ -1131,9 +1134,8 @@ public class ChartsComponent extends JPanel {
 	/**
 	 * Paints the build order charts of the players.
 	 * @param graphics     graphics to be used for painting
-	 * @param chartsParams parameters of the charts to be drawn
 	 */
-	private void paintBuildOrderCharts( final Graphics graphics, final ChartsParams chartsParams ) {
+	private void paintBuildOrderCharts( final Graphics graphics ) {
 		final boolean     showUnits               = showUnitsOnBuildOrderCheckBox.isSelected();
 		final int         buildOrderDisplayLevels = (Integer) buildOrderDisplayLevelComboBox.getSelectedItem() - 1;
 		final boolean     hideWorkerUnits         = hideWorkerUnitsCheckBox.isSelected();
@@ -1147,7 +1149,7 @@ public class ChartsComponent extends JPanel {
 			final Color         inGameColor   = getPlayerInGameColor( playerActions );
 			final Color         chartColor    = inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor;
 			
-			drawAxisAndTimeLabels( graphics, chartsParams, i );
+			drawAxisAndTimeLabels( graphics, i );
 			
 			graphics.setFont( CHART_PART_TEXT_FONT );
 			
@@ -1182,9 +1184,8 @@ public class ChartsComponent extends JPanel {
 	/**
 	 * Paints the strategy charts of the players.
 	 * @param graphics     graphics to be used for painting
-	 * @param chartsParams parameters of the charts to be drawn
 	 */
-	private void paintStrategyCharts( final Graphics graphics, final ChartsParams chartsParams ) {
+	private void paintStrategyCharts( final Graphics graphics ) {
 		final int         strategyDisplayLevels = (Integer) strategyDisplayLevelComboBox.getSelectedItem() - 1;
 		final FontMetrics fontMetrics           = graphics.getFontMetrics( CHART_PART_TEXT_FONT );
 		
@@ -1196,7 +1197,7 @@ public class ChartsComponent extends JPanel {
 			final Color         inGameColor   = getPlayerInGameColor( playerActions );
 			final Color         chartColor    = inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor;
 			
-			drawAxisAndTimeLabels( graphics, chartsParams, i );
+			drawAxisAndTimeLabels( graphics, i );
 			
 			graphics.setFont( CHART_PART_TEXT_FONT );
 			
@@ -1261,10 +1262,9 @@ public class ChartsComponent extends JPanel {
 	/**
 	 * Draws the axis and time labels.
 	 * @param graphics     graphics to be used for painting
-	 * @param chartsParams parameters of the charts to be drawn
 	 * @param chartIndex   index of chart being queried
 	 */
-	private void drawAxisAndTimeLabels( final Graphics graphics, final ChartsParams chartsParams, final int chartIndex ) {
+	private void drawAxisAndTimeLabels( final Graphics graphics, final int chartIndex ) {
 		if ( !chartsParams.allPlayersOnOneChart || chartIndex == 0 ) { // We draw axis and labels once if all players are on one chart
 			final int frames = replay.replayHeader.gameFrames;
 			final int y1     = chartsParams.getY1ForChart( chartIndex );
