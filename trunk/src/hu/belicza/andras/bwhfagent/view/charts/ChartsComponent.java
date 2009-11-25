@@ -857,10 +857,11 @@ public class ChartsComponent extends JPanel {
 		graphics.clearRect( 0, 0, getWidth(), getHeight() );
 		
 		if ( replay != null && playerIndexToShowList.size() > 0 && replay.replayHeader.gameFrames != 0 ) {
-			final ChartsParams chartsParams = new ChartsParams( chartsTab, replay.replayHeader.gameFrames, playerIndexToShowList.size(), this );
-			
 			final int zoom = (Integer) chartsTab.zoomComboBox.getSelectedItem();
-			graphics.translate( -( getWidth() * zoom - getWidth() ) * chartScrollBar.getValue() / ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ), 0 );
+			final int dx   = ( getWidth() * zoom - getWidth() ) * chartScrollBar.getValue() / ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() );
+			final ChartsParams chartsParams = new ChartsParams( chartsTab, replay.replayHeader.gameFrames, playerIndexToShowList.size(), this, dx );
+			
+			graphics.translate( -dx, 0 );
 			
 			switch ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() ) {
 				case APM :
@@ -1275,10 +1276,11 @@ public class ChartsComponent extends JPanel {
 			// Draw time axis labels
 			graphics.setColor( CHART_AXIS_LABEL_COLOR );
 			graphics.setFont( CHART_AXIS_LABEL_FONT );
-			for ( int j = 0; j <= TIME_LABELS_COUNT; j++ ) {
-				final String timeString = ReplayHeader.formatFrames( frames * j / TIME_LABELS_COUNT, new StringBuilder(), false ).toString();
-				final int x = chartsParams.x1 + ( chartsParams.maxXInChart * j / TIME_LABELS_COUNT )
-								- ( j == 0 ? 0 : ( j == TIME_LABELS_COUNT ? timeString.length() * 7 : timeString.length() * 7 / 2 ) );
+			final int labelsCount = TIME_LABELS_COUNT * chartsParams.zoom;
+			for ( int j = 0; j <= labelsCount; j++ ) {
+				final String timeString = ReplayHeader.formatFrames( frames * j / labelsCount, new StringBuilder(), false ).toString();
+				final int x = chartsParams.x1 + ( chartsParams.maxXInChart * j / labelsCount )
+								- ( j == 0 ? 0 : ( j == labelsCount ? timeString.length() * 7 : timeString.length() * 7 / 2 ) );
 				graphics.drawString( timeString, x, y1 + chartsParams.maxYInChart + 1 );
 			}
 		}
