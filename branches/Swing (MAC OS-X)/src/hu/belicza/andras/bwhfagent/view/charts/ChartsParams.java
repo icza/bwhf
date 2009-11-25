@@ -34,12 +34,19 @@ public class ChartsParams {
 	/** Max y coordinate inside charts.                 */
 	public final int     maxYInChart;
 	
-	public ChartsParams( final ChartsTab chartsTab, final int frames, final int playersCount, final JComponent chartsComponent ) {
+	/** Zoom level.                                                                            */
+	public final int zoom;
+	/** Delta x: x coordinate of the first visible chart point (it is scrollable when zoomed). */
+	public final int dx;
+	
+	public ChartsParams( final ChartsTab chartsTab, final int frames, final int playersCount, final JComponent chartsComponent, final int dx ) {
 		allPlayersOnOneChart   = chartsTab.allPlayersOnOneChartCheckBox.isSelected();
 		this.frames            = frames;
 		this.playersCount      = playersCount;
 		chartsCount            = allPlayersOnOneChart ? 1 : playersCount;
-		final int chartWidth_  = chartsComponent.getWidth() * (Integer) chartsTab.zoomComboBox.getSelectedItem() - AXIS_SPACE_X;
+		zoom                   = (Integer) chartsTab.zoomComboBox.getSelectedItem();
+		this.dx                = dx;
+		final int chartWidth_  = chartsComponent.getWidth() * zoom - AXIS_SPACE_X;
 		chartWidth             = chartWidth_ < 1 ? 1 : chartWidth_;
 		final int chartHeight_ = ( chartsComponent.getHeight() - AXIS_SPACE_Y ) / chartsCount - AXIS_SPACE_Y;
 		chartHeight            = chartHeight_ < 1 ? 1 : chartHeight_;
