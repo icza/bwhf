@@ -37,6 +37,8 @@ import swingwt.awt.GridLayout;
 import swingwt.awt.Stroke;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
+import swingwt.awt.event.AdjustmentEvent;
+import swingwt.awt.event.AdjustmentListener;
 import swingwt.awt.event.KeyAdapter;
 import swingwt.awt.event.KeyEvent;
 import swingwt.awt.event.MouseAdapter;
@@ -235,6 +237,11 @@ public class ChartsComponent extends JPanel {
 		} );
 		final JPanel chartsHolderPanel = new JPanel( new BorderLayout() );
 		chartsHolderPanel.add( this, BorderLayout.CENTER );
+		chartScrollBar.addAdjustmentListener( new AdjustmentListener() {
+			public void adjustmentValueChanged( final AdjustmentEvent event ) {
+				repaint();
+			}
+		} );
 		chartsHolderPanel.add( chartScrollBar, BorderLayout.SOUTH );
 		splitPane.setTopComponent( chartsHolderPanel );
 		
@@ -851,6 +858,10 @@ public class ChartsComponent extends JPanel {
 		
 		if ( replay != null && playerIndexToShowList.size() > 0 && replay.replayHeader.gameFrames != 0 ) {
 			final ChartsParams chartsParams = new ChartsParams( chartsTab, replay.replayHeader.gameFrames, playerIndexToShowList.size(), this );
+			
+			final int zoom = (Integer) chartsTab.zoomComboBox.getSelectedItem();
+			graphics.translate( -( getWidth() * zoom - getWidth() ) * chartScrollBar.getValue() / ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ), 0 );
+			
 			switch ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() ) {
 				case APM :
 					paintApmCharts( graphics, chartsParams, false );
