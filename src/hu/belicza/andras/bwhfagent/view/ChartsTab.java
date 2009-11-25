@@ -103,7 +103,7 @@ public class ChartsTab extends Tab {
 	/** Checkbox to display actions in seconds.                              */
 	public final JCheckBox displayActionsInSecondsCheckBox    = new JCheckBox( "Display in seconds", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DISPLAY_ACTIONS_IN_SECONDS ) ) );
 	/** Combobox to select the chart type.                                   */
-	public final JComboBox zoomComboBox                       = new JComboBox( new Integer[] { 1, 2, 4, 8, 16, 32 } );
+	public final JComboBox zoomComboBox                       = new JComboBox( new Integer[] { 1, 2, 4, 8, 16 } );
 	
 	/** The component visualizing the charts. */
 	private final ChartsComponent chartsComponent = new ChartsComponent( this );
@@ -279,7 +279,7 @@ public class ChartsTab extends Tab {
 				chartsComponent.loadPlayerActionsIntoList();
 			}
 		} );
-		chartsCommonControlPanel.add( new JLabel( "Zoom: x" ) );
+		chartsCommonControlPanel.add( new JLabel( "Zoom:" ) );
 		zoomComboBox.addChangeListener( new ChangeListener() {
 			public void stateChanged( final ChangeEvent event ) {
 				chartsComponent.setZoom( (Integer) zoomComboBox.getSelectedItem() );
