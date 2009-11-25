@@ -7,7 +7,7 @@
 ----
 ===Changes and new features in the upcoming release===
  * *A new popup menu when right clicking on the player names on the Charts tab.* In this menu you can open the direct profile page of the player on several web sites: BWHF Player profile, the iCCup Player profile, !StarCraft Dream Player profile, Vile Gaming Player profile, Team Liquid Player profile, !GosuGamers Player profile and the BWHF hacker reports page in case of a hacker.
- * *A new option on the charts tab: Zoom.*
+ * *A new setting on the charts tab: Zoom.*
  * If you open a replay on the charts tab, the names of players who have been reported as hackers will have red background, those who are on your custom list will have yellow background (regardless if the player hacked in the replay). Tooltip text explains the coloring.
  * Random tips at the bottom of the window. Clicking on the tip will show another random tip.
  * *Added detection of a new variant of the delayed autogather/autotrain hack.*
