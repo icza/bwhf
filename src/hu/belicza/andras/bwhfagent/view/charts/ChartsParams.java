@@ -39,7 +39,7 @@ public class ChartsParams {
 		this.frames            = frames;
 		this.playersCount      = playersCount;
 		chartsCount            = allPlayersOnOneChart ? 1 : playersCount;
-		final int chartWidth_  = chartsComponent.getWidth() - AXIS_SPACE_X;
+		final int chartWidth_  = chartsComponent.getWidth() * (Integer) chartsTab.zoomComboBox.getSelectedItem() - AXIS_SPACE_X;
 		chartWidth             = chartWidth_ < 1 ? 1 : chartWidth_;
 		final int chartHeight_ = ( chartsComponent.getHeight() - AXIS_SPACE_Y ) / chartsCount - AXIS_SPACE_Y;
 		chartHeight            = chartHeight_ < 1 ? 1 : chartHeight_;
