@@ -74,7 +74,8 @@ public class MainFrame extends JFrame {
 		"You can easily rename multiple replays at once on the Replay search tab. Right click on the selected replays and choose \"Group rename replays\".",
 		"BWHF Agent is independent of Starcraft, so you can start or close the Agent at any time, even during a game.",
 		"You can narrow a search result by refining the search terms and pressing the \"Search in previous results\" button.",
-		"If you understand regular expressions, it can be a great asset to quickly find the exact replays you're looking for."
+		"If you understand regular expressions, it can be a great asset to quickly find the exact replays you're looking for.",
+		"Add all your replays to the Players' Network, and you can see summarized statistics, connections and improvements over time for all players."
 	};
 	
 	/** Stores the reference of the main frame. */
