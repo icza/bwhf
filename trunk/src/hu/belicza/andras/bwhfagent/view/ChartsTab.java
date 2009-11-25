@@ -135,7 +135,7 @@ public class ChartsTab extends Tab {
 			public void componentResized( final ComponentEvent ce ) {
 				SwingUtilities.invokeLater( new Runnable() {
 					public void run() {
-						contentBox.validate();
+						buttonsPanel.getParent().validate();
 					}
 				} );
 			}

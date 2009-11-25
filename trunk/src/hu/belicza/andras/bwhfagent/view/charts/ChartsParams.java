@@ -15,6 +15,11 @@ public class ChartsParams {
 	/** Space to be left for the y axis. */
 	private static final int AXIS_SPACE_Y = 23;
 	
+	/** Width of the chartsComponent.  */
+	public final int componentWidth;
+	/** Height of the chartsComponent. */
+	public final int componentHeight;
+	
 	/** Tells whether to draw all players on one chart. */
 	public final boolean allPlayersOnOneChart;
 	/** Frames of the replay.                           */
@@ -40,15 +45,17 @@ public class ChartsParams {
 	public final int dx;
 	
 	public ChartsParams( final ChartsTab chartsTab, final int frames, final int playersCount, final JComponent chartsComponent, final int dx ) {
+		componentWidth         = chartsComponent.getWidth();
+		componentHeight        = chartsComponent.getHeight();
 		allPlayersOnOneChart   = chartsTab.allPlayersOnOneChartCheckBox.isSelected();
 		this.frames            = frames;
 		this.playersCount      = playersCount;
 		chartsCount            = allPlayersOnOneChart ? 1 : playersCount;
 		zoom                   = (Integer) chartsTab.zoomComboBox.getSelectedItem();
 		this.dx                = dx;
-		final int chartWidth_  = chartsComponent.getWidth() * zoom - AXIS_SPACE_X;
+		final int chartWidth_  = componentWidth * zoom - AXIS_SPACE_X;
 		chartWidth             = chartWidth_ < 1 ? 1 : chartWidth_;
-		final int chartHeight_ = ( chartsComponent.getHeight() - AXIS_SPACE_Y ) / chartsCount - AXIS_SPACE_Y;
+		final int chartHeight_ = ( componentHeight - AXIS_SPACE_Y ) / chartsCount - AXIS_SPACE_Y;
 		chartHeight            = chartHeight_ < 1 ? 1 : chartHeight_;
 		x1                     = AXIS_SPACE_X;
 		maxXInChart            = chartWidth  - 1;
@@ -75,30 +82,28 @@ public class ChartsParams {
 	
 	/**
 	 * Returns the x coordinate calculated for the given time.
-	 * @param time            time whose x coordinate to be returned (either iteration or seconds)
-	 * @param maxTime         max time (either frames count or duration) 
-	 * @param chartsComponent reference to the charts component
+	 * @param time    time whose x coordinate to be returned (either iteration or seconds)
+	 * @param maxTime max time (either frames count or duration) 
 	 * @return the x coordinate calculated for the specified time
 	 */
-	public static int getXForTime( final int time, int maxTime, final JComponent chartsComponent ) {
+	public int getXForTime( final int time, int maxTime ) {
 		if ( maxTime == 0 )
 			maxTime = 1;
-		return AXIS_SPACE_X + time * ( chartsComponent.getWidth() - AXIS_SPACE_X  - 1 ) / maxTime;
+		return AXIS_SPACE_X + time * ( chartWidth - 1 ) / maxTime;
 	}
 	
 	/**
 	 * Returns the time denoted by the x coordinate on the charts component.
-	 * @param x               x coordinate whose time is to be returned
-	 * @param maxTime         max time (either frames count or duration)
-	 * @param chartsComponent reference to the charts component
+	 * @param x       x coordinate whose time is to be returned
+	 * @param maxTime max time (either frames count or duration)
 	 * @return the time denoted by the x coordinate on the charts component or -1 if it is outside the game domain
 	 */
-	public static int getIterationForX( final int x, int maxTime, final JComponent chartsComponent ) {
+	public int getIterationForX( final int x, int maxTime ) {
 		if ( x < AXIS_SPACE_X )
 			return -1;
 		if ( maxTime == 0 )
 			maxTime = 1;
-		return ( x - AXIS_SPACE_X ) * maxTime / ( chartsComponent.getWidth() - AXIS_SPACE_X  - 1 );
+		return ( x - AXIS_SPACE_X ) * maxTime / ( chartWidth - 1 );
 	}
 	
 }
