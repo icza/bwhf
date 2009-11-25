@@ -56,7 +56,7 @@ public class MainFrame extends JFrame {
 		"If you pass a replay name to the starter .exe (or script) of BWHF Agent as an argument, it will be opened on the Charts tab.",
 		"On the Replay search tab use right click on the search results to access advanced replay operations.",
 		"On the Replay search tab double clicking on a replay opens it on the Charts tab.",
-		"Clicking on a column headers on the Replay search tab and on the Player matcher tab will sort the table by that column. Clicking again will reverse the order.",
+		"Clicking on a column header on the Replay search tab and on the Player matcher tab will sort the table by that column. Clicking again will reverse the order.",
 		"If your network becomes unavailable, you can use the Server monitor tab to get alerted when it comes back.",
 		"On the Server monitor tab you can add any servers you're interested in: private bnet servers, your favourite web pages etc (even FTP servers or streams).",
 		"On the charts tab you can use the word \"OR\" between filter words to display all actions you want to see at once.",
