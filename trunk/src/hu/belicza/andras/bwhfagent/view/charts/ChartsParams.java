@@ -35,16 +35,17 @@ public class ChartsParams {
 	public final int     maxYInChart;
 	
 	public ChartsParams( final ChartsTab chartsTab, final int frames, final int playersCount, final JComponent chartsComponent ) {
-		allPlayersOnOneChart = chartsTab.allPlayersOnOneChartCheckBox.isSelected();
-		this.frames          = frames;
-		this.playersCount    = playersCount;
-		chartsCount          = allPlayersOnOneChart ? 1 : playersCount;
-		chartWidth           = chartsComponent.getWidth() - AXIS_SPACE_X;
+		allPlayersOnOneChart   = chartsTab.allPlayersOnOneChartCheckBox.isSelected();
+		this.frames            = frames;
+		this.playersCount      = playersCount;
+		chartsCount            = allPlayersOnOneChart ? 1 : playersCount;
+		final int chartWidth_  = chartsComponent.getWidth() - AXIS_SPACE_X;
+		chartWidth             = chartWidth_ < 1 ? 1 : chartWidth_;
 		final int chartHeight_ = ( chartsComponent.getHeight() - AXIS_SPACE_Y ) / chartsCount - AXIS_SPACE_Y;
-		chartHeight          = chartHeight_ < 1 ? 1 : chartHeight_;
-		x1                   = AXIS_SPACE_X;
-		maxXInChart          = chartWidth  - 1;
-		maxYInChart          = chartHeight - 1;
+		chartHeight            = chartHeight_ < 1 ? 1 : chartHeight_;
+		x1                     = AXIS_SPACE_X;
+		maxXInChart            = chartWidth  - 1;
+		maxYInChart            = chartHeight - 1;
 	}
 	
 	/**

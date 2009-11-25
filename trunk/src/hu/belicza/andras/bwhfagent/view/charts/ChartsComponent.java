@@ -50,6 +50,7 @@ import swingwtx.swing.JLabel;
 import swingwtx.swing.JMenuItem;
 import swingwtx.swing.JPanel;
 import swingwtx.swing.JPopupMenu;
+import swingwtx.swing.JScrollBar;
 import swingwtx.swing.JScrollPane;
 import swingwtx.swing.JSplitPane;
 import swingwtx.swing.JTextArea;
@@ -177,6 +178,8 @@ public class ChartsComponent extends JPanel {
 	/** Show select hotkeys checkbox.                       */
 	private final JCheckBox showOverallEapmCheckBox              = new JCheckBox( "Show overall EAPM", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_OVERALL_EAPM ) ) );
 	
+	/** Scroll bar to scroll the zoomed charts.             */
+	private final JScrollBar            chartScrollBar           = new JScrollBar( JScrollBar.HORIZONTAL );
 	/** Split pane to display the charts component and the players' action list. */
 	private final JSplitPane            splitPane                = new JSplitPane( JSplitPane.VERTICAL_SPLIT, true );
 	/** List of the displayable actions, pairs of action+palyer name.            */
@@ -230,7 +233,10 @@ public class ChartsComponent extends JPanel {
 				repaint();
 			}
 		} );
-		splitPane.setTopComponent( Utils.wrapInBorderLayoutPanel( this ) );
+		final JPanel chartsHolderPanel = new JPanel( new BorderLayout() );
+		chartsHolderPanel.add( this, BorderLayout.CENTER );
+		chartsHolderPanel.add( chartScrollBar, BorderLayout.SOUTH );
+		splitPane.setTopComponent( chartsHolderPanel );
 		
 		final Box actionListBox = Box.createHorizontalBox();
 		actionsListTextArea.setFont( new Font( "Courier New", Font.PLAIN, 8 ) );
@@ -343,6 +349,15 @@ public class ChartsComponent extends JPanel {
 		strategyDisplayLevelComboBox.addChangeListener( repainterChangeListener );
 		overallApmChartDetailLevelComboBox.addChangeListener( repainterChangeListener );
 		showOverallEapmCheckBox.addChangeListener( repainterChangeListener );
+	}
+	
+	/**
+	 * Sets the zoom level.
+	 * @param zoom zoom level to be set.
+	 */
+	public void setZoom( final int zoom ) {
+		chartScrollBar.setVisible( zoom > 1 );
+		chartScrollBar.getParent().validate();
 	}
 	
 	/**
@@ -501,6 +516,10 @@ public class ChartsComponent extends JPanel {
 		splitPane.setDividerLocation( 0.78 );
 	}
 	
+	/**
+	 * Sets the chart type.
+	 * @param chartType chart type to be set
+	 */
 	public void setChartType( final ChartType chartType ) {
 		if ( chartType == null )
 			return;

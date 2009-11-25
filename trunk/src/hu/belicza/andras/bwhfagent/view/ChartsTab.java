@@ -95,13 +95,15 @@ public class ChartsTab extends Tab {
 	/** Combobox to select the chart type.                                   */
 	public final JComboBox chartTypeComboBox                  = new JComboBox( ChartsComponent.ChartType.values() );
 	/** Checkbox to enable/disable putting all players on one chart.         */
-	public final JCheckBox allPlayersOnOneChartCheckBox       = new JCheckBox( "All players on 1 chart", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_PLAYERS_ON_ONE_CHART ) ) );
+	public final JCheckBox allPlayersOnOneChartCheckBox       = new JCheckBox( "All on 1 chart", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_ALL_PLAYERS_ON_ONE_CHART ) ) );
 	/** Checkbox to enable/disable using players' in-game colors for charts. */
-	public final JCheckBox usePlayersColorsCheckBox           = new JCheckBox( "Use players' in-game colors", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLORS ) ) );
+	public final JCheckBox usePlayersColorsCheckBox           = new JCheckBox( "Use in-game colors", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLORS ) ) );
 	/** Checkbox to auto-disable inactive players.                           */
-	public final JCheckBox autoDisableInactivePlayersCheckBox = new JCheckBox( "Auto-disable players < 30 APM", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS ) ) );
+	public final JCheckBox autoDisableInactivePlayersCheckBox = new JCheckBox( "Auto-disable < 30 APM", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS ) ) );
 	/** Checkbox to display actions in seconds.                              */
-	public final JCheckBox displayActionsInSecondsCheckBox    = new JCheckBox( "Display actions in seconds", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DISPLAY_ACTIONS_IN_SECONDS ) ) );
+	public final JCheckBox displayActionsInSecondsCheckBox    = new JCheckBox( "Display in seconds", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DISPLAY_ACTIONS_IN_SECONDS ) ) );
+	/** Combobox to select the chart type.                                   */
+	public final JComboBox zoomComboBox                       = new JComboBox( new Integer[] { 1, 2, 4, 8, 16, 32 } );
 	
 	/** The component visualizing the charts. */
 	private final ChartsComponent chartsComponent = new ChartsComponent( this );
@@ -115,7 +117,9 @@ public class ChartsTab extends Tab {
 		buildGUI();
 		
 		chartTypeComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHART_TYPE ) ) );
+		zoomComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHART_ZOOM ) ) );
 		chartsComponent.setChartType( (ChartType) chartTypeComboBox.getSelectedItem() );
+		chartsComponent.setZoom( (Integer) zoomComboBox.getSelectedItem() );
 	}
 	
 	/**
@@ -275,6 +279,14 @@ public class ChartsTab extends Tab {
 				chartsComponent.loadPlayerActionsIntoList();
 			}
 		} );
+		chartsCommonControlPanel.add( new JLabel( "Zoom: x" ) );
+		zoomComboBox.addChangeListener( new ChangeListener() {
+			public void stateChanged( final ChangeEvent event ) {
+				chartsComponent.setZoom( (Integer) zoomComboBox.getSelectedItem() );
+				chartsComponent.repaint();
+			}
+		} );
+		chartsCommonControlPanel.add( zoomComboBox );
 		contentBox.add( chartsCommonControlPanel );
 		
 		chartsComponent.setCursor( new Cursor( Cursor.HAND_CURSOR ) );
@@ -362,6 +374,7 @@ public class ChartsTab extends Tab {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_USE_PLAYERS_IN_GAME_COLORS   , Boolean.toString( usePlayersColorsCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS, Boolean.toString( autoDisableInactivePlayersCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_DISPLAY_ACTIONS_IN_SECONDS   , Boolean.toString( displayActionsInSecondsCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_CHART_ZOOM                   , Integer.toString( zoomComboBox.getSelectedIndex() ) );
 		
 		chartsComponent.assignUsedProperties();
 	}
