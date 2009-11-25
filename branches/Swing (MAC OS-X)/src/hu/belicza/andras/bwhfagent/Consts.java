@@ -139,6 +139,8 @@ public class Consts {
 	public static final String PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS  = "autoDisableInactivePlayers";
 	/** Display actions in seconds property.     */
 	public static final String PROPERTY_DISPLAY_ACTIONS_IN_SECONDS     = "displayActionsInSeconds";
+	/** Chart zoom property.                     */
+	public static final String PROPERTY_CHART_ZOOM                     = "chartZoom";
 	/** APM chart detail level property.         */
 	public static final String PROPERTY_APM_CHART_DETAIL_LEVEL         = "apmChartDetailLevel";
 	/** Show EAPM property.                      */
@@ -234,6 +236,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_USE_PLAYERS_IN_GAME_COLORS    , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_AUTO_DISABLE_INACTIVE_PLAYERS , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DISPLAY_ACTIONS_IN_SECONDS    , "false" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHART_ZOOM                    , "0" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_APM_CHART_DETAIL_LEVEL        , "4" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SHOW_EAPM                     , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SHOW_SELECT_HOTKEYS           , "false" );
