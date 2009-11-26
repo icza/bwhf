@@ -33,6 +33,8 @@ public class HackDescription {
 	public static final int HACK_TYPE_USE_CHEAT_DROPHACK        = 11;
 	/** Subunit enqueue hack.           */
 	public static final int HACK_TYPE_SUBUNIT_ENQUEUE           = 12;
+	/** Auto unit re-queue hack.        */
+	public static final int HACK_TYPE_AUT0_UNIT_REQUEUE         = 13;
 	
 	/** Human readable names of the different types of hacks. */
 	public static final String[] HACK_TYPE_NAMES = {
@@ -48,7 +50,8 @@ public class HackDescription {
 		"ally-vision drop",
 		"build anywhere ",
 		"use cheat drop",
-		"subunit enqueue "
+		"subunit enqueue ",
+		"auto unit re-queue "
 	};
 	
 	/** Name of the player who was hacking.   */
