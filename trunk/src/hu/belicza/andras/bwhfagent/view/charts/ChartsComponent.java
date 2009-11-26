@@ -57,6 +57,7 @@ import swingwtx.swing.JScrollPane;
 import swingwtx.swing.JSplitPane;
 import swingwtx.swing.JTextArea;
 import swingwtx.swing.JTextField;
+import swingwtx.swing.SwingUtilities;
 import swingwtx.swing.event.ChangeEvent;
 import swingwtx.swing.event.ChangeListener;
 
@@ -370,6 +371,14 @@ public class ChartsComponent extends JPanel {
 	public void setZoom( final int zoom ) {
 		chartScrollBar.setVisible( zoom > 1 );
 		chartScrollBar.getParent().validate();
+		
+		// Scroll to the marker in the new zoom view.
+		// Since we're in a swing thread right now, we do this "later".
+		SwingUtilities.invokeLater( new Runnable() {
+			public void run() {
+				syncMarkerFromActionListToChart();
+			}
+		} );
 	}
 	
 	/**
@@ -439,6 +448,8 @@ public class ChartsComponent extends JPanel {
 	 * Synchronizes the marker from the chart to the action list text area.
 	 */
 	private void syncMarkerFromActionListToChart() {
+		if ( chartsParams == null )
+			return;
 		final String actionListText = actionsListTextArea.getText();
 		if ( actionsListTextArea.getText().length() == 0 )
 			return;
@@ -474,6 +485,10 @@ public class ChartsComponent extends JPanel {
 			maxTime = replay.replayHeader.gameFrames;
 		}
 		markerPosition = chartsParams.getXForTime( time, maxTime );
+		
+		// If marker is not visible, scroll to it
+		if ( markerPosition < chartsParams.dx || markerPosition >= chartsParams.dx + chartsParams.componentWidth )
+			chartScrollBar.setValue( ( markerPosition - chartsParams.componentWidth / 2 ) * ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ) / ( chartsParams.componentWidth * chartsParams.zoom - chartsParams.componentWidth ) );
 		
 		repaint();
 	}
@@ -866,7 +881,8 @@ public class ChartsComponent extends JPanel {
 			final int dx   = ( getWidth() * zoom - getWidth() ) * chartScrollBar.getValue() / ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() );
 			chartsParams   = new ChartsParams( chartsTab, replay.replayHeader.gameFrames, playerIndexToShowList.size(), this, dx );
 			
-			graphics.translate( -dx, 0 );
+			if ( dx != 0 )
+				graphics.translate( -dx, 0 );
 			
 			switch ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() ) {
 				case APM :
