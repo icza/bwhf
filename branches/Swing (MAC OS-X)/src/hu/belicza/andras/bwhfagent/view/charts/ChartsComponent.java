@@ -828,6 +828,9 @@ public class ChartsComponent extends JPanel {
 		actionsListTextArea.setText( actionsListTextBuilder.toString() );
 		actionsListTextArea.setCaretPosition( 0 );
 		actionsListTextBuilder.setLength( 0 ); // To indicate that this does not yet contain the lowercased version for searching
+		
+		if ( markerPosition >= 0 )
+			syncMarkerFromChartToActionList( markerPosition );
 	}
 	
 	/**
