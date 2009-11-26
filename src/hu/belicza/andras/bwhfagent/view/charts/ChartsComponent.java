@@ -884,8 +884,7 @@ public class ChartsComponent extends JPanel {
 			final int dx   = ( getWidth() * zoom - getWidth() ) * chartScrollBar.getValue() / ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() );
 			chartsParams   = new ChartsParams( chartsTab, replay.replayHeader.gameFrames, playerIndexToShowList.size(), this, dx );
 			
-			if ( dx != 0 )
-				graphics.translate( -dx, 0 );
+			graphics.translate( -dx, 0 );
 			
 			switch ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() ) {
 				case APM :
