@@ -136,6 +136,8 @@ public class ReplayScanner {
 		// Actions ahead local variables for multicommand unit control detection
 		Action actionAhead1, actionAhead2, actionAhead3;
 		
+		HackDescription lastAutoUnitRequeueOccurance = null;
+		
 		for ( int actionIndex = 0; actionIndex < actionsCount; actionIndex++ ) {
 			final Action action = playerActions[ actionIndex ];
 			
@@ -272,6 +274,30 @@ public class ReplayScanner {
 				lastIteration = action.iteration;
 				actionsCountForGeneralMulticommandHack = 0;
 			}
+			
+			// Auto unit re-queue hack:
+			// All at iteration I1 (and just these at I1): Select X, Train, Select Y
+			// All at iteration I2 (and just these at I2): Select Z, Train, Select Y
+			// I1 != I2
+			if ( actionIndex + 6 < actionsCount && lastAction != null && lastAction.iteration != action.iteration && action.iteration != playerActions[ actionIndex + 3 ].iteration && playerActions[ actionIndex + 3 ].iteration != playerActions[ actionIndex + 6 ].iteration )
+				if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT && playerActions[ actionIndex + 2 ].actionNameIndex == Action.ACTION_NAME_INDEX_SELECT
+						&& playerActions[ actionIndex + 3 ].actionNameIndex == Action.ACTION_NAME_INDEX_SELECT && playerActions[ actionIndex + 5 ].actionNameIndex == Action.ACTION_NAME_INDEX_SELECT
+						&& action.iteration == playerActions[ actionIndex + 1 ].iteration && action.iteration == playerActions[ actionIndex + 2 ].iteration
+						&& playerActions[ actionIndex + 3 ].iteration == playerActions[ actionIndex + 4 ].iteration && playerActions[ actionIndex + 3 ].iteration == playerActions[ actionIndex + 5 ].iteration 
+						&& playerActions[ actionIndex + 1 ].actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN && playerActions[ actionIndex + 4 ].actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN
+						&& playerActions[ actionIndex + 2 ].parameters != null && playerActions[ actionIndex + 5 ].parameters != null
+						&& playerActions[ actionIndex + 2 ].parameters.equals( playerActions[ actionIndex + 5 ].parameters )
+						&& action.parameters != null && playerActions[ actionIndex + 3 ].parameters != null ) {
+					if ( lastAutoUnitRequeueOccurance == null ) {
+						// It can happen 1 out of 5k games, so just mark it first, but don't alert						
+						lastAutoUnitRequeueOccurance = new HackDescription( player.playerName, HackDescription.HACK_TYPE_AUT0_UNIT_REQUEUE, action.iteration );
+					}
+					else {
+						// If this is not the first, it can't be coincidence!
+						hackDescriptionList.add( lastAutoUnitRequeueOccurance );
+						hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_AUT0_UNIT_REQUEUE, action.iteration ) );
+					}
+				}
 			
 			
 			// Proceeding to the next action
