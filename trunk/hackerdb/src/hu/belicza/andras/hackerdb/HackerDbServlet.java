@@ -193,7 +193,7 @@ public class HackerDbServlet extends BaseServlet {
 					throw new BadRequestException();
 				}
 				
-				String agentVersion = request.getParameter( REQUEST_PARAMETER_NAME_AGENT_VERSION );
+				final String agentVersion = request.getParameter( REQUEST_PARAMETER_NAME_AGENT_VERSION );
 				if ( agentVersion == null )
 					throw new BadRequestException();
 				
@@ -212,7 +212,11 @@ public class HackerDbServlet extends BaseServlet {
 				
 			} else if ( operation.equals( OPERATION_DOWNLOAD ) ) {
 				
-				serveDownload( request, response );
+				// Agent version and key parameters are optional (were added in version 2.90)
+				final String agentVersion     = request.getParameter( REQUEST_PARAMETER_NAME_AGENT_VERSION );
+				final String authorizationKey = request.getParameter( REQUEST_PARAMETER_NAME_KEY           );
+				
+				serveDownload( agentVersion, authorizationKey, request, response );
 				
 			} else if ( operation.equals( OPERATION_HACKER_DETAILS ) ) {
 				
@@ -729,10 +733,12 @@ public class HackerDbServlet extends BaseServlet {
 	
 	/**
 	 * Serves the download of the hacker list.
-	 * @param request  the http request
-	 * @param response the http response
+	 * @param agentVersion     agent version (optional)
+	 * @param authorizationKey authorization key (optional)
+	 * @param request          the http request
+	 * @param response         the http response
 	 */
-	private void serveDownload( final HttpServletRequest request, final HttpServletResponse response ) {
+	private void serveDownload( final String agentVersion, final String authorizationKey, final HttpServletRequest request, final HttpServletResponse response ) {
 		setNoCache( response );
 		response.setContentType( "text/plain" );
 		
@@ -745,6 +751,10 @@ public class HackerDbServlet extends BaseServlet {
 		final long  startTime    = System.nanoTime();
 		try {
 			connection = dataSource.getConnection();
+			
+			// We might compress the list in the future if agent version supports it...
+			
+			// We might deny the download based on the authorization key...
 			
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery( "SELECT DISTINCT gateway, name from hacker JOIN report on report.hacker=hacker.id JOIN key on report.key=key.id WHERE hacker.guarded=FALSE AND key.revocated=FALSE AND report.revocated=FALSE" );

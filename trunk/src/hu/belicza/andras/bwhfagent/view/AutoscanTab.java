@@ -223,6 +223,14 @@ public class AutoscanTab extends LoggedTab {
 	}
 	
 	/**
+	 * Returns the authorization key.
+	 * @return the authorization key
+	 */
+	public String getAuthorizationKey() {
+		return authorizationKey;
+	}
+	
+	/**
 	 * Starts the autoscanner.
 	 */
 	private void startAutoscanner() {
