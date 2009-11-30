@@ -121,8 +121,6 @@ public class ChartsTab extends Tab {
 		chartTypeComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHART_TYPE ) ) );
 		zoomComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHART_ZOOM ) ) );
 		chartsComponent.setChartType( (ChartType) chartTypeComboBox.getSelectedItem() );
-		
-		zoomChangeListener.stateChanged( null );
 	}
 	
 	/**
@@ -302,6 +300,7 @@ public class ChartsTab extends Tab {
 	@Override
 	public void initializationEnded() {
 		super.initializationEnded();
+		zoomChangeListener.stateChanged( null );
 		chartsComponent.initializationEnded();
 	}
 	
