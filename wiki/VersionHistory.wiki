@@ -7,7 +7,7 @@
 ----
 ===2.90 2009-11-30===
  * *A new popup menu when right clicking on the player names on the Charts tab.* In this menu you can open the direct profile page of the player on several web sites: BWHF Player profile, the iCCup Player profile, !StarCraft Dream Player profile, Vile Gaming Player profile, Team Liquid Player profile, !GosuGamers Player profile and the BWHF hacker reports page in case of a hacker.
- * *A new setting on the charts tab: Zoom.* With this you can zoom any chart time on the time axis. Green background draws your attention if zoom is activated.
+ * *A new setting on the charts tab: Zoom.* With this you can zoom any chart type on the time axis. Green background draws your attention if zoom is activated.
  * If you open a replay on the charts tab, *the names of reported hackers and custom listed players will be emphasized by different backgrounds*. The names of players who have been reported as hackers will have red background (regardless if the player hacked in the replay), and those who are on your custom list will have yellow background. Tooltip text explains the coloring.
  * Random tips at the bottom of the window. Clicking on the tip will show another random tip.
  * Action list is resynced to the marker if its content changes (this applies to changing the action filter too).
