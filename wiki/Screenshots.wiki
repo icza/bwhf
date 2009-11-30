@@ -4,8 +4,8 @@
 
 <wiki:toc max_depth="3" />
 
-===EAPM chart:===
-http://lh4.ggpht.com/_jDMClHrENz8/St7cIcFEAqI/AAAAAAAAO-E/s5Bn0Eln_Ls/s800/bwhfagent.png.jpg
+===EAPM chart and player context menu:===
+http://lh4.ggpht.com/_jDMClHrENz8/SxNzVHNMAqI/AAAAAAAASEE/c62x-h0zICg/s800/bwhf_agent_2.90.png.jpg
 
 ===Player matcher:===
 http://lh5.ggpht.com/_jDMClHrENz8/SpThi731p4I/AAAAAAAAObM/tv9Y_Cgadb0/s800/player_matcher.png.jpg
