@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -401,7 +402,14 @@ public class PlayerCheckerTab extends LoggedTab {
 						throw new Exception();
 					}
 					
-					input = new BufferedReader( new InputStreamReader( new URL( Consts.BWHF_HACKER_DATA_BASE_SERVER_URL + "?" + ServerApiConsts.REQUEST_PARAMETER_NAME_OPERATION + "=" + ServerApiConsts.OPERATION_DOWNLOAD ).openStream() ) );
+					String authorizationKey = MainFrame.getInstance().autoscanTab.getAuthorizationKey();
+					if ( authorizationKey != null && authorizationKey.length() == 0 )
+						authorizationKey = null;
+					final String downloadUrlString = Consts.BWHF_HACKER_DATA_BASE_SERVER_URL + "?" + ServerApiConsts.REQUEST_PARAMETER_NAME_OPERATION + "=" + ServerApiConsts.OPERATION_DOWNLOAD
+						+ "&" + ServerApiConsts.REQUEST_PARAMETER_NAME_AGENT_VERSION + "=" + URLEncoder.encode( MainFrame.getInstance().applicationVersion, "UTF-8" )
+						+ ( authorizationKey == null ? "" : "&" + ServerApiConsts.REQUEST_PARAMETER_NAME_KEY + "=" + URLEncoder.encode( authorizationKey, "UTF-8" ) );
+					
+					input = new BufferedReader( new InputStreamReader( new URL( downloadUrlString ).openStream() ) );
 					final File tempCacheFile = new File( Consts.HACKER_LIST_DIRECTORY_NAME, HACKER_LIST_CACHE_FILE_NAME + ".dl" );
 					output = new PrintWriter( tempCacheFile );
 					
