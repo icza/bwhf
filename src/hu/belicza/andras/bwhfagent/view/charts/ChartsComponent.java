@@ -916,7 +916,7 @@ public class ChartsComponent extends JPanel {
 	 * @param overall      tells if we have to paint momentary or overall APM charts
 	 */
 	private void paintApmCharts( final Graphics graphics, final boolean overall ) {
-		final int chartGranularity = (Integer) ( overall? overallApmChartDetailLevelComboBox : apmChartDetailLevelComboBox ).getSelectedItem();
+		final int chartGranularity = chartsParams.zoom * (Integer) ( overall? overallApmChartDetailLevelComboBox : apmChartDetailLevelComboBox ).getSelectedItem();
 		if ( getWidth() < chartGranularity )
 			return;
 		

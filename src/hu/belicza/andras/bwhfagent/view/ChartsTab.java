@@ -114,7 +114,6 @@ public class ChartsTab extends Tab {
 		chartTypeComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHART_TYPE ) ) );
 		zoomComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHART_ZOOM ) ) );
 		chartsComponent.setChartType( (ChartType) chartTypeComboBox.getSelectedItem() );
-		chartsComponent.setZoom( (Integer) zoomComboBox.getSelectedItem() );
 	}
 	
 	/**
@@ -261,10 +260,14 @@ public class ChartsTab extends Tab {
 				chartsComponent.loadPlayerActionsIntoList();
 			}
 		} );
-		chartsCommonControlPanel.add( new JLabel( "Zoom:" ) );
+		final JLabel zoomLabel = new JLabel( "Zoom:" );
+		zoomLabel.setOpaque( true ); // Needed for the background to take effect
+		chartsCommonControlPanel.add( zoomLabel );
 		zoomComboBox.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
-				chartsComponent.setZoom( (Integer) zoomComboBox.getSelectedItem() );
+				final int zoom = (Integer) zoomComboBox.getSelectedItem();
+				zoomLabel.setBackground( zoom == 1 ? zoomLabel.getParent().getBackground() : Color.GREEN );
+				chartsComponent.setZoom( zoom );
 				chartsComponent.repaint();
 			}
 		} );
