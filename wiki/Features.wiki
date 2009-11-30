@@ -20,6 +20,8 @@ Players in the game lobby can be checked whether they have been previously repor
 ===Charts===
 Displays information about a replay and draws various charts of replays like APM (with or without EAPM), Hotkeys, Build orders, Strategy, Overall APM (with or without Overall EAPM). Lists the actions of players, you can search, filter and export the actions.
 
+Right click on the player names gives you direct access to player profile pages of many Starcraft sites.
+
 Check out the screenshots for example charts: [Screenshots]
 
 You can read more about APM/EAPM here: EapmRules
