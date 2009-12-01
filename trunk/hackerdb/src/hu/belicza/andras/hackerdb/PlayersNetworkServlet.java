@@ -1030,48 +1030,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 				if ( akaIdList != null )
 					resultSet2  = statement2.executeQuery( "SELECT gateway, COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ") GROUP BY gateway ORDER BY gateway" );
 				
-				final int GATEWAY_CHART_WIDTH  = 80;
-				final int GATEWAY_CHART_HEIGHT = 50;
-				final String GATEWAY_CHART_URL = "http://chart.apis.google.com/chart?cht=p3&amp;chf=bg,s,ffffff00&amp;chs=80x40&amp;chco=";
 				outputWriter.print( "<tr><th align=left>Gateway distribution:<td>" );
-				StringBuilder gatewayChartUrlBuilder     = new StringBuilder( GATEWAY_CHART_URL );
-				StringBuilder gatewayChartDataBuilder    = new StringBuilder( "&amp;chd=t:" );
-				StringBuilder gatewayChartTooltipBuilder = new StringBuilder();
-				while ( resultSet.next() ) {
-					if ( resultSet.getObject( 1 ) != null ) { // Games with no gateways are also counted
-						gatewayChartUrlBuilder .append( GATEWAY_COLORS[ resultSet.getInt( 1 ) ] ).append( ',' );
-						gatewayChartDataBuilder.append( resultSet.getInt( 2 ) ).append( ',' );
-					}
-					gatewayChartTooltipBuilder.append( resultSet.getObject( 1 ) == null ? "Unknown" : GATEWAYS[ resultSet.getInt( 1 ) ] ).append( ": " ).append( resultSet.getInt( 2 ) ).append( ", " );
-				}
-				if ( gatewayChartUrlBuilder.length() > GATEWAY_CHART_URL.length() ) { // If there were data...
-					gatewayChartUrlBuilder    .setLength( gatewayChartUrlBuilder    .length() - 1 ); // Cut the last comma
-					gatewayChartDataBuilder   .setLength( gatewayChartDataBuilder   .length() - 1 ); // Cut the last comma
-					gatewayChartTooltipBuilder.setLength( gatewayChartTooltipBuilder.length() - 2 ); // Cut the last comma
-					outputWriter.print( "<img src='" + gatewayChartUrlBuilder + gatewayChartDataBuilder + "' width=" + GATEWAY_CHART_WIDTH + " height=" + GATEWAY_CHART_HEIGHT + " title='" + gatewayChartTooltipBuilder + "'>" );
-				}
-				else
-					outputWriter.print( UNKOWN_HTML_STRING );
+				outputWriter.print( generateGatewayDistributionImageHtml( resultSet ) );
 				if ( akaIdList != null ) {
 					outputWriter.print( "<td>" );
-					gatewayChartUrlBuilder     = new StringBuilder( GATEWAY_CHART_URL );
-					gatewayChartDataBuilder    = new StringBuilder( "&amp;chd=t:" );
-					gatewayChartTooltipBuilder = new StringBuilder();
-					while ( resultSet2.next() ) {
-						if ( resultSet2.getObject( 1 ) != null ) { // Games with no gateways are also counted
-							gatewayChartUrlBuilder .append( GATEWAY_COLORS[ resultSet2.getInt( 1 ) ] ).append( ',' );
-							gatewayChartDataBuilder.append( resultSet2.getInt( 2 ) ).append( ',' );
-						}
-						gatewayChartTooltipBuilder.append( resultSet2.getObject( 1 ) == null ? "Unknown" : GATEWAYS[ resultSet2.getInt( 1 ) ] ).append( ": " ).append( resultSet2.getInt( 2 ) ).append( ", " );
-					}
-					if ( gatewayChartUrlBuilder.length() > GATEWAY_CHART_URL.length() ) { // If there were data...
-						gatewayChartUrlBuilder    .setLength( gatewayChartUrlBuilder    .length() - 1 ); // Cut the last comma
-						gatewayChartDataBuilder   .setLength( gatewayChartDataBuilder   .length() - 1 ); // Cut the last comma
-						gatewayChartTooltipBuilder.setLength( gatewayChartTooltipBuilder.length() - 2 ); // Cut the last comma
-						outputWriter.print( "<img src='" + gatewayChartUrlBuilder + gatewayChartDataBuilder + "' width=" + GATEWAY_CHART_WIDTH + " height=" + GATEWAY_CHART_HEIGHT + " title='" + gatewayChartTooltipBuilder + "'>" );
-					}
-					else
-						outputWriter.print( UNKOWN_HTML_STRING );
+					outputWriter.print( generateGatewayDistributionImageHtml( resultSet2 ) );
 				}
 				
 				if ( hasAka )
@@ -1384,6 +1347,63 @@ public class PlayersNetworkServlet extends BaseServlet {
 	 */
 	private static int calculateRandomOMeter( final float zergGames, final float terranGames, final float protossGames, final float gamesCount ) {
 		return 100 - (int) ( ( Math.abs( zergGames / gamesCount - 1f/3f ) + Math.abs( terranGames / gamesCount - 1f/3f ) + Math.abs( protossGames / gamesCount - 1f/3f ) ) * 75f );
+	}
+	
+	/**
+	 * Generates and returns a gateway distribution chart image html.
+	 * @param resultSet result set containing the numbers for the gateways
+	 * @return a gateway distribution chart image html
+	 * @throws SQLException thrown if using the resultSet throws SQLException
+	 */
+	private static String generateGatewayDistributionImageHtml( final ResultSet resultSet ) throws SQLException {
+		final List< int[] > dataList = new ArrayList< int[] >( GATEWAYS.length + 1 ); // +1 optional for missing gateway
+		int allKnownGames = 0;
+		
+		while ( resultSet.next() ) {
+			final boolean unknownGateway = resultSet.getObject( 1 ) == null;
+			final int     gamesCount     = resultSet.getInt( 2 );
+			dataList.add( new int[] { unknownGateway ? -1 : resultSet.getInt( 1 ), gamesCount } );
+			if ( !unknownGateway )
+				allKnownGames += gamesCount;
+		}
+		
+		final int gatewaysCount = dataList.size();
+		if ( allKnownGames > 0 ) { // If there were data...
+			final int GATEWAY_CHART_WIDTH  = 80;
+			final int GATEWAY_CHART_HEIGHT = 50;
+			
+			StringBuilder resultBuilder = new StringBuilder( "<img src='http://chart.apis.google.com/chart?cht=p3&amp;chf=bg,s,ffffff00&amp;chs=" );
+			resultBuilder.append( GATEWAY_CHART_WIDTH ).append( 'x' ).append( GATEWAY_CHART_HEIGHT ).append( "&amp;chco=" );
+			for ( int i = 0; i < gatewaysCount; i++ ) {
+				if ( dataList.get( i )[ 0 ] < 0 ) // Missing gateway
+					continue;
+				if ( i > 0 )
+					resultBuilder.append( ',' );
+				resultBuilder.append( GATEWAY_COLORS[ dataList.get( i )[ 0 ] ] );
+			}
+			resultBuilder.append( "&amp;chd=t:" );
+			final Formatter dataFormatter = new Formatter( resultBuilder );
+			for ( int i = 0; i < gatewaysCount; i++ ) {
+				if ( dataList.get( i )[ 0 ] < 0 ) // Missing gateway
+					continue;
+				if ( i > 0 )
+					resultBuilder.append( ',' );
+				dataFormatter.format( "%.2f", dataList.get( i )[ 1 ] * 100.0f / allKnownGames );
+			}
+			
+			resultBuilder.append( "' width=" ).append( GATEWAY_CHART_WIDTH ).append( " height=" ).append( GATEWAY_CHART_HEIGHT ).append( " title='" );
+			for ( int i = 0; i < gatewaysCount; i++ ) {
+				if ( i > 0 )
+					resultBuilder.append( ", " );
+				final int[] data = dataList.get( i );
+				resultBuilder.append( data[ 0 ] < 0 ? "Unknown" : GATEWAYS[ data[ 0 ] ] ).append( ": " ).append( data[ 1 ] );
+			}
+			resultBuilder.append( "'>" );
+			
+			return resultBuilder.toString();
+		}
+		else
+			return UNKOWN_HTML_STRING;
 	}
 	
 	/**
