@@ -17,7 +17,7 @@ import java.util.List;
 public class ReplayScanner {
 	
 	/** Version of the scan engine. */
-	public static final String ENGINE_VERSION = "1.45";
+	public static final String ENGINE_VERSION = "1.46";
 	
 	/**
 	 * Scans the replay actions for hacks.
@@ -137,6 +137,7 @@ public class ReplayScanner {
 		Action actionAhead1, actionAhead2, actionAhead3;
 		
 		HackDescription lastAutoUnitRequeueOccurance = null;
+		int             autoUnitRequeueCount         = 0;
 		
 		for ( int actionIndex = 0; actionIndex < actionsCount; actionIndex++ ) {
 			final Action action = playerActions[ actionIndex ];
@@ -288,13 +289,14 @@ public class ReplayScanner {
 						&& playerActions[ actionIndex + 2 ].parameters != null && playerActions[ actionIndex + 5 ].parameters != null
 						&& playerActions[ actionIndex + 2 ].parameters.equals( playerActions[ actionIndex + 5 ].parameters )
 						&& action.parameters != null && playerActions[ actionIndex + 3 ].parameters != null ) {
-					if ( lastAutoUnitRequeueOccurance == null ) {
+					if ( ++autoUnitRequeueCount == 1 ) {
 						// It can happen 1 out of 5k games, so just mark it first, but don't alert						
 						lastAutoUnitRequeueOccurance = new HackDescription( player.playerName, HackDescription.HACK_TYPE_AUT0_UNIT_REQUEUE, action.iteration );
 					}
 					else {
 						// If this is not the first, it can't be coincidence!
-						hackDescriptionList.add( lastAutoUnitRequeueOccurance );
+						if ( autoUnitRequeueCount == 2 )
+							hackDescriptionList.add( lastAutoUnitRequeueOccurance );
 						hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_AUT0_UNIT_REQUEUE, action.iteration ) );
 					}
 				}
