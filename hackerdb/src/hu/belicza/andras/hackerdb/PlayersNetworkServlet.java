@@ -1014,12 +1014,65 @@ public class PlayersNetworkServlet extends BaseServlet {
 					
 					final int RANDOM_O_METER_WIDTH  = 80;
 					final int RANDOM_O_METER_HEIGHT = 40;
-					final String RANDOM_O_METER_URL = "http://chart.apis.google.com/chart?chs=" + RANDOM_O_METER_WIDTH + "x" + RANDOM_O_METER_HEIGHT + "&cht=gom&amp;chf=bg,s,ffffff00&amp;chd=t:";
+					final String RANDOM_O_METER_URL = "http://chart.apis.google.com/chart?chs=" + RANDOM_O_METER_WIDTH + "x" + RANDOM_O_METER_HEIGHT + "&amp;cht=gom&amp;chf=bg,s,ffffff00&amp;chd=t:";
 					outputWriter.print( "<tr><th align=left>Random-o-meter&trade;: <span style='font-size:80%'>(<a href='http://code.google.com/p/bwhf/wiki/PlayersNetwork#Player_details'>?</a>)<td><img src='" + RANDOM_O_METER_URL + calculateRandomOMeter( resultSet.getInt( 5 ), resultSet.getInt( 6 ), resultSet.getInt( 7 ), gamesCount ) + "' width=" + RANDOM_O_METER_WIDTH + " height=" + RANDOM_O_METER_HEIGHT + ">" );
 					if ( hasAka ) outputWriter.print( "<td><img src='" + RANDOM_O_METER_URL + calculateRandomOMeter( resultSet2.getInt( 5 ), resultSet2.getInt( 6 ), resultSet2.getInt( 7 ), gamesCount2 ) + "' width=" + RANDOM_O_METER_WIDTH + " height=" + RANDOM_O_METER_HEIGHT + ">" ); 
 				}
 				else
 					outputWriter.println( "<p><b><i><font color='red'>The referred player could not be found!</font></i></b></p>" );
+				
+				if ( hasAka )
+					resultSet2.close();
+				resultSet.close();
+				
+				// Gateway distribution section
+				resultSet  = statement.executeQuery( "SELECT gateway, COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player=" + entityId + " GROUP BY gateway ORDER BY gateway" );
+				if ( akaIdList != null )
+					resultSet2  = statement2.executeQuery( "SELECT gateway, COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ") GROUP BY gateway ORDER BY gateway" );
+				
+				final int GATEWAY_CHART_WIDTH  = 80;
+				final int GATEWAY_CHART_HEIGHT = 50;
+				final String GATEWAY_CHART_URL = "http://chart.apis.google.com/chart?cht=p3&amp;chf=bg,s,ffffff00&amp;chs=80x40&amp;chco=";
+				outputWriter.print( "<tr><th align=left>Gateway distribution:<td>" );
+				StringBuilder gatewayChartUrlBuilder     = new StringBuilder( GATEWAY_CHART_URL );
+				StringBuilder gatewayChartDataBuilder    = new StringBuilder( "&amp;chd=t:" );
+				StringBuilder gatewayChartTooltipBuilder = new StringBuilder();
+				while ( resultSet.next() ) {
+					if ( resultSet.getObject( 1 ) != null ) { // Games with no gateways are also counted
+						gatewayChartUrlBuilder .append( GATEWAY_COLORS[ resultSet.getInt( 1 ) ] ).append( ',' );
+						gatewayChartDataBuilder.append( resultSet.getInt( 2 ) ).append( ',' );
+					}
+					gatewayChartTooltipBuilder.append( resultSet.getObject( 1 ) == null ? "Unknown" : GATEWAYS[ resultSet.getInt( 1 ) ] ).append( ": " ).append( resultSet.getInt( 2 ) ).append( ", " );
+				}
+				if ( gatewayChartUrlBuilder.length() > GATEWAY_CHART_URL.length() ) { // If there were data...
+					gatewayChartUrlBuilder    .setLength( gatewayChartUrlBuilder    .length() - 1 ); // Cut the last comma
+					gatewayChartDataBuilder   .setLength( gatewayChartDataBuilder   .length() - 1 ); // Cut the last comma
+					gatewayChartTooltipBuilder.setLength( gatewayChartTooltipBuilder.length() - 2 ); // Cut the last comma
+					outputWriter.print( "<img src='" + gatewayChartUrlBuilder + gatewayChartDataBuilder + "' width=" + GATEWAY_CHART_WIDTH + " height=" + GATEWAY_CHART_HEIGHT + " title='" + gatewayChartTooltipBuilder + "'>" );
+				}
+				else
+					outputWriter.print( UNKOWN_HTML_STRING );
+				if ( akaIdList != null ) {
+					outputWriter.print( "<td>" );
+					gatewayChartUrlBuilder     = new StringBuilder( GATEWAY_CHART_URL );
+					gatewayChartDataBuilder    = new StringBuilder( "&amp;chd=t:" );
+					gatewayChartTooltipBuilder = new StringBuilder();
+					while ( resultSet2.next() ) {
+						if ( resultSet2.getObject( 1 ) != null ) { // Games with no gateways are also counted
+							gatewayChartUrlBuilder .append( GATEWAY_COLORS[ resultSet2.getInt( 1 ) ] ).append( ',' );
+							gatewayChartDataBuilder.append( resultSet2.getInt( 2 ) ).append( ',' );
+						}
+						gatewayChartTooltipBuilder.append( resultSet2.getObject( 1 ) == null ? "Unknown" : GATEWAYS[ resultSet2.getInt( 1 ) ] ).append( ": " ).append( resultSet2.getInt( 2 ) ).append( ", " );
+					}
+					if ( gatewayChartUrlBuilder.length() > GATEWAY_CHART_URL.length() ) { // If there were data...
+						gatewayChartUrlBuilder    .setLength( gatewayChartUrlBuilder    .length() - 1 ); // Cut the last comma
+						gatewayChartDataBuilder   .setLength( gatewayChartDataBuilder   .length() - 1 ); // Cut the last comma
+						gatewayChartTooltipBuilder.setLength( gatewayChartTooltipBuilder.length() - 2 ); // Cut the last comma
+						outputWriter.print( "<img src='" + gatewayChartUrlBuilder + gatewayChartDataBuilder + "' width=" + GATEWAY_CHART_WIDTH + " height=" + GATEWAY_CHART_HEIGHT + " title='" + gatewayChartTooltipBuilder + "'>" );
+					}
+					else
+						outputWriter.print( UNKOWN_HTML_STRING );
+				}
 				
 				if ( hasAka )
 					resultSet2.close();
