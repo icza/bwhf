@@ -59,9 +59,9 @@ public class MainFrame extends JFrame {
 		"Clicking on a column header on the Replay search tab and on the Player matcher tab will sort the table by that column. Clicking again will reverse the order.",
 		"If your network becomes unavailable, you can use the Server monitor tab to get alerted when it comes back.",
 		"On the Server monitor tab you can add any servers you're interested in: private bnet servers, your favourite web pages etc (even FTP servers or streams).",
-		"On the charts tab you can use the word \"OR\" between filter words to display all actions you want to see at once.",
+		"On the Charts tab you can use the word \"OR\" between filter words to display all actions you want to see at once.",
 		"On the replay search tab you can create a list of replays from multiple searches by checking \"Append results to table\".",
-		"On the charts tab you can easily export the actions: just select the actions you want to export, copy it (CTRL+C) and paste it to any editor (CTRL+V).",
+		"On the Charts tab you can easily export the actions: just select the actions you want to export, copy it (CTRL+C) and paste it to any editor (CTRL+V).",
 		"Replay lists saved on the Replay search tab can be opened with Excel for example for further processing.",
 		"If you download a new version of BWHF Agent, you can simply copy the \"settings.properties\" file to keep all your settings.",
 		"By default manual scan renames replays by adding \"hack\" to their names, so you can easily find them in your file browser.",
@@ -78,7 +78,9 @@ public class MainFrame extends JFrame {
 		"You can narrow a search result by refining the search terms and pressing the \"Search in previous results\" button.",
 		"If you understand regular expressions, it can be a great asset to quickly find the exact replays you're looking for.",
 		"Add all your replays to the Players' Network, and you can see summarized statistics, connections and improvements over time for all players.",
-		"If you want to select and export all actions of a replay: right click on the action list and choose \"Select all\" and copy."
+		"If you want to select and export all actions of a replay: right click on the action list and choose \"Select all\" and copy.",
+		"By default the Agent saves all your replays without any effort. Hacker replays are also saved to a separate folder.",
+		"On the Charts tab use the search box to quickly jump to actions you're interested in. Use the filter box to show actions only that you're interested in."
 	};
 	
 	/** Stores the reference of the main frame. */
