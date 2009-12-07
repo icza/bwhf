@@ -50,3 +50,6 @@ A: Yes. On the hacker database page there is a filter: "reported with key". Ente
 
 ===Q: My name is on the hacker list but I don't hack. What can I do?===
 A: If you never hack but you're on the hacker list, contact me and try to convience me. My gmail user name is *iczaaa*. Drop me an email.
+
+===Q: Does BWHF Agent detect spoofs?===
+A: No. BWHF Agent operates on replays, so there is no way to detect spoofs based on replays.
