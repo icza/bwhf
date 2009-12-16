@@ -6,6 +6,7 @@
 
 ----
 ===Changes and new features in the upcoming release:===
+ * Fixed a bug on the Charts tab (when all actions in a replay happened at the first iteration and there was hack in the replay).
  * Added new tips.
 
 ----
