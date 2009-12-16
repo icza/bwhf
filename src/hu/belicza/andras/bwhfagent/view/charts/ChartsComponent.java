@@ -1068,6 +1068,8 @@ public class ChartsComponent extends JPanel {
 				for ( final HackDescription hackDescription : hackDescriptionList )
 					if ( hackDescription.playerName.equalsIgnoreCase( playerActions.playerName ) ) {
 						pointIndex = hackDescription.iteration * chartPoints / chartsParams.frames;
+						if ( pointIndex == chartPoints )
+							pointIndex = chartPoints - 1;
 						final float position = (float) ( hackDescription.iteration - pointIndex * chartsParams.frames / chartPoints ) * chartPoints / chartsParams.frames;
 						graphics.drawString( "!",
 								interpolate( xPoints[ pointIndex ], xPoints[ pointIndex + 1 ], position ) - 4,
