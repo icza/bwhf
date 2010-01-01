@@ -870,7 +870,7 @@ public class AdminServlet extends BaseServlet {
 			
 			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.MANAGE_AKAS.name() + "' method=POST><table border=1>" );
 			
-			outputWriter.println( "<tr><td rowspan=2>AKA group/person name:<input type=text name='" + REQUEST_PARAM_AKA_GROUP_NAME + "'>" );
+			outputWriter.println( "<tr><td rowspan=2>AKA group/person name:<input type=text name='" + REQUEST_PARAM_AKA_GROUP_NAME + "'" + ( akaGroupName == null ? "" : " value='" + encodeHtmlString( akaGroupName ) + "'" ) + ">" );
 			outputWriter.println( "<td><input type=submit name='" + REQUEST_PARAM_AKA_ACTION + "' value='" + ACTION_NEW_AKA_GROUP + "'>" );
 			
 			outputWriter.println( "<tr><td>Player name:<input type=text name='" + REQUEST_PARAM_PLAYER_NAME + "'><input type=submit name='" + REQUEST_PARAM_AKA_ACTION + "' value='" + ACTION_NEW_AKA + "'>" );

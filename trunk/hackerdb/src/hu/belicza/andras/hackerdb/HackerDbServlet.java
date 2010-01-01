@@ -574,7 +574,7 @@ public class HackerDbServlet extends BaseServlet {
 			final List< Object[] > monthlyReportsList = new ArrayList< Object[] >();
 			statement = connection.createStatement();
 			resultSet = statement.executeQuery( "SELECT date_trunc('month',report.version), COUNT(*) FROM report JOIN key on report.key=key.id JOIN hacker on report.hacker=hacker.id WHERE key.revocated=FALSE AND report.revocated=FALSE AND hacker.guarded=FALSE GROUP BY date_trunc('month',report.version) ORDER BY date_trunc('month',report.version)" );
-			final DateFormat monthDateFormat = new SimpleDateFormat( "yyyy-MM" );
+			final DateFormat monthDateFormat = new SimpleDateFormat( "yy-MM" );
 			int totalReportsCount = 0;
 			int maxMonthlyReportsCount = 0;
 			while ( resultSet.next() ) {
@@ -641,7 +641,7 @@ public class HackerDbServlet extends BaseServlet {
 			}
 			
 			// Monthly reports chart URL
-			final int ADDED_MONTLY_LINES_GRANULARITY = 500; // Added lines in granularity of reports count (a helper line added in every ADDED_MONTLY_LINES_GRANULARITY repors)
+			final int ADDED_MONTLY_LINES_GRANULARITY = 1000; // Added lines in granularity of reports count (a helper line added in every ADDED_MONTLY_LINES_GRANULARITY reports)
 			final StringBuilder monthlyReportsChartUrlBuilder = new StringBuilder();
 			numberFormatter = new Formatter( monthlyReportsChartUrlBuilder );
 			monthlyReportsChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=bvs&amp;chf=bg,s,ffffff00&amp;chbh=a&amp;chxt=y&amp;chxr=0,0," )
@@ -704,12 +704,12 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.println( "<h3>Monthly reports</h3>" );
 			outputWriter.println( "<table border=0><tr><td>" );
 			outputWriter.println( "<tr><td><img src='" + monthlyReportsChartUrlBuilder.toString() + "' width=" + CHARTS_WIDTH + " height=" + CHARTS_HEIGHT + " title='Monthly reports'></img>" );
-			outputWriter.println( "<td><table border=1 cellspacing=0 cellpadding=2><tr class=" + TABLE_HEADER_STYLE_NAME + "><th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Month:<th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Reports:" );
+			outputWriter.println( "<td><div style='width:140;height:400;overflow:auto;'><table border=1 cellspacing=0 cellpadding=2><tr class=" + TABLE_HEADER_STYLE_NAME + "><th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Month:<th class=" + NON_SORTING_COLUMN_STYLE_NAME + ">Reports:" );
 			Collections.reverse( monthlyReportsList );
 			monthlyReportsList.add( 0, new Object[] { "Total:", totalReportsCount} );
 			for ( final Object[] monthReports : monthlyReportsList )
 				outputWriter.println( "<tr><td>" + monthReports[ 0 ] + "<td align=right>" + DECIMAL_FORMAT.format( monthReports[ 1 ] ) );
-			outputWriter.println( "</table></table>" );
+			outputWriter.println( "</div></table></table>" );
 			
 			renderFooter( outputWriter );
 			

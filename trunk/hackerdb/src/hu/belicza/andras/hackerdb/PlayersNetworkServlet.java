@@ -87,11 +87,11 @@ public class PlayersNetworkServlet extends BaseServlet {
 		try {
 			final StringBuilder tagBuilder = new StringBuilder( "<a class='hacker' href='hackers?" );
 			tagBuilder.append( ServerApiConsts.FILTER_NAME_NAME ).append( '=' ).append( URLEncoder.encode( '"' + playerName + '"', "UTF-8" ) );
-			tagBuilder.append( "'>&nbsp;H&nbsp;</a>" );
+			tagBuilder.append( "'>R</a>" );
 			return tagBuilder.toString();
 		} catch ( final UnsupportedEncodingException uee ) {
 			uee.printStackTrace();
-			return "<span class='hacker'>&nbsp;H&nbsp;</span>";
+			return "<span class='hacker'>R</span>";
 		}
 	}
 	
