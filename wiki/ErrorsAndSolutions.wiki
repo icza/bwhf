@@ -56,4 +56,11 @@ First thing you should know is that you need Java 6.0 or newer to run BWHF Agent
 http://support.apple.com/downloads/Java_for_Mac_OS_X_10_5_Update_1
 
 You can verify the verssion of your java by typing the following command on a console/terminal:
-{{{java -verison}}}
+
+`java -version`
+
+Once you confirmed you have Java 6.0, you can start the Agent by executing the `BWHFAgent.sh` starter script. You might need to give executable permission on it. You can do that if you open a terminal/console, navigate to the BWHF Agent's folder, and enter the following command: `chmod +x BWHFAgent.sh`
+
+If you someone can't execute the script (for example it always opens in an editor or something), then open a console/terminal, navigate to the BWHF Agent's folder, and enter the command that is inside the `BWHFAgent.sh` starter script (open it in an editor, copy the command from it and paste it to the terminal). It should start now.
+
+If you have multiple Java installed (like 5.0 and 6.0), you might need to alter the command, and add the path to your Java 6.0 version.
