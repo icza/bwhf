@@ -51,7 +51,7 @@ If you still don't hear anything, check if your sound is not muted in BWHF Agent
 
 If the hacker was just recently reported, your local cache of the hacker list might not yet contain it. You can initiate a manual update of your local cache of the hacker list at any time by pressing the 'Update now' button on the Player checker tab.
 
-==I have MAC 0S-X and I can't start BWHF Agent==
+==I have MAC OS-X and I can't start BWHF Agent==
 First thing you should know is that you need Java 6.0 or newer to run BWHF Agent. On some old MAC only Java 5.0 is available. Check out this link which helps you to install Java 6.0 on old MAC computers:
 http://support.apple.com/downloads/Java_for_Mac_OS_X_10_5_Update_1
 
@@ -59,7 +59,9 @@ You can verify the verssion of your java by typing the following command on a co
 
 `java -version`
 
-Once you confirmed you have Java 6.0, you can start the Agent by executing the `BWHFAgent.sh` starter script. You might need to give executable permission on it. You can do that if you open a terminal/console, navigate to the BWHF Agent's folder, and enter the following command: `chmod +x BWHFAgent.sh`
+Once you confirmed you have Java 6.0, you can start the Agent by executing the `BWHFAgent.sh` starter script. You might need to give executable permission on it. You can do that if you open a terminal/console, navigate to the BWHF Agent's folder, and enter the following command:
+
+`chmod +x BWHFAgent.sh`
 
 If you someone can't execute the script (for example it always opens in an editor or something), then open a console/terminal, navigate to the BWHF Agent's folder, and enter the command that is inside the `BWHFAgent.sh` starter script (open it in an editor, copy the command from it and paste it to the terminal). It should start now.
 
