@@ -50,3 +50,10 @@ _If you use Advloader too, it disables making screenshot in the game lobby. Try 
 If you still don't hear anything, check if your sound is not muted in BWHF Agent on the general settings tab.
 
 If the hacker was just recently reported, your local cache of the hacker list might not yet contain it. You can initiate a manual update of your local cache of the hacker list at any time by pressing the 'Update now' button on the Player checker tab.
+
+==I have MAC 0S-X and I can't start BWHF Agent==
+First thing you should know is that you need Java 6.0 or newer to run BWHF Agent. On some old MAC only Java 5.0 is available. Check out this link which helps you to install Java 6.0 on old MAC computers:
+http://support.apple.com/downloads/Java_for_Mac_OS_X_10_5_Update_1
+
+You can verify the verssion of your java by typing the following command on a console/terminal:
+{{{java -verison}}}
