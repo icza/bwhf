@@ -3,11 +3,15 @@
 =BWHF turns 1=
 http://lh4.ggpht.com/_jDMClHrENz8/S0LwRiw78aI/AAAAAAAASUM/z8SQZ0dmRZw/s800/birthday_cake.jpg
 
-The first BWHF Agent was publicly released on December 28, 2008. Since that more than a year has passed. This how the first Agent looked like:
+The first BWHF Agent was publicly released on December 28, 2008. Since that more than a year has passed.
+
+*This how the first Agent looked like:*
 
 http://lh3.ggpht.com/_jDMClHrENz8/S0L0VUw7aSI/AAAAAAAASUQ/u8HOu-BuVMQ/s288/first_public_bwhf_agent.png.jpg
 
 Since the first release another *16 new release* has been launched adding [Features many features], detecting more and more hacks, making the Agent more user friendly and stable.
+*This is how the Agent looks like now:*
+[http://code.google.com/p/bwhf/wiki/Screenshots http://lh4.ggpht.com/_jDMClHrENz8/SxNzVHNMAqI/AAAAAAAASEE/c62x-h0zICg/s400/bwhf_agent_2.90.png.jpg]
 
 A global network of Starcraft games and players has been initiated on June 29, 2009 with the Agent version of 2.40. It provides statistical information of Starcraft games and players from all around the world.
 
