@@ -5,12 +5,10 @@
 <table><tr><td>http://lh4.ggpht.com/_jDMClHrENz8/S0LwRiw78aI/AAAAAAAASUM/z8SQZ0dmRZw/s800/birthday_cake.jpg</td>
 <td>BWHF celebrates its first birthday!
 
-The first BWHF Agent was publicly released on December 28, 2008. Since that more than a year has passed.</td></tr>
+The first BWHF Agent was publicly released on December 28, 2008. Since then more than a year has passed.</td></tr>
 </table>
 
-The first BWHF Agent was publicly released on December 28, 2008. Since that more than a year has passed.
-
-*This how the first Agent looked like:*
+*This is how the first Agent (ver. 0.99) looked like:*
 
 http://lh3.ggpht.com/_jDMClHrENz8/S0L0VUw7aSI/AAAAAAAASUQ/u8HOu-BuVMQ/s288/first_public_bwhf_agent.png.jpg
 
