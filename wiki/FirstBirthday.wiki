@@ -18,7 +18,7 @@ The first Agent only supported Windows. Since then another *16 new release* has 
 
 A global network of Starcraft games and players has been initiated on June 29, 2009 with the Agent version of 2.40. It provides statistical information of Starcraft games and players from all around the world.
 
-*Here are the first-year statistics of the BWHF system:*
+*Here are the 1^st^-year statistics of the BWHF system:*
  * More than *31,000 hackers* reported
  * More than *64,000 hacker reports*
  * Over *1,000,000 games* added to the Players' Network
