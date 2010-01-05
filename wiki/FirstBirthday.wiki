@@ -23,7 +23,7 @@ The global network of Starcraft games and players has been initiated on June 29,
 *Here are the 1^st^-year statistics of the BWHF system:*
  * More than *31,000 hackers* reported
  * More than *64,000 hacker reports*
- * Over *1,000,000 games* added to the Players' Network
+ * More than *1,000,000 games* added to the Players' Network
  * More than *550,000 players* registered in the Players' Network
 
 The initial USEast autarky amongst the hackers (which was over 90%) is now broken and USEast holds less than 50% of the reported hackers.
