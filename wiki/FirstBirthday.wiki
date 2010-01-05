@@ -29,4 +29,4 @@ The global network of Starcraft games and players has been initiated on June 29,
 The initial USEast autarky amongst the hackers (which was over 90%) is now broken and USEast holds less than 50% of the reported hackers.
 You can check out the Detailed [http://bwhf.net/hackerdb/hackers?op=sta BWHF Hacker Database statistics here].
 
-Post your comments below!
+_Post your comments below!_
