@@ -16,7 +16,7 @@ The first Agent only supported Windows. Since then another *16 new release* has 
 
 [http://code.google.com/p/bwhf/wiki/Screenshots http://lh4.ggpht.com/_jDMClHrENz8/SxNzVHNMAqI/AAAAAAAASEE/c62x-h0zICg/s400/bwhf_agent_2.90.png.jpg]
 
-A global network of Starcraft games and players has been initiated on June 29, 2009 with the Agent version of 2.40. It provides statistical information of Starcraft games and players from all around the world. It's like a Starcraft "Facebook".
+A global network of Starcraft games and players has been initiated on June 29, 2009 with the Agent version of 2.40. It provides statistical information of Starcraft games and players from all around the world. It's like a Starcraft "Facebook". This network is built automatically by the BWHF Agents. You can also add any of your saved replays which is recommended for a more complete network.
 
 *Here are the 1^st^-year statistics of the BWHF system:*
  * More than *31,000 hackers* reported
