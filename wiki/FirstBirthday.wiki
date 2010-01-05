@@ -18,7 +18,7 @@ The first Agent only supported Windows. Since then another *16 new releases* hav
 
 From the original replay scanner and central hacker database project BWHF grew to a complete Starcraft Broodwar utility program and to a global system of Starcraft Broodwar games and players.
 
-A global network of Starcraft games and players has been initiated on June 29, 2009 with the Agent version of 2.40. It provides statistical information of Starcraft games and players from all around the world. It's like a Starcraft "Facebook". This network is built automatically by the BWHF Agents. You can also add any of your saved replays which is recommended for a more complete network.
+The global network of Starcraft games and players has been initiated on June 29, 2009 with the Agent version of 2.40. It provides statistical information of Starcraft games and players from all around the world. It's like a Starcraft "Facebook". This network is built automatically by the BWHF Agents. You can also add any of your saved replays which is recommended for a more complete network.
 
 *Here are the 1^st^-year statistics of the BWHF system:*
  * More than *31,000 hackers* reported
