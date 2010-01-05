@@ -12,7 +12,7 @@ The first BWHF Agent was publicly released on December 28, 2008. Since then more
 
 http://lh3.ggpht.com/_jDMClHrENz8/S0L0VUw7aSI/AAAAAAAASUQ/u8HOu-BuVMQ/s288/first_public_bwhf_agent.png.jpg
 
-The first Agent only supported Windows. Since then another *16 new release* has been launched adding [Features many features], detecting more and more hacks, making the Agent more user friendly and stable. The newest Agent now supports all 3 major operating systems: Windows, Linux and MAC OS-X. *This is how the Agent (ver. 2.90) looks like now:*
+The first Agent only supported Windows. Since then another *16 new release* has been launched adding [Features many features], detecting more and more hacks, making the Agent more user friendly and stable. The newest Agent now supports all 3 major operating systems: Windows, Linux and MAC OS-X. *This is how the Agent (ver. 2.90) currently looks like:*
 
 [http://code.google.com/p/bwhf/wiki/Screenshots http://lh4.ggpht.com/_jDMClHrENz8/SxNzVHNMAqI/AAAAAAAASEE/c62x-h0zICg/s400/bwhf_agent_2.90.png.jpg]
 
