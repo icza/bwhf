@@ -82,7 +82,7 @@ public class GeneralSettingsTab extends Tab {
 		buildGUI();
 		checkStarcraftFolder();
 		
-		if ( checkUpdatesOnStartupCheckBox.isSelected() ) // Start thread delayed in new thread becase main frame might not yet (or at all) be visible
+		if ( checkUpdatesOnStartupCheckBox.isSelected() ) // Start thread delayed in new thread because main frame might not yet (or at all) be visible
 			new Thread() {
 				@Override
 				public void run() {
