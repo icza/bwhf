@@ -532,16 +532,33 @@ public class HackerDbServlet extends BaseServlet {
 		PrintWriter outputWriter = null;
 		try {
 			
-			final int CHARTS_WIDTH  = 750;
-			final int CHARTS_HEIGHT = 400;
+			final int SPEED_CHARTS_WIDTH  = 160;
+			final int SPEED_CHARTS_HEIGHT =  89;
+			final int CHARTS_WIDTH        = 750;
+			final int CHARTS_HEIGHT       = 400;
 			
 			final Date currentDate = new Date();
 			
 			connection = dataSource.getConnection();
 			
+			statement = connection.createStatement();
+			
+			// Hacker reporting speed data
+			int reportingSpeed = -1;
+			resultSet = statement.executeQuery( "SELECT 72000*(SELECT COUNT(*) FROM report WHERE version>=NOW()-INTERVAL '1:0')/(SELECT COUNT(*) FROM report WHERE version>=NOW()-INTERVAL '720:0')" );
+			if ( resultSet.next() )
+				reportingSpeed = resultSet.getInt( 1 );
+			resultSet.close();
+			
+			// Hacker reporting speed data
+			int playersNetworkGrowingSpeed = -1;
+			resultSet = statement.executeQuery( "SELECT 72000*(SELECT COUNT(*) FROM game WHERE version>=NOW()-INTERVAL '1:0')/(SELECT COUNT(*) FROM game WHERE version>=NOW()-INTERVAL '720:0')" );
+			if ( resultSet.next() )
+				playersNetworkGrowingSpeed = resultSet.getInt( 1 );
+			resultSet.close();
+			
 			// Last days daily reports chart data
 			final int LAST_DAYS_REPORTS = 30;
-			statement = connection.createStatement();
 			resultSet = statement.executeQuery( "SELECT date_trunc('day',report.version), COUNT(*) FROM report JOIN key on key.id=report.key JOIN hacker on report.hacker=hacker.id WHERE report.version>=current_date-INTEGER '" + LAST_DAYS_REPORTS + "' AND report.revocated=FALSE AND key.revocated=FALSE AND hacker.guarded=FALSE GROUP BY date_trunc('day',report.version) ORDER BY date_trunc('day',report.version)" );
 			final List< Object[] > dailyReportsList = new ArrayList< Object[] >( LAST_DAYS_REPORTS );
 			final DateFormat dayFormat = new SimpleDateFormat( "dd" );
@@ -555,7 +572,6 @@ public class HackerDbServlet extends BaseServlet {
 				dailyReportsList.add( new Object[] { dayFormat.format( resultSet.getDate( 1 ) ), dayReportsCount } );
 			}
 			resultSet.close();
-			statement.close();
 			
 			// Gateway distribution chart data
 			statement = connection.createStatement();
@@ -568,7 +584,6 @@ public class HackerDbServlet extends BaseServlet {
 				gatewayDistributionList.add( new int[] { resultSet.getInt( 1 ), hackersInGateway } );
 			}
 			resultSet.close();
-			statement.close();
 			
 			// Monthly reports chart data
 			final List< Object[] > monthlyReportsList = new ArrayList< Object[] >();
@@ -585,7 +600,24 @@ public class HackerDbServlet extends BaseServlet {
 				monthlyReportsList.add( new Object[] { monthDateFormat.format( resultSet.getDate( 1 ) ), monthReportsCount } );
 			}
 			resultSet.close();
+			
 			statement.close();
+			
+			// Hacker reporting speed data
+			final StringBuilder reportingSpeedChartUrlBuilder = new StringBuilder();
+			reportingSpeedChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=gom&amp;chs=" )
+				.append( SPEED_CHARTS_WIDTH ).append( 'x' ).append( SPEED_CHARTS_HEIGHT )
+				.append( "&amp;chco=5050ff,ff2020&amp;chf=bg,s,ffffff00" );
+			if ( reportingSpeed >= 0 )
+				reportingSpeedChartUrlBuilder.append( "&amp;chl=" ).append( reportingSpeed ).append( "+%&amp;chd=t:" ).append( reportingSpeed / 2 );
+			
+			// Hacker reporting speed data
+			final StringBuilder playersNetworkGrowingSpeedChartUrlBuilder = new StringBuilder();
+			playersNetworkGrowingSpeedChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=gom&amp;chs=" )
+				.append( SPEED_CHARTS_WIDTH ).append( 'x' ).append( SPEED_CHARTS_HEIGHT )
+				.append( "&amp;chco=5050ff,ff2020&amp;chf=bg,s,ffffff00" );
+			if ( playersNetworkGrowingSpeed >= 0 )
+				playersNetworkGrowingSpeedChartUrlBuilder.append( "&amp;chl=" ).append( playersNetworkGrowingSpeed ).append( "+%&amp;chd=t:" ).append( playersNetworkGrowingSpeed / 2 );
 			
 			// Last days daily reports chart URL
 			final int ADDED_DAILY_LINES_GRANULARITY = 50; // Added lines in granularity of reports count (a helper line added in every ADDED_DAILY_LINES_GRANULARITY repors)
@@ -668,6 +700,11 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter = response.getWriter();
 			
 			renderHeader( outputWriter, "BWHF Hacker Database Statistics" );
+			
+			outputWriter.print( "<table border=1 cellspacing=0 cellpadding=2><tr><th width=50%>&nbsp;Current hacker reporting speed:&nbsp;<th width=50%>&nbsp;Players' Network's current growing speed:&nbsp;<tr>" );
+			outputWriter.print( "<td align=center><img src='" + reportingSpeedChartUrlBuilder             + "' width=" + SPEED_CHARTS_WIDTH + " height=" + SPEED_CHARTS_HEIGHT + " title=\"Current hacker reporting speed\"></img>" );
+			outputWriter.print( "<td align=center><img src='" + playersNetworkGrowingSpeedChartUrlBuilder + "' width=" + SPEED_CHARTS_WIDTH + " height=" + SPEED_CHARTS_HEIGHT + " title=\"Players' Network's current growing speed\"></img>" );
+			outputWriter.println( "</table>" );
 			
 			outputWriter.println( "<h3>Last " + LAST_DAYS_REPORTS + " days' daily reports</h3>" );
 			outputWriter.println( "<table border=0><tr><td>" );
