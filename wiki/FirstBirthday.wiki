@@ -31,7 +31,8 @@ The global network of Starcraft games and players has been initiated on June 29,
 The initial USEast autarchy amongst the hackers (which was over 90%) is now broken and USEast holds less than 50% of the reported hackers.
 You can check out the detailed [http://bwhf.net/hackerdb/hackers?op=sta BWHF Hacker Database Statistics here].
 
-*BWHF Agent 2.90 has won the Softpedia's Free and clean software award!*
+*BWHF Agent 2.90 has won the Softpedia's Free and clean software award:*
+_Softpedia guarantees that BWHF Agent 2.90 is 100% Free, which means it does not contain any form of malware, including but not limited to: spyware, viruses, trojans and backdoors._
 
 [http://mac.softpedia.com/progClean/BWHF-Agent-Clean-69288.html http://mac.softpedia.com/base_img/softpedia_free_award_f.gif]
 
