@@ -48,11 +48,11 @@ Note that all times and dates between 2009-09-18 and 2009-10-21 are in GMT-9. Ot
 
 The *First reported* column shows how long the hacker is using hacks and the *Last reported* column shows how recently was the hacker active (based on the reports arrived to the BWHF system).
 
-The numbers in the *Report count* column are links. If you click on them, they will list the reports.
+The numbers in the *Report count* column are links. If you click on them, the reports of the hacker will be listed.
 
 The default sorting column is the *Last reported* column, which puts the most recent active hackers to the top of the list. Sorting by the *First reported* column puts the newest hackers to the top of the list (again, based on the reports arrived to the BWHF system).
 
 ==Hacker database - Players' Network connection==
 If a hacker is registered in the Players' Network, the hacker name will be displayed as a link. Clicking on this link will take you to the profile page of the player in the Players' Network.
 
-When you're viewing the list of reports of a hacker if the games of the reports are added to the Players' Network, you will see a *Details* link at the *Game details* column. Clicking on these link will take you to the game profile in the Players' Network.
+When you're viewing the list of reports of a hacker, if a game of a report is added to the Players' Network, you will see a *Details* link at the *Game details* column. Clicking on this link will take you to the game profile in the Players' Network.
