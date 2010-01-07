@@ -246,6 +246,14 @@ CREATE INDEX idx_game__replay_md5
   USING btree
   (replay_md5);
 
+-- Index: idx_game_version
+
+-- DROP INDEX idx_game_version;
+
+CREATE INDEX idx_game_version
+  ON game
+  USING btree
+  (version);
 
 
 
