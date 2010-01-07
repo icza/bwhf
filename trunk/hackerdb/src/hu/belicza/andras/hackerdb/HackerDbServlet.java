@@ -543,18 +543,24 @@ public class HackerDbServlet extends BaseServlet {
 			
 			statement = connection.createStatement();
 			
-			// Hacker reporting speed data
-			int reportingSpeed = -1;
-			resultSet = statement.executeQuery( "SELECT 72000*(SELECT COUNT(*) FROM report WHERE version>=NOW()-INTERVAL '1:0')/(SELECT COUNT(*) FROM report WHERE version>=NOW()-INTERVAL '720:0')" );
-			if ( resultSet.next() )
-				reportingSpeed = resultSet.getInt( 1 );
+			// Current hacker reporting speed data
+			int lastHourReports  = -1;
+			int lastMonthReports = -1;
+			resultSet = statement.executeQuery( "SELECT (SELECT COUNT(*) FROM report WHERE version>=NOW()-INTERVAL '1:0'), (SELECT COUNT(*) FROM report WHERE version>=NOW()-INTERVAL '720:0')" );
+			if ( resultSet.next() ) {
+				lastHourReports  = resultSet.getInt( 1 );
+				lastMonthReports = resultSet.getInt( 2 );
+			}
 			resultSet.close();
 			
-			// Hacker reporting speed data
-			int playersNetworkGrowingSpeed = -1;
-			resultSet = statement.executeQuery( "SELECT 72000*(SELECT COUNT(*) FROM game WHERE version>=NOW()-INTERVAL '1:0')/(SELECT COUNT(*) FROM game WHERE version>=NOW()-INTERVAL '720:0')" );
-			if ( resultSet.next() )
-				playersNetworkGrowingSpeed = resultSet.getInt( 1 );
+			// Players' Network's current growing speed data
+			int lastHourGames  = -1;
+			int lastMonthGames = -1;
+			resultSet = statement.executeQuery( "SELECT (SELECT COUNT(*) FROM game WHERE version>=NOW()-INTERVAL '1:0'), (SELECT COUNT(*) FROM game WHERE version>=NOW()-INTERVAL '720:0')" );
+			if ( resultSet.next() ) {
+				lastHourGames  = resultSet.getInt( 1 );
+				lastMonthGames = resultSet.getInt( 2 );
+			}
 			resultSet.close();
 			
 			// Last days daily reports chart data
@@ -603,21 +609,25 @@ public class HackerDbServlet extends BaseServlet {
 			
 			statement.close();
 			
-			// Hacker reporting speed data
+			// Current hacker reporting speed chart URL
 			final StringBuilder reportingSpeedChartUrlBuilder = new StringBuilder();
 			reportingSpeedChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=gom&amp;chs=" )
 				.append( SPEED_CHARTS_WIDTH ).append( 'x' ).append( SPEED_CHARTS_HEIGHT )
 				.append( "&amp;chco=5050ff,ff2020&amp;chf=bg,s,ffffff00" );
-			if ( reportingSpeed >= 0 )
-				reportingSpeedChartUrlBuilder.append( "&amp;chl=" ).append( reportingSpeed ).append( "+%&amp;chd=t:" ).append( reportingSpeed / 2 );
+			if ( lastHourReports >= 0 && lastMonthReports > 0 ) {
+				final int speed = 72000 * lastHourReports / lastMonthReports;
+				reportingSpeedChartUrlBuilder.append( "&amp;chl=" ).append( speed ).append( "+%&amp;chd=t:" ).append( speed / 2 );
+			}
 			
-			// Hacker reporting speed data
+			// Players' Network's current growing speed chart URL
 			final StringBuilder playersNetworkGrowingSpeedChartUrlBuilder = new StringBuilder();
 			playersNetworkGrowingSpeedChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=gom&amp;chs=" )
 				.append( SPEED_CHARTS_WIDTH ).append( 'x' ).append( SPEED_CHARTS_HEIGHT )
 				.append( "&amp;chco=5050ff,ff2020&amp;chf=bg,s,ffffff00" );
-			if ( playersNetworkGrowingSpeed >= 0 )
-				playersNetworkGrowingSpeedChartUrlBuilder.append( "&amp;chl=" ).append( playersNetworkGrowingSpeed ).append( "+%&amp;chd=t:" ).append( playersNetworkGrowingSpeed / 2 );
+			if ( lastHourGames >= 0 && lastMonthGames > 0 ) {
+				final int speed = 72000 * lastHourGames / lastMonthGames;
+				playersNetworkGrowingSpeedChartUrlBuilder.append( "&amp;chl=" ).append( speed ).append( "+%&amp;chd=t:" ).append( speed / 2 );
+			}
 			
 			// Last days daily reports chart URL
 			final int ADDED_DAILY_LINES_GRANULARITY = 50; // Added lines in granularity of reports count (a helper line added in every ADDED_DAILY_LINES_GRANULARITY repors)
@@ -701,9 +711,13 @@ public class HackerDbServlet extends BaseServlet {
 			
 			renderHeader( outputWriter, "BWHF Hacker Database Statistics" );
 			
-			outputWriter.print( "<table border=1 cellspacing=0 cellpadding=2><tr><th width=50%>&nbsp;Current hacker reporting speed:&nbsp;<th width=50%>&nbsp;Players' Network's current growing speed:&nbsp;<tr>" );
-			outputWriter.print( "<td align=center><img src='" + reportingSpeedChartUrlBuilder             + "' width=" + SPEED_CHARTS_WIDTH + " height=" + SPEED_CHARTS_HEIGHT + " title=\"Current hacker reporting speed\"></img>" );
-			outputWriter.print( "<td align=center><img src='" + playersNetworkGrowingSpeedChartUrlBuilder + "' width=" + SPEED_CHARTS_WIDTH + " height=" + SPEED_CHARTS_HEIGHT + " title=\"Players' Network's current growing speed\"></img>" );
+			outputWriter.print( "<table border=1 cellspacing=0 cellpadding=2><tr><th colspan=2 width=50%>&nbsp;Current hacker reporting speed:&nbsp;<th colspan=2 width=50%>&nbsp;Players' Network's current growing speed:&nbsp;<tr>" );
+			outputWriter.print( "<td rowspan=2 align=center><img src='" + reportingSpeedChartUrlBuilder             + "' width=" + SPEED_CHARTS_WIDTH + " height=" + SPEED_CHARTS_HEIGHT + " title=\"Current hacker reporting speed\"></img>" );
+			outputWriter.print( "<td align=center>" + lastHourReports + " reports/hour" );
+			outputWriter.print( "<td rowspan=2 align=center><img src='" + playersNetworkGrowingSpeedChartUrlBuilder + "' width=" + SPEED_CHARTS_WIDTH + " height=" + SPEED_CHARTS_HEIGHT + " title=\"Players' Network's current growing speed\"></img>" );
+			outputWriter.print( "<td align=center>" + lastHourGames + " games/hour" );
+			outputWriter.print( "<tr><td align=center>Avg " + new Formatter().format( "%.1f", lastMonthReports / 720f ) + " reports/hour<br><div class='note'>(in the last 720 hours)</div>" );
+			outputWriter.print( "<td align=center>Avg " + new Formatter().format( "%.1f", lastMonthGames / 720f ) + " games/hour<br><div class='note'>(in the last 720 hours)</div>" );
 			outputWriter.println( "</table>" );
 			
 			outputWriter.println( "<h3>Last " + LAST_DAYS_REPORTS + " days' daily reports</h3>" );
