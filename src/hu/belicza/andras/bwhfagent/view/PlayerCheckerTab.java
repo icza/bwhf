@@ -251,6 +251,8 @@ public class PlayerCheckerTab extends LoggedTab {
 		final Set< String > bwhfHackerSet       = gatewayBwhfHackerSetMap  .get( gateway );
 		final Set< String > customPlayerNameSet = gatewayCustomPlayerSetMap.get( gateway );
 		
+		boolean missingGatewayAlertPlayed = false;
+		
 		for ( final File screenshotFile : screenshotFiles ) {
 			BufferedImage image = null;
 			try {
@@ -262,56 +264,68 @@ public class PlayerCheckerTab extends LoggedTab {
 			if ( image == null || !TextRecognizer.isGameLobbyScreenshot( image ) )
 				remainedScreenshotFileList.add( screenshotFile );
 			else {
-				logMessage( "", false ); // Prints an empty line
-				logMessage( "Game lobby screenshot detected, proceeding to check..." );
-				
-				final String[] playerNames = TextRecognizer.readPlayerNamesFromGameLobbyImage( image );
-				
-				if ( echoRecognizedPlayerNamesCheckBox.isSelected() ) {
-					final StringBuilder playerNamesBuilder = new StringBuilder();
-					for ( final String playerName : playerNames )
-						if ( playerName != null ) {
-							if ( playerNamesBuilder.length() > 0 )
-								playerNamesBuilder.append( ", " );
-							playerNamesBuilder.append( playerName );
-						}
-					logMessage( "Recognized player names in game lobby: " + playerNamesBuilder.toString() );
-				}
-				
-				boolean foundHacker = false;
-				for ( int i = 0; i < playerNames.length; i++ ) {
-					final String playerName = playerNames[ i ];
+				if ( gateway < 0 ) {
+					logMessage( "", false ); // Prints an empty line
+					logMessage( "Game lobby screenshot detected, but no check was performed because gateway is not set!" );
 					
-					if ( playerName != null ) {
-						final String[] playerNamePermutations = generatePlayerNamePermutations( playerName );
-						final boolean  exactMatch             = playerNamePermutations.length == 1;
-						
-						// First check if the player is a hacker
-						boolean isHacker = false;
-						for ( final String playerNamePermutation : playerNamePermutations )
-							if ( bwhfHackerSet != null && bwhfHackerSet.contains( playerNamePermutation ) ) {
-								foundHacker = true;
-								isHacker = true;
-								logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "hacker player in game lobby: " + playerName );
-								Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "hacker_at_slot.wav" : "possible_hacker_at_slot.wav" ), true );
-								Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (i+1) + ".wav" ), true );
-								break;
-							}
-						
-						if ( !isHacker ) for ( final String playerNamePermutation : playerNamePermutations )
-							if ( customPlayerNameSet != null && customPlayerNameSet.contains( playerNamePermutation ) ) {
-								foundHacker = true;
-								logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "custom listed player in game lobby: " + playerName );
-								Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "custom_at_slot.wav" : "possible_custom_at_slot.wav" ), true );
-								Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (i+1) + ".wav" ), true );
-								break;
-							}
+					if ( !missingGatewayAlertPlayed ) {
+						Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "gateway_not_set.wav" ), false );
+						// We only want to play this alert sound once!
+						missingGatewayAlertPlayed = true;
 					}
 				}
-				if ( !foundHacker && sayCleanCheckBox.isSelected() )
-					Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "clean.wav" ), true );
-				
-				logMessage( "Player check finished." );
+				else {
+					logMessage( "", false ); // Prints an empty line
+					logMessage( "Game lobby screenshot detected, proceeding to check..." );
+					
+					final String[] playerNames = TextRecognizer.readPlayerNamesFromGameLobbyImage( image );
+					
+					if ( echoRecognizedPlayerNamesCheckBox.isSelected() ) {
+						final StringBuilder playerNamesBuilder = new StringBuilder();
+						for ( final String playerName : playerNames )
+							if ( playerName != null ) {
+								if ( playerNamesBuilder.length() > 0 )
+									playerNamesBuilder.append( ", " );
+								playerNamesBuilder.append( playerName );
+							}
+						logMessage( "Recognized player names in game lobby: " + playerNamesBuilder.toString() );
+					}
+					
+					boolean foundHacker = false;
+					for ( int i = 0; i < playerNames.length; i++ ) {
+						final String playerName = playerNames[ i ];
+						
+						if ( playerName != null ) {
+							final String[] playerNamePermutations = generatePlayerNamePermutations( playerName );
+							final boolean  exactMatch             = playerNamePermutations.length == 1;
+							
+							// First check if the player is a hacker
+							boolean isHacker = false;
+							for ( final String playerNamePermutation : playerNamePermutations )
+								if ( bwhfHackerSet != null && bwhfHackerSet.contains( playerNamePermutation ) ) {
+									foundHacker = true;
+									isHacker = true;
+									logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "hacker player in game lobby: " + playerName );
+									Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "hacker_at_slot.wav" : "possible_hacker_at_slot.wav" ), true );
+									Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (i+1) + ".wav" ), true );
+									break;
+								}
+							
+							if ( !isHacker ) for ( final String playerNamePermutation : playerNamePermutations )
+								if ( customPlayerNameSet != null && customPlayerNameSet.contains( playerNamePermutation ) ) {
+									foundHacker = true;
+									logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "custom listed player in game lobby: " + playerName );
+									Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "custom_at_slot.wav" : "possible_custom_at_slot.wav" ), true );
+									Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (i+1) + ".wav" ), true );
+									break;
+								}
+						}
+					}
+					if ( !foundHacker && sayCleanCheckBox.isSelected() )
+						Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "clean.wav" ), true );
+					
+					logMessage( "Player check finished." );
+				}
 				
 				if ( deleteGameLobbyScreenshotsCheckBox.isSelected() )
 					screenshotFile.delete();
