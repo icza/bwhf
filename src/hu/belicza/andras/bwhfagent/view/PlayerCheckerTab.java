@@ -447,7 +447,7 @@ public class PlayerCheckerTab extends LoggedTab {
 			try { input.close(); input = null; } catch ( final IOException ie ) {}
 			
 			if ( responseList.isEmpty() || !responseList.get( 0 ).equals( ServerApiConsts.CHECK_RECORDS_OK ) ) {
-				logMessage( "Record check processing error: " + responseList.get( 0 ) );
+				logMessage( "Record check processing error" + ( responseList.isEmpty() ? "!" : ": " + responseList.get( 0 ) ) );
 			}
 			else {
 				for ( int i = 1; i < responseList.size(); i++ )
@@ -458,7 +458,7 @@ public class PlayerCheckerTab extends LoggedTab {
 						
 						final RecordAlertLevel alertLevel = RecordAlertLevel.getAlertLevelForGamesCount( gamesCount );
 						if ( alertLevel != null && alertLevel.ordinal() <= ( (RecordAlertLevel) recordAlertLevelsComboBox.getSelectedItem() ).ordinal() ) {
-							logMessage( alertLevel.name + " record for player: " + playerNames[ playerId ] );
+							logMessage( alertLevel.name + " record for player: " + playerNames[ playerId ] + " (" + gamesCount + " game" + (gamesCount == 1 ? ")" : "s)" ) );
 							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, alertLevel.name + "_at_slot.wav" ), true );
 							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (playerId+1) + ".wav" ), true );
 						}
