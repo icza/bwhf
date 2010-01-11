@@ -342,7 +342,7 @@ public class PlayerCheckerTab extends LoggedTab {
 					logMessage( "Game lobby screenshot detected, but no check was performed because gateway is not set!" );
 					
 					if ( !missingGatewayAlertPlayed ) {
-						Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "gateway_not_set.wav" ), false );
+						Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "gateway_not_set.wav" ), true );
 						// We only want to play this alert sound once!
 						missingGatewayAlertPlayed = true;
 					}
