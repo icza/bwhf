@@ -169,6 +169,10 @@ public class Consts {
 	public static final String PROPERTY_HACKER_LIST_UPDATE_INTERVAL    = "hackerListUpdateInterval";
 	/** Say "clean" property.                    */
 	public static final String PROPERTY_SAY_CLEAN                      = "sayClean";
+	/** Check BWHF player records property.      */
+	public static final String PROPERTY_CHECK_BWHF_PLAYER_RECORDS      = "checkBwhfPlayerRecords";
+	/** BWHF record alert level property.        */
+	public static final String PROPERTY_BWHF_RECORD_ALERT_LEVEL        = "bwhfRecordAlertLevel";
 	/** Delete game lobby screenshots property.  */
 	public static final String PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS  = "deleteGameLobbyScreenshots";
 	/** Echo recognized player names property.   */
@@ -251,6 +255,8 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAYER_CHECKER_ENABLED        , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HACKER_LIST_UPDATE_INTERVAL   , "2" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SAY_CLEAN                     , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CHECK_BWHF_PLAYER_RECORDS     , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_BWHF_RECORD_ALERT_LEVEL       , "0" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ECHO_RECOGNIZED_PLAYER_NAMES  , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST    , "false" );
