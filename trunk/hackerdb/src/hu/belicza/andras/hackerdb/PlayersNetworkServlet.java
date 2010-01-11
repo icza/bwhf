@@ -4,6 +4,7 @@ import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_AKA;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_GAME;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.ENTITY_PLAYER;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.GATEWAYS;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_CHECK_RECORDS;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_DETAILS;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_LIST;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_OPERATION_SEND;
@@ -18,6 +19,7 @@ import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_P
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_PLAYER2;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_SORTING_DESC;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.PN_REQUEST_PARAM_NAME_SORTING_INDEX;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_PLAYER;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.IOException;
@@ -196,6 +198,16 @@ public class PlayersNetworkServlet extends BaseServlet {
 				}
 				
 				handleDetails( request, response, entity, entityId, entityName );
+			} else if ( operation.equals( PN_OPERATION_CHECK_RECORDS ) ) {
+				final String agentVersion = request.getParameter( ServerApiConsts.REQUEST_PARAMETER_NAME_AGENT_VERSION  );
+				
+				final String[] playerNames = new String[ 8 ];
+				String playerName;
+				for ( int i = 0; i < 8; i++ )
+					if ( ( playerName = request.getParameter( REQUEST_PARAMETER_NAME_PLAYER + i ) ) != null )
+						playerNames[ i ] = playerName;
+				
+				handleRecordCheck( response, agentVersion, playerNames );
 			}
 		}
 		catch ( final BadRequestException bre ) {
@@ -1330,6 +1342,46 @@ public class PlayersNetworkServlet extends BaseServlet {
 		finally {
 			if ( resultSet2 != null ) try { resultSet2.close(); } catch ( final SQLException se ) {}
 			if ( statement2 != null ) try { statement2.close(); } catch ( final SQLException se ) {}
+			if ( resultSet != null ) try { resultSet.close(); } catch ( final SQLException se ) {}
+			if ( statement != null ) try { statement.close(); } catch ( final SQLException se ) {}
+			if ( connection != null ) try { connection.close(); } catch ( final SQLException se ) {}
+		}
+	}
+	
+	/**
+	 * Handles player record checks.
+	 * @param response     http response
+	 * @param agentVersion version of the agent
+	 * @param playerNames  names of the players whose record to check
+	 */
+	private void handleRecordCheck( final HttpServletResponse response, final String agentVersion, final String[] playerNames ) throws IOException {
+		PrintWriter       outputWriter = null;
+		Connection        connection   = null;
+		PreparedStatement statement    = null;
+		ResultSet         resultSet    = null;
+		
+		try {
+			connection = dataSource.getConnection();
+			
+			statement = connection.prepareStatement( "SELECT games_count FROM player WHERE name=?" );
+			
+			response.setContentType( "text/plain" );
+			outputWriter = response.getWriter();
+			outputWriter.println( ServerApiConsts.CHECK_RECORDS_OK );
+			
+			for ( int i = 0; i < playerNames.length; i++ )
+				if ( playerNames[ i ] != null ) {
+					statement.setString( 1, playerNames[ i ] );
+					resultSet = statement.executeQuery();
+					outputWriter.println( i + " " + ( resultSet.next() ? resultSet.getInt( 1 ) : 0 ) );
+				}
+			
+			outputWriter.flush();
+		}
+		catch ( final SQLException se ) {
+			se.printStackTrace();
+		}
+		finally {
 			if ( resultSet != null ) try { resultSet.close(); } catch ( final SQLException se ) {}
 			if ( statement != null ) try { statement.close(); } catch ( final SQLException se ) {}
 			if ( connection != null ) try { connection.close(); } catch ( final SQLException se ) {}

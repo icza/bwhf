@@ -599,9 +599,9 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.NEW_KEY.name() + "' method=POST>" );
 			outputWriter.println( "<table border=0>" );
 			outputWriter.println( "<tr><td align=right>Number of keys*:<td><input type=text name='" + REQUEST_PARAM_NUMBER_OF_KEYS + "' value='1'>" );
-			outputWriter.println( "<tr><td align=right>Name of the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_NAME + "'><td>(Person's real name)" );
+			outputWriter.println( "<tr><td align=right>Name of the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_NAME + "'><td><div class='note'>(Person's real name)</div>" );
 			outputWriter.println( "<tr><td align=right>E-mail of the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_EMAIL + "'>" );
-			outputWriter.println( "<tr><td align=right>Comment to the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_COMMENT + "'>(Battle.net accounts with gateways)" );
+			outputWriter.println( "<tr><td align=right>Comment to the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_COMMENT + "'><td><div class='note'>(Battle.net accounts with gateways)</div>" );
 			outputWriter.println( "<tr><td colspan=2 align=center><input type=submit value='Generate and Add'>" );
 			outputWriter.println( "</table>" );
 			outputWriter.println( "</form>" );
