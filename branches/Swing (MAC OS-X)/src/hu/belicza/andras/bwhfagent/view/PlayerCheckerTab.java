@@ -458,7 +458,7 @@ public class PlayerCheckerTab extends LoggedTab {
 						
 						final RecordAlertLevel alertLevel = RecordAlertLevel.getAlertLevelForGamesCount( gamesCount );
 						if ( alertLevel != null && alertLevel.ordinal() <= ( (RecordAlertLevel) recordAlertLevelsComboBox.getSelectedItem() ).ordinal() ) {
-							logMessage( alertLevel.name + " record for player: " + playerNames[ playerId ] + " (" + gamesCount + " game" + (gamesCount == 1 ? ")" : "s)" ) );
+							logMessage( alertLevel.name + " record detected at slot " + playerId + " for player: " + playerNames[ playerId ] + " (" + gamesCount + " game" + (gamesCount == 1 ? ")" : "s)" ) );
 							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, alertLevel.name + "_at_slot.wav" ), true );
 							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (playerId+1) + ".wav" ), true );
 						}
