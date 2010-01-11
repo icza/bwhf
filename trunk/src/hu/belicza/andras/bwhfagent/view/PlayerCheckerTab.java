@@ -71,20 +71,24 @@ public class PlayerCheckerTab extends LoggedTab {
 	 */
 	public static enum RecordAlertLevel {
 		/** New account    */
-		NEW   ( "New"   ,    0,   9 ),
+		NEW   ( "New"   ,    0,    9 ),
 		/** Medium account */
-		MEDIUM( "Medium",   10,  99 ),
+		SMALL ( "Small" ,   10,   99 ),
+		/** Medium account */
+		MEDIUM( "Medium",  100,  499 ),
 		/** Big account    */
-		BIG   ( "Big"   ,  100, 999 ),
+		BIG   ( "Big"   ,  500, 1999 ),
 		/** Huge account   */
-		HUGE  ( "Huge"  , 1000, Integer.MAX_VALUE );
+		HUGE  ( "Huge"  , 2000, Integer.MAX_VALUE );
 		
-		/** Name of this alert level. */
+		/** Name of this alert level.                   */
 		public final String name;
-		/** Min games count belonging to this level. */
-		public final int minGamesCount;
-		/** Max games count belonging to this level. */
-		public final int maxGamesCount;
+		/** Voice file name prefix of this alert level. */
+		public final String fileNamePrefix;
+		/** Min games count belonging to this level.    */
+		public final int    minGamesCount;
+		/** Max games count belonging to this level.    */
+		public final int    maxGamesCount;
 		
 		/**
 		 * Creates a new RecordAlertLevel.
@@ -94,6 +98,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		 */
 		private RecordAlertLevel( final String name, final int minGamesCount, final int maxGamesCount ) {
 			this.name          = name;
+			fileNamePrefix     = name.toLowerCase();
 			this.minGamesCount = minGamesCount;
 			this.maxGamesCount = maxGamesCount;
 		}
@@ -103,7 +108,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		 */
 		@Override
 		public String toString() {
-			return name + " record (" + ( minGamesCount == 0 ? "less than " + (maxGamesCount+1) : maxGamesCount == Integer.MAX_VALUE ? "more than " + (minGamesCount-1) : "between " + minGamesCount + " and " + maxGamesCount ) + " games)";
+			return name + " record (" + ( maxGamesCount == Integer.MAX_VALUE ? minGamesCount + " or more" : minGamesCount + ".." + maxGamesCount ) + " games)";
 		}
 		
 		/**
@@ -459,7 +464,7 @@ public class PlayerCheckerTab extends LoggedTab {
 						final RecordAlertLevel alertLevel = RecordAlertLevel.getAlertLevelForGamesCount( gamesCount );
 						if ( alertLevel != null && alertLevel.ordinal() <= ( (RecordAlertLevel) recordAlertLevelsComboBox.getSelectedItem() ).ordinal() ) {
 							logMessage( alertLevel.name + " record detected at slot " + playerId + " for player: " + playerNames[ playerId ] + " (" + gamesCount + " game" + (gamesCount == 1 ? ")" : "s)" ) );
-							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, alertLevel.name + "_at_slot.wav" ), true );
+							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, alertLevel.fileNamePrefix + "_at_slot.wav" ), true );
 							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (playerId+1) + ".wav" ), true );
 						}
 					}
