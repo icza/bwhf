@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.imageio.ImageIO;
 
@@ -64,14 +65,70 @@ public class PlayerCheckerTab extends LoggedTab {
 		CUSTOM
 	}
 	
-	/** Text of the update now button.           */
-	private static final String UPDATE_NOW_BUTTON_TEXT      = "Update now";
-	/** Name of the bwhf hacker list cache file. */
-	private static final String HACKER_LIST_CACHE_FILE_NAME = "BWHF_hacker_list_cache.txt";
-	/** THe hacker list directory.               */
-	private static final File   HACKER_LIST_DIRECTORY       = new File( Consts.HACKER_LIST_DIRECTORY_NAME );
-	/** The hacker list cache file.              */
-	private static final File   HACKER_LIST_CACHE_FILE      = new File( Consts.HACKER_LIST_DIRECTORY_NAME, HACKER_LIST_CACHE_FILE_NAME );
+	/**
+	 * Record alert levels.
+	 * @author Andras Belicza
+	 */
+	public static enum RecordAlertLevel {
+		/** New account    */
+		NEW   ( "New"   ,    0,   9 ),
+		/** Medium account */
+		MEDIUM( "Medium",   10,  99 ),
+		/** Big account    */
+		BIG   ( "Big"   ,  100, 999 ),
+		/** Huge account   */
+		HUGE  ( "Huge"  , 1000, Integer.MAX_VALUE );
+		
+		/** Name of this alert level. */
+		public final String name;
+		/** Min games count belonging to this level. */
+		public final int minGamesCount;
+		/** Max games count belonging to this level. */
+		public final int maxGamesCount;
+		
+		/**
+		 * Creates a new RecordAlertLevel.
+		 * @param name          name of the alert level
+		 * @param minGamesCount min games count belonging to this level
+		 * @param maxGamesCount max games count belonging to this level
+		 */
+		private RecordAlertLevel( final String name, final int minGamesCount, final int maxGamesCount ) {
+			this.name          = name;
+			this.minGamesCount = minGamesCount;
+			this.maxGamesCount = maxGamesCount;
+		}
+		
+		/**
+		 * Returns a string representation of this alert level.
+		 */
+		@Override
+		public String toString() {
+			return name + " record (" + ( minGamesCount == 0 ? "less than " + (maxGamesCount+1) : maxGamesCount == Integer.MAX_VALUE ? "more than " + (minGamesCount-1) : "between " + minGamesCount + " and " + maxGamesCount ) + " games)";
+		}
+		
+		/**
+		 * Returns the proper record alert level for the given games count.
+		 * @param gamesCount games count whose alert level to be returned
+		 * @return the proper record alert level for the given games count
+		 */
+		public static RecordAlertLevel getAlertLevelForGamesCount( final int gamesCount ) {
+			for ( final RecordAlertLevel alertLevel : values() )
+				if ( alertLevel.minGamesCount <= gamesCount && alertLevel.maxGamesCount >= gamesCount )
+					return alertLevel;
+			
+			return null;
+		}
+		
+	}
+	
+	/** Text of the update now button.                    */
+	private static final String UPDATE_NOW_BUTTON_TEXT         = "Update now";
+	/** Name of the bwhf hacker list cache file.          */
+	private static final String HACKER_LIST_CACHE_FILE_NAME    = "BWHF_hacker_list_cache.txt";
+	/** THe hacker list directory.                        */
+	private static final File   HACKER_LIST_DIRECTORY          = new File( Consts.HACKER_LIST_DIRECTORY_NAME );
+	/** The hacker list cache file.                       */
+	private static final File   HACKER_LIST_CACHE_FILE         = new File( Consts.HACKER_LIST_DIRECTORY_NAME, HACKER_LIST_CACHE_FILE_NAME );
 	
 	/** Reference to the settings panel. */
 	private JPanel settingsPanel;
@@ -92,6 +149,10 @@ public class PlayerCheckerTab extends LoggedTab {
 	private   final JButton    reloadButton                       = new JButton( "Reload", IconResourceManager.ICON_ARROW_REFRESH );
 	/** Checkbox to enable/disable saying "clean" if no hackers found. */
 	private   final JCheckBox  sayCleanCheckBox                   = new JCheckBox( "Say \"clean\" if no hackers found", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SAY_CLEAN ) ) );
+	/** Checkbox to check BWHF player records.                         */
+	private   final JCheckBox  checkBwhfPlayerRecordsBox          = new JCheckBox( "Check BWHF player records, alert level:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_CHECK_BWHF_PLAYER_RECORDS ) ) );
+	/** Combo box to set the hacker list update interval in hours.     */
+	private   final JComboBox  recordAlertLevelsComboBox          = new JComboBox( RecordAlertLevel.values() );
 	/** Checkbox to enable/disable the autoscan.                       */
 	private   final JCheckBox  deleteGameLobbyScreenshotsCheckBox = new JCheckBox( "Delete game lobby screenshots after checking players", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS ) ) );
 	/** Checkbox to enable/disable the autoscan.                       */
@@ -103,7 +164,7 @@ public class PlayerCheckerTab extends LoggedTab {
 	private final Map< Integer, Set< String > > gatewayCustomPlayerSetMap = new HashMap< Integer, Set< String > >();
 	
 	/** Last update time. */
-	private volatile long lastUpdateTime = HACKER_LIST_CACHE_FILE.lastModified(); // If local cache doesn't exist yet, this returns 0l, and will update immediatelly if player checker is enabled.
+	private volatile long lastUpdateTime = HACKER_LIST_CACHE_FILE.lastModified(); // If local cache doesn't exist yet, this returns 0l, and will update immediately if player checker is enabled.
 	
 	/**
 	 * Creates a new PlayerCheckerTab.
@@ -114,6 +175,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		buildGUI();
 		
 		hackerListUpdateIntervalComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_HACKER_LIST_UPDATE_INTERVAL ) ) );
+		recordAlertLevelsComboBox       .setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_BWHF_RECORD_ALERT_LEVEL     ) ) );
 		
 		refreshLastUpdatedLabel();
 		
@@ -222,6 +284,17 @@ public class PlayerCheckerTab extends LoggedTab {
 		gridBagLayout.setConstraints( sayCleanCheckBox, constraints );
 		settingsPanel.add( sayCleanCheckBox );
 		
+		constraints.gridwidth = 1;
+		gridBagLayout.setConstraints( checkBwhfPlayerRecordsBox, constraints );
+		settingsPanel.add( checkBwhfPlayerRecordsBox );
+		constraints.gridwidth = 1;
+		gridBagLayout.setConstraints( recordAlertLevelsComboBox, constraints );
+		settingsPanel.add( recordAlertLevelsComboBox );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		label = new JLabel();
+		gridBagLayout.setConstraints( label, constraints );
+		settingsPanel.add( label );
+		
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		gridBagLayout.setConstraints( deleteGameLobbyScreenshotsCheckBox, constraints );
 		settingsPanel.add( deleteGameLobbyScreenshotsCheckBox );
@@ -269,9 +342,14 @@ public class PlayerCheckerTab extends LoggedTab {
 					logMessage( "Game lobby screenshot detected, but no check was performed because gateway is not set!" );
 					
 					if ( !missingGatewayAlertPlayed ) {
-						Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "gateway_not_set.wav" ), false );
+						Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "gateway_not_set.wav" ), true );
 						// We only want to play this alert sound once!
 						missingGatewayAlertPlayed = true;
+					}
+					
+					if ( checkBwhfPlayerRecordsBox.isSelected() ) {
+						final String[] playerNames = TextRecognizer.readPlayerNamesFromGameLobbyImage( image );
+						checkPlayerRecords( playerNames );
 					}
 				}
 				else {
@@ -311,18 +389,26 @@ public class PlayerCheckerTab extends LoggedTab {
 									break;
 								}
 							
+							boolean isCustomListed = false;
 							if ( !isHacker ) for ( final String playerNamePermutation : playerNamePermutations )
 								if ( customPlayerNameSet != null && customPlayerNameSet.contains( playerNamePermutation ) ) {
-									foundHacker = true;
+									foundHacker    = true;
+									isCustomListed = true;
 									logMessage( "Found " + ( exactMatch ? "" : "possible " ) + "custom listed player in game lobby: " + playerName );
 									Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, exactMatch ? "custom_at_slot.wav" : "possible_custom_at_slot.wav" ), true );
 									Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (i+1) + ".wav" ), true );
 									break;
 								}
+							
+							if ( isHacker || isCustomListed )
+								playerNames[ i ] = null; // Does not have to check the record of this player
 						}
 					}
 					if ( !foundHacker && sayCleanCheckBox.isSelected() )
 						Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "clean.wav" ), true );
+					
+					if ( checkBwhfPlayerRecordsBox.isSelected() )
+						checkPlayerRecords( playerNames );
 					
 					logMessage( "Player check finished." );
 				}
@@ -335,6 +421,59 @@ public class PlayerCheckerTab extends LoggedTab {
 		}
 		
 		return remainedScreenshotFileList.toArray( new File[ remainedScreenshotFileList.size() ] );
+	}
+	
+	/**
+	 * Checks the BWHF player records of the given names.<br>
+	 * The array index is the slot (starting from zero, so 1 has to be added to the index).
+	 * Values can be null which does not have to be checked.
+	 * @param playerNames player names whose records to be checked.
+	 */
+	private void checkPlayerRecords( final String[] playerNames ) {
+		BufferedReader input = null;
+		try {
+			final StringBuilder reportURLBuilder = new StringBuilder( Consts.PLAYERS_NETWORK_DATA_BASE_URL );
+			reportURLBuilder.append( '?' ).append( ServerApiConsts.PN_REQUEST_PARAM_NAME_OPERATION      ).append( '=' ).append( ServerApiConsts.PN_OPERATION_CHECK_RECORDS )
+							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_AGENT_VERSION ).append( '=' ).append( URLEncoder.encode( MainFrame.getInstance().applicationVersion, "UTF-8" ) );
+			
+			for ( int i = 0; i < playerNames.length; i++ )
+				if ( playerNames[ i ] != null )
+					reportURLBuilder.append( '&' ).append( ServerApiConsts.PN_REQUEST_PARAMETER_NAME_PLAYER ).append( i ).append( '=' ).append( URLEncoder.encode( playerNames[ i ].toLowerCase(), "UTF-8" ) );
+			
+			final List< String > responseList = new ArrayList< String >();
+			input = new BufferedReader( new InputStreamReader( new URL( reportURLBuilder.toString() ).openStream() ) );
+			while ( input.ready() )
+				responseList.add( input.readLine() );
+			try { input.close(); input = null; } catch ( final IOException ie ) {}
+			
+			if ( responseList.isEmpty() || !responseList.get( 0 ).equals( ServerApiConsts.CHECK_RECORDS_OK ) ) {
+				logMessage( "Record check processing error: " + responseList.get( 0 ) );
+			}
+			else {
+				for ( int i = 1; i < responseList.size(); i++ )
+					try {
+						final StringTokenizer lineTokenizer = new StringTokenizer( responseList.get( i ) );
+						final int playerId   = Integer.parseInt( lineTokenizer.nextToken() );
+						final int gamesCount = Integer.parseInt( lineTokenizer.nextToken() );
+						
+						final RecordAlertLevel alertLevel = RecordAlertLevel.getAlertLevelForGamesCount( gamesCount );
+						if ( alertLevel != null && alertLevel.ordinal() <= ( (RecordAlertLevel) recordAlertLevelsComboBox.getSelectedItem() ).ordinal() ) {
+							logMessage( alertLevel.name + " record for player: " + playerNames[ playerId ] );
+							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, alertLevel.name + "_at_slot.wav" ), true );
+							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (playerId+1) + ".wav" ), true );
+						}
+					}
+					catch ( final Exception e ) {
+					}
+			}
+		}
+		catch ( final Exception e ) {
+			logMessage( "Record check failed: error connecting to the BWHF data base server!" );
+		}
+		finally {
+			if ( input != null )
+				try { input.close(); } catch ( final IOException ie ) {}
+		}
 	}
 	
 	/**
@@ -587,6 +726,8 @@ public class PlayerCheckerTab extends LoggedTab {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST   , Boolean.toString( includeCustomPlayerListCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_CUSTOM_PLAYER_LIST_FILE      , customPlayerListFileTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SAY_CLEAN                    , Boolean.toString( sayCleanCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_CHECK_BWHF_PLAYER_RECORDS    , Boolean.toString( checkBwhfPlayerRecordsBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_BWHF_RECORD_ALERT_LEVEL      , Integer.toString( recordAlertLevelsComboBox.getSelectedIndex() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_DELETE_GAME_LOBBY_SCREENSHOTS, Boolean.toString( deleteGameLobbyScreenshotsCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_ECHO_RECOGNIZED_PLAYER_NAMES , Boolean.toString( echoRecognizedPlayerNamesCheckBox.isSelected() ) );
 	}

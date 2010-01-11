@@ -445,11 +445,13 @@ public class Utils {
 			final String message = input.readLine();
 			
 			return message.equals( ServerApiConsts.REPORT_ACCEPTED_MESSAGE ) ? null : message;
-		} catch ( final Exception e ) {
+		}
+		catch ( final Exception e ) {
+			return "Error connecting to the BWHF data base server!";
+		}
+		finally {
 			if ( input != null )
 				try { input.close(); } catch ( final IOException ie ) {}
-			
-			return "Error connecting to the BWHF data base server!";
 		}
 	}
 	
