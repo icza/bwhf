@@ -123,13 +123,17 @@ public class ServerApiConsts {
 	public static final String PN_REQUEST_PARAM_NAME_INCLUDE_AKAS  = "includeakas";
 	/** Name of the name filter request parameter.        */
 	public static final String PN_REQUEST_PARAM_NAME_NAME_FILTER   = "namefilter";
+	/** Name of the player request parameter.             */
+	public static final String PN_REQUEST_PARAMETER_NAME_PLAYER    = "pln";
 	
 	/** Send game info operation value.   */
-	public static final String PN_OPERATION_SEND    = "send";
+	public static final String PN_OPERATION_SEND          = "send";
 	/** List entity operation value.      */
-	public static final String PN_OPERATION_LIST    = "list";
+	public static final String PN_OPERATION_LIST          = "list";
 	/** Detail an entity operation value. */
-	public static final String PN_OPERATION_DETAILS = "details";
+	public static final String PN_OPERATION_DETAILS       = "details";
+	/** Check records operation value.    */
+	public static final String PN_OPERATION_CHECK_RECORDS = "chkRec";
 	
 	/** Game entity value.   */
 	public static final String ENTITY_GAME   = "game";
@@ -137,6 +141,9 @@ public class ServerApiConsts {
 	public static final String ENTITY_PLAYER = "player";
 	/** Aka entity value.    */
 	public static final String ENTITY_AKA    = "aka";
+	
+	/** Message to be sent back to the client if check records request was accepted and processed. */
+	public static final String CHECK_RECORDS_OK = "OK";
 	
 	/** Game param name for engine.        */
 	public static final String GAME_PARAM_ENGINE         = "engine";
