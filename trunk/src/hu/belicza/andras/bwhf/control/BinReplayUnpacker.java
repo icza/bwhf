@@ -85,6 +85,7 @@ public class BinReplayUnpacker {
 	}
 	
 	private static class Esi {
+		@SuppressWarnings("unused")
 		int       m00;
 		int       m04;
 		int       m08;
@@ -95,7 +96,9 @@ public class BinReplayUnpacker {
 		int       m1C;
 		int       m20;
 		ReplayEnc m24;
+		@SuppressWarnings("unused")
 		int       m28;
+		@SuppressWarnings("unused")
 		int       m2C;
 		byte[]    data = new byte[ 0x3114 + 0x20 ]; // allocates 0x30 extra bytes in the beginning, but we ignore those
 		
