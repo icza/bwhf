@@ -588,7 +588,7 @@ public class AdminServlet extends BaseServlet {
 							else {
 								emailMessageBuilder.append( "Plz make sure that one key is only used by one person (a unique key should be given to each person)." );
 							}
-							emailMessageBuilder.append( "\n\nIf you have old hacker replays (only from 2009), send them and I add them in your name (with your key). Just reply to this email. Don't forget to indicate the gateway for the replays!" );
+							emailMessageBuilder.append( "\n\nIf you have old hacker replays (only after 2009-01-01), send them and I add them in your name (with your key). Just reply to this email. Don't forget to indicate the gateway for the replays!" );
 							emailMessageBuilder.append( "\n\nCheers,\n    Dakota_Fanning" );
 						}
 						else
@@ -599,9 +599,9 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.NEW_KEY.name() + "' method=POST>" );
 			outputWriter.println( "<table border=0>" );
 			outputWriter.println( "<tr><td align=right>Number of keys*:<td><input type=text name='" + REQUEST_PARAM_NUMBER_OF_KEYS + "' value='1'>" );
-			outputWriter.println( "<tr><td align=right>Name of the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_NAME + "'>" );
+			outputWriter.println( "<tr><td align=right>Name of the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_NAME + "'><td>(Person's real name)" );
 			outputWriter.println( "<tr><td align=right>E-mail of the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_EMAIL + "'>" );
-			outputWriter.println( "<tr><td align=right>Comment to the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_COMMENT + "'>" );
+			outputWriter.println( "<tr><td align=right>Comment to the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_COMMENT + "'>(Battle.net accounts with gateways)" );
 			outputWriter.println( "<tr><td colspan=2 align=center><input type=submit value='Generate and Add'>" );
 			outputWriter.println( "</table>" );
 			outputWriter.println( "</form>" );
