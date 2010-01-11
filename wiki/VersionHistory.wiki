@@ -7,7 +7,7 @@
 ----
 ===Changes and new features in the upcoming release:===
  * Added a *BWHF player record checker* to the Player checker tab. When this feature is enabled, pressing Print Screen in the game lobby will also check the BWHF records of the players (not just whether they are hackers). You can set different alert levels: _New record_ (less than 10 games), _Medium record_ (between 10 and 99 games), _Big record_ (between 100 and 999 games) and _Huge record_ (more than 1000 games). If you set the alert level for Medium for example, for a player in the lobby who is not in the BWHF Players' Network, you will hear _"new at slot x"_, for a player who has 50 games you will hear: _"medium at slot x"_.
- * Added check and sound alert for missing gateway. If the Player checker is enabled and the print screen is pressed in the game lobby but no gateway is set, you will hear: _"gateway not set"_ instead of _"clean"_.
+ * Added check and sound alert for *missing gateway*. If you press the Print Screen in the game lobby but no gateway is set, you will hear: _"gateway not set"_ instead of _"clean"_.
  * Fixed a bug on the Charts tab (when all actions in a replay happened at the first iteration and there was hack in the replay).
  * Added new tips.
 
