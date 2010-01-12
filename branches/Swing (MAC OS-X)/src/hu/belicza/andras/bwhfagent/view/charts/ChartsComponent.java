@@ -1203,7 +1203,7 @@ public class ChartsComponent extends JPanel {
 	
 	/**
 	 * Paints the strategy charts of the players.
-	 * @param graphics     graphics to be used for painting
+	 * @param graphics graphics to be used for painting
 	 */
 	private void paintStrategyCharts( final Graphics graphics ) {
 		final int         strategyDisplayLevels = (Integer) strategyDisplayLevelComboBox.getSelectedItem() - 1;
