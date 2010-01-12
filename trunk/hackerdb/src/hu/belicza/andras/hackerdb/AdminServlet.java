@@ -85,6 +85,10 @@ public class AdminServlet extends BaseServlet {
 	private static final String REQUEST_PARAM_REVOCATE_ID       = "revocate_id";
 	/** Reinstate report id request param.         */
 	private static final String REQUEST_PARAM_REINSTATE_ID      = "reinstate_id";
+	/** Guard hacker id request param.             */
+	private static final String REQUEST_PARAM_GUARD_ID          = "guard_id";
+	/** Unguard hacker id request param.           */
+	private static final String REQUEST_PARAM_UNGUARD_ID        = "unguard_id";
 	/** Change gateway of report id request param. */
 	private static final String REQUEST_PARAM_CHANGE_GATEWAY_ID = "changegw_id";
 	/** New gateway request param.                 */
@@ -301,6 +305,8 @@ public class AdminServlet extends BaseServlet {
 			
 			final Integer revocateId      = getIntegerParamValue( request, REQUEST_PARAM_REVOCATE_ID       );
 			final Integer reinstateId     = getIntegerParamValue( request, REQUEST_PARAM_REINSTATE_ID      );
+			final Integer guardId         = getIntegerParamValue( request, REQUEST_PARAM_GUARD_ID          );
+			final Integer unguardId       = getIntegerParamValue( request, REQUEST_PARAM_UNGUARD_ID        );
 			final Integer changeGatewayId = getIntegerParamValue( request, REQUEST_PARAM_CHANGE_GATEWAY_ID );
 			final Integer newGateway      = getIntegerParamValue( request, REQUEST_PARAM_NEW_GATEWAY       );
 			
@@ -311,6 +317,17 @@ public class AdminServlet extends BaseServlet {
 						renderMessage( "Report has been " + ( revocateId == null ? "reinstated" : "revocated" ) + " successfully.", false, outputWriter );
 					else
 						renderMessage( "Failed to " + ( revocateId == null ? "reinstate" : "revocate" ) + " the report!", true, outputWriter );
+					statement.close();
+				}
+			}
+			
+			if ( guardId != null || unguardId != null ) {
+				synchronized ( Page.LAST_REPORTS ) {
+					statement = connection.prepareStatement( "UPDATE hacker set guarded=" + ( guardId == null ? "false" : "true" ) + " WHERE id=" + ( guardId != null ? guardId : unguardId ) );
+					if ( statement.executeUpdate() == 1 )
+						renderMessage( "Player is now " + ( guardId == null ? "unguarded." : "guarded." ), false, outputWriter );
+					else
+						renderMessage( "Failed to " + ( guardId == null ? "guard" : "unguard" ) + " the player!", true, outputWriter );
 					statement.close();
 				}
 			}
@@ -429,26 +446,30 @@ public class AdminServlet extends BaseServlet {
 			
 			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_REVOCATE_ID       + "'>" );
 			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_REINSTATE_ID      + "'>" );
+			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_GUARD_ID          + "'>" );
+			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_UNGUARD_ID        + "'>" );
 			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_CHANGE_GATEWAY_ID + "'>" );
 			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_NEW_GATEWAY       + "'>" );
 			
 			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
-			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME + "><th>#" + ( fullAdmin ? "<th>IP" : "" ) + "<th>Report<th>Reporter<th>Key<th>Hacker<th>Hacker name<th>Gateway<th>Engine<th>Date<th>Agver<th>Game id<th>Revocated" + ( fullAdmin ? "<th>Changed by" : "" ) );
+			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME + "><th>#" + ( fullAdmin ? "<th>IP" : "" ) + "<th>Report<th>Reporter<th>Key<th>Hacker<th>Hacker name<th>Gateway<th>Engine<th>Date<th>Agver<th>Game id<th>Revocated?<th>Guarded" + ( fullAdmin ? "<th>Changed by" : "" ) );
 			resultSet = statement.executeQuery();
 			int rowCounter = 0;
 			while ( resultSet.next() ) {
 				final int     reportId  = resultSet.getInt( 1 );
+				final int     hackerId  = resultSet.getInt( 4 );
 				final int     gateway   = resultSet.getInt( 6 );
 				final boolean revocated = resultSet.getBoolean( 11 );
+				final boolean guarded   = resultSet.getBoolean( 13 );
 				
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
 						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 15 ) + "' target='_blank'>" + resultSet.getString( 15 ) + "&uarr;</a>" : "" )
 						+ "<td align=right>" + reportId
 						+ "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) 
 						+ "<td align=right>" + ( resultSet.getBoolean( 12 ) ? "(revocated) " : "" ) + "<a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_KEY_ID + "')[0].value='" + resultSet.getInt( 3 ) + "';document.forms['lastReportsFormId'].submit();\">" + resultSet.getInt( 3 ) + "</a>" + ( fullAdmin ? ' ' + getHackerRecordsByKeyLink( resultSet.getString( 14 ), "", "keyreportsform" ) : "" ) 
-						+ "<td align=right>" + resultSet.getInt( 4 )
+						+ "<td align=right>" + hackerId
 						+ "<td><a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_HACKER_NAME + "')[0].value='" + encodeHtmlString( '"' + resultSet.getString( 5 ) + '"' ) + "';document.forms['lastReportsFormId'].submit();\">" + encodeHtmlString( resultSet.getString( 5 ) ) + "</a> " 
-							+ HackerDbServlet.getHackerRecordsByNameLink( '"' + resultSet.getString( 5 ) + '"', "&uarr;", true ) + ( resultSet.getBoolean( 13 ) ? " (guarded)" : "" )
+							+ HackerDbServlet.getHackerRecordsByNameLink( '"' + resultSet.getString( 5 ) + '"', "&uarr;", true ) + ( guarded ? " (guarded)" : "" )
 						+ "<td>" + getGatewayComboHtml( gateway, reportId )
 						+ "<td>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 7 ) ]
 						+ "<td>" + TIME_FORMAT.format( resultSet.getTimestamp( 8 ) )
@@ -456,6 +477,7 @@ public class AdminServlet extends BaseServlet {
 						+ "<td align=right>" + ( resultSet.getObject( 10 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 10 ), Integer.toString( resultSet.getInt( 10 ) ) ) )
 						+ "<td>" + ( revocated ? "Yes" : "No" ) );
 				outputWriter.println( revocated ? "<input type=submit value='Reinstate' onclick='javascript:this.form." + REQUEST_PARAM_REINSTATE_ID + ".value=\"" + reportId + "\";'>" : "<input type=submit value='Revocate' onclick='javascript:this.form." + REQUEST_PARAM_REVOCATE_ID + ".value=\"" + reportId + "\";'>" );
+				outputWriter.println( "<td align=center>" + ( guarded ? "<input type=submit value='Unguard' onclick='javascript:this.form." + REQUEST_PARAM_UNGUARD_ID + ".value=\"" + hackerId + "\";'>" : "<input type=submit value='Guard' onclick='javascript:this.form." + REQUEST_PARAM_GUARD_ID + ".value=\"" + hackerId + "\";'>" ) );
 				if ( fullAdmin )
 					outputWriter.println( "<td>" + ( resultSet.getString( 16 ) == null ? "&nbsp;" : encodeHtmlString( resultSet.getString( 16 ) ) ) );
 			}
