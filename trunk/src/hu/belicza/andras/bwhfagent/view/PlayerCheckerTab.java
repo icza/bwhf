@@ -463,7 +463,7 @@ public class PlayerCheckerTab extends LoggedTab {
 						
 						final RecordAlertLevel alertLevel = RecordAlertLevel.getAlertLevelForGamesCount( gamesCount );
 						if ( alertLevel != null && alertLevel.ordinal() <= ( (RecordAlertLevel) recordAlertLevelsComboBox.getSelectedItem() ).ordinal() ) {
-							logMessage( alertLevel.name + " record detected at slot " + playerId + " for player: " + playerNames[ playerId ] + " (" + gamesCount + " game" + (gamesCount == 1 ? ")" : "s)" ) );
+							logMessage( alertLevel.name + " record detected at slot " + (playerId+1) + " for player: " + playerNames[ playerId ] + " (" + gamesCount + " game" + (gamesCount == 1 ? ")" : "s)" ) );
 							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, alertLevel.fileNamePrefix + "_at_slot.wav" ), true );
 							Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, (playerId+1) + ".wav" ), true );
 						}
@@ -473,7 +473,7 @@ public class PlayerCheckerTab extends LoggedTab {
 			}
 		}
 		catch ( final Exception e ) {
-			logMessage( "Record check failed: error connecting to the BWHF data base server!" );
+			logMessage( "Record check failed: error connecting to the BWHF database server!" );
 		}
 		finally {
 			if ( input != null )
