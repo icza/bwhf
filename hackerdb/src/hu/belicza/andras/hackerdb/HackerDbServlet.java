@@ -270,6 +270,8 @@ public class HackerDbServlet extends BaseServlet {
 			
 			if ( filtersWrapper.pageSize < 1 )
 				filtersWrapper.pageSize = 1;
+			if ( filtersWrapper.pageSize > 1000 )
+				filtersWrapper.pageSize = 1000;
 			final int pagesCount = ( (matchingRecordsCount-1) / filtersWrapper.pageSize ) + 1;
 			if ( filtersWrapper.stepDirection != null ) {
 				if ( filtersWrapper.stepDirection.equals( STEP_DIRECTION_FIRST ) )
