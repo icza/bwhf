@@ -10,7 +10,7 @@
  * Added a *BWHF player record checker* to the Player checker tab. When this feature is enabled, pressing Print Screen in the game lobby will also check the BWHF records of the players (not just whether they are hackers). You can set different alert levels: _New record_ (0..9 games), _Small record_ (10..99) _Medium record_ (100..499 games), _Big record_ (500..1999 games) and _Huge record_ (2000 or more games). If you set the alert level for Medium for example, for a player in the lobby who is not in the BWHF Players' Network, you will hear _"new at slot x"_, for a player who has 250 games you will hear: _"medium at slot x"_ (you won't be alerted for players with more than 500 games). It's like an automated /stats command for all players in the lobby which operates on the BWHF database.
  * Added check and sound alert for *missing gateway*. If you press the Print Screen in the game lobby but no gateway is set, you will hear: _"gateway not set"_ instead of _"clean"_.
  * Fixed a bug on the Charts tab (when all actions in a replay happened at the first iteration and there was hack in the replay).
- * Added new detected chars in the lobby: ` (this is not allowed anymore on battle.net, but there are still old names with this in it), ~ (this was recognized as a quotation mark), {, }, =, §
+ * Added new recognized characters in the lobby: ` (this is not allowed anymore on battle.net, but there are still old names with this in it), ~ (this was recognized as a quotation mark), {, }, =, §
  * Added new tips.
 
 ----
