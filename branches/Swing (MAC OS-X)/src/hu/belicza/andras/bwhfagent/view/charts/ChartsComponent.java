@@ -119,18 +119,18 @@ public class ChartsComponent extends JPanel {
 	 * @author Andras Belicza
 	 */
 	public enum ChartType {
-		/** APM charts of the players.         */
-		APM( "APM/EAPM" ),
-		/** Hotkeys charts of the players.     */
-		HOTKEYS( "Hotkeys" ),
-		/** Build order charts of the players. */
-		BUILD_ORDER( "Build order" ),
-		/** Strategy charts of the players.    */
-		STRATEGY( "Strategy" ),
-		/** Overall APM charts of the players. */
-		OVERALL_APM( "Overall APM/EAPM" ),
-		/** Action Sequence Execution Rate charts of the players. */
-		ASER( "ASER" );
+		/** APM charts of the players.              */
+		APM             ( "APM/EAPM"         ),
+		/** Hotkeys charts of the players.          */
+		HOTKEYS         ( "Hotkeys"          ),
+		/** Build order charts of the players.      */
+		BUILD_ORDER     ( "Build order"      ),
+		/** Strategy charts of the players.         */
+		STRATEGY        ( "Strategy"         ),
+		/** Overall APM charts of the players.      */
+		OVERALL_APM     ( "Overall APM/EAPM" ),
+		/** Action Sequences charts of the players. */
+		ACTION_SEQUENCES( "Action Sequences" );
 		
 		private final String name;
 		private ChartType( final String name ) {
@@ -159,10 +159,12 @@ public class ChartsComponent extends JPanel {
 	/** List of player indices to be shown.                           */
 	private List< Integer >         playerIndexToShowList;
 	
-	/** Detail levels.  */
-	private static final Object[] DETAIL_LEVELS  = { 1, 2, 3, 4, 5, 10, 15, 20, 30, 50, 100 }; 
-	/** Display levels. */
-	private static final Object[] DISPLAY_LEVELS = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 }; 
+	/** Detail levels.                 */
+	private static final Object[] DETAIL_LEVELS                 = { 1, 2, 3, 4, 5, 10, 15, 20, 30, 50, 100 }; 
+	/** Display levels.                */
+	private static final Object[] DISPLAY_LEVELS                = { 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 }; 
+	/** Max frame delays in sequences. */
+	private static final Object[] MAX_FRAME_DELAYS_IN_SEQUENCES = { 5, 10, 15, 20, 25, 30, 35, 40, 45, 50 }; 
 	
 	/** APM chart detail level in pixels combo box.         */
 	private final JComboBox apmChartDetailLevelComboBox          = new JComboBox( DETAIL_LEVELS );
@@ -182,6 +184,10 @@ public class ChartsComponent extends JPanel {
 	private final JComboBox overallApmChartDetailLevelComboBox   = new JComboBox( DETAIL_LEVELS );
 	/** Show select hotkeys checkbox.                       */
 	private final JCheckBox showOverallEapmCheckBox              = new JCheckBox( "Show overall EAPM", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_OVERALL_EAPM ) ) );
+	/** Hide non-hotkey sequences checkbox.                 */
+	private final JCheckBox hideNonHotkeySequencesCheckBox       = new JCheckBox( "Hide non-hotkey sequences", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_NON_HOTKEY_SEQUENCES ) ) );
+	/** Max frames delay in sequences combo box.            */
+	private final JComboBox maxFramesDelayInSequenceComboBox     = new JComboBox( MAX_FRAME_DELAYS_IN_SEQUENCES );
 	
 	/** Scroll bar to scroll the zoomed charts.             */
 	private final JScrollBar            chartScrollBar           = new JScrollBar( JScrollBar.HORIZONTAL );
@@ -221,6 +227,7 @@ public class ChartsComponent extends JPanel {
 		buildOrderDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_BUILD_ORDER_DISPLAY_LEVELS ) ) );
 		strategyDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_STRATEGY_DISPLAY_LEVELS ) ) );
 		overallApmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL ) ) );
+		maxFramesDelayInSequenceComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_MAX_FRAME_DELAY_IN_SEQUENCES ) ) );
 	}
 	
 	/**
@@ -364,6 +371,8 @@ public class ChartsComponent extends JPanel {
 		strategyDisplayLevelComboBox.addActionListener( repainterActionListener );
 		overallApmChartDetailLevelComboBox.addActionListener( repainterActionListener );
 		showOverallEapmCheckBox.addActionListener( repainterActionListener );
+		hideNonHotkeySequencesCheckBox.addActionListener( repainterActionListener );
+		maxFramesDelayInSequenceComboBox.addActionListener( repainterActionListener );
 	}
 	
 	/**
@@ -582,7 +591,10 @@ public class ChartsComponent extends JPanel {
 				chartOptionsPanel.add( new JLabel( " pixels." ) );
 				chartOptionsPanel.add( showOverallEapmCheckBox );
 				break;
-			case ASER :
+			case ACTION_SEQUENCES :
+				chartOptionsPanel.add( hideNonHotkeySequencesCheckBox );
+				chartOptionsPanel.add( new JLabel( "Max frame delay in sequences: " ) );
+				chartOptionsPanel.add( maxFramesDelayInSequenceComboBox );
 				break;
 		}
 		
@@ -594,6 +606,8 @@ public class ChartsComponent extends JPanel {
 		hideWorkerUnitsCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_WORKER_UNITS ) ) );
 		buildOrderDisplayLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_STRATEGY_DISPLAY_LEVELS ) ) );
 		overallApmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL ) ) );
+		hideNonHotkeySequencesCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_NON_HOTKEY_SEQUENCES ) ) );
+		maxFramesDelayInSequenceComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_MAX_FRAME_DELAY_IN_SEQUENCES ) ) );
 		
 		contentPanel.validate();
 		repaint();
@@ -905,8 +919,8 @@ public class ChartsComponent extends JPanel {
 				case OVERALL_APM :
 					paintApmCharts( graphics, true );
 					break;
-				case ASER :
-					paintAserCharts( graphics );
+				case ACTION_SEQUENCES :
+					paintActionSequencesCharts( graphics );
 					break;
 			}
 			
@@ -1287,11 +1301,14 @@ public class ChartsComponent extends JPanel {
 	}
 	
 	/**
-	 * Paints the ASER charts of the players.
+	 * Paints the Action Sequences charts of the players.
 	 * @param graphics graphics to be used for painting
 	 */
 	@SuppressWarnings("unchecked")
-	private void paintAserCharts( final Graphics graphics ) {
+	private void paintActionSequencesCharts( final Graphics graphics ) {
+		final boolean hideNonHotkeySequences = hideNonHotkeySequencesCheckBox.isSelected();
+		final int     maxActionDelay         = (Integer) maxFramesDelayInSequenceComboBox.getSelectedItem();
+		
 		graphics.setFont( CHART_MAIN_FONT );
 		graphics.setColor( CHART_AXIS_COLOR );
 		graphics.drawString( "Pairs/sec", 1, 0 );
@@ -1299,7 +1316,6 @@ public class ChartsComponent extends JPanel {
 		// First identify Action Sequences
 		final List< int[] >[] actionSequenceLists = new List[ chartsParams.playersCount ]; // An action sequence has 3 parameters: its first frame; its last frame; and the Pairs/sec value calculated from number of action pairs in the sequence and from the sequence start and end values 
 		final int[] maxValues = new int[ chartsParams.playersCount ]; // We calculate max values for normalization in one step 
-		final int maxActionDelay = 25;
 		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
 			final List< int[] > actionSequenceList = actionSequenceLists[ i ] = new ArrayList< int[] >();
 			
@@ -1314,7 +1330,7 @@ public class ChartsComponent extends JPanel {
 				final Action  action2           = actions[ actionIndex + 1 ];
 				final boolean isSelectOrHotkey2 = action2.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action2.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY;
 				
-				if ( ( isSelect || isHotkeySelect ) && !isSelectOrHotkey2  && action2.iteration - action.iteration <= maxActionDelay ) {
+				if ( ( !hideNonHotkeySequences && isSelect || isHotkeySelect ) && !isSelectOrHotkey2  && action2.iteration - action.iteration <= maxActionDelay ) {
 					final int  sequenceStart       = action.iteration;
 					final byte command             = action2.actionNameIndex;
 					int        pairsCount          = 1;
@@ -1332,7 +1348,7 @@ public class ChartsComponent extends JPanel {
 						final boolean isHotkeySelect3 = action3.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action3.parameters.startsWith( "Select" );
 						final Action  action4         = actions[ actionIndex + 1 ];
 						
-						if ( ( isSelect3 || isHotkeySelect3 ) && action4.actionNameIndex == command && action4.iteration - action3.iteration <= maxActionDelay ) {
+						if ( ( !hideNonHotkeySequences && isSelect3 || isHotkeySelect3 ) && ( isSelect == isSelect3 || isHotkeySelect == isHotkeySelect3 ) && action4.actionNameIndex == command && action4.iteration - action3.iteration <= maxActionDelay ) {
 							pairsCount++;
 							prevActionIteration = action4.iteration;
 						}
@@ -1346,7 +1362,7 @@ public class ChartsComponent extends JPanel {
 						if ( maxValues[ i ] < pairsPerSec )
 							maxValues[ i ] = pairsPerSec;
 					}
-					actionIndex -= 2;
+					actionIndex--;
 				}
 			}
 		}
@@ -1379,7 +1395,7 @@ public class ChartsComponent extends JPanel {
 					final int y   = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
 					final int value = maxValue * j / ASSIST_LINES_COUNT;
 					graphics.setColor( CHART_AXIS_LABEL_COLOR );
-					graphics.drawString( ( value < 100 ? ( value < 10 ? "  " : " " ) : "" ) + value, 1, y - 7 );
+					graphics.drawString( ( value < 100 ? ( value < 10 ? "  " : " " ) : "" ) + value, 1, y + 4 );
 					if ( j > 0 ) {
 						graphics.setColor( CHART_ASSIST_LINES_COLOR );
 						graphics.drawLine( chartsParams.x1 + 1, y, chartsParams.x1 + chartsParams.maxXInChart, y );
@@ -1459,6 +1475,8 @@ public class ChartsComponent extends JPanel {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_STRATEGY_DISPLAY_LEVELS       , Integer.toString( strategyDisplayLevelComboBox.getSelectedIndex() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL, Integer.toString( overallApmChartDetailLevelComboBox.getSelectedIndex() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_OVERALL_EAPM             , Boolean.toString( showOverallEapmCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_HIDE_NON_HOTKEY_SEQUENCES     , Boolean.toString( hideNonHotkeySequencesCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_MAX_FRAME_DELAY_IN_SEQUENCES  , Integer.toString( maxFramesDelayInSequenceComboBox.getSelectedIndex() ) );
 	}
 	
 }
