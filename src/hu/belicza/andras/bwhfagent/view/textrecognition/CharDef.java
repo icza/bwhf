@@ -77,7 +77,7 @@ public class CharDef {
 			charsInCharDefsPic.add( ch );
 		for ( char ch = '0'; ch <= '9'; ch++ )
 			charsInCharDefsPic.add( ch );
-		for ( final char ch : new char[] { '.', ',', ';', '_', '(', ')', '[', ']', '-', '~', '!', '@', '#', '$', '%', '\'', '`' } )
+		for ( final char ch : new char[] { '.', ',', ';', '_', '(', ')', '[', ']', '-', '~', '!', '@', '#', '$', '%', '\'', '`', '{', '}', '=', '§' } )
 			charsInCharDefsPic.add( ch );
 		
 		CHAR_DEFS = new CharDef[ charsInCharDefsPic.size() ];
