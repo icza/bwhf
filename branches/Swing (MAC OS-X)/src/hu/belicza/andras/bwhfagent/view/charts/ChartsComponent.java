@@ -119,16 +119,18 @@ public class ChartsComponent extends JPanel {
 	 * @author Andras Belicza
 	 */
 	public enum ChartType {
-		/** APM charts of the players of the replay.         */
+		/** APM charts of the players.         */
 		APM( "APM/EAPM" ),
-		/** Hotkeys charts of the players of the replay.     */
+		/** Hotkeys charts of the players.     */
 		HOTKEYS( "Hotkeys" ),
-		/** Build order charts of the players of the replay. */
+		/** Build order charts of the players. */
 		BUILD_ORDER( "Build order" ),
-		/** Strategy charts of the players of the replay.    */
+		/** Strategy charts of the players.    */
 		STRATEGY( "Strategy" ),
-		/** Overall APM charts of the players of the replay. */
-		OVERALL_APM( "Overall APM/EAPM" );
+		/** Overall APM charts of the players. */
+		OVERALL_APM( "Overall APM/EAPM" ),
+		/** Action Sequence Execution Rate charts of the players. */
+		ASER( "ASER" );
 		
 		private final String name;
 		private ChartType( final String name ) {
@@ -580,6 +582,8 @@ public class ChartsComponent extends JPanel {
 				chartOptionsPanel.add( new JLabel( " pixels." ) );
 				chartOptionsPanel.add( showOverallEapmCheckBox );
 				break;
+			case ASER :
+				break;
 		}
 		
 		// We restore the values
@@ -901,6 +905,9 @@ public class ChartsComponent extends JPanel {
 				case OVERALL_APM :
 					paintApmCharts( graphics, true );
 					break;
+				case ASER :
+					paintAserCharts( graphics );
+					break;
 			}
 			
 			if ( markerPosition >= 0 ) {
@@ -1029,7 +1036,7 @@ public class ChartsComponent extends JPanel {
 			
 			drawAxisAndTimeLabels( graphics, i );
 			
-			// Draw APM axis labels
+			// Draw APM axis labels and assist lines
 			if ( !chartsParams.allPlayersOnOneChart || i == 0 ) { // We draw labels once if all players are on one chart
 				graphics.setFont( CHART_AXIS_LABEL_FONT );
 				// if no actions, let's define axis labels from zero to ASSIST_LINES_COUNT
@@ -1277,6 +1284,121 @@ public class ChartsComponent extends JPanel {
 			}
 		
 		return inGameColor;
+	}
+	
+	/**
+	 * Paints the ASER charts of the players.
+	 * @param graphics graphics to be used for painting
+	 */
+	@SuppressWarnings("unchecked")
+	private void paintAserCharts( final Graphics graphics ) {
+		graphics.setFont( CHART_MAIN_FONT );
+		graphics.setColor( CHART_AXIS_COLOR );
+		graphics.drawString( "Pairs/sec", 1, 0 );
+		
+		// First identify Action Sequences
+		final List< int[] >[] actionSequenceLists = new List[ chartsParams.playersCount ]; // An action sequence has 3 parameters: its first frame; its last frame; and the Pairs/sec value calculated from number of action pairs in the sequence and from the sequence start and end values 
+		final int[] maxValues = new int[ chartsParams.playersCount ]; // We calculate max values for normalization in one step 
+		final int maxActionDelay = 25;
+		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
+			final List< int[] > actionSequenceList = actionSequenceLists[ i ] = new ArrayList< int[] >();
+			
+			final int      playerIndex = playerIndexToShowList.get( i );
+			final Action[] actions     = replay.replayActions.players[ playerIndex ].actions;
+			
+			final int maxActionIndex = actions.length - 4;
+			for ( int actionIndex = 0; actionIndex < maxActionIndex; actionIndex++ ) {
+				final Action  action            = actions[ actionIndex ];
+				final boolean isSelect          = action.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT;
+				final boolean isHotkeySelect    = action.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action.parameters.startsWith( "Select" );
+				final Action  action2           = actions[ actionIndex + 1 ];
+				final boolean isSelectOrHotkey2 = action2.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action2.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY;
+				
+				if ( ( isSelect || isHotkeySelect ) && !isSelectOrHotkey2  && action2.iteration - action.iteration <= maxActionDelay ) {
+					final int  sequenceStart       = action.iteration;
+					final byte command             = action2.actionNameIndex;
+					int        pairsCount          = 1;
+					int        prevActionIteration = action2.iteration;
+					
+					do {
+						if ( actionIndex + 3 >= actions.length )
+							break;
+						actionIndex += 2;
+						final Action action3 = actions[ actionIndex ];
+						if ( action3.iteration - prevActionIteration > maxActionDelay )
+							break;
+						
+						final boolean isSelect3       = action3.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT;
+						final boolean isHotkeySelect3 = action3.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY && action3.parameters.startsWith( "Select" );
+						final Action  action4         = actions[ actionIndex + 1 ];
+						
+						if ( ( isSelect3 || isHotkeySelect3 ) && action4.actionNameIndex == command && action4.iteration - action3.iteration <= maxActionDelay ) {
+							pairsCount++;
+							prevActionIteration = action4.iteration;
+						}
+						else
+							break;
+					} while ( true );
+					
+					if ( pairsCount > 1 ) {
+						final int pairsPerSec =  pairsCount * 42 * ( prevActionIteration == sequenceStart ? 2 : prevActionIteration - sequenceStart ) / 1000;
+						actionSequenceList.add( new int[] { sequenceStart, prevActionIteration, pairsPerSec } );
+						if ( maxValues[ i ] < pairsPerSec )
+							maxValues[ i ] = pairsPerSec;
+					}
+					actionIndex -= 2;
+				}
+			}
+		}
+		
+		if ( chartsParams.allPlayersOnOneChart ) { // If all players are on one chart, we have a global maximum
+			int globalMaxValue = 0;
+			for ( int i = 0; i < chartsParams.playersCount; i++ )
+				if ( globalMaxValue < maxValues[ i ] )
+					globalMaxValue = maxValues[ i ];
+			Arrays.fill( maxValues, globalMaxValue );
+		}
+		
+		// Now draw the Axis, labels and charts
+		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
+			final int           playerIndex   = playerIndexToShowList.get( i );
+			final PlayerActions playerActions = replay.replayActions.players[ playerIndex ];
+			final int           y1            = chartsParams.getY1ForChart( i );
+			final int           y2            = y1 + chartsParams.maxYInChart - 1;
+			final Color         inGameColor   = getPlayerInGameColor( playerActions );
+			final Color         chartColor    = inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor;
+			
+			drawAxisAndTimeLabels( graphics, i );
+			
+			// Draw Pairs/sec axis labels and assist lines
+			if ( !chartsParams.allPlayersOnOneChart || i == 0 ) { // We draw labels once if all players are on one chart
+				graphics.setFont( CHART_AXIS_LABEL_FONT );
+				// if no action sequences, let's define axis labels from zero to ASSIST_LINES_COUNT
+				final int maxValue = maxValues[ i ] > 0 ? maxValues[ i ] : ASSIST_LINES_COUNT;
+				for ( int j = 0; j <= ASSIST_LINES_COUNT; j++ ) {
+					final int y   = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
+					final int value = maxValue * j / ASSIST_LINES_COUNT;
+					graphics.setColor( CHART_AXIS_LABEL_COLOR );
+					graphics.drawString( ( value < 100 ? ( value < 10 ? "  " : " " ) : "" ) + value, 1, y - 7 );
+					if ( j > 0 ) {
+						graphics.setColor( CHART_ASSIST_LINES_COLOR );
+						graphics.drawLine( chartsParams.x1 + 1, y, chartsParams.x1 + chartsParams.maxXInChart, y );
+					}
+				}
+			}
+			
+			// Now draw the bars of the action sequences
+			graphics.setColor( chartColor );
+			final int maxValue = maxValues[ i ] > 0 ? maxValues[ i ] : 1;
+			for ( final int[] actionSequence : actionSequenceLists[ i ] ) {
+				final int x1     = chartsParams.getXForIteration( actionSequence[ 0 ] );
+				final int x2     = chartsParams.getXForIteration( actionSequence[ 1 ] );
+				final int height = actionSequence[ 2 ] * chartsParams.chartHeight / maxValue;
+				graphics.fillRect( x1, y2 - height, x2 > x1 ? x2 - x1 : 1, height );
+			}
+			
+			drawPlayerDescription( graphics, chartsParams, i, inGameColor, null );
+		}
 	}
 	
 	/**
