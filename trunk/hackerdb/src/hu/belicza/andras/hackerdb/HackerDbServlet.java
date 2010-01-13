@@ -713,9 +713,9 @@ public class HackerDbServlet extends BaseServlet {
 			
 			outputWriter.print( "<table border=1 cellspacing=0 cellpadding=2><tr><th colspan=2 width=50%>&nbsp;Current hacker reporting speed:&nbsp;<th colspan=2 width=50%>&nbsp;Players' Network's current growing speed:&nbsp;<tr>" );
 			outputWriter.print( "<td rowspan=2 align=center><img src='" + reportingSpeedChartUrlBuilder             + "' width=" + SPEED_CHARTS_WIDTH + " height=" + SPEED_CHARTS_HEIGHT + " title=\"Current hacker reporting speed\"></img>" );
-			outputWriter.print( "<td align=center>" + lastHourReports + " reports/hour" );
+			outputWriter.print( "<td align=center>" + lastHourReports + " report" + ( lastHourReports == 1 ? "" : "s" ) + "/hour" );
 			outputWriter.print( "<td rowspan=2 align=center><img src='" + playersNetworkGrowingSpeedChartUrlBuilder + "' width=" + SPEED_CHARTS_WIDTH + " height=" + SPEED_CHARTS_HEIGHT + " title=\"Players' Network's current growing speed\"></img>" );
-			outputWriter.print( "<td align=center>" + lastHourGames + " games/hour" );
+			outputWriter.print( "<td align=center>" + lastHourGames + " game" + ( lastHourGames == 1 ? "" : "s" ) + "/hour" );
 			outputWriter.print( "<tr><td align=center>Avg " + new Formatter().format( "%.1f", lastMonthReports / 720f ) + " reports/hour<br><div class='note'>(in the last 720 hours)</div>" );
 			outputWriter.print( "<td align=center>Avg " + new Formatter().format( "%.1f", lastMonthGames / 720f ) + " games/hour<br><div class='note'>(in the last 720 hours)</div>" );
 			outputWriter.println( "</table>" );
