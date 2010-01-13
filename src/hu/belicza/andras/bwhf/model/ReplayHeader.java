@@ -251,7 +251,7 @@ public class ReplayHeader {
 	
 	/**
 	 * Returns the number of frames when the player was active.<br>
-	 * The first 2 minutes are ommitted.
+	 * The first 2 minutes are omitted.
 	 * The last frame is the frame of the last action of the player.
 	 * If the player does not have actions after 2 minutes, 0 is returned
 	 * @param playerIndex
