@@ -159,6 +159,10 @@ public class Consts {
 	public static final String PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL = "overallApmChartDetailLevel";
 	/** Show overall EAPM property.              */
 	public static final String PROPERTY_SHOW_OVERALL_EAPM              = "showOverallEapm";
+	/** Hide non-hotkey sequences property.      */
+	public static final String PROPERTY_HIDE_NON_HOTKEY_SEQUENCES      = "hideNonHotkeySequences";
+	/** Max frame delay in sequences property.   */
+	public static final String PROPERTY_MAX_FRAME_DELAY_IN_SEQUENCES   = "maxFrameDelayInSequences";
 	/** Player checker enabled property.         */
 	public static final String PROPERTY_HIDE_SEARCH_FILTERS            = "hideSearchFilters";
 	/** Player checker enabled property.         */
@@ -250,6 +254,8 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_STRATEGY_DISPLAY_LEVELS       , "4" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL, "7" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SHOW_OVERALL_EAPM             , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HIDE_NON_HOTKEY_SEQUENCES     , "false" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_MAX_FRAME_DELAY_IN_SEQUENCES  , "4" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HIDE_SEARCH_FILTERS           , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_APPEND_RESULTS_TO_TABLE       , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAYER_CHECKER_ENABLED        , "true" );
