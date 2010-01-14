@@ -2,9 +2,7 @@
 
 = Introduction =
 
-These videos were created by [http://www.youtube.com/user/dobbersp dobbersp].
-
-These !YouTube video series explain exactly howto setup BWHF Agent plus Chaoslauncher.
+These !YouTube video series explain exactly howto setup BWHF Agent plus Chaoslauncher. Author: [http://www.youtube.com/user/dobbersp dobbersp].
 
 *Part 1:*
 
