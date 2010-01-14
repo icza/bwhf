@@ -1177,7 +1177,7 @@ public class AdminServlet extends BaseServlet {
 	 * @param outputWriter writer to be used to render
 	 */
 	private static void renderFooter( final PrintWriter outputWriter ) {
-		outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></td></center>" );
+		outputWriter.println( "<p align=right><i>&copy; Andr&aacute;s Belicza, 2008-2010</i></td></center>" );
 		outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
 		outputWriter.println( "</body></html>" );
 		outputWriter.flush();

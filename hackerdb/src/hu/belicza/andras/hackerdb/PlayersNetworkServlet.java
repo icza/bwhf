@@ -42,6 +42,7 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -1011,8 +1012,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 					
 					outputWriter.print( "<tr><th align=left>Total time in games:<td>" + ReplayHeader.formatFrames( resultSet.getInt( 4 ), new StringBuilder(), true ) );
 					if ( hasAka ) outputWriter.print( "<td>" + ReplayHeader.formatFrames( resultSet2.getInt( 4 ), new StringBuilder(), true ) );
-					outputWriter.print( "<tr><th align=left>Average games per day:<td>" + ( firstGameDate == null ? UNKOWN_HTML_STRING : new Formatter().format( "%.2f", ( resultSet.getInt( 1 ) / (float) days ) ) ) );
-					if ( hasAka ) outputWriter.print( "<td>" + ( firstGameDate2 == null ? UNKOWN_HTML_STRING : new Formatter().format( "%.2f", ( resultSet2.getInt( 1 ) / (float) days2 ) ) ) );
+					outputWriter.print( "<tr><th align=left>Average games per day:<td>" + ( firstGameDate == null ? UNKOWN_HTML_STRING : new Formatter( Locale.ENGLISH ).format( "%.2f", ( resultSet.getInt( 1 ) / (float) days ) ) ) );
+					if ( hasAka ) outputWriter.print( "<td>" + ( firstGameDate2 == null ? UNKOWN_HTML_STRING : new Formatter( Locale.ENGLISH ).format( "%.2f", ( resultSet2.getInt( 1 ) / (float) days2 ) ) ) );
 					outputWriter.print( "<tr><th align=left>Average game length:<td>" + ( resultSet.getInt( 8 ) > 0 ? ReplayHeader.formatFrames( resultSet.getInt( 9 ) /  resultSet.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
 					if ( hasAka ) outputWriter.print( "<td>" + ( resultSet2.getInt( 8 ) > 0 ? ReplayHeader.formatFrames( resultSet2.getInt( 9 ) /  resultSet2.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
 					averageApm = (int) (resultSet.getInt( 10 ) > 0 ? ( resultSet.getInt( 11 ) * 60l /  ReplayHeader.convertFramesToSeconds( resultSet.getInt( 10 ) ) ) : 0l );
@@ -1199,8 +1200,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 						activityChartUrlBuilder.append( ',' ).append( monthsCount == 1 ? 50 : i * 100 / ( monthsCount - 1 ) ); // If one month only, put it in center
 					
 					activityChartUrlBuilder.append( "&amp;chg=" );
-					activityChartUrlBuilder.append( monthsCount == 1 ? "50," : new Formatter().format( "%.2f,", monthsJump * 100.0f / ( monthsCount - 1 ) ) );
-					new Formatter( activityChartUrlBuilder ).format( "%.2f", 100.0f / maxYLabelsCount );
+					activityChartUrlBuilder.append( monthsCount == 1 ? "50," : new Formatter( Locale.ENGLISH ).format( "%.2f,", monthsJump * 100.0f / ( monthsCount - 1 ) ) );
+					new Formatter( activityChartUrlBuilder,  Locale.ENGLISH ).format( "%.2f", 100.0f / maxYLabelsCount );
 					
 					outputWriter.println( "<p><img src='" + activityChartUrlBuilder.toString() + "' width=" + CHART_WIDTH + " height=" + CHART_HEIGHT + " title='BWHF Activity of " + playerNameHtml + " (games/month)'></p>" );
 					outputWriter.flush();
@@ -1262,13 +1263,13 @@ public class PlayersNetworkServlet extends BaseServlet {
 					for ( int i = 0; i < monthsCount; i += monthsJump )
 						apmDevelChartUrlBuilder.append( ',' ).append( monthsCount == 1 ? 50 : i * 100 / ( monthsCount - 1 ) ); // If one month only, put it in center
 					apmDevelChartUrlBuilder.append( "|2," );
-					new Formatter( apmDevelChartUrlBuilder ).format( "%.2f", averageApm * 100f / (maxMonthApm == 0 ? 1 : maxMonthApm) );
+					new Formatter( apmDevelChartUrlBuilder, Locale.ENGLISH ).format( "%.2f", averageApm * 100f / (maxMonthApm == 0 ? 1 : maxMonthApm) );
 					if ( averageApm2 > 0 && Math.abs( averageApm - averageApm2 ) > 5 ) // Only render AKA average if the 2 averages are not too close
-						new Formatter( apmDevelChartUrlBuilder ).format( ",%.2f", averageApm2 * 100f / (maxMonthApm == 0 ? 1 : maxMonthApm) );
+						new Formatter( apmDevelChartUrlBuilder, Locale.ENGLISH ).format( ",%.2f", averageApm2 * 100f / (maxMonthApm == 0 ? 1 : maxMonthApm) );
 					
 					apmDevelChartUrlBuilder.append( "&amp;chg=" );
-					apmDevelChartUrlBuilder.append( monthsCount == 1 ? "50," : new Formatter().format( "%.2f,", monthsJump * 100.0f / ( monthsCount - 1 ) ) );
-					new Formatter( apmDevelChartUrlBuilder ).format( "%.2f", 100.0f / maxYLabelsCount );
+					apmDevelChartUrlBuilder.append( monthsCount == 1 ? "50," : new Formatter( Locale.ENGLISH ).format( "%.2f,", monthsJump * 100.0f / ( monthsCount - 1 ) ) );
+					new Formatter( apmDevelChartUrlBuilder, Locale.ENGLISH ).format( "%.2f", 100.0f / maxYLabelsCount );
 					
 					apmDevelChartUrlBuilder.append( "&amp;chxs=2,2020FF,10,-1,t,2020FF&amp;chxtc=0,0|2,-" ).append( CHART_WIDTH );
 					
@@ -1283,7 +1284,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 							raceChartUrlBuilder.append( " (with+AKAs+included)" );
 						raceChartUrlBuilder.append( "&amp;chdl=Zerg|Terran|Protoss" );
 						raceChartUrlBuilder.append( "&amp;chd=t:" );
-						final Formatter raceDistroFormatter = new Formatter( raceChartUrlBuilder );
+						final Formatter raceDistroFormatter = new Formatter( raceChartUrlBuilder, Locale.ENGLISH );
 						for ( int race=0; race < 3; race++ ) {
 							if ( race > 0 )
 								raceChartUrlBuilder.append( '|' );
@@ -1319,7 +1320,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 							raceChartUrlBuilder.append( ',' ).append( monthsCount == 1 ? 50 : i * 100 / ( monthsCount - 1 ) ); // If one month only, put it in center
 						
 						raceChartUrlBuilder.append( "&amp;chg=" );
-						raceChartUrlBuilder.append( monthsCount == 1 ? "50," : new Formatter().format( "%.2f,", monthsJump * 100.0f / ( monthsCount - 1 ) ) );
+						raceChartUrlBuilder.append( monthsCount == 1 ? "50," : new Formatter( Locale.ENGLISH ).format( "%.2f,", monthsJump * 100.0f / ( monthsCount - 1 ) ) );
 						raceChartUrlBuilder.append( "33.33,1,0" );
 						
 						outputWriter.println( "<p><img src='" + raceChartUrlBuilder.toString() + "' width=" + CHART_WIDTH + " height=" + CHART_HEIGHT + " title='BWHF Race distribution of " + playerNameHtml + " over time" + ( dataList == chartData2 ? " (with AKAs included)" : "" ) + "'></p>" );
@@ -1374,6 +1375,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					statement.setString( 1, playerNames[ i ] );
 					resultSet = statement.executeQuery();
 					outputWriter.println( i + " " + ( resultSet.next() ? resultSet.getInt( 1 ) : 0 ) );
+					resultSet.close();
 				}
 			
 			outputWriter.flush();
@@ -1434,7 +1436,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				resultBuilder.append( GATEWAY_COLORS[ dataList.get( i )[ 0 ] ] );
 			}
 			resultBuilder.append( "&amp;chd=t:" );
-			final Formatter dataFormatter = new Formatter( resultBuilder );
+			final Formatter dataFormatter = new Formatter( resultBuilder, Locale.ENGLISH );
 			for ( int i = 0; i < gatewaysCount; i++ ) {
 				if ( dataList.get( i )[ 0 ] < 0 ) // Missing gateway
 					continue;
@@ -1739,7 +1741,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 		
 		outputWriter.println( "<hr><table border=0 width='100%'><tr><td width='40%' align='left'><a href='http://code.google.com/p/bwhf/'>BWHF Agent home page</a>&nbsp;&nbsp;<a href='hackers'>BWHF Hacker Database</a>"
 							+ "<td align=center width='20%'><i>Served in " + (executionMs / 1000) + " sec, " + (executionMs % 1000) + " ms</i>"
-							+ "<td align=right width='40%'><i>&copy; Andr&aacute;s Belicza, 2008-2009</i></table>" );
+							+ "<td align=right width='40%'><i>&copy; Andr&aacute;s Belicza, 2008-2010</i></table>" );
 		outputWriter.println( "</center>" );
 		outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
 		outputWriter.println( "</body></html>" );

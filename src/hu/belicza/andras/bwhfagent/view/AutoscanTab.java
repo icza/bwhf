@@ -56,7 +56,7 @@ public class AutoscanTab extends LoggedTab {
 	/** Checkbox to use short names for autosaved replays.                      */
 	private   final JCheckBox  useShortNamesForAutosaveCheckBox = new JCheckBox( "Use short names for autosaved replays (short format: 'YYMMDD hhmmss.rep', default: 'YYYY-MM-DD hh-mm-ss LastRep.rep' )", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_USE_SHORT_NAMES_FOR_AUTOSAVE ) ) );
 	/** Checkbox to enable/disable playing sound if found hacks.                */
-	private   final JCheckBox  playSoundCheckBox                = new JCheckBox( "Play sound alert if found hackers", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_PLAY_SOUND_IF_FOUND_HACKERS ) ) );
+	private   final JCheckBox  playSoundCheckBox                = new JCheckBox( "Enable sound alerts for announcing hackers", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_PLAY_SOUND_IF_FOUND_HACKERS ) ) );
 	/** Checkbox to enable/disable bringing main frame to front if found hacks. */
 	private   final JCheckBox  bringToFrontCheckBox             = new JCheckBox( "Bring Agent to front if found hackers", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_BRING_TO_FRONT ) ) );
 	/** Checkbox to enable/disable reporting hackers.                           */
