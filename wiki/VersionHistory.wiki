@@ -11,6 +11,7 @@
  * Added check and sound alert for *missing gateway*. If you press the Print Screen in the game lobby but no gateway is set, you will hear: _"gateway not set"_ instead of _"clean"_.
  * Autoscan now says _"clean"_ if last replay contained no hacks.
  * Fixed a bug on the Charts tab (when all actions in a replay happened at the first iteration and there was hack in the replay).
+ * Changed the 2nd colors of players on the EAPM and Action Sequences charts.
  * Added new recognized characters in the lobby: ` (this is not allowed anymore on battle.net, but there are still old names with this in it), ~ (this was recognized as a quotation mark), {, }, =, §
  * Added new tips.
 
