@@ -63,6 +63,7 @@ import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
@@ -634,7 +635,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Last days daily reports chart URL
 			final int ADDED_DAILY_LINES_GRANULARITY = 50; // Added lines in granularity of reports count (a helper line added in every ADDED_DAILY_LINES_GRANULARITY repors)
 			final StringBuilder dailyReportsChartUrlBuilder = new StringBuilder();
-			Formatter numberFormatter = new Formatter( dailyReportsChartUrlBuilder );
+			Formatter numberFormatter = new Formatter( dailyReportsChartUrlBuilder, Locale.ENGLISH );
 			dailyReportsChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=bvs&amp;chf=bg,s,ffffff00&amp;chbh=a&amp;chxt=y&amp;chxr=0,0," )
 				.append( maxLastDaysReportsCount ).append( "," ).append( ADDED_DAILY_LINES_GRANULARITY ).append( "&amp;chg=0," );
 			numberFormatter.format( "%2.2f", ADDED_DAILY_LINES_GRANULARITY * 100.0f / maxLastDaysReportsCount );
@@ -660,7 +661,7 @@ public class HackerDbServlet extends BaseServlet {
 			gatewayDistributionChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=p3&amp;chf=bg,s,ffffff00&amp;chs=" ).append( CHARTS_WIDTH ).append( 'x' ).append( CHARTS_HEIGHT )
 				.append( "&amp;chtt=BWHF+Hacker+gateway+distribution+at+" ).append( DATE_FORMAT.format( currentDate ).replace( " ", "+" ) );
 			gatewayDistributionChartUrlBuilder.append( "&amp;chd=t:" );
-			numberFormatter = new Formatter( gatewayDistributionChartUrlBuilder );
+			numberFormatter = new Formatter( gatewayDistributionChartUrlBuilder, Locale.ENGLISH );
 			for ( int i = 0; i < gatewayDistributionList.size(); i++ ) {
 				final int[] gatewayDistribution = gatewayDistributionList.get( i ); 
 				if ( i > 0 )
@@ -687,7 +688,7 @@ public class HackerDbServlet extends BaseServlet {
 			// Monthly reports chart URL
 			final int ADDED_MONTLY_LINES_GRANULARITY = 1000; // Added lines in granularity of reports count (a helper line added in every ADDED_MONTLY_LINES_GRANULARITY reports)
 			final StringBuilder monthlyReportsChartUrlBuilder = new StringBuilder();
-			numberFormatter = new Formatter( monthlyReportsChartUrlBuilder );
+			numberFormatter = new Formatter( monthlyReportsChartUrlBuilder, Locale.ENGLISH );
 			monthlyReportsChartUrlBuilder.append( "http://chart.apis.google.com/chart?cht=bvs&amp;chf=bg,s,ffffff00&amp;chbh=a&amp;chxt=y&amp;chxr=0,0," )
 				.append( maxMonthlyReportsCount ).append( "," ).append( ADDED_MONTLY_LINES_GRANULARITY ).append( "&amp;chg=0," );
 			numberFormatter.format( "%2.2f", ADDED_MONTLY_LINES_GRANULARITY * 100.0f / maxMonthlyReportsCount );
@@ -718,8 +719,8 @@ public class HackerDbServlet extends BaseServlet {
 			outputWriter.print( "<td align=center>" + lastHourReports + " report" + ( lastHourReports == 1 ? "" : "s" ) + "/hour" );
 			outputWriter.print( "<td rowspan=2 align=center><img src='" + playersNetworkGrowingSpeedChartUrlBuilder + "' width=" + SPEED_CHARTS_WIDTH + " height=" + SPEED_CHARTS_HEIGHT + " title=\"Players' Network's current growing speed\"></img>" );
 			outputWriter.print( "<td align=center>" + lastHourGames + " game" + ( lastHourGames == 1 ? "" : "s" ) + "/hour" );
-			outputWriter.print( "<tr><td align=center>Avg " + new Formatter().format( "%.1f", lastMonthReports / 720f ) + " reports/hour<br><div class='note'>(in the last 720 hours)</div>" );
-			outputWriter.print( "<td align=center>Avg " + new Formatter().format( "%.1f", lastMonthGames / 720f ) + " games/hour<br><div class='note'>(in the last 720 hours)</div>" );
+			outputWriter.print( "<tr><td align=center>Avg " + new Formatter( Locale.ENGLISH ).format( "%.1f", lastMonthReports / 720f ) + " reports/hour<br><div class='note'>(in the last 720 hours)</div>" );
+			outputWriter.print( "<td align=center>Avg " + new Formatter( Locale.ENGLISH ).format( "%.1f", lastMonthGames / 720f ) + " games/hour<br><div class='note'>(in the last 720 hours)</div>" );
 			outputWriter.println( "</table>" );
 			
 			outputWriter.println( "<h3>Last " + LAST_DAYS_REPORTS + " days' daily reports</h3>" );
@@ -1143,7 +1144,7 @@ public class HackerDbServlet extends BaseServlet {
 	
 	private static void renderFooter( final PrintWriter outputWriter ) {
 		outputWriter.println( "<hr><table border=0 width='100%'><tr><td align='left'><a href='http://code.google.com/p/bwhf/'>BWHF Agent home page</a>&nbsp;&nbsp;<a href='players'>BWHF Players' Network</a>"
-				+ "<td align=right <i>&copy; Andr&aacute;s Belicza, 2008-2009</i></table>" );
+				+ "<td align=right <i>&copy; Andr&aacute;s Belicza, 2008-2010</i></table>" );
 		outputWriter.println( "</center>" );
 		outputWriter.println( GOOGLE_ANALYTICS_TRACKING_CODE );
 		outputWriter.println( "</body></html>" );
