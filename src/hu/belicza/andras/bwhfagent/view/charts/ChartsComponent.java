@@ -22,7 +22,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Formatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import swingwt.awt.BasicStroke;
@@ -1294,8 +1296,10 @@ public class ChartsComponent extends JPanel {
 		graphics.drawString( "Pairs/sec", 1, 0 );
 		
 		// First identify Action Sequences
-		final List< int[] >[] actionSequenceLists = new List[ chartsParams.playersCount ]; // An action sequence has 3 parameters: its first frame; its last frame; and the Pairs/sec value calculated from number of action pairs in the sequence and from the sequence start and end values 
-		final int[] maxValues = new int[ chartsParams.playersCount ]; // We calculate max values for normalization in one step 
+		final List< int[] >[] actionSequenceLists = new List[ chartsParams.playersCount ]; // An action sequence has 4 parameters: its first frame; its last frame; pairs count, and whether it is hotkey sequence (0) or not (1) 
+		final float[] maxValues     = new float[ chartsParams.playersCount ]; // We calculate max values for normalization in one step 
+		final int[]   summaPairs    = new int[ chartsParams.playersCount ];   // For the average pairs/sec 
+		final int[]   summaDuration = new int[ chartsParams.playersCount ];   // For the average pairs/sec 
 		for ( int i = 0; i < chartsParams.playersCount; i++ ) {
 			final List< int[] > actionSequenceList = actionSequenceLists[ i ] = new ArrayList< int[] >();
 			
@@ -1310,7 +1314,7 @@ public class ChartsComponent extends JPanel {
 				final Action  action2           = actions[ actionIndex + 1 ];
 				final boolean isSelectOrHotkey2 = action2.actionNameIndex == Action.ACTION_NAME_INDEX_SELECT || action2.actionNameIndex == Action.ACTION_NAME_INDEX_HOTKEY;
 				
-				if ( ( !hideNonHotkeySequences && isSelect || isHotkeySelect ) && !isSelectOrHotkey2  && action2.iteration - action.iteration <= maxActionDelay ) {
+				if ( ( !hideNonHotkeySequences && isSelect || isHotkeySelect ) && !isSelectOrHotkey2 && action2.iteration - action.iteration <= maxActionDelay ) {
 					final int  sequenceStart       = action.iteration;
 					final byte command             = action2.actionNameIndex;
 					int        pairsCount          = 1;
@@ -1337,8 +1341,11 @@ public class ChartsComponent extends JPanel {
 					} while ( true );
 					
 					if ( pairsCount > 1 ) {
-						final int pairsPerSec =  pairsCount * 42 * ( prevActionIteration == sequenceStart ? 2 : prevActionIteration - sequenceStart ) / 1000;
-						actionSequenceList.add( new int[] { sequenceStart, prevActionIteration, pairsPerSec } );
+						final int sequenceDuration = ( prevActionIteration == sequenceStart ? 2 : prevActionIteration - sequenceStart );
+						actionSequenceList.add( new int[] { sequenceStart, prevActionIteration, pairsCount, isSelect ? 1 : 0 } );
+						summaPairs   [ i ] += pairsCount;
+						summaDuration[ i ] += sequenceDuration;
+						final float pairsPerSec =  pairsCount * 1000f / ( sequenceDuration * 42f );
 						if ( maxValues[ i ] < pairsPerSec )
 							maxValues[ i ] = pairsPerSec;
 					}
@@ -1348,7 +1355,7 @@ public class ChartsComponent extends JPanel {
 		}
 		
 		if ( chartsParams.allPlayersOnOneChart ) { // If all players are on one chart, we have a global maximum
-			int globalMaxValue = 0;
+			float globalMaxValue = 0;
 			for ( int i = 0; i < chartsParams.playersCount; i++ )
 				if ( globalMaxValue < maxValues[ i ] )
 					globalMaxValue = maxValues[ i ];
@@ -1370,12 +1377,12 @@ public class ChartsComponent extends JPanel {
 			if ( !chartsParams.allPlayersOnOneChart || i == 0 ) { // We draw labels once if all players are on one chart
 				graphics.setFont( CHART_AXIS_LABEL_FONT );
 				// if no action sequences, let's define axis labels from zero to ASSIST_LINES_COUNT
-				final int maxValue = maxValues[ i ] > 0 ? maxValues[ i ] : ASSIST_LINES_COUNT;
+				final float maxValue = maxValues[ i ] > 0 ? maxValues[ i ] : ASSIST_LINES_COUNT;
 				for ( int j = 0; j <= ASSIST_LINES_COUNT; j++ ) {
-					final int y   = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
-					final int value = maxValue * j / ASSIST_LINES_COUNT;
+					final int   y     = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
+					final float value = maxValue * j / ASSIST_LINES_COUNT;
 					graphics.setColor( CHART_AXIS_LABEL_COLOR );
-					graphics.drawString( ( value < 100 ? ( value < 10 ? "  " : " " ) : "" ) + value, 1, y - 7 );
+					graphics.drawString( new Formatter( Locale.ENGLISH ).format( "%.1f", value ).toString(), 1, y - 7 );
 					if ( j > 0 ) {
 						graphics.setColor( CHART_ASSIST_LINES_COLOR );
 						graphics.drawLine( chartsParams.x1 + 1, y, chartsParams.x1 + chartsParams.maxXInChart, y );
@@ -1384,19 +1391,20 @@ public class ChartsComponent extends JPanel {
 			}
 			
 			// Now draw the bars of the action sequences
-			graphics.setColor( chartColor );
-			final int maxValue = maxValues[ i ] > 0 ? maxValues[ i ] : 1;
+			final float maxValue = maxValues[ i ] > 0 ? maxValues[ i ] : 1;
 			for ( final int[] actionSequence : actionSequenceLists[ i ] ) {
-				final int x1     = chartsParams.getXForIteration( actionSequence[ 0 ] );
-				final int x2     = chartsParams.getXForIteration( actionSequence[ 1 ] );
-				final int height = actionSequence[ 2 ] * chartsParams.chartHeight / maxValue;
-				graphics.fillRect( x1, y2 - height, x2 > x1 ? x2 - x1 : 1, height );
+				final int x1               = chartsParams.getXForIteration( actionSequence[ 0 ] );
+				final int x2               = chartsParams.getXForIteration( actionSequence[ 1 ] );
+				final int sequenceDuration = ( actionSequence[ 1 ] == actionSequence[ 0 ] ? 2 : actionSequence[ 1 ] - actionSequence[ 0 ] );
+				final int height           = (int) ( actionSequence[ 2 ] * 1000f * chartsParams.chartHeight / ( sequenceDuration * 42f * maxValue ) );
+				graphics.setColor( actionSequence[ 3 ] == 0 ? chartColor : chartColor.brighter().brighter() );
+				graphics.fillRect( x1, y2 - height + 1, x2 > x1 ? x2 - x1 : 1, height );
 			}
 			// SwingWT sets permanently the fill color if a filling operation is called. We have to reset it.
 			graphics.setColor( CHART_BACKGROUND_COLOR );
 			graphics.fillRect( -5, -5, 1, 1 );
 			
-			drawPlayerDescription( graphics, chartsParams, i, inGameColor, null );
+			drawPlayerDescription( graphics, chartsParams, i, inGameColor, new Formatter( Locale.ENGLISH ).format( "Avg %.1f pairs/sec", summaDuration[ i ] > 0 ? summaPairs[ i ] * 1000f / ( summaDuration[ i ] * 42f ) : 0f ).toString() );
 		}
 	}
 	
@@ -1453,13 +1461,13 @@ public class ChartsComponent extends JPanel {
 	 * @param chartsParams parameters of the charts to be drawn
 	 * @param chartIndex   index of chart being queried
 	 * @param inGameColor  in-game color of the player
-	 * @param eapmText     EAPM text to display; can be <code>null</code>
+	 * @param extraInfo    extra info to be displayed; can be <code>null</code>
 	 */
-	private void drawPlayerDescription( final Graphics graphics, final ChartsParams chartsParams, final int chartIndex, final Color inGameColor, final String eapmText ) {
+	private void drawPlayerDescription( final Graphics graphics, final ChartsParams chartsParams, final int chartIndex, final Color inGameColor, final String extraInfo ) {
 		graphics.setFont( CHART_MAIN_FONT );
 		graphics.setColor( inGameColor == null ? CHART_PLAYER_DESCRIPTION_COLOR : inGameColor );
 		final String description = replay.replayHeader.getPlayerDescription( replay.replayActions.players[ playerIndexToShowList.get( chartIndex ) ].playerName );
-		graphics.drawString( eapmText == null ? description : description + ", " + eapmText,
+		graphics.drawString( extraInfo == null ? description : description + ", " + extraInfo,
 				             chartsParams.x1 + 2,
 				             chartsParams.getY1ForChart( chartIndex ) + ( chartsParams.allPlayersOnOneChart ? chartIndex * 14 - 22 : -12 ) );
 	}
