@@ -1,8 +1,8 @@
-#summary Step-by-step instructions on how to setup BWHF+Chaoslauncher
+#summary Step-by-step instructions on how to setup BWHF Agent and Chaoslauncher
 
 = Introduction =
 
-These !YouTube video series explain exactly howto setup BWHF Agent plus Chaoslauncher. Author: [http://www.youtube.com/user/dobbersp dobbersp].
+These !YouTube video series explain exactly howto setup BWHF Agent and Chaoslauncher. Author: [http://www.youtube.com/user/dobbersp dobbersp].
 
 *Part 1:*
 
