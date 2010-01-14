@@ -4,6 +4,8 @@
 
 This !YouTube video series explains how to download, install, configure, and utilize Chaoslauncher and BWHF Agent for Starcraft. Author: [http://www.youtube.com/user/dobbersp dobbersp].
 
+The video maker used BWHF Agent 2.90 on Windows XP.
+
 *Part 1:*
 
 <wiki:video url="http://www.youtube.com/watch?v=k39QqTfvyA8"/>
