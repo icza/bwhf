@@ -461,7 +461,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 			output.println( "<hr>" );
 			output.println( "<table width='100%' border=0>" );
 			output.println( "<tr><td align=left><i>This report was created with BWHF Agent ver <b>" + MainFrame.getInstance().applicationVersion + "</b></i>" );
-			output.println( "<td align=right><i>&copy; Andr&aacute;s Belicza, 2008-2009</i>" );
+			output.println( "<td align=right><i>&copy; Andr&aacute;s Belicza, 2008-2010</i>" );
 			output.println( "</table>" );
 			
 			output.println( "</body></html>" );
