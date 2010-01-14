@@ -33,7 +33,7 @@ You can check out the detailed [http://bwhf.net/hackerdb/hackers?op=sta BWHF Hac
 
 *BWHF Agent 2.90 has won the Softpedia's Free and clean software award:*
 
-_"Softpedia guarantees that BWHF Agent 2.90 is 100% Free, which means it does not contain any form of malware, including but not limited to: spyware, viruses, trojans and backdoors."_
+_"Softpedia guarantees that BWHF Agent 3.00 is 100% Free, which means it does not contain any form of malware, including but not limited to: spyware, viruses, trojans and backdoors."_
 
 [http://mac.softpedia.com/progClean/BWHF-Agent-Clean-69288.html http://mac.softpedia.com/base_img/softpedia_free_award_f.gif]
 
