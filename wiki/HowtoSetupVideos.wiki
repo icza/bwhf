@@ -2,7 +2,7 @@
 
 = Introduction =
 
-These !YouTube video series explain exactly howto setup BWHF Agent and Chaoslauncher. Author: [http://www.youtube.com/user/dobbersp dobbersp].
+This !YouTube video series explains how to download, install, configure, and utilize Chaoslauncher and BWHF Agent for Starcraft. Author: [http://www.youtube.com/user/dobbersp dobbersp].
 
 *Part 1:*
 
