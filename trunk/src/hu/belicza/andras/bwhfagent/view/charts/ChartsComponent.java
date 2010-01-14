@@ -1074,7 +1074,7 @@ public class ChartsComponent extends JPanel {
 			final Color chartColor = inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor;
 			// Draw eapm first if we have 
 			if ( eapm ) {
-				graphics.setColor( chartColor.brighter().brighter().brighter() );
+				graphics.setColor( getBrighterColor( chartColor ) );
 				graphics.drawPolyline( xPoints, yPointsEapm, xPoints.length - 1 ); // Last point is excluded, it might not be a whole domain
 			}
 			// Now the apm
@@ -1397,7 +1397,7 @@ public class ChartsComponent extends JPanel {
 				final int x2               = chartsParams.getXForIteration( actionSequence[ 1 ] );
 				final int sequenceDuration = ( actionSequence[ 1 ] == actionSequence[ 0 ] ? 2 : actionSequence[ 1 ] - actionSequence[ 0 ] );
 				final int height           = (int) ( actionSequence[ 2 ] * 1000f * chartsParams.chartHeight / ( sequenceDuration * 42f * maxValue ) );
-				graphics.setColor( actionSequence[ 3 ] == 0 ? chartColor : chartColor.brighter().brighter() );
+				graphics.setColor( actionSequence[ 3 ] == 0 ? chartColor : getBrighterColor( chartColor ) );
 				graphics.fillRect( x1, y2 - height + 1, x2 > x1 ? x2 - x1 : 1, height );
 			}
 			// SwingWT sets permanently the fill color if a filling operation is called. We have to reset it.
@@ -1470,6 +1470,20 @@ public class ChartsComponent extends JPanel {
 		graphics.drawString( extraInfo == null ? description : description + ", " + extraInfo,
 				             chartsParams.x1 + 2,
 				             chartsParams.getY1ForChart( chartIndex ) + ( chartsParams.allPlayersOnOneChart ? chartIndex * 14 - 22 : -12 ) );
+	}
+	
+	/**
+	 * Creates and returns a brighter version of the specified color.<br>
+	 * If the color is white, it returns a bright green color.
+	 * @param color color whose brighter version to be returned
+	 * @return a brighter version of the specified color
+	 */
+	private static Color getBrighterColor( final Color color ) {
+		if ( color.getRed() + color.getGreen() + color.getBlue() > 600 )
+			return new Color( 100, 255, 100 );
+		else
+			return new Color( Math.min( 255, color.getRed() + 50 ), Math.min( 255, color.getGreen() + 50 ), Math.min( 255, color.getBlue() + 50 ) ).brighter().brighter();
+		
 	}
 	
 	/**
