@@ -336,8 +336,11 @@ public class AutoscanTab extends LoggedTab {
 											}
 										}
 									}
-									else
+									else {
+										if ( playSoundCheckBox.isSelected() )
+											Utils.playWavFile( new File( Consts.SOUNDS_DIRECTORY_NAME, "clean.wav" ), true );
 										logMessage( "Found no hacks in 'LastReplay.rep.'" );
+									}
 							}
 						}
 						
