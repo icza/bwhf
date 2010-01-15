@@ -1,4 +1,5 @@
 #summary Step-by-step instructions on how to setup BWHF Agent and Chaoslauncher
+#labels Featured
 
 = Howto setup BWHF Agent and Chaoslauncher =
 
