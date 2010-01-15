@@ -1,4 +1,5 @@
 #summary Frequently Asked Questions and answers regarding to BWHF Agent
+#labels Featured
 
 =Frequently Asked Questions=
 
