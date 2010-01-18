@@ -55,4 +55,4 @@ The default sorting column is the *Last reported* column, which puts the most re
 ==Hacker database - Players' Network connection==
 If a hacker is registered in the Players' Network, the hacker name will be displayed as a link. Clicking on this link will take you to the profile page of the player in the Players' Network.
 
-When you're viewing the list of reports of a hacker, if a game of a report is added to the Players' Network, you will see a *Details* link at the *Game details* column. Clicking on this link will take you to the game profile in the Players' Network.
+When you're viewing the list of reports of a hacker, if a game of a report is added to the Players' Network, you will see a *Details* link in the *Game details* column. Clicking on this link will take you to the game profile in the Players' Network.
