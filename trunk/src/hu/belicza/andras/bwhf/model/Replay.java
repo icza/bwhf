@@ -13,8 +13,8 @@ public class Replay {
 	public final ReplayActions replayActions;
 	/** Formatted text of game chat.            */
 	public final String        gameChat;
-	/** Map tile data: width x height elements. */
-	public final short[]       mapTileData;
+	/** Data of the map.                        */
+	public final MapData       mapData;
 	
 	/**
 	 * Creates a new Replay.
@@ -22,11 +22,11 @@ public class Replay {
 	 * @param replayActions actions of the replay
 	 * @param gameChat      formatted text of game chat
 	 */
-	public Replay( final ReplayHeader replayHeader, final ReplayActions replayActions, final String gameChat, final short[] mapTileData ) {
+	public Replay( final ReplayHeader replayHeader, final ReplayActions replayActions, final String gameChat, final MapData mapData ) {
 		this.replayHeader  = replayHeader;
 		this.replayActions = replayActions;
 		this.gameChat      = gameChat;
-		this.mapTileData   = mapTileData;
+		this.mapData       = mapData;
 	}
 	
 }
