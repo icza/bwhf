@@ -1329,7 +1329,7 @@ public class ReplaySearchTab extends Tab {
 						if ( requestedToStop )
 							return;
 						
-						final Replay replay = BinRepParser.parseReplay( replayFile, false, false, false );
+						final Replay replay = BinRepParser.parseReplay( replayFile, false, false, false, false );
 						if ( replay != null ) {
 							boolean replayIncluded = true;
 							for ( final ReplayFilter replayFilter : replayFilters )
