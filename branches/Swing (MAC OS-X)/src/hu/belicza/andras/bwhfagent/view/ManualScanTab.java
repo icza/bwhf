@@ -243,7 +243,7 @@ public class ManualScanTab extends ProgressLoggedTab {
 						final String replayFileAbsolutePath = replayFile.getAbsolutePath();
 						
 						List< HackDescription > hackDescriptionList = null; 
-						final Replay replay = BinRepParser.parseReplay( replayFile, true, false, true );
+						final Replay replay = BinRepParser.parseReplay( replayFile, true, false, true, false );
 						if ( replay != null )
 							hackDescriptionList = ReplayScanner.scanReplayForHacks( replay, skipLatterActionsOfHackers );
 						
