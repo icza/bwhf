@@ -1,6 +1,7 @@
 package hu.belicza.andras.bwhf.control;
 
 import hu.belicza.andras.bwhf.model.Action;
+import hu.belicza.andras.bwhf.model.MapData;
 import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhf.model.ReplayActions;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
@@ -31,7 +32,7 @@ public class BinRepParser {
 		final String[] replayNames = new String[] { "w:/rep/4 - hack.rep" };
 		
 		for ( final String replayName : replayNames ) {
-			final Replay replay = parseReplay( new File( replayName ), true, false, true );
+			final Replay replay = parseReplay( new File( replayName ), true, false, true, false );
 			if ( replay != null )
 				replay.replayHeader.printHeaderInformation( new PrintWriter( System.out ) );
 			else
@@ -76,10 +77,11 @@ public class BinRepParser {
 	 * @param parseCommandsSection tells if player actions have to be parsed from the commands section 
 	 * @param parseGameChat        tells if game chat has to be parsed
 	 * @param parseMapDataSection  tells if map data section has to be parsed
+	 * @param parseMapTileData     tells if map tile data section has to be parsed
 	 * @return a {@link Replay} object describing the replay; or <code>null</code> if replay cannot be parsed 
 	 */
 	@SuppressWarnings("unchecked")
-	public static Replay parseReplay( final File replayFile, final boolean parseCommandsSection, final boolean parseGameChat, final boolean parseMapDataSection ) {
+	public static Replay parseReplay( final File replayFile, final boolean parseCommandsSection, final boolean parseGameChat, final boolean parseMapDataSection, final boolean parseMapTileData ) {
 		BinReplayUnpacker unpacker = null;
 		try {
 			unpacker = new BinReplayUnpacker( replayFile );
@@ -183,7 +185,7 @@ public class BinRepParser {
 				replayActions = new ReplayActions( playerNameActionListMap );
 			}
 			
-			short[] mapTileData = null;
+			MapData mapData = parseMapTileData ? new MapData() : null;
 			if ( parseMapDataSection ) {
 				// Map data length section
 				final int mapDataLength = Integer.reverseBytes( ByteBuffer.wrap( unpacker.unpackSection( 4 ) ).getInt() );
@@ -194,7 +196,7 @@ public class BinRepParser {
 				
 				final byte[] sectionNameBuffer = new byte[ 4 ];
 				final String SECTION_NAME_DIMENSION = "DIM "; // Name of the dimension section in the map data replay section.
-				final String SECTION_NAME_TILE      = "TILE"; // Name of the tile section in the map data replay section.
+				final String SECTION_NAME_MTXM      = "MTXM"; // Name of the tile section in the map data replay section.
 				while ( mapDataBuffer.position() < mapDataLength ) {
 					mapDataBuffer.get( sectionNameBuffer );
 					final String sectionName   = new String( sectionNameBuffer, "US-ASCII" );
@@ -210,13 +212,19 @@ public class BinRepParser {
 							replayHeader.mapWidth = newWidth;
 						if ( newHeight > replayHeader.mapHeight )
 							replayHeader.mapHeight= newHeight;
-						//break; // We only needed the dimension section
+						if ( !parseMapTileData )
+							break; // We only needed the dimension section
 					}
-					else if ( sectionName.equals( SECTION_NAME_TILE ) ) {
-						final int maxI = sectionLength/2; // This is map_width*map_height
-						mapTileData = new short[ maxI ];
-						for ( int i = 0; i < maxI; i++ )
-							mapTileData[ i ] = mapDataBuffer.getShort();
+					else if ( sectionName.equals( SECTION_NAME_MTXM ) ) {
+						if ( parseMapTileData ) {
+							final int maxI = sectionLength/2; // This is map_width*map_height
+							// Sometimes map is broken into multiple sections. The first one is the biggest (whole map size), but the beginning of map is empty
+							// The subsequent MTXM sections will fill the whole at the beginning. 
+							if ( mapData.tiles == null )
+								mapData.tiles = new short[ maxI ];
+							for ( int i = 0; i < maxI; i++ )
+								mapData.tiles[ i ] = mapDataBuffer.getShort();
+						}
 					}
 					
 					if ( mapDataBuffer.position() < sectionEndPos ) // Part or all the section might be unprocessed, skip the unprocessed bytes
@@ -227,7 +235,7 @@ public class BinRepParser {
 					mapDataBuffer.position( mapDataLength );
 			}
 			
-			return new Replay( replayHeader, replayActions, gameChatWrapper == null ? null : gameChatWrapper.gameChatBuilder.toString(), mapTileData );
+			return new Replay( replayHeader, replayActions, gameChatWrapper == null ? null : gameChatWrapper.gameChatBuilder.toString(), mapData );
 		}
 		catch ( final Exception e ) {
 			e.printStackTrace();
