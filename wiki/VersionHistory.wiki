@@ -5,6 +5,10 @@
 <wiki:toc max_depth="3" />
 
 ----
+===Changes and new features in the upcoming release===
+ * Added new tips.
+
+----
 ===3.00 2010-01-14===
  * Added a new chart type: *Action Sequences*. This chart visualizes how fast the players execute different action sequences. It is measured in pairs/sec (action pairs in one second). _Action sequences_ are subsequent select+command pairs without being interrupted by other commands or by a specific time break, and contains at least 2 select+command pairs. For example: _select+move+select+move+..._, another: _hotkey select+set rally+hotkey select+set rally+..._. These sequences are presented as bars, where the width of a bar is the duration of the sequence, the height of a bar is the average execution rate of the sequence in pairs/sec. The max allowed frame delay in sequences is a parameter and can be changed. Non-hotkey sequences are drawn with brighter color, and they can be hidden. Like any other chart, it can be zoomed, or multiple players can be shown in one chart.
  * Added a *BWHF player record checker* to the Player checker tab. When this feature is enabled, pressing Print Screen in the game lobby will also check the BWHF records of the players (not just whether they are hackers). You can set different alert levels: _New record_ (0..9 games), _Small record_ (10..99) _Medium record_ (100..499 games), _Big record_ (500..1999 games) and _Huge record_ (2000 or more games). If you set the alert level for Medium for example, for a player in the lobby who is not in the BWHF Players' Network, you will hear _"new at x"_, for a player who has 250 games you will hear: _"medium at x"_ (you won't be alerted for players with more than 500 games). If you set the alert level to the max (_Huge record_), it will announce the record of all players in the lobby. It's like an automated /stats command for all players in the lobby which operates on the BWHF database.
