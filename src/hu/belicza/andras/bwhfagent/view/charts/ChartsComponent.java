@@ -1112,6 +1112,14 @@ public class ChartsComponent extends JPanel {
 			}
 			drawPlayerDescription( graphics, chartsParams, i, inGameColor, eapmString );
 		}
+		
+		final int mapWidth  = replay.replayHeader.mapWidth;
+		final int mapHeight = replay.replayHeader.mapHeight;
+		for ( int y = 0; y < mapHeight; y++ )
+			for ( int x = 0; x < mapWidth; x++ ) {
+				graphics.setColor( new Color( replay.mapTileData[ y * mapWidth + x ] & 0xff, 0, 0 ) );
+				graphics.fillRect( x<<1, y<<1, 2, 2 );
+			}
 	}
 	
 	/**
