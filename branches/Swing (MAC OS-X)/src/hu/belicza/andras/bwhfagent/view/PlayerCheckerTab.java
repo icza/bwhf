@@ -150,6 +150,8 @@ public class PlayerCheckerTab extends LoggedTab {
 	private   final JCheckBox  includeCustomPlayerListCheckBox    = new JCheckBox( "Include this custom player list:", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST ) ) );
 	/** File of the custom player list.                                */
 	private   final JTextField customPlayerListFileTextField      = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_CUSTOM_PLAYER_LIST_FILE ), 30 );
+	/** Text field of names to be ignored.                             */
+	private   final JTextField ignoreNamesTextField               = new JTextField( Utils.settingsProperties.getProperty( Consts.PROPERTY_IGNORE_NAMES ) );
 	/** Button to reload custom player list.                           */
 	private   final JButton    reloadButton                       = new JButton( "Reload", IconResourceManager.ICON_ARROW_REFRESH );
 	/** Checkbox to enable/disable saying "clean" if no hackers found. */
@@ -285,6 +287,18 @@ public class PlayerCheckerTab extends LoggedTab {
 		gridBagLayout.setConstraints( wrapperPanel, constraints );
 		settingsPanel.add( wrapperPanel );
 		
+		constraints.gridwidth = 1;
+		label = new JLabel( "Ignore the following names:" );
+		gridBagLayout.setConstraints( label, constraints );
+		settingsPanel.add( label );
+		constraints.gridwidth = 1;
+		gridBagLayout.setConstraints( ignoreNamesTextField, constraints );
+		settingsPanel.add( ignoreNamesTextField );
+		constraints.gridwidth = GridBagConstraints.REMAINDER;
+		label = new JLabel( "(comma separated list; case sensitive)" );
+		gridBagLayout.setConstraints( label, constraints );
+		settingsPanel.add( label );
+		
 		constraints.gridwidth = GridBagConstraints.REMAINDER;
 		gridBagLayout.setConstraints( sayCleanCheckBox, constraints );
 		settingsPanel.add( sayCleanCheckBox );
@@ -342,6 +356,11 @@ public class PlayerCheckerTab extends LoggedTab {
 			if ( image == null || !TextRecognizer.isGameLobbyScreenshot( image ) )
 				remainedScreenshotFileList.add( screenshotFile );
 			else {
+				final Set< String > ignoreNameSet = new HashSet< String >();
+				final StringTokenizer ignoreNamesTokenizer = new StringTokenizer( ignoreNamesTextField.getText(), "," );
+				while ( ignoreNamesTokenizer.hasMoreTokens() )
+					ignoreNameSet.add( ignoreNamesTokenizer.nextToken().trim() );
+				
 				if ( gateway < 0 ) {
 					logMessage( "", false ); // Prints an empty line
 					logMessage( "Game lobby screenshot detected, but no check was performed because gateway is not set!" );
@@ -353,7 +372,7 @@ public class PlayerCheckerTab extends LoggedTab {
 					}
 					
 					if ( checkBwhfPlayerRecordsBox.isSelected() ) {
-						final String[] playerNames = TextRecognizer.readPlayerNamesFromGameLobbyImage( image );
+						final String[] playerNames = TextRecognizer.readPlayerNamesFromGameLobbyImage( image, ignoreNameSet );
 						checkPlayerRecords( playerNames );
 					}
 				}
@@ -361,7 +380,7 @@ public class PlayerCheckerTab extends LoggedTab {
 					logMessage( "", false ); // Prints an empty line
 					logMessage( "Game lobby screenshot detected, proceeding to check..." );
 					
-					final String[] playerNames = TextRecognizer.readPlayerNamesFromGameLobbyImage( image );
+					final String[] playerNames = TextRecognizer.readPlayerNamesFromGameLobbyImage( image, ignoreNameSet );
 					
 					if ( echoRecognizedPlayerNamesCheckBox.isSelected() ) {
 						final StringBuilder playerNamesBuilder = new StringBuilder();
@@ -730,6 +749,7 @@ public class PlayerCheckerTab extends LoggedTab {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_HACKER_LIST_UPDATE_INTERVAL  , Integer.toString( hackerListUpdateIntervalComboBox.getSelectedIndex() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST   , Boolean.toString( includeCustomPlayerListCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_CUSTOM_PLAYER_LIST_FILE      , customPlayerListFileTextField.getText() );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_IGNORE_NAMES                 , ignoreNamesTextField.getText() );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SAY_CLEAN                    , Boolean.toString( sayCleanCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_CHECK_BWHF_PLAYER_RECORDS    , Boolean.toString( checkBwhfPlayerRecordsBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_BWHF_RECORD_ALERT_LEVEL      , Integer.toString( recordAlertLevelsComboBox.getSelectedIndex() ) );
