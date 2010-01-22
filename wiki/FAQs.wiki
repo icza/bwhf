@@ -55,7 +55,7 @@ A: If you never hack but you're on the hacker list, contact me and try to convie
 ===Q: Does BWHF Agent detect spoofs?===
 A: No. BWHF Agent operates on replays, so there is no way to detect spoofs based on replays.
 
-===Q: What does the "R" tag means next to some player names in the Players' Network?===
+===Q: What does the "R" tag mean next to some player names in the Players' Network?===
 A: It means there are hacker reports with that name. The "R" tag is a link, you can click on it and it will list the hacker reports with that name.
 
 ===Q: I applied for a key days ago but I haven't received any response.===
