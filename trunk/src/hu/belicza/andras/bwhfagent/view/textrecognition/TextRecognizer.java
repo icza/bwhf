@@ -3,6 +3,7 @@ package hu.belicza.andras.bwhfagent.view.textrecognition;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Text recognizer class.
@@ -28,17 +29,18 @@ public class TextRecognizer {
 	/**
 	 * Tries to read player names from a game lobby screenshot.<br>
 	 * The returned array contains as many elements as player slots are detected in the image.
-	 * Player names for slots not containing players will be <code>null</code> (when slot is "Open", "Closed" or "Computer").
+	 * Player names for slots containing names that are to be ignored will be <code>null</code>.
 	 * @param image screenshot image of the game lobby
+	 * @param ignoreNameSet    set of names to be ignored
 	 * @return an array of player names read from the image
 	 */
-	public static String[] readPlayerNamesFromGameLobbyImage( final BufferedImage image ) {
+	public static String[] readPlayerNamesFromGameLobbyImage( final BufferedImage image, final Set< String > ignoreNameSet ) {
 		final List< String > playerNames = new ArrayList< String >();
 		for ( int slot = 0; slot < 12; slot++ )
 			if ( isSlotPlayerSlot( slot, image ) ) {
 				String playerName = readString( PLAYER_SLOT_FRAME_X + 4, FIRST_PLAYER_SLOT_FRAME_Y + ( PLAYER_SLOT_HEIGHT + GAP_BETWEEN_PLAYER_SLOTS ) * slot + 2, image );
 				
-				if ( playerName == null || playerName.equals( "Open" ) || playerName.equals( "Closed" ) || playerName.equals( "Computer" ) )
+				if ( playerName == null || ignoreNameSet.contains( playerName ) )
 					playerNames.add( null );
 				else
 					playerNames.add( playerName );
