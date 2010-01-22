@@ -79,7 +79,8 @@ public class MainFrame extends JFrame {
 		"If you want to select and export all actions of a replay: right click on the action list and choose \"Select all\" and copy.",
 		"By default the Agent saves all your replays without any effort. Hacker replays are also saved to a separate folder.",
 		"On the Charts tab use the search box to quickly jump to actions you're interested in. Use the filter box to show actions only that you're interested in.",
-		"Leaving all fields empty on the Replay search tab will add all selected replays or all replays in a folder."
+		"Leaving all fields empty on the Replay search tab will add all selected replays or all replays in a folder.",
+		"If you're using a non-English version of Starcraft, you can modify the ignored names on the Player checker tab for your language."
 	};
 	
 	/** Stores the reference of the main frame. */

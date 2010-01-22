@@ -185,6 +185,8 @@ public class Consts {
 	public static final String PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST     = "includeCustomPlayerList";
 	/** Custom player list file property.        */
 	public static final String PROPERTY_CUSTOM_PLAYER_LIST_FILE        = "customPlayerListFile";
+	/** Ignore names property.                   */
+	public static final String PROPERTY_IGNORE_NAMES                   = "ignoreNames";
 	/** Replay list to load on startup property. */
 	public static final String PROPERTY_REPLAY_LIST_TO_LOAD_ON_STARTUP = "replayListToLoadOnStartup";
 	/** Editor program property.                 */
@@ -267,6 +269,7 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_ECHO_RECOGNIZED_PLAYER_NAMES  , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_INCLUDE_CUSTOM_PLAYER_LIST    , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_CUSTOM_PLAYER_LIST_FILE       , "" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_IGNORE_NAMES                  , "Open, Closed, Computer" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_DEFAULT_REPLAY_LISTS_FOLDER   , DEFAULT_REPLAY_LISTS_FOLDER );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_REPLAY_LIST_TO_LOAD_ON_STARTUP, "" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_EDITOR_PROGRAM                , "open" );
