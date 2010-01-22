@@ -188,19 +188,19 @@ public class BinRepParser {
 				final int mapDataLength = Integer.reverseBytes( ByteBuffer.wrap( unpacker.unpackSection( 4 ) ).getInt() );
 				
 				// Map data section
-				final ByteBuffer mapDataBuffer = ByteBuffer.wrap( unpacker.unpackSection(  mapDataLength ) );
+				final ByteBuffer mapDataBuffer = ByteBuffer.wrap( unpacker.unpackSection( mapDataLength ) );
 				mapDataBuffer.order( ByteOrder.LITTLE_ENDIAN );
 				
 				final byte[] sectionNameBuffer = new byte[ 4 ];
-				// Name of the dimension section in the map data replay section.
-				final String DIMENSION_SECTION_NAME = "DIM ";
+				final String SECTION_NAME_DIMENSION = "DIM "; // Name of the dimension section in the map data replay section.
+				final String SECTION_NAME_TILE      = "TILE"; // Name of the tile section in the map data replay section.
 				while ( mapDataBuffer.position() < mapDataLength ) {
 					mapDataBuffer.get( sectionNameBuffer );
 					final String sectionName   = new String( sectionNameBuffer, "US-ASCII" );
 					final int    sectionLength = mapDataBuffer.getInt();
 					final int    sectionEndPos = mapDataBuffer.position() + sectionLength;
 					
-					if ( sectionName.equals( DIMENSION_SECTION_NAME ) ) {
+					if ( sectionName.equals( SECTION_NAME_DIMENSION ) ) {
 						// If map has a non-standard size, the replay header contains invalid map size, this is the correct one
 						final short newWidth  = mapDataBuffer.getShort();
 						final short newHeight = mapDataBuffer.getShort();
