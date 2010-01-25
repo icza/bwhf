@@ -45,6 +45,7 @@ import swingwt.awt.event.KeyAdapter;
 import swingwt.awt.event.KeyEvent;
 import swingwt.awt.event.MouseAdapter;
 import swingwt.awt.event.MouseEvent;
+import swingwt.awt.image.BufferedImage;
 import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
@@ -132,7 +133,9 @@ public class ChartsComponent extends JPanel {
 		/** Overall APM charts of the players.      */
 		OVERALL_APM     ( "Overall APM/EAPM" ),
 		/** Action Sequences charts of the players. */
-		ACTION_SEQUENCES( "Action Sequences" );
+		ACTION_SEQUENCES( "Action Sequences" ),
+		/** Map view charts of the players.         */
+		MAP_VIEW        ( "Map view"         );
 		
 		private final String name;
 		private ChartType( final String name ) {
@@ -214,6 +217,11 @@ public class ChartsComponent extends JPanel {
 	
 	/** Reference to the last charts params object. */
 	private ChartsParams chartsParams;
+	
+	/** Cache for the replay map view cache.     */
+	private BufferedImage replayMapViewImage;
+	/** Zoom value of the replay map view cache. */
+	private int           replayMapViewZoom = -1;
 	
 	/**
 	 * Creates a new ChartsComponent.
@@ -602,6 +610,8 @@ public class ChartsComponent extends JPanel {
 				chartOptionsPanel.add( new JLabel( "Max frame delay in sequences: " ) );
 				chartOptionsPanel.add( maxFramesDelayInSequenceComboBox );
 				break;
+			case MAP_VIEW :
+				break;
 		}
 		
 		// We restore the values
@@ -626,7 +636,9 @@ public class ChartsComponent extends JPanel {
 	public void setReplay( final Replay replay ) {
 		this.replay = replay;
 		
-		markerPosition = -1;
+		markerPosition     = -1;
+		replayMapViewZoom  = -1;
+		replayMapViewImage = null;
 		
 		// removeAll() does not work properly in SwingWT, we remove previous checkboxes manually!
 		while ( playersPanel.getComponentCount() > 1 )
@@ -925,6 +937,9 @@ public class ChartsComponent extends JPanel {
 				case ACTION_SEQUENCES :
 					paintActionSequencesCharts( graphics );
 					break;
+				case MAP_VIEW :
+					paintMapViewCharts( graphics );
+					break;
 			}
 			
 			if ( markerPosition >= 0 ) {
@@ -1111,21 +1126,6 @@ public class ChartsComponent extends JPanel {
 					eapmString += "0%";
 			}
 			drawPlayerDescription( graphics, chartsParams, i, inGameColor, eapmString );
-		}
-		
-		final short[] tiles = replay.mapData == null ? null : replay.mapData.tiles;  
-		if ( tiles != null ) {
-			final int mapWidth  = replay.replayHeader.mapWidth;
-			final int mapHeight = replay.replayHeader.mapHeight;
-			outer:
-			for ( int y = 0; y < mapHeight; y++ )
-				for ( int x = 0; x < mapWidth; x++ ) {
-					if ( y * mapWidth + x  >= tiles.length )
-						break outer;
-					graphics.setColor( new Color( tiles[ y * mapWidth + x ] & 0xff, 0, 0 ) );
-					final int zoom = 2;
-					graphics.fillRect( x*zoom, y*zoom, zoom, zoom );
-				}
 		}
 	}
 	
@@ -1420,6 +1420,44 @@ public class ChartsComponent extends JPanel {
 			graphics.fillRect( -5, -5, 1, 1 );
 			
 			drawPlayerDescription( graphics, chartsParams, i, inGameColor, new Formatter( Locale.ENGLISH ).format( "Avg %.1f pairs/sec", summaDuration[ i ] > 0 ? summaPairs[ i ] * 1000f / ( summaDuration[ i ] * 42f ) : 0f ).toString() );
+		}
+	}
+	
+	/**
+	 * Paints the Map view charts of the players.
+	 * @param graphics graphics to be used for painting
+	 */
+	private void paintMapViewCharts( final Graphics graphics ) {
+		final short[] tiles = replay.mapData == null ? null : replay.mapData.tiles;
+		
+		if ( tiles != null ) {
+			final int zoom = 2 * chartsParams.zoom;
+			
+			if ( replayMapViewZoom != zoom ) {
+				final int mapWidth  = replay.replayHeader.mapWidth;
+				final int mapHeight = replay.replayHeader.mapHeight;
+				
+				replayMapViewImage = new BufferedImage( mapWidth * zoom, mapHeight * zoom, BufferedImage.TYPE_INT_RGB );
+				final Graphics        cacheGraphics       = replayMapViewImage.getGraphics();
+				final int             tileSet             = replay.mapData.tileSet < 0 ? 0 : replay.mapData.tileSet & 0x07;
+				final BufferedImage[] tileSetScaledImages = MapTilesManager.getTileSetScaledImages( tileSet, zoom );
+				
+				for ( int y = 0; y < mapHeight; y++ )
+					if ( y * mapWidth + mapWidth  <= tiles.length ) // If we have the whole line
+						for ( int x = 0; x < mapWidth; x++ ) {
+							final short tile = tiles[ y * mapWidth + x ];
+							final int borderConfig = tile >> 9 & 0x1f;
+							if ( borderConfig == 0 )
+								cacheGraphics.drawImage( tileSetScaledImages[ tile >> 5 & 0x0f ], x * zoom, y * zoom, null ); // Solid tile
+							else
+								cacheGraphics.drawImage( tileSetScaledImages[ borderConfig & 0x0f ], x * zoom, y * zoom, null ); // Border
+						}
+				
+				replayMapViewZoom = zoom;
+			}
+			
+			if ( replayMapViewImage != null )
+				graphics.drawImage( replayMapViewImage, 0, 0, null );
 		}
 	}
 	
