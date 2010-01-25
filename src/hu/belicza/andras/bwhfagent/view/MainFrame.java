@@ -82,7 +82,8 @@ public class MainFrame extends JFrame {
 		"By default the Agent saves all your replays without any effort. Hacker replays are also saved to a separate folder.",
 		"On the Charts tab use the search box to quickly jump to actions you're interested in. Use the filter box to show actions only that you're interested in.",
 		"Leaving all fields empty on the Replay search tab will add all selected replays or all replays in a folder.",
-		"If you're using a non-English version of Starcraft, you can modify the ignored names on the Player checker tab for your language."
+		"If you're using a non-English version of Starcraft, you can modify the ignored names on the Player checker tab for your language.",
+		"Most buttons have hotkeys. If they're hidden, press ALT to see the hotkeys in Win 7 and Vista."
 	};
 	
 	/** Stores the reference of the main frame. */
