@@ -197,6 +197,7 @@ public class BinRepParser {
 				final byte[] sectionNameBuffer = new byte[ 4 ];
 				final String SECTION_NAME_DIMENSION = "DIM "; // Name of the dimension section in the map data replay section.
 				final String SECTION_NAME_MTXM      = "MTXM"; // Name of the tile section in the map data replay section.
+				final String SECTION_NAME_ERA       = "ERA "; // Name of the tile set section in the map data replay section.
 				while ( mapDataBuffer.position() < mapDataLength ) {
 					mapDataBuffer.get( sectionNameBuffer );
 					final String sectionName   = new String( sectionNameBuffer, "US-ASCII" );
@@ -225,6 +226,10 @@ public class BinRepParser {
 							for ( int i = 0; i < maxI; i++ )
 								mapData.tiles[ i ] = mapDataBuffer.getShort();
 						}
+					}
+					else if ( sectionName.equals( SECTION_NAME_ERA ) ) {
+						if ( parseMapTileData )
+							mapData.tileSet = mapDataBuffer.getShort();
 					}
 					
 					if ( mapDataBuffer.position() < sectionEndPos ) // Part or all the section might be unprocessed, skip the unprocessed bytes
