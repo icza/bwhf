@@ -77,6 +77,7 @@ cd /home/joe/BWHFAgent
 chmod +x BWHFAgent.sh
 ./BWHFAgent.sh
 }}}
+(The `chmod` command is required only once, at the first start.)
 
 If that fails, try this one:
 {{{
