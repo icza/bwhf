@@ -36,9 +36,9 @@ public class MapTilesManager {
 	private static int   scaleFactor = -1;
 	
 	/** Width of the tiles image.  */
-	private static final int TILE_IMAGE_WIDTH  = 32;
+	public static final int TILE_IMAGE_WIDTH  = 32;
 	/** Height of the tiles image. */
-	private static final int TILE_IMAGE_HEIGHT = 32;
+	public static final int TILE_IMAGE_HEIGHT = 32;
 	
 	/** Number of tile sets.               */
 	private static final int TILE_SETS_COUNT = 8;
@@ -60,10 +60,7 @@ public class MapTilesManager {
 			if ( mapTilesImage == null )
 				mapTilesImage = new ImageIcon( MapTilesManager.class.getResource( "map_tiles.png" ) ).getImage(); // We only load this once on demand.
 			
-			scaledMapTilesImage = mapTilesImage.getScaledInstance( mapTilesImage.getWidth() * zoom / TILE_IMAGE_WIDTH, mapTilesImage.getHeight() * zoom / TILE_IMAGE_HEIGHT, Image.SCALE_AREA_AVERAGING );
-			
-			scaledMapTilesImage = new BufferedImage( mapTilesImage.getWidth() * zoom / TILE_IMAGE_WIDTH, mapTilesImage.getHeight() * zoom / TILE_IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB );
-			scaledMapTilesImage.getGraphics().drawImage( mapTilesImage, 0, 0, scaledMapTilesImage.getWidth(), scaledMapTilesImage.getHeight(), null );
+			scaledMapTilesImage = mapTilesImage.getScaledInstance( mapTilesImage.getWidth() * zoom / TILE_IMAGE_WIDTH, mapTilesImage.getHeight() * zoom / TILE_IMAGE_HEIGHT, Image.SCALE_FAST );
 			
 			// Zoom has changed, discard the cached scaled tile images
 			for ( int i = 0; i < scaledTileImages.length; i ++ )
@@ -76,7 +73,7 @@ public class MapTilesManager {
 			// We only scale the required tile set images 
 			scaledTileImages[ tileSet ] = new BufferedImage[ MAX_TILES_COUNT ];
 			for ( int i = 0; i < scaledTileImages[ tileSet ].length; i++ ) {
-				scaledTileImages[ tileSet ][ i ] = new BufferedImage( zoom, zoom, BufferedImage.TYPE_INT_ARGB );
+				scaledTileImages[ tileSet ][ i ] = new BufferedImage( zoom, zoom, BufferedImage.TYPE_INT_RGB );
 				scaledTileImages[ tileSet ][ i ].getGraphics().drawImage( scaledMapTilesImage, 0, 0, zoom, zoom,
 						i * zoom, tileSet * zoom, i * zoom + zoom, tileSet * zoom + zoom, null );
 			}

@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
 
+import org.eclipse.swt.graphics.ImageData;
+
 import swingwt.awt.BasicStroke;
 import swingwt.awt.BorderLayout;
 import swingwt.awt.Color;
@@ -212,8 +214,10 @@ public class ChartsComponent extends JPanel {
 	/** To filter actions.                                                       */
 	private final JTextField            filterTextField          = new JTextField( 1 );
 	
-	/** Position of the marker. */
-	private int markerPosition = -1;
+	/** Position of the marker.                                                           */
+	private int markerPosition      = -1;
+	/** Index of the selected action (in the actionList list) in case of Map view chart. */
+	private int selectedActionIndex = -1;
 	
 	/** Reference to the last charts params object. */
 	private ChartsParams chartsParams;
@@ -407,7 +411,7 @@ public class ChartsComponent extends JPanel {
 	 * @param x x coordinate on the chart
 	 */
 	private void syncMarkerFromChartToActionList( final int x ) {
-		if ( replay == null || playerIndexToShowList.isEmpty() || chartsParams == null )
+		if ( replay == null || playerIndexToShowList.isEmpty() || chartsParams == null || (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() == ChartType.MAP_VIEW )
 			return;
 		
 		final int iteration = chartsParams.getIterationForX( x, replay.replayHeader.gameFrames );
@@ -494,22 +498,31 @@ public class ChartsComponent extends JPanel {
 		actionsListTextArea.setSelectionEnd( actionLastPosition );
 		actionsListTextArea.setSelectionStart( actionFirstPosition );
 		
-		final StringTokenizer timeTokenizer = new StringTokenizer( (String) actionListText.substring( actionFirstPosition, actionLastPosition ) );
-		int time;
-		int maxTime;
-		if ( chartsTab.displayActionsInSecondsCheckBox.isSelected() ) {
-			time    = 3600 * Integer.parseInt( timeTokenizer.nextToken( ":" ) ) + 60 * Integer.parseInt( timeTokenizer.nextToken( ":" ) ) + Integer.parseInt( timeTokenizer.nextToken( ": " ) );
-			maxTime = replay.replayHeader.getDurationSeconds();
+		if ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() == ChartType.MAP_VIEW ) {
+			// TODO
+			selectedActionIndex = 0;
+			for ( int i = caretPosition; i >= 0; i -- )
+				if ( actionListText.charAt( i ) == '\n' )
+					selectedActionIndex++;
 		}
 		else {
-			time    = Integer.parseInt( timeTokenizer.nextToken() );
-			maxTime = replay.replayHeader.gameFrames;
+			final StringTokenizer timeTokenizer = new StringTokenizer( (String) actionListText.substring( actionFirstPosition, actionLastPosition ) );
+			int time;
+			int maxTime;
+			if ( chartsTab.displayActionsInSecondsCheckBox.isSelected() ) {
+				time    = 3600 * Integer.parseInt( timeTokenizer.nextToken( ":" ) ) + 60 * Integer.parseInt( timeTokenizer.nextToken( ":" ) ) + Integer.parseInt( timeTokenizer.nextToken( ": " ) );
+				maxTime = replay.replayHeader.getDurationSeconds();
+			}
+			else {
+				time    = Integer.parseInt( timeTokenizer.nextToken() );
+				maxTime = replay.replayHeader.gameFrames;
+			}
+			markerPosition = chartsParams.getXForTime( time, maxTime );
+			
+			// If marker is not visible, scroll to it
+			if ( markerPosition < chartsParams.dx || markerPosition >= chartsParams.dx + chartsParams.componentWidth )
+				chartScrollBar.setValue( ( markerPosition - chartsParams.componentWidth / 2 ) * ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ) / ( chartsParams.componentWidth * chartsParams.zoom - chartsParams.componentWidth ) );
 		}
-		markerPosition = chartsParams.getXForTime( time, maxTime );
-		
-		// If marker is not visible, scroll to it
-		if ( markerPosition < chartsParams.dx || markerPosition >= chartsParams.dx + chartsParams.componentWidth )
-			chartScrollBar.setValue( ( markerPosition - chartsParams.componentWidth / 2 ) * ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ) / ( chartsParams.componentWidth * chartsParams.zoom - chartsParams.componentWidth ) );
 		
 		repaint();
 	}
@@ -636,9 +649,10 @@ public class ChartsComponent extends JPanel {
 	public void setReplay( final Replay replay ) {
 		this.replay = replay;
 		
-		markerPosition     = -1;
-		replayMapViewZoom  = -1;
-		replayMapViewImage = null;
+		markerPosition      = -1;
+		replayMapViewZoom   = -1;
+		replayMapViewImage  = null;
+		selectedActionIndex = -1;
 		
 		// removeAll() does not work properly in SwingWT, we remove previous checkboxes manually!
 		while ( playersPanel.getComponentCount() > 1 )
@@ -918,7 +932,8 @@ public class ChartsComponent extends JPanel {
 			
 			graphics.translate( -dx, 0 );
 			
-			switch ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() ) {
+			final ChartType chartType = (ChartType) chartsTab.chartTypeComboBox.getSelectedItem();
+			switch ( chartType ) {
 				case APM :
 					paintApmCharts( graphics, false );
 					break;
@@ -942,10 +957,14 @@ public class ChartsComponent extends JPanel {
 					break;
 			}
 			
-			if ( markerPosition >= 0 ) {
-				graphics.setColor( CHART_MARKER_COLOR );
-				graphics.drawLine( markerPosition, 0, markerPosition, getHeight() - 1 );
+			if ( chartType == ChartType.MAP_VIEW ) {
+				// TODO
 			}
+			else
+				if ( markerPosition >= 0 ) {
+					graphics.setColor( CHART_MARKER_COLOR );
+					graphics.drawLine( markerPosition, 0, markerPosition, getHeight() - 1 );
+				}
 		}
 	}
 	
@@ -1431,27 +1450,55 @@ public class ChartsComponent extends JPanel {
 		final short[] tiles = replay.mapData == null ? null : replay.mapData.tiles;
 		
 		if ( tiles != null ) {
-			final int zoom = 2 * chartsParams.zoom;
+			final int zoom = MapTilesManager.TILE_IMAGE_WIDTH * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
 			
 			if ( replayMapViewZoom != zoom ) {
 				final int mapWidth  = replay.replayHeader.mapWidth;
 				final int mapHeight = replay.replayHeader.mapHeight;
 				
 				replayMapViewImage = new BufferedImage( mapWidth * zoom, mapHeight * zoom, BufferedImage.TYPE_INT_RGB );
-				final Graphics        cacheGraphics       = replayMapViewImage.getGraphics();
+				final Graphics2D      cacheGraphics       = replayMapViewImage.createGraphics();
 				final int             tileSet             = replay.mapData.tileSet < 0 ? 0 : replay.mapData.tileSet & 0x07;
 				final BufferedImage[] tileSetScaledImages = MapTilesManager.getTileSetScaledImages( tileSet, zoom );
 				
-				for ( int y = 0; y < mapHeight; y++ )
-					if ( y * mapWidth + mapWidth  <= tiles.length ) // If we have the whole line
+				for ( int y = 0; y < mapHeight; y++ ) {
+					final int rowStartPos = y * mapWidth;
+					if ( rowStartPos + mapWidth  <= tiles.length ) // If we have the whole line
 						for ( int x = 0; x < mapWidth; x++ ) {
-							final short tile = tiles[ y * mapWidth + x ];
+							final short tile = tiles[ rowStartPos + x ];
 							final int borderConfig = tile >> 9 & 0x1f;
+							final int pixelX = x * zoom;
+							final int pixelY = y * zoom;
+							
+							// TODO: handle borderconfig to draw border between solid tiles
 							if ( borderConfig == 0 )
-								cacheGraphics.drawImage( tileSetScaledImages[ tile >> 5 & 0x0f ], x * zoom, y * zoom, null ); // Solid tile
-							else
-								cacheGraphics.drawImage( tileSetScaledImages[ borderConfig & 0x0f ], x * zoom, y * zoom, null ); // Border
+								cacheGraphics.drawImage( tileSetScaledImages[ tile >> 5 & 0x0f ], pixelX, pixelY, null ); // Solid tile
+							else {
+								//cacheGraphics.drawImage( tileSetScaledImages[ borderConfig & 0x0f ], x * zoom, y * zoom, null ); // Border
+								//cacheGraphics.drawImage( tileSetScaledImages[ ( (borderConfig & 0x0f)+1 )&0x0f ], x * zoom, y * zoom, null ); // Border
+								
+								cacheGraphics.drawImage( tileSetScaledImages[ borderConfig & 0x0f ], pixelX, pixelY, null ); // Border
+								final BufferedImage b = tileSetScaledImages[ ( (borderConfig & 0x0f)+1 )&0x0f ]; // Usually the border is between [borderCofing] and [borderConfig+1] tiles
+								
+								final byte[] data = b.image.getImageData().data;
+								for ( int i = zoom - 1; i >= 0; i-- )
+									for ( int j = zoom - 1; j >= 0; j -= 2 ) {
+										final int pos = ( i*zoom + j ) << 2; // <<2 means *4, 4 bytes in the INT_RGB model
+										cacheGraphics.setColor( new Color( data[ pos+2 ] & 0xff, data[ pos+1 ] & 0xff, data[ pos ] & 0xff ) );
+										cacheGraphics.drawLine( pixelX + j, pixelY + i, pixelX + j, pixelY + i );
+									}
+							}
 						}
+				}
+				
+				// Mineral fields
+				cacheGraphics.setColor( new Color( 50, 50, 255 ) );
+				for ( final short[] mineral : replay.mapData.mineralFieldList )
+					cacheGraphics.fillRect( mineral[ 0 ] * zoom / MapTilesManager.TILE_IMAGE_WIDTH, mineral[ 1 ] * zoom / MapTilesManager.TILE_IMAGE_HEIGHT, 2*zoom, 2*zoom ); // Size of mineral fields are 2x2
+				// Vespene geysers
+				cacheGraphics.setColor( new Color( 10, 150, 10 ) );
+				for ( final short[] geyser : replay.mapData.geyserList )
+					cacheGraphics.fillRect( ( geyser[ 0 ] - MapTilesManager.TILE_IMAGE_WIDTH ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH, geyser[ 1 ] * zoom / MapTilesManager.TILE_IMAGE_HEIGHT, 4*zoom, 2*zoom ); // Size of vespene geysers are 4x2
 				
 				replayMapViewZoom = zoom;
 			}
