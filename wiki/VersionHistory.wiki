@@ -6,7 +6,7 @@
 
 ----
 ===Changes and new features in the upcoming release===
- * A new *MAP VIEW* chart type. This chart shows the map image (approximation), and if you select an action in the action list, it will show buildings that were built (were issued to build) up to that time. If you click on a build command, it will show with a rectange where it is targeted. If you click on an action which has a target point (such as _move_, _attack move_, _set rally_, _casting spells_, _comsat scan_ etc.), it will show the point in the map with a big red "X".
+ * A new *MAP VIEW* chart type. This chart shows the map image (approximation), and if you select an action in the action list, it will show buildings that were built (were issued to build) up to that time. If you click on a build command, it will show with a rectange where it is targeted. If you click on an action which has a target point (such as _move_, _attack move_, _set rally_, _casting spells_, _comsat scan_ etc.), it will show the point in the map with a big red "X".<br>For a clear view, only those buildings are show in the map that are listed in the action list. So for example if you filter the actions with _"build gateway"_, only the gateway build commands will be listed, and therefore only the gateways will be drawn on the map.
  * Added a new setting on the Player checker tab: *Ignore the following names*. Names enumerated here will be completely ignored (no hacker or record check). By default this contains 3 trivial names: _"Open, Closed, Computer"_. But the thing is in non-English Starcraft these words are different. So non-English Starcraft users can easily adjust this to their words. For example in Spanish change this to: _"Abierta, Cerrado, Ordenador"_.
  * Added new tips.
 
