@@ -103,10 +103,10 @@ public class ChartsComponent extends JPanel {
 	private static final Font   HACK_MARKER_FONT               = new Font( "Courier New", Font.BOLD, 16 );
 	/** Font to use to draw texts as part of charts.             */
 	private static final Font   CHART_PART_TEXT_FONT           = new Font( "Courier New", Font.PLAIN, 11 );
-	/** Stroke to be used to draw charts.                        */
-	private static final Stroke CHART_STROKE                   = new BasicStroke( 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND );
-	/** Stroke to be used to draw everything else.               */
-	private static final Stroke CHART_REST_STROKE              = new BasicStroke( 1.0f );
+	/** Double width stroke (for charts for example.             */
+	private static final Stroke STROKE_DOUBLE                  = new BasicStroke( 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND );
+	/** Normal stroke.                                           */
+	private static final Stroke STROKE_NORMAL                  = new BasicStroke( 1.0f );
 	/** Number of assist lines to be painted in each chart.      */
 	private static final int    ASSIST_LINES_COUNT             = 5;
 	/** Number of time labels to be painted in each chart.       */
@@ -1094,10 +1094,10 @@ public class ChartsComponent extends JPanel {
 				graphics.drawPolyline( xPoints, yPointsEapm, xPoints.length - 1 ); // Last point is excluded, it might not be a whole domain
 			}
 			// Now the apm
-			( (Graphics2D) graphics ).setStroke( CHART_STROKE );
+			( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
 			graphics.setColor( chartColor );
 			graphics.drawPolyline( xPoints, yPoints, xPoints.length - 1 ); // Last point is excluded, it might not be a whole domain
-			( (Graphics2D) graphics ).setStroke( CHART_REST_STROKE );
+			( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
 			
 			// Mark hack occurences
 			if ( hackDescriptionList != null ) {
