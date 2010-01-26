@@ -1468,29 +1468,21 @@ public class ChartsComponent extends JPanel {
 							if ( borderConfig == 0 )
 								cacheGraphics.drawImage( tileSetScaledImages[ tile >> 5 & 0x0f ], pixelX, pixelY, null ); // Solid tile
 							else {
-								//cacheGraphics.drawImage( tileSetScaledImages[ borderConfig & 0x0f ], x * zoom, y * zoom, null ); // Border
-								//cacheGraphics.drawImage( tileSetScaledImages[ ( (borderConfig & 0x0f)+1 )&0x0f ], x * zoom, y * zoom, null ); // Border
-								
 								cacheGraphics.drawImage( tileSetScaledImages[ borderConfig & 0x0f ], pixelX, pixelY, null ); // Border
-								final BufferedImage b = tileSetScaledImages[ ( (borderConfig & 0x0f)+1 )&0x0f ]; // Usually the border is between [borderCofing] and [borderConfig+1] tiles
+								final BufferedImage borderImage = tileSetScaledImages[ ( (borderConfig & 0x0f)+1 )&0x0f ]; // Usually the border is between [borderCofing] and [borderConfig+1] tiles
 								
-								final byte[] data = b.image.getImageData().data;
-								for ( int i = zoom - 1; i >= 0; i-- )
-									for ( int j = zoom - 1; j >= 0; j -= 2 ) {
-										final int pos = ( i*zoom + j ) << 2; // <<2 means *4, 4 bytes in the INT_RGB model
-										cacheGraphics.setColor( new Color( data[ pos+2 ] & 0xff, data[ pos+1 ] & 0xff, data[ pos ] & 0xff ) );
-										cacheGraphics.drawLine( pixelX + j, pixelY + i, pixelX + j, pixelY + i );
-									}
+								for ( int i = zoom - 1; i >= 0; i -= 2 )
+									cacheGraphics.drawImage( borderImage, pixelX, pixelY + i, pixelX + zoom, pixelY + i + 1, 0, i, zoom, i + 1, null );
 							}
 						}
 				}
 				
 				// Mineral fields
-				cacheGraphics.setColor( new Color( 50, 50, 255 ) );
+				cacheGraphics.setColor( new Color( 90, 90, 255 ) );
 				for ( final short[] mineral : replay.mapData.mineralFieldList )
 					cacheGraphics.fillRect( ( mineral[ 0 ] -  MapTilesManager.TILE_IMAGE_WIDTH ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH, ( mineral[ 1 ] -  MapTilesManager.TILE_IMAGE_HEIGHT ) * zoom / MapTilesManager.TILE_IMAGE_HEIGHT, 2*zoom, 2*zoom ); // Size of mineral fields are 2x2
 				// Vespene geysers
-				cacheGraphics.setColor( new Color( 10, 150, 10 ) );
+				cacheGraphics.setColor( new Color( 20, 180, 20 ) );
 				for ( final short[] geyser : replay.mapData.geyserList )
 					cacheGraphics.fillRect( ( geyser[ 0 ] - 2*MapTilesManager.TILE_IMAGE_WIDTH ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH, ( geyser[ 1 ] -  MapTilesManager.TILE_IMAGE_HEIGHT ) * zoom / MapTilesManager.TILE_IMAGE_HEIGHT, 4*zoom, 2*zoom ); // Size of vespene geysers are 4x2
 				
