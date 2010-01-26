@@ -198,13 +198,35 @@ public class BinRepParser {
 				final String SECTION_NAME_DIMENSION = "DIM "; // Name of the dimension section in the map data replay section.
 				final String SECTION_NAME_MTXM      = "MTXM"; // Name of the tile section in the map data replay section.
 				final String SECTION_NAME_ERA       = "ERA "; // Name of the tile set section in the map data replay section.
+				final String SECTION_NAME_UNIT      = "UNIT"; // Name of the unit section in the map data replay section.
 				while ( mapDataBuffer.position() < mapDataLength ) {
 					mapDataBuffer.get( sectionNameBuffer );
 					final String sectionName   = new String( sectionNameBuffer, "US-ASCII" );
 					final int    sectionLength = mapDataBuffer.getInt();
 					final int    sectionEndPos = mapDataBuffer.position() + sectionLength;
 					
-					if ( sectionName.equals( SECTION_NAME_DIMENSION ) ) {
+					if ( sectionName.equals( SECTION_NAME_UNIT ) ) {
+						if ( parseMapTileData ) {
+							while ( mapDataBuffer.position() < sectionEndPos ) {
+								final int unitEndPos = mapDataBuffer.position() + 36; // 36 bytes each unit
+								mapDataBuffer.getInt(); // unknown
+								final short x    = mapDataBuffer.getShort();
+								final short y    = mapDataBuffer.getShort();
+								final short type = mapDataBuffer.getShort();
+								
+								if ( type == 176 || type == 177 || type == 178 ) { // Minerals
+									mapData.mineralFieldList.add( new short[] { x, y } );
+								}
+								else if ( type == 188 ) { // Vespene geyser
+									mapData.geyserList.add( new short[] { x, y } );
+								}
+								
+								if ( mapDataBuffer.position() < unitEndPos ) // We might not processed all unit data
+									mapDataBuffer.position( unitEndPos < mapDataLength ? unitEndPos : mapDataLength );
+							}
+						}
+					}
+					else if ( sectionName.equals( SECTION_NAME_DIMENSION ) ) {
 						// If map has a non-standard size, the replay header contains invalid map size, this is the correct one
 						final short newWidth  = mapDataBuffer.getShort();
 						final short newHeight = mapDataBuffer.getShort();
