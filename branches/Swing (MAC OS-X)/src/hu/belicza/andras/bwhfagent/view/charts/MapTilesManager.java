@@ -61,10 +61,7 @@ public class MapTilesManager {
 			if ( mapTilesImage == null )
 				mapTilesImage = new ImageIcon( MapTilesManager.class.getResource( "map_tiles.png" ) ).getImage(); // We only load this once on demand.
 			
-			scaledMapTilesImage = mapTilesImage.getScaledInstance( mapTilesImage.getWidth( null ) * zoom / TILE_IMAGE_WIDTH, mapTilesImage.getHeight( null ) * zoom / TILE_IMAGE_HEIGHT, Image.SCALE_AREA_AVERAGING );
-			
-			scaledMapTilesImage = new BufferedImage( mapTilesImage.getWidth( null ) * zoom / TILE_IMAGE_WIDTH, mapTilesImage.getHeight( null ) * zoom / TILE_IMAGE_HEIGHT, BufferedImage.TYPE_INT_RGB );
-			scaledMapTilesImage.getGraphics().drawImage( mapTilesImage, 0, 0, scaledMapTilesImage.getWidth( null ), scaledMapTilesImage.getHeight( null ), null );
+			scaledMapTilesImage = mapTilesImage.getScaledInstance( mapTilesImage.getWidth( null ) * zoom / TILE_IMAGE_WIDTH, mapTilesImage.getHeight( null ) * zoom / TILE_IMAGE_HEIGHT, Image.SCALE_FAST );
 			
 			// Zoom has changed, discard the cached scaled tile images
 			for ( int i = 0; i < scaledTileImages.length; i ++ )

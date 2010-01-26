@@ -47,6 +47,9 @@ public class ChartsTab extends Tab {
 		}
 	};
 	
+	/** Max zoom value. */
+	public static final int MAX_ZOOM = 16;
+	
 	/**
 	 * Creates a clone file which is equal to the source based on the comparision provided by this comparator.<br>
 	 * The returned file cannot be used as a real File object!<br>

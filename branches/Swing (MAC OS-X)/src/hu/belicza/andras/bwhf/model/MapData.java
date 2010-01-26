@@ -1,5 +1,8 @@
 package hu.belicza.andras.bwhf.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Class modeling some data about the map.
  * 
@@ -12,5 +15,11 @@ public class MapData {
 	
 	/** Map tile data: width x height elements. */
 	public short[] tiles;
+	
+	/** Mineral positions on the map. */
+	public List< short[] > mineralFieldList = new ArrayList< short[] >();
+	
+	/** Vespene geyser positions on the map. */
+	public List< short[] > geyserList       = new ArrayList< short[] >();
 	
 }
