@@ -6,6 +6,7 @@ import hu.belicza.andras.bwhf.model.HackDescription;
 import hu.belicza.andras.bwhf.model.PlayerActions;
 import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
+import hu.belicza.andras.bwhf.model.Action.Size;
 import hu.belicza.andras.bwhfagent.Consts;
 import hu.belicza.andras.bwhfagent.view.ChartsTab;
 import hu.belicza.andras.bwhfagent.view.IconResourceManager;
@@ -26,8 +27,6 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Locale;
 import java.util.StringTokenizer;
-
-import org.eclipse.swt.graphics.ImageData;
 
 import swingwt.awt.BasicStroke;
 import swingwt.awt.BorderLayout;
@@ -105,10 +104,10 @@ public class ChartsComponent extends JPanel {
 	private static final Font   HACK_MARKER_FONT               = new Font( "Courier New", Font.BOLD, 13 );
 	/** Font to use to draw texts as part of charts.             */
 	private static final Font   CHART_PART_TEXT_FONT           = new Font( "Courier New", Font.PLAIN, 8 );
-	/** Stroke to be used to draw charts.                        */
-	private static final Stroke CHART_STROKE                   = new BasicStroke( 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND );
-	/** Stroke to be used to draw everything else.               */
-	private static final Stroke CHART_REST_STROKE              = new BasicStroke( 1.0f );
+	/** Double width stroke (for charts for example.             */
+	private static final Stroke STROKE_DOUBLE                  = new BasicStroke( 2.0f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND );
+	/** Normal stroke.                                           */
+	private static final Stroke STROKE_NORMAL                  = new BasicStroke( 1.0f );
 	/** Number of assist lines to be painted in each chart.      */
 	private static final int    ASSIST_LINES_COUNT             = 5;
 	/** Number of time labels to be painted in each chart.       */
@@ -499,7 +498,6 @@ public class ChartsComponent extends JPanel {
 		actionsListTextArea.setSelectionStart( actionFirstPosition );
 		
 		if ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() == ChartType.MAP_VIEW ) {
-			// TODO
 			selectedActionIndex = 0;
 			for ( int i = caretPosition; i >= 0; i -- )
 				if ( actionListText.charAt( i ) == '\n' )
@@ -957,14 +955,10 @@ public class ChartsComponent extends JPanel {
 					break;
 			}
 			
-			if ( chartType == ChartType.MAP_VIEW ) {
-				// TODO
+			if ( chartType != ChartType.MAP_VIEW && markerPosition >= 0 ) {
+				graphics.setColor( CHART_MARKER_COLOR );
+				graphics.drawLine( markerPosition, 0, markerPosition, getHeight() - 1 );
 			}
-			else
-				if ( markerPosition >= 0 ) {
-					graphics.setColor( CHART_MARKER_COLOR );
-					graphics.drawLine( markerPosition, 0, markerPosition, getHeight() - 1 );
-				}
 		}
 	}
 	
@@ -1112,10 +1106,10 @@ public class ChartsComponent extends JPanel {
 				graphics.drawPolyline( xPoints, yPointsEapm, xPoints.length - 1 ); // Last point is excluded, it might not be a whole domain
 			}
 			// Now the apm
-			( (Graphics2D) graphics ).setStroke( CHART_STROKE );
+			( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
 			graphics.setColor( chartColor );
 			graphics.drawPolyline( xPoints, yPoints, xPoints.length - 1 ); // Last point is excluded, it might not be a whole domain
-			( (Graphics2D) graphics ).setStroke( CHART_REST_STROKE );
+			( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
 			
 			// Mark hack occurences
 			if ( hackDescriptionList != null ) {
@@ -1494,17 +1488,80 @@ public class ChartsComponent extends JPanel {
 				// Mineral fields
 				cacheGraphics.setColor( new Color( 50, 50, 255 ) );
 				for ( final short[] mineral : replay.mapData.mineralFieldList )
-					cacheGraphics.fillRect( mineral[ 0 ] * zoom / MapTilesManager.TILE_IMAGE_WIDTH, mineral[ 1 ] * zoom / MapTilesManager.TILE_IMAGE_HEIGHT, 2*zoom, 2*zoom ); // Size of mineral fields are 2x2
+					cacheGraphics.fillRect( ( mineral[ 0 ] -  MapTilesManager.TILE_IMAGE_WIDTH ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH, ( mineral[ 1 ] -  MapTilesManager.TILE_IMAGE_HEIGHT ) * zoom / MapTilesManager.TILE_IMAGE_HEIGHT, 2*zoom, 2*zoom ); // Size of mineral fields are 2x2
 				// Vespene geysers
 				cacheGraphics.setColor( new Color( 10, 150, 10 ) );
 				for ( final short[] geyser : replay.mapData.geyserList )
-					cacheGraphics.fillRect( ( geyser[ 0 ] - MapTilesManager.TILE_IMAGE_WIDTH ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH, geyser[ 1 ] * zoom / MapTilesManager.TILE_IMAGE_HEIGHT, 4*zoom, 2*zoom ); // Size of vespene geysers are 4x2
+					cacheGraphics.fillRect( ( geyser[ 0 ] - 2*MapTilesManager.TILE_IMAGE_WIDTH ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH, ( geyser[ 1 ] -  MapTilesManager.TILE_IMAGE_HEIGHT ) * zoom / MapTilesManager.TILE_IMAGE_HEIGHT, 4*zoom, 2*zoom ); // Size of vespene geysers are 4x2
 				
 				replayMapViewZoom = zoom;
 			}
 			
 			if ( replayMapViewImage != null )
 				graphics.drawImage( replayMapViewImage, 0, 0, null );
+			
+			// Show game state up to the selection
+			if ( selectedActionIndex >= 0 ) {
+				// Show buildings up to this time
+				for ( int i = 0; i < selectedActionIndex; i++ ) {
+					final Object[] actionObjects = actionList.get( i );
+					final Action action = (Action) actionObjects[ 0 ];
+					if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
+						final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters.substring( action.parameters.indexOf( '(' ) + 1, action.parameters.indexOf( ')' ) ), "," );
+						if ( paramsTokenizer.countTokens() == 2 ) {
+							final int x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
+							final int y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
+							
+							Color playerColor = null;
+							try {
+								final int headerPlayerIndex = replay.replayHeader.getPlayerIndexByName( (String) actionObjects[ 1 ] );
+								playerColor = IN_GAME_COLORS[ replay.replayHeader.playerColors[ headerPlayerIndex ] ];
+							}
+							catch ( final Exception e ) {
+								playerColor = CHART_DEFAULT_COLOR;
+							}
+							graphics.setColor( playerColor );
+							
+							final Size size = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
+							graphics.fillRect( x, y, size.width * zoom, size.height * zoom );
+							( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
+						}
+					}
+				}
+				
+				// And the current action's target point
+				try { // To avoid the hassle with string -> int parsing
+					final Action action = (Action) actionList.get( selectedActionIndex )[ 0 ];
+					if ( Action.ACTION_NAME_INDICES_WITH_POINT_TARGET_SET.contains( action.actionNameIndex ) ) {
+						final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters, "," );
+						if ( paramsTokenizer.countTokens() == 2 ) {
+							final int x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH;
+							final int y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapTilesManager.TILE_IMAGE_HEIGHT;
+							graphics.setColor( new Color( 255, 50, 50 ) );
+							( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
+							graphics.drawLine( x - zoom, y - zoom, x + zoom, y + zoom );
+							graphics.drawLine( x - zoom, y + zoom, x + zoom, y - zoom );
+							( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
+						}
+					}
+					else if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
+						final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters.substring( action.parameters.indexOf( '(' ) + 1, action.parameters.indexOf( ')' ) ), "," );
+						if ( paramsTokenizer.countTokens() == 2 ) {
+							final int x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
+							final int y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
+							graphics.setColor( new Color( 255, 50, 50 ) );
+							( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
+							final Size size = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
+							graphics.drawRect( x, y, size.width * zoom, size.height * zoom );
+							( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
+						}
+					}
+				}
+				catch ( final Exception e ) {
+					e.printStackTrace();
+				}
+			}
+			
 		}
 	}
 	
