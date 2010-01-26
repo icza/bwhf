@@ -1,8 +1,11 @@
 package hu.belicza.andras.bwhf.model;
 
+import java.util.Arrays;
 import java.util.Formatter;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.Map.Entry;
 
 /**
@@ -77,6 +80,11 @@ public class Action implements Comparable< Action > {
 	public static final byte ACTION_NAME_INDEX_MERGE_ARCHON      = (byte) 0x2a;
 	public static final byte ACTION_NAME_INDEX_MERGE_DARK_ARCHON = (byte) 0x5a;
 	public static final byte ACTION_NAME_INDEX_LIFT              = (byte) 0x2f;
+	
+	/** Set of actions that have an exact point target. */
+	public static final Set< Byte > ACTION_NAME_INDICES_WITH_POINT_TARGET_SET = new HashSet< Byte >(
+			Arrays.asList( ACTION_NAME_INDEX_ATTACK_MOVE, ACTION_NAME_INDEX_GATHER, ACTION_NAME_INDEX_SET_RALLY, ACTION_NAME_INDEX_MOVE,
+					(byte) 0x15 /* All subactions. */ ) );
 	
 	/** Action IDs we're interested in when parsing exported text by BWChart.<br>
 	 *  Parsing from exported BWChart text is no longer a goal. This might be inaccurate. */
