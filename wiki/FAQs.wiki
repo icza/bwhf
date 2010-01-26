@@ -60,3 +60,6 @@ A: It means there are hacker reports with that name. The "R" tag is a link, you 
 
 ===Q: I applied for a key days ago but I haven't received any response.===
 A: I reply to everyone who applies for a key. Check your spam folder, maybe the response was put there. Or it could that you gave a wrong email address and I was not able to contact you.
+
+===Q: I'm using a laptop and I can't use the Print screen key. Is there a workaround?===
+A: Yes. You can remap the Print Screen key to another one that is comfortable for you on your computer. You have to use an external program for this, for example KeyTweak or SharpKeys.
