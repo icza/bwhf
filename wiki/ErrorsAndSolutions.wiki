@@ -77,3 +77,9 @@ cd /home/joe/BWHFAgent
 chmod +x BWHFAgent.sh
 ./BWHFAgent.sh
 }}}
+
+If that fails, try this one:
+{{{
+cd /home/joe/BWHFAgent
+java -Xmx320m -cp lib/BWHFAgent.jar:lib/pcx.jar hu/belicza/andras/bwhfagent/BWHFAgent
+}}}
