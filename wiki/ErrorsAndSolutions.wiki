@@ -67,3 +67,13 @@ Once you confirmed you have Java 6.0, you can start the Agent by executing the `
 If you someone can't execute the script (for example it always opens in an editor or something), then open a console/terminal, navigate to the BWHF Agent's folder, and enter the command that is inside the `BWHFAgent.sh` starter script (open it in an editor, copy the command from it and paste it to the terminal). It should start now.
 
 If you have multiple Java installed (like 5.0 and 6.0), you might need to alter the command, and add the path to your Java 6.0 version.
+
+*MAC OS-X test case*
+
+Let's say you extracted BWHF Agent to the folder: `/home/joe/BWHFAgent`. This is how you can start it:
+Open a terminal/console, and type the following commands:
+{{{
+cd /home/joe/BWHFAgent
+chmod +x BWHFAgent.sh
+./BWHFAgent.sh
+}}}
