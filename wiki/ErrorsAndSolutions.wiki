@@ -15,7 +15,7 @@ You can start the program with any of the following programs/scripts:
  * `BWHFAgent.exe` (preferred)
  * `BWHFAgent.cmd`
  * `BWHFAgent-console.cmd` (opens a console window for detailed error messages; good for debugging)
-Or on linux platform:
+Or on linux and OS-X platforms:
  * `BWHFAgent.sh` (you might need to set executable privilige first)
 
 ==I have Java installed, still can't start==
