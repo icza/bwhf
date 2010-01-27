@@ -222,8 +222,10 @@ public class ChartsComponent extends JPanel {
 	/** Show player names on map checkbox.                  */
 	private final JCheckBox showBuildingImagesCheckBox           = new JCheckBox( "Show building images", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_BUILDING_IMAGES ) ) );
 	
-	/** Scroll bar to scroll the zoomed charts.             */
+	/** Scroll bar to scroll the zoomed charts.                                  */
 	private final JScrollBar            chartScrollBar           = new JScrollBar( JScrollBar.HORIZONTAL );
+	/** Vertical scroll bar to scroll the zoomed map view charts.                */
+	private final JScrollBar            chartVScrollBar           = new JScrollBar( JScrollBar.VERTICAL );
 	/** Split pane to display the charts component and the players' action list. */
 	private final JSplitPane            splitPane                = new JSplitPane( JSplitPane.VERTICAL_SPLIT, true );
 	/** List of the displayable actions, pairs of action+palyer name.            */
@@ -298,6 +300,12 @@ public class ChartsComponent extends JPanel {
 			}
 		} );
 		chartsHolderPanel.add( chartScrollBar, BorderLayout.SOUTH );
+		chartVScrollBar.addAdjustmentListener( new AdjustmentListener() {
+			public void adjustmentValueChanged( final AdjustmentEvent event ) {
+				repaint();
+			}
+		} );
+		chartsHolderPanel.add( chartVScrollBar, BorderLayout.EAST );
 		splitPane.setTopComponent( chartsHolderPanel );
 		
 		final Box actionListBox = Box.createHorizontalBox();
@@ -423,6 +431,7 @@ public class ChartsComponent extends JPanel {
 	 */
 	public void setZoom( final int zoom ) {
 		chartScrollBar.setVisible( zoom > 1 );
+		chartVScrollBar.setVisible( zoom > 1 && ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() ) == ChartType.MAP_VIEW );
 		chartScrollBar.getParent().validate();
 		
 		// Scroll to the marker in the new zoom view.
@@ -613,6 +622,12 @@ public class ChartsComponent extends JPanel {
 	public void setChartType( final ChartType chartType ) {
 		if ( chartType == null )
 			return;
+		
+		// Scrollbar visibility policy might change here: only the Map view chart has vertical scrollbar
+		if ( (Integer) chartsTab.zoomComboBox.getSelectedItem() > 1 
+				&& !( chartVScrollBar.isVisible() ^ chartType != ChartType.MAP_VIEW ) ) {
+			setZoom( (Integer) chartsTab.zoomComboBox.getSelectedItem() );
+		}
 		
 		// We store values on the options panel before we remove the components, they might lost their values in SwingWT
 		assignUsedProperties();
@@ -959,13 +974,26 @@ public class ChartsComponent extends JPanel {
 		graphics.clearRect( 0, 0, getWidth(), getHeight() );
 		
 		if ( replay != null && playerIndexToShowList.size() > 0 && replay.replayHeader.gameFrames != 0 ) {
-			final int zoom = (Integer) chartsTab.zoomComboBox.getSelectedItem();
-			final int dx   = ( getWidth() * zoom - getWidth() ) * chartScrollBar.getValue() / ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() );
-			chartsParams   = new ChartsParams( chartsTab, replay.replayHeader.gameFrames, playerIndexToShowList.size(), this, dx );
-			
-			graphics.translate( -dx, 0 );
-			
 			final ChartType chartType = (ChartType) chartsTab.chartTypeComboBox.getSelectedItem();
+			
+			final int zoom = (Integer) chartsTab.zoomComboBox.getSelectedItem();
+			int dx, dy;
+			if ( zoom > 1 && chartType == ChartType.MAP_VIEW ) {
+				final int tileWidth  = MapTilesManager.TILE_IMAGE_WIDTH  * zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
+				final int tileHeight = MapTilesManager.TILE_IMAGE_HEIGHT * zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
+				dx = ( replay.replayHeader.mapWidth  * tileWidth  - getWidth () ) * chartScrollBar .getValue() / ( chartScrollBar .getMaximum() - chartScrollBar .getVisibleAmount() );
+				dy = ( replay.replayHeader.mapHeight * tileHeight - getHeight() ) * chartVScrollBar.getValue() / ( chartVScrollBar.getMaximum() - chartVScrollBar.getVisibleAmount() );
+			}
+			else {
+				dx = ( getWidth() * zoom - getWidth() ) * chartScrollBar.getValue() / ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() );
+				dy = 0;
+			}
+			if ( dx < 0 ) dx = 0;
+			if ( dy < 0 ) dy = 0;
+			chartsParams = new ChartsParams( chartsTab, replay.replayHeader.gameFrames, playerIndexToShowList.size(), this, dx, dy );
+			
+			graphics.translate( -dx, -dy );
+			
 			switch ( chartType ) {
 				case APM :
 					paintApmCharts( graphics, false );
@@ -1482,9 +1510,10 @@ public class ChartsComponent extends JPanel {
 		if ( tiles != null ) {
 			final int zoom = MapTilesManager.TILE_IMAGE_WIDTH * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
 			
+			final int mapWidth  = replay.replayHeader.mapWidth;
+			final int mapHeight = replay.replayHeader.mapHeight;
+			
 			if ( replayMapViewZoom != zoom ) {
-				final int mapWidth  = replay.replayHeader.mapWidth;
-				final int mapHeight = replay.replayHeader.mapHeight;
 				
 				replayMapViewImage = new BufferedImage( mapWidth * zoom, mapHeight * zoom, BufferedImage.TYPE_INT_RGB );
 				final Graphics2D      cacheGraphics       = replayMapViewImage.createGraphics();
@@ -1531,6 +1560,8 @@ public class ChartsComponent extends JPanel {
 			final boolean showPlayerNames    = showPlayerNamesOnMapCheckBox.isSelected();
 			final boolean showBuildingImages = showBuildingImagesCheckBox  .isSelected();
 			
+			// TODO: optimize building image rendering
+			
 			// Show start locations
 			for ( int i = 0; i < chartsParams.playersCount; i++ ) {
 				final int           playerIndex_  = playerIndexToShowList.get( i );
@@ -1554,7 +1585,7 @@ public class ChartsComponent extends JPanel {
 								final int imageIndex = BUILDING_POSITION_LIST[ race ].indexOf( mainBuildingIndex );
 								if ( imageIndex >= 0 ) {
 									graphics.drawImage( RACE_BUILDINGS_IMAGES[ race ], x, y, 
-											x + size.width * zoom, y + size.height * zoom, 0, imageIndex * 34, 36, imageIndex*34 + 34, Color.BLACK, null );
+											x + size.width * zoom, y + size.height * zoom, 0, imageIndex * 34, 36, imageIndex*34 + 34, null );
 									graphics.drawRect( x, y, size.width * zoom, size.height * zoom );
 									paintRectangle = false;
 								}
@@ -1605,7 +1636,7 @@ public class ChartsComponent extends JPanel {
 									final int imageIndex = BUILDING_POSITION_LIST[ race ].indexOf( action.parameterBuildingNameIndex );
 									if ( imageIndex >= 0 ) {
 										graphics.drawImage( RACE_BUILDINGS_IMAGES[ race ], x, y, 
-												x + size.width * zoom, y + size.height * zoom, 0, imageIndex * 34, 36, imageIndex*34 + 34, Color.BLACK, null );
+												x + size.width * zoom, y + size.height * zoom, 0, imageIndex * 34, 36, imageIndex*34 + 34, null );
 										graphics.drawRect( x, y, size.width * zoom, size.height * zoom );
 										paintRectangle = false;
 									}
@@ -1620,11 +1651,12 @@ public class ChartsComponent extends JPanel {
 				// And the current action's target point
 				try { // To avoid the hassle with string -> int parsing
 					final Action action = (Action) actionList.get( selectedActionIndex )[ 0 ];
+					final int x, y;
 					if ( Action.ACTION_NAME_INDICES_WITH_POINT_TARGET_SET.contains( action.actionNameIndex ) ) {
 						final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters, "," );
 						if ( paramsTokenizer.countTokens() == 2 ) {
-							final int x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH;
-							final int y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapTilesManager.TILE_IMAGE_HEIGHT;
+							x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH;
+							y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapTilesManager.TILE_IMAGE_HEIGHT;
 							graphics.setColor( new Color( 255, 50, 50 ) );
 							( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
 							graphics.drawLine( x - zoom, y - zoom, x + zoom, y + zoom );
@@ -1635,8 +1667,8 @@ public class ChartsComponent extends JPanel {
 					else if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
 						final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters.substring( action.parameters.indexOf( '(' ) + 1, action.parameters.indexOf( ')' ) ), "," );
 						if ( paramsTokenizer.countTokens() == 2 ) {
-							final int x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
-							final int y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
+							x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
+							y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
 							graphics.setColor( new Color( 255, 50, 50 ) );
 							( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
 							final Size size = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
@@ -1644,11 +1676,28 @@ public class ChartsComponent extends JPanel {
 							( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
 						}
 					}
+					
+					// If target point is not visible, scroll to it
+					// TODO
+					/*if ( markerPosition < chartsParams.dx || markerPosition >= chartsParams.dx + chartsParams.componentWidth )
+						chartScrollBar.setValue( ( markerPosition - chartsParams.componentWidth / 2 ) * ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ) / ( chartsParams.componentWidth * chartsParams.zoom - chartsParams.componentWidth ) );*/
 				}
 				catch ( final Exception e ) {
 					e.printStackTrace();
 				}
 			}
+			
+			if ( chartsParams.zoom == 1 ) {
+				graphics.setColor( CHART_BACKGROUND_COLOR );
+				graphics.fillRect( -5, -5, 1, 1 ); // To set the background color...
+				graphics.setColor( new Color( 200, 200, 200 ) );
+				graphics.drawString( "Tip: try zooming this chart type.", mapWidth * zoom + 5, 15 );
+			}
+		}
+		else {
+			graphics.setColor( CHART_DEFAULT_COLOR );
+			graphics.drawString( "A Map view is not available for this replay!", chartsParams.dx, chartsParams.dy );
+			
 		}
 	}
 	

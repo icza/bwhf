@@ -43,8 +43,10 @@ public class ChartsParams {
 	public final int zoom;
 	/** Delta x: x coordinate of the first visible chart point (it is scrollable when zoomed). */
 	public final int dx;
+	/** Delta y: y coordinate of the first visible chart point (it is scrollable when zoomed). */
+	public final int dy;
 	
-	public ChartsParams( final ChartsTab chartsTab, final int frames, final int playersCount, final JComponent chartsComponent, final int dx ) {
+	public ChartsParams( final ChartsTab chartsTab, final int frames, final int playersCount, final JComponent chartsComponent, final int dx, final int dy ) {
 		componentWidth         = chartsComponent.getWidth();
 		componentHeight        = chartsComponent.getHeight();
 		allPlayersOnOneChart   = chartsTab.allPlayersOnOneChartCheckBox.isSelected();
@@ -53,6 +55,7 @@ public class ChartsParams {
 		chartsCount            = allPlayersOnOneChart ? 1 : playersCount;
 		zoom                   = (Integer) chartsTab.zoomComboBox.getSelectedItem();
 		this.dx                = dx;
+		this.dy                = dy;
 		final int chartWidth_  = componentWidth * zoom - AXIS_SPACE_X;
 		chartWidth             = chartWidth_ < 1 ? 1 : chartWidth_;
 		final int chartHeight_ = ( componentHeight - AXIS_SPACE_Y ) / chartsCount - AXIS_SPACE_Y;
