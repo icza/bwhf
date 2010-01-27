@@ -1607,8 +1607,8 @@ public class ChartsComponent extends JPanel {
 			// Show game state up to the selection
 			if ( selectedActionIndex >= 0 ) {
 				// Show buildings up to this time
-				final int maxIndex = Math.min( selectedActionIndex, actionList.size() );
-				for ( int i = 0; i < maxIndex; i++ ) {
+				final int maxActionIndex = Math.min( selectedActionIndex, actionList.size() - 1 );
+				for ( int i = 0; i <= maxActionIndex; i++ ) {
 					final Object[] actionObjects = actionList.get( i );
 					final Action action = (Action) actionObjects[ 0 ];
 					if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
@@ -1650,37 +1650,39 @@ public class ChartsComponent extends JPanel {
 				
 				// And the current action's target point
 				try { // To avoid the hassle with string -> int parsing
-					final Action action = (Action) actionList.get( selectedActionIndex )[ 0 ];
-					final int x, y;
-					if ( Action.ACTION_NAME_INDICES_WITH_POINT_TARGET_SET.contains( action.actionNameIndex ) ) {
-						final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters, "," );
-						if ( paramsTokenizer.countTokens() == 2 ) {
-							x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH;
-							y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapTilesManager.TILE_IMAGE_HEIGHT;
-							graphics.setColor( new Color( 255, 50, 50 ) );
-							( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
-							graphics.drawLine( x - zoom, y - zoom, x + zoom, y + zoom );
-							graphics.drawLine( x - zoom, y + zoom, x + zoom, y - zoom );
-							( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
+					if ( selectedActionIndex < actionList.size() ) {
+						final Action action = (Action) actionList.get( selectedActionIndex )[ 0 ];
+						final int x, y;
+						if ( Action.ACTION_NAME_INDICES_WITH_POINT_TARGET_SET.contains( action.actionNameIndex ) ) {
+							final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters, "," );
+							if ( paramsTokenizer.countTokens() == 2 ) {
+								x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH;
+								y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapTilesManager.TILE_IMAGE_HEIGHT;
+								graphics.setColor( new Color( 255, 50, 50 ) );
+								( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
+								graphics.drawLine( x - zoom, y - zoom, x + zoom, y + zoom );
+								graphics.drawLine( x - zoom, y + zoom, x + zoom, y - zoom );
+								( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
+							}
 						}
-					}
-					else if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
-						final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters.substring( action.parameters.indexOf( '(' ) + 1, action.parameters.indexOf( ')' ) ), "," );
-						if ( paramsTokenizer.countTokens() == 2 ) {
-							x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
-							y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
-							graphics.setColor( new Color( 255, 50, 50 ) );
-							( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
-							final Size size = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
-							graphics.drawRect( x, y, size.width * zoom, size.height * zoom );
-							( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
+						else if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
+							final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters.substring( action.parameters.indexOf( '(' ) + 1, action.parameters.indexOf( ')' ) ), "," );
+							if ( paramsTokenizer.countTokens() == 2 ) {
+								x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
+								y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
+								graphics.setColor( new Color( 255, 50, 50 ) );
+								( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
+								final Size size = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
+								graphics.drawRect( x, y, size.width * zoom, size.height * zoom );
+								( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
+							}
 						}
+						
+						// If target point is not visible, scroll to it
+						// TODO
+						/*if ( markerPosition < chartsParams.dx || markerPosition >= chartsParams.dx + chartsParams.componentWidth )
+							chartScrollBar.setValue( ( markerPosition - chartsParams.componentWidth / 2 ) * ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ) / ( chartsParams.componentWidth * chartsParams.zoom - chartsParams.componentWidth ) );*/
 					}
-					
-					// If target point is not visible, scroll to it
-					// TODO
-					/*if ( markerPosition < chartsParams.dx || markerPosition >= chartsParams.dx + chartsParams.componentWidth )
-						chartScrollBar.setValue( ( markerPosition - chartsParams.componentWidth / 2 ) * ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ) / ( chartsParams.componentWidth * chartsParams.zoom - chartsParams.componentWidth ) );*/
 				}
 				catch ( final Exception e ) {
 					e.printStackTrace();
