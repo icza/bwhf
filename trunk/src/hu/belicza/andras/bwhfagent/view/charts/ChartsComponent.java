@@ -3,6 +3,7 @@ package hu.belicza.andras.bwhfagent.view.charts;
 import hu.belicza.andras.bwhf.control.ReplayScanner;
 import hu.belicza.andras.bwhf.model.Action;
 import hu.belicza.andras.bwhf.model.HackDescription;
+import hu.belicza.andras.bwhf.model.MapData;
 import hu.belicza.andras.bwhf.model.PlayerActions;
 import hu.belicza.andras.bwhf.model.Replay;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
@@ -37,6 +38,7 @@ import swingwt.awt.FontMetrics;
 import swingwt.awt.Graphics;
 import swingwt.awt.Graphics2D;
 import swingwt.awt.GridLayout;
+import swingwt.awt.Image;
 import swingwt.awt.Stroke;
 import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
@@ -48,6 +50,7 @@ import swingwt.awt.event.MouseAdapter;
 import swingwt.awt.event.MouseEvent;
 import swingwt.awt.image.BufferedImage;
 import swingwtx.swing.Box;
+import swingwtx.swing.ImageIcon;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
 import swingwtx.swing.JComboBox;
@@ -117,6 +120,26 @@ public class ChartsComponent extends JPanel {
 	
 	/** Date format to format replay dates. */
 	private static final DateFormat REPLAY_DATE_FORMAT = new SimpleDateFormat( "yyyy-MM-dd" );
+	
+	/** Images of the buildings of the different races. */
+	private static final Image[] RACE_BUILDINGS_IMAGES = new Image[] {
+		new ImageIcon( ChartsComponent.class.getResource( "zerg_buildings.png"    ) ).getImage(),
+		new ImageIcon( ChartsComponent.class.getResource( "terran_buildings.png"  ) ).getImage(),
+		new ImageIcon( ChartsComponent.class.getResource( "protoss_buildings.png" ) ).getImage()
+	};
+	
+	/** Positions of the images of the different buildings in the big pictures. */
+	private static final List< ? >[] BUILDING_POSITION_LIST = new List[] {
+		// Zerg
+		Arrays.asList( (short) 0x82, (short) 0x83, (short) 0x85, (short) 0x84, (short) 0x86, (short) 0x87, (short) 0x88, (short) 0x89, (short) 0x8A, (short) 0x8B, (short) 0x8C, (short) 0x8D, (short) 0x8E, (short) 0x8F, (short) 0x90, (short) 0x92, (short) 0x95 ),
+		// Terran
+		Arrays.asList( (short) 0x6A, (short) 0x6D, (short) 0x6E, (short) 0x6F, (short) 0x70, (short) 0x71, (short) 0x72, (short) 0x74, (short) 0x7A, (short) 0x7B, (short) 0x7C, (short) 0x7D, (short) 0x6B, (short) 0x6C, (short) 0x73, (short) 0x75, (short) 0x76, (short) 0x78 ),
+		// Protoss
+		Arrays.asList( (short) 0x9A, (short) 0x9B, (short) 0x9C, (short) 0x9D, (short) 0x9F, (short) 0xA0, (short) 0xA2, (short) 0xA3, (short) 0xA4, (short) 0xA5, (short) 0xA6, (short) 0xA7, (short) 0xA9, (short) 0xAA, (short) 0xAB, (short) 0xAC )
+	};
+	
+	/** Main buildings of the different races. */
+	private static short[] RACE_MAIN_BUILDINGS = new short[] { Action.BUILDING_NAME_INDEX_HATCHERY, Action.BUILDING_NAME_INDEX_COMMAND_CENTER, Action.BUILDING_NAME_INDEX_NEXUS };
 	
 	/**
 	 * The supported types of charts.
@@ -194,6 +217,10 @@ public class ChartsComponent extends JPanel {
 	private final JCheckBox hideNonHotkeySequencesCheckBox       = new JCheckBox( "Hide non-hotkey sequences", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_NON_HOTKEY_SEQUENCES ) ) );
 	/** Max frames delay in sequences combo box.            */
 	private final JComboBox maxFramesDelayInSequenceComboBox     = new JComboBox( MAX_FRAME_DELAYS_IN_SEQUENCES );
+	/** Show player names on map checkbox.                  */
+	private final JCheckBox showPlayerNamesOnMapCheckBox         = new JCheckBox( "Show player names on map", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_PLAYER_NAMES_ON_MAP ) ) );
+	/** Show player names on map checkbox.                  */
+	private final JCheckBox showBuildingImagesCheckBox           = new JCheckBox( "Show building images", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_BUILDING_IMAGES ) ) );
 	
 	/** Scroll bar to scroll the zoomed charts.             */
 	private final JScrollBar            chartScrollBar           = new JScrollBar( JScrollBar.HORIZONTAL );
@@ -386,6 +413,8 @@ public class ChartsComponent extends JPanel {
 		showOverallEapmCheckBox.addChangeListener( repainterChangeListener );
 		hideNonHotkeySequencesCheckBox.addChangeListener( repainterChangeListener );
 		maxFramesDelayInSequenceComboBox.addChangeListener( repainterChangeListener );
+		showPlayerNamesOnMapCheckBox.addChangeListener( repainterChangeListener );
+		showBuildingImagesCheckBox.addChangeListener( repainterChangeListener );
 	}
 	
 	/**
@@ -502,6 +531,8 @@ public class ChartsComponent extends JPanel {
 			for ( int i = caretPosition; i >= 0; i -- )
 				if ( actionListText.charAt( i ) == '\n' )
 					selectedActionIndex++;
+			if ( selectedActionIndex >= actionList.size() ) // Sometimes it counts up to the size...
+				selectedActionIndex  = actionList.size();
 		}
 		else {
 			final StringTokenizer timeTokenizer = new StringTokenizer( (String) actionListText.substring( actionFirstPosition, actionLastPosition ) );
@@ -622,6 +653,8 @@ public class ChartsComponent extends JPanel {
 				chartOptionsPanel.add( maxFramesDelayInSequenceComboBox );
 				break;
 			case MAP_VIEW :
+				chartOptionsPanel.add( showPlayerNamesOnMapCheckBox );
+				chartOptionsPanel.add( showBuildingImagesCheckBox );
 				break;
 		}
 		
@@ -635,6 +668,8 @@ public class ChartsComponent extends JPanel {
 		overallApmChartDetailLevelComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_OVERALL_APM_CHART_DETAIL_LEVEL ) ) );
 		hideNonHotkeySequencesCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_NON_HOTKEY_SEQUENCES ) ) );
 		maxFramesDelayInSequenceComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_MAX_FRAME_DELAY_IN_SEQUENCES ) ) );
+		showPlayerNamesOnMapCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_PLAYER_NAMES_ON_MAP ) ) );
+		showBuildingImagesCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_BUILDING_IMAGES ) ) );
 		
 		contentPanel.validate();
 		repaint();
@@ -1441,7 +1476,8 @@ public class ChartsComponent extends JPanel {
 	 * @param graphics graphics to be used for painting
 	 */
 	private void paintMapViewCharts( final Graphics graphics ) {
-		final short[] tiles = replay.mapData == null ? null : replay.mapData.tiles;
+		final MapData mapData = replay.mapData;
+		final short[] tiles = mapData == null ? null : mapData.tiles;
 		
 		if ( tiles != null ) {
 			final int zoom = MapTilesManager.TILE_IMAGE_WIDTH * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
@@ -1452,7 +1488,7 @@ public class ChartsComponent extends JPanel {
 				
 				replayMapViewImage = new BufferedImage( mapWidth * zoom, mapHeight * zoom, BufferedImage.TYPE_INT_RGB );
 				final Graphics2D      cacheGraphics       = replayMapViewImage.createGraphics();
-				final int             tileSet             = replay.mapData.tileSet < 0 ? 0 : replay.mapData.tileSet & 0x07;
+				final int             tileSet             = mapData.tileSet < 0 ? 0 : mapData.tileSet & 0x07;
 				final BufferedImage[] tileSetScaledImages = MapTilesManager.getTileSetScaledImages( tileSet, zoom );
 				
 				for ( int y = 0; y < mapHeight; y++ ) {
@@ -1479,11 +1515,11 @@ public class ChartsComponent extends JPanel {
 				
 				// Mineral fields
 				cacheGraphics.setColor( new Color( 90, 90, 255 ) );
-				for ( final short[] mineral : replay.mapData.mineralFieldList )
+				for ( final short[] mineral : mapData.mineralFieldList )
 					cacheGraphics.fillRect( ( mineral[ 0 ] -  MapTilesManager.TILE_IMAGE_WIDTH ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH, ( mineral[ 1 ] -  MapTilesManager.TILE_IMAGE_HEIGHT ) * zoom / MapTilesManager.TILE_IMAGE_HEIGHT, 2*zoom, 2*zoom ); // Size of mineral fields are 2x2
 				// Vespene geysers
 				cacheGraphics.setColor( new Color( 20, 180, 20 ) );
-				for ( final short[] geyser : replay.mapData.geyserList )
+				for ( final short[] geyser : mapData.geyserList )
 					cacheGraphics.fillRect( ( geyser[ 0 ] - 2*MapTilesManager.TILE_IMAGE_WIDTH ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH, ( geyser[ 1 ] -  MapTilesManager.TILE_IMAGE_HEIGHT ) * zoom / MapTilesManager.TILE_IMAGE_HEIGHT, 4*zoom, 2*zoom ); // Size of vespene geysers are 4x2
 				
 				replayMapViewZoom = zoom;
@@ -1492,10 +1528,59 @@ public class ChartsComponent extends JPanel {
 			if ( replayMapViewImage != null )
 				graphics.drawImage( replayMapViewImage, 0, 0, null );
 			
+			final boolean showPlayerNames    = showPlayerNamesOnMapCheckBox.isSelected();
+			final boolean showBuildingImages = showBuildingImagesCheckBox  .isSelected();
+			
+			// Show start locations
+			for ( int i = 0; i < chartsParams.playersCount; i++ ) {
+				final int playerIndex = replay.replayHeader.getPlayerIndexByName( replay.replayActions.players[ playerIndexToShowList.get( i ) ].playerName );
+				
+				Color playerColor = null;
+				try {
+					playerColor = IN_GAME_COLORS[ replay.replayHeader.playerColors[ playerIndex ] ];
+				}
+				catch ( final Exception e ) {
+					playerColor = CHART_DEFAULT_COLOR;
+				}
+				graphics.setColor( playerColor );
+				
+				final int   race              = replay.replayHeader.playerRaces[ playerIndex ] & 0xff;
+				final short mainBuildingIndex = race >= 0 && race < RACE_MAIN_BUILDINGS.length ? RACE_MAIN_BUILDINGS[ race ] : Action.BUILDING_NAME_INDEX_NEXUS;
+				final Size  size              = Action.BUILDING_ID_SIZE_MAP.get( mainBuildingIndex );
+				for ( final int[] loc : mapData.startLocationList )
+					if ( loc[ 2 ] == playerIndex ) {
+						final int x = ( loc[ 0 ] - size.width  * MapTilesManager.TILE_IMAGE_WIDTH  / 2 ) * zoom / MapTilesManager.TILE_IMAGE_WIDTH;
+						final int y = ( loc[ 1 ] - size.height * MapTilesManager.TILE_IMAGE_HEIGHT / 2 ) * zoom / MapTilesManager.TILE_IMAGE_HEIGHT;
+						boolean paintRectangle = true;
+						if ( showBuildingImages ) {
+							if ( race >= 0 && race < RACE_BUILDINGS_IMAGES.length ) {
+								final int imageIndex = BUILDING_POSITION_LIST[ race ].indexOf( mainBuildingIndex );
+								if ( imageIndex >= 0 ) {
+									graphics.drawImage( RACE_BUILDINGS_IMAGES[ race ], x, y, 
+											x + size.width * zoom, y + size.height * zoom, 0, imageIndex * 34, 36, imageIndex*34 + 34, Color.BLACK, null );
+									graphics.drawRect( x, y, size.width * zoom, size.height * zoom );
+									paintRectangle = false;
+								}
+							}
+						}
+						if ( paintRectangle )
+							graphics.fillRect( x, y, size.width * zoom, size.height * zoom );
+						
+						if ( showPlayerNames ) {
+							if ( !paintRectangle )
+								graphics.fillRect( -5, -5, 1, 1 ); // We issue a paint command so the next string draw operation (player name) will use the proper background color
+							graphics.setColor( Color.BLACK );
+							graphics.drawString( replay.replayActions.players[ playerIndexToShowList.get( i ) ].playerName, loc[ 0 ] * zoom / MapTilesManager.TILE_IMAGE_WIDTH, loc[ 1 ] * zoom / MapTilesManager.TILE_IMAGE_HEIGHT );
+						}
+						break;
+					}
+			}
+			
 			// Show game state up to the selection
 			if ( selectedActionIndex >= 0 ) {
 				// Show buildings up to this time
-				for ( int i = 0; i < selectedActionIndex; i++ ) {
+				final int maxIndex = Math.min( selectedActionIndex, actionList.size() );
+				for ( int i = 0; i < maxIndex; i++ ) {
 					final Object[] actionObjects = actionList.get( i );
 					final Action action = (Action) actionObjects[ 0 ];
 					if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
@@ -1504,10 +1589,11 @@ public class ChartsComponent extends JPanel {
 							final int x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
 							final int y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
 							
+							final int playerIndex = replay.replayHeader.getPlayerIndexByName( (String) actionObjects[ 1 ] );
+							                                                          
 							Color playerColor = null;
 							try {
-								final int headerPlayerIndex = replay.replayHeader.getPlayerIndexByName( (String) actionObjects[ 1 ] );
-								playerColor = IN_GAME_COLORS[ replay.replayHeader.playerColors[ headerPlayerIndex ] ];
+								playerColor = IN_GAME_COLORS[ replay.replayHeader.playerColors[ playerIndex ] ];
 							}
 							catch ( final Exception e ) {
 								playerColor = CHART_DEFAULT_COLOR;
@@ -1515,8 +1601,21 @@ public class ChartsComponent extends JPanel {
 							graphics.setColor( playerColor );
 							
 							final Size size = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
-							graphics.fillRect( x, y, size.width * zoom, size.height * zoom );
-							( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
+							boolean paintRectangle = true;
+							if ( showBuildingImages ) {
+								final int race = replay.replayHeader.playerRaces[ playerIndex ] & 0xff;
+								if ( race >= 0 && race < RACE_BUILDINGS_IMAGES.length ) {
+									final int imageIndex = BUILDING_POSITION_LIST[ race ].indexOf( action.parameterBuildingNameIndex );
+									if ( imageIndex >= 0 ) {
+										graphics.drawImage( RACE_BUILDINGS_IMAGES[ race ], x, y, 
+												x + size.width * zoom, y + size.height * zoom, 0, imageIndex * 34, 36, imageIndex*34 + 34, Color.BLACK, null );
+										graphics.drawRect( x, y, size.width * zoom, size.height * zoom );
+										paintRectangle = false;
+									}
+								}
+							}
+							if ( paintRectangle )
+								graphics.fillRect( x, y, size.width * zoom, size.height * zoom );
 						}
 					}
 				}
@@ -1553,7 +1652,6 @@ public class ChartsComponent extends JPanel {
 					e.printStackTrace();
 				}
 			}
-			
 		}
 	}
 	
@@ -1650,6 +1748,8 @@ public class ChartsComponent extends JPanel {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_OVERALL_EAPM             , Boolean.toString( showOverallEapmCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_HIDE_NON_HOTKEY_SEQUENCES     , Boolean.toString( hideNonHotkeySequencesCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_MAX_FRAME_DELAY_IN_SEQUENCES  , Integer.toString( maxFramesDelayInSequenceComboBox.getSelectedIndex() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_PLAYER_NAMES_ON_MAP      , Boolean.toString( showPlayerNamesOnMapCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_BUILDING_IMAGES          , Boolean.toString( showBuildingImagesCheckBox.isSelected() ) );
 	}
 	
 }

@@ -165,6 +165,10 @@ public class Consts {
 	public static final String PROPERTY_HIDE_NON_HOTKEY_SEQUENCES      = "hideNonHotkeySequences";
 	/** Max frame delay in sequences property.   */
 	public static final String PROPERTY_MAX_FRAME_DELAY_IN_SEQUENCES   = "maxFrameDelayInSequences";
+	/** Show player names on map property.       */
+	public static final String PROPERTY_SHOW_PLAYER_NAMES_ON_MAP       = "showPlayerNamesOnMap";
+	/** Show building images property.           */
+	public static final String PROPERTY_SHOW_BUILDING_IMAGES           = "showBuildingImages";
 	/** Player checker enabled property.         */
 	public static final String PROPERTY_HIDE_SEARCH_FILTERS            = "hideSearchFilters";
 	/** Player checker enabled property.         */
@@ -260,6 +264,8 @@ public class Consts {
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SHOW_OVERALL_EAPM             , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HIDE_NON_HOTKEY_SEQUENCES     , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_MAX_FRAME_DELAY_IN_SEQUENCES  , "4" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SHOW_PLAYER_NAMES_ON_MAP      , "true" );
+		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_SHOW_BUILDING_IMAGES          , "true" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_HIDE_SEARCH_FILTERS           , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_APPEND_RESULTS_TO_TABLE       , "false" );
 		DEFAULT_SETTINGS_PROPERTIES.setProperty( PROPERTY_PLAYER_CHECKER_ENABLED        , "true" );
