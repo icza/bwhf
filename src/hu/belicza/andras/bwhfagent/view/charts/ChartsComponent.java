@@ -1533,16 +1533,13 @@ public class ChartsComponent extends JPanel {
 			
 			// Show start locations
 			for ( int i = 0; i < chartsParams.playersCount; i++ ) {
-				final int playerIndex = replay.replayHeader.getPlayerIndexByName( replay.replayActions.players[ playerIndexToShowList.get( i ) ].playerName );
+				final int           playerIndex_  = playerIndexToShowList.get( i );
+				final PlayerActions playerActions = replay.replayActions.players[ playerIndex_ ];
+				final int           playerIndex   = replay.replayHeader.getPlayerIndexByName( replay.replayActions.players[ playerIndex_ ].playerName );
+				final Color         inGameColor   = getPlayerInGameColor( playerActions );
+				final Color         chartColor    = inGameColor == null ? CHART_DEFAULT_COLOR : inGameColor;
 				
-				Color playerColor = null;
-				try {
-					playerColor = IN_GAME_COLORS[ replay.replayHeader.playerColors[ playerIndex ] ];
-				}
-				catch ( final Exception e ) {
-					playerColor = CHART_DEFAULT_COLOR;
-				}
-				graphics.setColor( playerColor );
+				graphics.setColor( chartColor );
 				
 				final int   race              = replay.replayHeader.playerRaces[ playerIndex ] & 0xff;
 				final short mainBuildingIndex = race >= 0 && race < RACE_MAIN_BUILDINGS.length ? RACE_MAIN_BUILDINGS[ race ] : Action.BUILDING_NAME_INDEX_NEXUS;
@@ -1593,7 +1590,7 @@ public class ChartsComponent extends JPanel {
 							                                                          
 							Color playerColor = null;
 							try {
-								playerColor = IN_GAME_COLORS[ replay.replayHeader.playerColors[ playerIndex ] ];
+								playerColor = chartsTab.usePlayersColorsCheckBox.isSelected() ? IN_GAME_COLORS[ replay.replayHeader.playerColors[ playerIndex ] ] : CHART_DEFAULT_COLOR;
 							}
 							catch ( final Exception e ) {
 								playerColor = CHART_DEFAULT_COLOR;
