@@ -10,7 +10,7 @@ import javax.swing.ImageIcon;
  * 
  * @author Andras Belicza
  */
-public class MapTilesManager {
+public class MapImagesManager {
 	
 	/** Badlands tile set. */
 	public static final int TILE_SET_BADLANDS       = 0;
@@ -59,7 +59,7 @@ public class MapTilesManager {
 		if ( scaleFactor != zoom ) {
 			// We only scale if no scaled image yet or zoom changed
 			if ( mapTilesImage == null )
-				mapTilesImage = new ImageIcon( MapTilesManager.class.getResource( "map_tiles.png" ) ).getImage(); // We only load this once on demand.
+				mapTilesImage = new ImageIcon( MapImagesManager.class.getResource( "map_tiles.png" ) ).getImage(); // We only load this once on demand.
 			
 			scaledMapTilesImage = mapTilesImage.getScaledInstance( mapTilesImage.getWidth( null ) * zoom / TILE_IMAGE_WIDTH, mapTilesImage.getHeight( null ) * zoom / TILE_IMAGE_HEIGHT, Image.SCALE_FAST );
 			
