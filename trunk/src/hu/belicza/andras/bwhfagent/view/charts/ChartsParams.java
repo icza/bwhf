@@ -1,7 +1,7 @@
 package hu.belicza.andras.bwhfagent.view.charts;
 
-import swingwtx.swing.JComponent;
 import hu.belicza.andras.bwhfagent.view.ChartsTab;
+import swingwt.awt.Canvas;
 
 /**
  * Common parameters for drawing players' charts.
@@ -46,7 +46,7 @@ public class ChartsParams {
 	/** Delta y: y coordinate of the first visible chart point (it is scrollable when zoomed). */
 	public final int dy;
 	
-	public ChartsParams( final ChartsTab chartsTab, final int frames, final int playersCount, final JComponent chartsComponent, final int dx, final int dy ) {
+	public ChartsParams( final ChartsTab chartsTab, final int frames, final int playersCount, final Canvas chartsComponent, final int dx, final int dy ) {
 		componentWidth         = chartsComponent.getWidth();
 		componentHeight        = chartsComponent.getHeight();
 		allPlayersOnOneChart   = chartsTab.allPlayersOnOneChartCheckBox.isSelected();
