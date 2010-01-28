@@ -522,7 +522,23 @@ public class ChartsComponent extends JPanel {
 				if ( actionListText.charAt( i ) == '\n' )
 					selectedActionIndex++;
 			if ( selectedActionIndex >= actionList.size() ) // Sometimes it counts up to the size...
-				selectedActionIndex  = actionList.size();
+				selectedActionIndex  = actionList.size() - 1;
+			
+			// If target point is not visible, scroll to it
+			final int   zoom        = MapImagesManager.TILE_IMAGE_WIDTH * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
+			final int[] targetPoint = getActionTargetPoint( (Action) actionList.get( selectedActionIndex )[ 0 ], zoom );
+			if ( targetPoint != null ) {
+				final int x = targetPoint[ 0 ];
+				final int y = targetPoint[ 1 ];
+				
+				final int tileWidth  = MapImagesManager.TILE_IMAGE_WIDTH  * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
+				final int tileHeight = MapImagesManager.TILE_IMAGE_HEIGHT * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
+				
+				if ( x < chartsParams.dx || x >= chartsParams.dx + chartsParams.componentWidth )
+					chartScrollBar .setValue( ( x - chartsParams.componentWidth  / 2 ) * ( chartScrollBar .getMaximum() - chartScrollBar .getVisibleAmount() ) / ( replay.replayHeader.mapWidth  * tileWidth  - chartsParams.componentWidth  ) );
+				if ( y < chartsParams.dy || y >= chartsParams.dy + chartsParams.componentHeight )
+					chartVScrollBar.setValue( ( y - chartsParams.componentHeight / 2 ) * ( chartVScrollBar.getMaximum() - chartVScrollBar.getVisibleAmount() ) / ( replay.replayHeader.mapHeight * tileHeight - chartsParams.componentHeight ) );
+			}
 		}
 		else {
 			final StringTokenizer timeTokenizer = new StringTokenizer( (String) actionListText.substring( actionFirstPosition, actionLastPosition ) );
@@ -1541,8 +1557,6 @@ public class ChartsComponent extends JPanel {
 			final boolean showPlayerNames    = showPlayerNamesOnMapCheckBox.isSelected();
 			final boolean showBuildingImages = showBuildingImagesCheckBox  .isSelected();
 			
-			// TODO: optimize building image rendering
-			
 			// Show start locations
 			for ( int i = 0; i < chartsParams.playersCount; i++ ) {
 				final int           playerIndex_  = playerIndexToShowList.get( i );
@@ -1617,12 +1631,18 @@ public class ChartsComponent extends JPanel {
 				try { // To avoid the hassle with string -> int parsing
 					if ( selectedActionIndex < actionList.size() ) {
 						final Action action = (Action) actionList.get( selectedActionIndex )[ 0 ];
-						final int x, y;
-						if ( Action.ACTION_NAME_INDICES_WITH_POINT_TARGET_SET.contains( action.actionNameIndex ) ) {
-							final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters, "," );
-							if ( paramsTokenizer.countTokens() == 2 ) {
-								x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapImagesManager.TILE_IMAGE_WIDTH;
-								y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapImagesManager.TILE_IMAGE_HEIGHT;
+						final int[] targetPoint = getActionTargetPoint( action, zoom );
+						if ( targetPoint != null ) {
+							final int x = targetPoint[ 0 ];
+							final int y = targetPoint[ 1 ];
+							if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
+								graphics.setColor( new Color( 255, 50, 50 ) );
+								( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
+								final Size size = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
+								graphics.drawRect( x, y, size.width * zoom, size.height * zoom );
+								( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
+							}
+							else {
 								graphics.setColor( new Color( 255, 50, 50 ) );
 								( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
 								graphics.drawLine( x - zoom, y - zoom, x + zoom, y + zoom );
@@ -1630,23 +1650,6 @@ public class ChartsComponent extends JPanel {
 								( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
 							}
 						}
-						else if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
-							final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters.substring( action.parameters.indexOf( '(' ) + 1, action.parameters.indexOf( ')' ) ), "," );
-							if ( paramsTokenizer.countTokens() == 2 ) {
-								x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
-								y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
-								graphics.setColor( new Color( 255, 50, 50 ) );
-								( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
-								final Size size = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
-								graphics.drawRect( x, y, size.width * zoom, size.height * zoom );
-								( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
-							}
-						}
-						
-						// If target point is not visible, scroll to it
-						// TODO
-						/*if ( markerPosition < chartsParams.dx || markerPosition >= chartsParams.dx + chartsParams.componentWidth )
-							chartScrollBar.setValue( ( markerPosition - chartsParams.componentWidth / 2 ) * ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ) / ( chartsParams.componentWidth * chartsParams.zoom - chartsParams.componentWidth ) );*/
 					}
 				}
 				catch ( final Exception e ) {
@@ -1666,6 +1669,33 @@ public class ChartsComponent extends JPanel {
 			graphics.drawString( "A Map view is not available for this replay!", chartsParams.dx, chartsParams.dy );
 			
 		}
+	}
+	
+	/**
+	 * Returns the target point of an action in pixel coordinates.
+	 * @param action action whose target is to be returned
+	 * @param zoom   zoom value to be used for coordinate calculation
+	 * @return the target point of an action in pixel coordinates
+	 */
+	private static int[] getActionTargetPoint( final Action action, final int zoom ) {
+		if ( Action.ACTION_NAME_INDICES_WITH_POINT_TARGET_SET.contains( action.actionNameIndex ) ) {
+			final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters, "," );
+			if ( paramsTokenizer.countTokens() == 2 ) {
+				final int x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapImagesManager.TILE_IMAGE_WIDTH;
+				final int y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom / MapImagesManager.TILE_IMAGE_HEIGHT;
+				return new int[] { x, y };
+			}
+		}
+		else if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
+			final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters.substring( action.parameters.indexOf( '(' ) + 1, action.parameters.indexOf( ')' ) ), "," );
+			if ( paramsTokenizer.countTokens() == 2 ) {
+				final int x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
+				final int y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
+				return new int[] { x, y };
+			}
+		}
+		
+		return null;
 	}
 	
 	/**
