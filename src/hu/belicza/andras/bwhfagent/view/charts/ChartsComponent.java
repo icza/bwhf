@@ -1695,12 +1695,16 @@ public class ChartsComponent extends Canvas {
 								final Size size = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
 								graphics.drawRect( x, y, size.width * zoom, size.height * zoom );
 								( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
+								graphics.setColor( Color.WHITE );
+								graphics.drawRect( x+1, y+1, size.width * zoom-3, size.height * zoom-3 );
 							}
 							else {
 								graphics.setColor( new Color( 255, 50, 50 ) );
 								( (Graphics2D) graphics ).setStroke( STROKE_DOUBLE );
 								graphics.drawLine( x - zoom, y - zoom, x + zoom, y + zoom );
 								graphics.drawLine( x - zoom, y + zoom, x + zoom, y - zoom );
+								graphics.setColor( Color.WHITE );
+								graphics.drawOval( x - 3*zoom/2, y - 3*zoom/2, 3*zoom, 3*zoom );
 								( (Graphics2D) graphics ).setStroke( STROKE_NORMAL );
 							}
 						}
