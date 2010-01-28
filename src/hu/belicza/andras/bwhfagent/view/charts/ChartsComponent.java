@@ -32,6 +32,7 @@ import java.util.StringTokenizer;
 
 import swingwt.awt.BasicStroke;
 import swingwt.awt.BorderLayout;
+import swingwt.awt.Canvas;
 import swingwt.awt.Color;
 import swingwt.awt.Dimension;
 import swingwt.awt.Font;
@@ -73,7 +74,7 @@ import swingwtx.swing.event.ChangeListener;
  * 
  * @author Andras Belicza
  */
-public class ChartsComponent extends JPanel {
+public class ChartsComponent extends Canvas {
 	
 	/** Value of in-game colors. */
 	private static final Color[] IN_GAME_COLORS = new Color[] {
@@ -605,8 +606,9 @@ public class ChartsComponent extends JPanel {
 			chartVScrollBar.setValue( y * ( chartVScrollBar.getMaximum() - chartVScrollBar.getVisibleAmount() ) / ( replay.replayHeader.mapHeight * tileHeight - chartsParams.componentHeight ) );
 		}
 		else {
-			if ( chartsParams.componentWidth > 0 ) // to avoid ArithmeticException 
-				chartScrollBar.setValue( x * ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ) / ( chartsParams.componentWidth * chartsParams.zoom - chartsParams.componentWidth ) );
+			final int divider = ( chartsParams.componentWidth * chartsParams.zoom - chartsParams.componentWidth );
+			if ( divider > 0 ) // to avoid ArithmeticException 
+				chartScrollBar.setValue( x * ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ) / divider );
 		}
 	}
 	
@@ -1014,8 +1016,13 @@ public class ChartsComponent extends JPanel {
 	}
 	
 	@Override
-	public void paintComponent( final Graphics graphics ) {
+	public void paintComponent( final Graphics graphics2 ) {
 		if ( replay != null && playerIndexToShowList.size() > 0 && replay.replayHeader.gameFrames != 0 ) {
+			final BufferedImage doubleBufferingCache = new BufferedImage( getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB );
+			final Graphics graphics = doubleBufferingCache.createGraphics();
+			( (Graphics2D) graphics ).setBackground( CHART_BACKGROUND_COLOR );
+			graphics.clearRect( 0, 0, getWidth(), getHeight() );
+			
 			final ChartType chartType = (ChartType) chartsTab.chartTypeComboBox.getSelectedItem();
 			
 			final int zoom = (Integer) chartsTab.zoomComboBox.getSelectedItem();
@@ -1064,6 +1071,8 @@ public class ChartsComponent extends JPanel {
 				graphics.setColor( CHART_MARKER_COLOR );
 				graphics.drawLine( markerPosition, 0, markerPosition, getHeight() - 1 );
 			}
+			
+			graphics2.drawImage( doubleBufferingCache, 0, 0, null );
 		}
 	}
 	
