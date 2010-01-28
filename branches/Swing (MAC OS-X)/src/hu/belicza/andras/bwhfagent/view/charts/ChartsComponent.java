@@ -1438,7 +1438,7 @@ public class ChartsComponent extends JPanel {
 				replayMapViewImage = new BufferedImage( mapWidth * zoom, mapHeight * zoom, BufferedImage.TYPE_INT_RGB );
 				final Graphics        cacheGraphics       = replayMapViewImage.getGraphics();
 				final int             tileSet             = replay.mapData.tileSet < 0 ? 0 : replay.mapData.tileSet & 0x07;
-				final BufferedImage[] tileSetScaledImages = MapTilesManager.getTileSetScaledImages( tileSet, zoom );
+				final BufferedImage[] tileSetScaledImages = MapImagesManager.getTileSetScaledImages( tileSet, zoom );
 				
 				for ( int y = 0; y < mapHeight; y++ )
 					if ( y * mapWidth + mapWidth  <= tiles.length ) // If we have the whole line
