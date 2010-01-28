@@ -213,12 +213,19 @@ public class BinRepParser {
 								final short x    = mapDataBuffer.getShort();
 								final short y    = mapDataBuffer.getShort();
 								final short type = mapDataBuffer.getShort();
+								mapDataBuffer.getShort(); // unknown
+								mapDataBuffer.getShort(); // special properties flag
+								mapDataBuffer.getShort(); // valid elements flag
+								final byte owner = mapDataBuffer.get();
 								
 								if ( type == 176 || type == 177 || type == 178 ) { // Minerals
 									mapData.mineralFieldList.add( new short[] { x, y } );
 								}
 								else if ( type == 188 ) { // Vespene geyser
 									mapData.geyserList.add( new short[] { x, y } );
+								}
+								else if ( type == 214 ) { // Start location
+									mapData.startLocationList.add( new int[] { x, y, owner } );
 								}
 								
 								if ( mapDataBuffer.position() < unitEndPos ) // We might not processed all unit data
