@@ -23,6 +23,6 @@ public class MapData {
 	public List< short[] > geyserList        = new ArrayList< short[] >();
 	
 	/** Start locations on the map, {owner,x,y} pixel coordinates.    */
-	public List< int[] >   startLocationList = new ArrayList< int[] >();
+	public List< int[] >   startLocationList = new ArrayList< int[]   >();
 	
 }

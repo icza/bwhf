@@ -16,6 +16,7 @@ import hu.belicza.andras.bwhfagent.view.Utils;
 import hu.belicza.andras.bwhfagent.view.PlayerCheckerTab.ListedAs;
 import hu.belicza.andras.hackerdb.ServerApiConsts;
 
+import java.awt.event.InputEvent;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.text.DateFormat;
@@ -47,6 +48,7 @@ import swingwt.awt.event.KeyAdapter;
 import swingwt.awt.event.KeyEvent;
 import swingwt.awt.event.MouseAdapter;
 import swingwt.awt.event.MouseEvent;
+import swingwt.awt.event.MouseMotionAdapter;
 import swingwt.awt.image.BufferedImage;
 import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
@@ -206,7 +208,7 @@ public class ChartsComponent extends JPanel {
 	/** Scroll bar to scroll the zoomed charts.                                  */
 	private final JScrollBar            chartScrollBar           = new JScrollBar( JScrollBar.HORIZONTAL );
 	/** Vertical scroll bar to scroll the zoomed map view charts.                */
-	private final JScrollBar            chartVScrollBar           = new JScrollBar( JScrollBar.VERTICAL );
+	private final JScrollBar            chartVScrollBar          = new JScrollBar( JScrollBar.VERTICAL );
 	/** Split pane to display the charts component and the players' action list. */
 	private final JSplitPane            splitPane                = new JSplitPane( JSplitPane.VERTICAL_SPLIT, true );
 	/** List of the displayable actions, pairs of action+palyer name.            */
@@ -227,6 +229,15 @@ public class ChartsComponent extends JPanel {
 	private int markerPosition      = -1;
 	/** Index of the selected action (in the actionList list) in case of Map view chart. */
 	private int selectedActionIndex = -1;
+	
+	/** X coordinate of the mouse drag start.       */
+	private int dragStartX;
+	/** Y coordinate of the mouse drag start.       */
+	private int dragStartY;
+	/** X coordinate of the mouse drag destination. */
+	private int dragDestinationX;
+	/** Y coordinate of the mouse drag destination. */
+	private int dragDestinationY;
 	
 	/** Reference to the last charts params object. */
 	private ChartsParams chartsParams;
@@ -268,8 +279,28 @@ public class ChartsComponent extends JPanel {
 			@Override
 			public void mousePressed( final MouseEvent event ) {
 				if ( chartsParams != null ) {
+					dragStartX = event.getX();
+					dragStartY = event.getY();
+					dragDestinationX = chartsParams.dx;
+					dragDestinationY = chartsParams.dy;
 					syncMarkerFromChartToActionList( event.getX() + chartsParams.dx );
 					repaint();
+				}
+			}
+		} );
+		addMouseMotionListener( new MouseMotionAdapter() {
+			@Override
+			public void mouseDragged( final MouseEvent event ) {
+				if ( chartsParams != null ) {
+					if ( ( event.getModifiers() & InputEvent.BUTTON3_DOWN_MASK ) == 0 ) {
+						// If the delta is less than the scroll unit, it won't scroll, and the little delta would vanish, so we accumulate them 
+						dragDestinationX -= ( event.getX() - dragStartX ) * 2;
+						dragDestinationY -= ( event.getY() - dragStartY ) * 2;
+						scrollToPoint( dragDestinationX, dragDestinationY );
+						dragStartX = event.getX();
+						dragStartY = event.getY();
+						repaint();
+					}
 				}
 			}
 		} );
@@ -456,11 +487,11 @@ public class ChartsComponent extends JPanel {
 	
 	/**
 	 * Searches an action for the given iteration.<br>
-	 * If no such action exists, returns the one that preceeds it. If no such iteration preceeds it,
+	 * If no such action exists, returns the one that precedes it. If no such iteration precedes it,
 	 * returns the first iteration.<br>
 	 * Uses binary search algorithm.
 	 * @param iteration iteration to be searched for
-	 * @return a preceeding action for the given iteration or the first action if no preceeding iteration exists; or -1 if action list is empty
+	 * @return a preceding action for the given iteration or the first action if no preceding iteration exists; or -1 if action list is empty
 	 */
 	private int searchActionForIteration( final int iteration ) {
 		if ( actionList.isEmpty() )
@@ -531,13 +562,8 @@ public class ChartsComponent extends JPanel {
 				final int x = targetPoint[ 0 ];
 				final int y = targetPoint[ 1 ];
 				
-				final int tileWidth  = MapImagesManager.TILE_IMAGE_WIDTH  * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
-				final int tileHeight = MapImagesManager.TILE_IMAGE_HEIGHT * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
-				
-				if ( x < chartsParams.dx || x >= chartsParams.dx + chartsParams.componentWidth )
-					chartScrollBar .setValue( ( x - chartsParams.componentWidth  / 2 ) * ( chartScrollBar .getMaximum() - chartScrollBar .getVisibleAmount() ) / ( replay.replayHeader.mapWidth  * tileWidth  - chartsParams.componentWidth  ) );
-				if ( y < chartsParams.dy || y >= chartsParams.dy + chartsParams.componentHeight )
-					chartVScrollBar.setValue( ( y - chartsParams.componentHeight / 2 ) * ( chartVScrollBar.getMaximum() - chartVScrollBar.getVisibleAmount() ) / ( replay.replayHeader.mapHeight * tileHeight - chartsParams.componentHeight ) );
+				if ( x < chartsParams.dx || x >= chartsParams.dx + chartsParams.componentWidth || y < chartsParams.dy || y >= chartsParams.dy + chartsParams.componentHeight )
+					scrollToPoint( x - chartsParams.componentWidth / 2, y - chartsParams.componentHeight / 2 );
 			}
 		}
 		else {
@@ -556,10 +582,32 @@ public class ChartsComponent extends JPanel {
 			
 			// If marker is not visible, scroll to it
 			if ( markerPosition < chartsParams.dx || markerPosition >= chartsParams.dx + chartsParams.componentWidth )
-				chartScrollBar.setValue( ( markerPosition - chartsParams.componentWidth / 2 ) * ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ) / ( chartsParams.componentWidth * chartsParams.zoom - chartsParams.componentWidth ) );
+				scrollToPoint( markerPosition - chartsParams.componentWidth / 2, 0 );
 		}
 		
 		repaint();
+	}
+	
+	/**
+	 * Scrolls to the given point
+	 * @param x pixel x coordinate to scroll to
+	 * @param y pixel y coordinate to scroll to
+	 */
+	private void scrollToPoint( final int x, final int y ) {
+		if ( chartsParams == null )
+			return;
+		
+		if ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() == ChartType.MAP_VIEW ) {
+			final int tileWidth  = MapImagesManager.TILE_IMAGE_WIDTH  * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
+			final int tileHeight = MapImagesManager.TILE_IMAGE_HEIGHT * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
+			
+			chartScrollBar .setValue( x * ( chartScrollBar .getMaximum() - chartScrollBar .getVisibleAmount() ) / ( replay.replayHeader.mapWidth  * tileWidth  - chartsParams.componentWidth  ) );
+			chartVScrollBar.setValue( y * ( chartVScrollBar.getMaximum() - chartVScrollBar.getVisibleAmount() ) / ( replay.replayHeader.mapHeight * tileHeight - chartsParams.componentHeight ) );
+		}
+		else {
+			if ( chartsParams.componentWidth > 0 ) // to avoid ArithmeticException 
+				chartScrollBar.setValue( x * ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ) / ( chartsParams.componentWidth * chartsParams.zoom - chartsParams.componentWidth ) );
+		}
 	}
 	
 	/**
@@ -967,9 +1015,6 @@ public class ChartsComponent extends JPanel {
 	
 	@Override
 	public void paintComponent( final Graphics graphics ) {
-		( (Graphics2D) graphics ).setBackground( CHART_BACKGROUND_COLOR );
-		graphics.clearRect( 0, 0, getWidth(), getHeight() );
-		
 		if ( replay != null && playerIndexToShowList.size() > 0 && replay.replayHeader.gameFrames != 0 ) {
 			final ChartType chartType = (ChartType) chartsTab.chartTypeComboBox.getSelectedItem();
 			
@@ -1604,7 +1649,7 @@ public class ChartsComponent extends JPanel {
 							final int y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
 							
 							final int playerIndex = replay.replayHeader.getPlayerIndexByName( (String) actionObjects[ 1 ] );
-							                                                          
+							
 							Color playerColor = null;
 							try {
 								playerColor = chartsTab.usePlayersColorsCheckBox.isSelected() ? IN_GAME_COLORS[ replay.replayHeader.playerColors[ playerIndex ] ] : CHART_DEFAULT_COLOR;
@@ -1667,7 +1712,6 @@ public class ChartsComponent extends JPanel {
 		else {
 			graphics.setColor( CHART_DEFAULT_COLOR );
 			graphics.drawString( "A Map view is not available for this replay!", chartsParams.dx, chartsParams.dy );
-			
 		}
 	}
 	
