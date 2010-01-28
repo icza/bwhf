@@ -1716,7 +1716,7 @@ public class ChartsComponent extends JPanel {
 				graphics.setColor( CHART_BACKGROUND_COLOR );
 				graphics.fillRect( -5, -5, 1, 1 ); // To set the background color...
 				graphics.setColor( new Color( 200, 200, 200 ) );
-				graphics.drawString( "Tip: try zooming this chart!", mapWidth * zoom + 5, 15 );
+				graphics.drawString( "Tip: try zooming this chart!", mapWidth * zoom + 5, 10 );
 			}
 		}
 		else {
