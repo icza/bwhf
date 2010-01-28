@@ -1015,11 +1015,22 @@ public class ChartsComponent extends Canvas {
 		return filterGroups;
 	}
 	
+	/** Buffered image of the double buffering cache. */
+	private BufferedImage doubleBufferingCache;
+	/** Graphics of the the double buffering cache.   */
+	private Graphics graphics;
+	
 	@Override
 	public void paintComponent( final Graphics graphics2 ) {
 		if ( replay != null && playerIndexToShowList.size() > 0 && replay.replayHeader.gameFrames != 0 ) {
-			final BufferedImage doubleBufferingCache = new BufferedImage( getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB );
-			final Graphics graphics = doubleBufferingCache.createGraphics();
+			if ( doubleBufferingCache != null && ( doubleBufferingCache.getWidth() != getWidth() || doubleBufferingCache.getHeight() != getHeight() ) ) {
+				doubleBufferingCache.flush();
+				doubleBufferingCache = null;
+			}
+			if ( doubleBufferingCache == null ) {
+				doubleBufferingCache = new BufferedImage( getWidth(), getHeight(), BufferedImage.TYPE_INT_RGB );
+				graphics             = doubleBufferingCache.createGraphics();
+			}
 			( (Graphics2D) graphics ).setBackground( CHART_BACKGROUND_COLOR );
 			graphics.clearRect( 0, 0, getWidth(), getHeight() );
 			
@@ -1073,6 +1084,8 @@ public class ChartsComponent extends Canvas {
 			}
 			
 			graphics2.drawImage( doubleBufferingCache, 0, 0, null );
+			
+			graphics.translate( dx, dy );
 		}
 	}
 	
@@ -1719,7 +1732,7 @@ public class ChartsComponent extends Canvas {
 				graphics.setColor( CHART_BACKGROUND_COLOR );
 				graphics.fillRect( -5, -5, 1, 1 ); // To set the background color...
 				graphics.setColor( new Color( 200, 200, 200 ) );
-				graphics.drawString( "Tip: try zooming this chart!", mapWidth * zoom + 5, 15 );
+				graphics.drawString( "Tip: try zooming this chart!", mapWidth * zoom + 5, 0 );
 			}
 		}
 		else {
