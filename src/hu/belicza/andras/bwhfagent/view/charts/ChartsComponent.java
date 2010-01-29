@@ -600,9 +600,13 @@ public class ChartsComponent extends JPanel {
 		if ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() == ChartType.MAP_VIEW ) {
 			final int tileWidth  = MapImagesManager.TILE_IMAGE_WIDTH  * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
 			final int tileHeight = MapImagesManager.TILE_IMAGE_HEIGHT * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
+			final int mapPixelWidth  = replay.replayHeader.mapWidth  * tileWidth;
+			final int mapPixelHeight = replay.replayHeader.mapHeight * tileHeight;
 			
-			chartScrollBar .setValue( x * ( chartScrollBar .getMaximum() - chartScrollBar .getVisibleAmount() ) / ( replay.replayHeader.mapWidth  * tileWidth  - chartsParams.componentWidth  ) );
-			chartVScrollBar.setValue( y * ( chartVScrollBar.getMaximum() - chartVScrollBar.getVisibleAmount() ) / ( replay.replayHeader.mapHeight * tileHeight - chartsParams.componentHeight ) );
+			if ( mapPixelWidth > chartsParams.componentWidth )
+				chartScrollBar .setValue( x * ( chartScrollBar .getMaximum() - chartScrollBar .getVisibleAmount() ) / ( mapPixelWidth  - chartsParams.componentWidth  ) );
+			if ( mapPixelHeight > chartsParams.componentHeight )
+				chartVScrollBar.setValue( y * ( chartVScrollBar.getMaximum() - chartVScrollBar.getVisibleAmount() ) / ( mapPixelHeight - chartsParams.componentHeight ) );
 		}
 		else {
 			if ( chartsParams.componentWidth > 0 ) // to avoid ArithmeticException 

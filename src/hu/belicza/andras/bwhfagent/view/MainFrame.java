@@ -308,8 +308,9 @@ public class MainFrame extends JFrame {
 				titleLabel  .setToolTipText( toolTipText );
 				
 				navigationBarCollapsed = !navigationBarCollapsed;
-				navigationBox.invalidate();
+				navigationBox.getParent().addNotify();
 				navigationBox.getParent().validate();
+				
 			}
 		};
 		iconLabel   .addMouseListener( mouseListener );

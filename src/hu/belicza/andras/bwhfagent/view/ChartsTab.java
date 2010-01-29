@@ -15,7 +15,6 @@ import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.Comparator;
 
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -123,8 +122,6 @@ public class ChartsTab extends Tab {
 	 * Builds the GUI of the tab.
 	 */
 	private void buildGUI() {
-		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
-		
 		final Box buttonsPanel = Box.createHorizontalBox();
 		buttonsPanel.setMaximumSize( Utils.getMaxDimension() );
 		// Previous-next replay from search tab
@@ -233,8 +230,9 @@ public class ChartsTab extends Tab {
 		
 		contentBox.add( buttonsPanel );
 		
+		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
+		
 		final JPanel chartsCommonControlPanel = Utils.createWrapperPanel();
-		chartsCommonControlPanel.setBorder( BorderFactory.createTitledBorder( "General chart settings:" ) );
 		chartsCommonControlPanel.add( new JLabel( "Chart:" ) );
 		chartTypeComboBox.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {

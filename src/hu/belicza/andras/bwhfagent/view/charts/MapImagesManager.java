@@ -88,8 +88,13 @@ public class MapImagesManager {
 				mapTilesImage = new ImageIcon( MapImagesManager.class.getResource( "map_tiles.png" ) ).getImage(); // We only load this once on demand.
 			
 			// Zoom has changed, discard the cached scaled tile images
-			for ( int i = 0; i < scaledTileImages.length; i ++ )
-				scaledTileImages[ i ] = null;
+			for ( int i = 0; i < scaledTileImages.length; i ++ ) {
+				if ( scaledTileImages[ i ] != null ) {
+					for ( final BufferedImage bi : scaledTileImages[ i ] )
+						bi.flush();
+					scaledTileImages[ i ] = null;
+				}
+			}
 			
 			tileScaleFactor = zoom;
 		}
@@ -127,8 +132,13 @@ public class MapImagesManager {
 				buildingsImage = new ImageIcon( MapImagesManager.class.getResource( "buildings.png" ) ).getImage(); // We only load this once on demand.
 			
 			// Zoom has changed, discard the cached scaled building images
-			for ( int i = 0; i < scaledBuildingImages.length; i ++ )
-				scaledBuildingImages[ i ] = null;
+			for ( int i = 0; i < scaledBuildingImages.length; i ++ ) {
+				if ( scaledBuildingImages[ i ] != null ) {
+					for ( final BufferedImage bi : scaledBuildingImages[ i ] )
+						bi.flush();
+					scaledBuildingImages[ i ] = null;
+				}
+			}
 			
 			buildingScaleFactor = zoom;
 		}
