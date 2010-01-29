@@ -65,6 +65,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
+import javax.swing.ToolTipManager;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -291,19 +292,27 @@ public class ChartsComponent extends JPanel {
 		addMouseMotionListener( new MouseMotionAdapter() {
 			@Override
 			public void mouseDragged( final MouseEvent event ) {
+				final int mx = event.getX();
+				final int my = event.getY();
 				if ( chartsParams != null ) {
-					if ( ( event.getModifiers() & InputEvent.BUTTON3_DOWN_MASK ) == 0 ) {
+					if ( ( event.getModifiers() & InputEvent.BUTTON1_MASK ) != 0 ) {
 						// If the delta is less than the scroll unit, it won't scroll, and the little delta would vanish, so we accumulate them 
-						dragDestinationX -= ( event.getX() - dragStartX ) * 2;
-						dragDestinationY -= ( event.getY() - dragStartY ) * 2;
+						dragDestinationX -= ( mx - dragStartX ) * 2;
+						dragDestinationY -= ( my - dragStartY ) * 2;
 						scrollToPoint( dragDestinationX, dragDestinationY );
-						dragStartX = event.getX();
-						dragStartY = event.getY();
+						dragStartX = mx;
+						dragStartY = my;
 						repaint();
 					}
 				}
+				updateTooltipText( mx, my );
 			}
+			@Override
+			public void mouseMoved( final MouseEvent event ) {
+				updateTooltipText( event.getX(), event.getY() );
+			};
 		} );
+		ToolTipManager.sharedInstance().setInitialDelay( 0 );
 		final JPanel chartsHolderPanel = new JPanel( new BorderLayout() );
 		chartsHolderPanel.add( this, BorderLayout.CENTER );
 		chartScrollBar.addAdjustmentListener( new AdjustmentListener() {
@@ -435,6 +444,45 @@ public class ChartsComponent extends JPanel {
 		maxFramesDelayInSequenceComboBox.addActionListener( repainterActionListener );
 		showPlayerNamesOnMapCheckBox.addActionListener( repainterActionListener );
 		showBuildingImagesCheckBox.addActionListener( repainterActionListener );
+	}
+	
+	/**
+	 * Updates the tooltip text over the chart.
+	 * @param x x coordinate of the point to show tooltip for
+	 * @param y y coordinate of the point to show tooltip for
+	 */
+	private void updateTooltipText( final int x, final int y ) {
+		if ( chartsParams == null )
+			return;
+		
+		final ChartType chartType = (ChartType) chartsTab.chartTypeComboBox.getSelectedItem();
+		if ( chartType == ChartType.MAP_VIEW ) {
+			final int mapWidth   = replay.replayHeader.mapWidth  * 32; // 1 tile is 32 pixel width  in the game (this is independent of our tile width )
+			final int mapHeight  = replay.replayHeader.mapHeight * 32; // 1 tile is 32 pixel height in the game (this is independent of our tile height)
+			
+			final int mapCoordX = ( chartsParams.dx + x ) * ChartsTab.MAX_ZOOM / chartsParams.zoom;
+			final int mapCoordY = ( chartsParams.dy + y ) * ChartsTab.MAX_ZOOM / chartsParams.zoom;
+			
+			if ( mapCoordX < mapWidth && mapCoordY < mapHeight ) {
+				final int tileWidth  = MapImagesManager.TILE_IMAGE_WIDTH  * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
+				final int tileHeight = MapImagesManager.TILE_IMAGE_HEIGHT * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
+				setToolTipText( "Position: " + mapCoordX + "," + mapCoordY + " (" + ( (chartsParams.dx + x) / tileWidth ) + "," + ( (chartsParams.dy + y) / tileHeight ) + ")" );
+			}
+			else
+				setToolTipText( null );
+		}
+		else {
+			final int coordX = chartsParams.dx - chartsParams.x1 + x;
+			if ( coordX >= 0 ) {
+				final int maxX = chartsParams.componentWidth * chartsParams.zoom - chartsParams.x1;
+				final int iteration = ( coordX * replay.replayHeader.gameFrames / maxX );
+				
+				final StringBuilder tooltipTextBuilder = new StringBuilder( "Frame: " ).append( iteration ).append( ", time: " );
+				setToolTipText( ReplayHeader.formatFrames( iteration, tooltipTextBuilder, true ).toString() );
+			}
+			else
+				setToolTipText( null );
+		}
 	}
 	
 	/**
@@ -598,8 +646,8 @@ public class ChartsComponent extends JPanel {
 			return;
 		
 		if ( (ChartType) chartsTab.chartTypeComboBox.getSelectedItem() == ChartType.MAP_VIEW ) {
-			final int tileWidth  = MapImagesManager.TILE_IMAGE_WIDTH  * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
-			final int tileHeight = MapImagesManager.TILE_IMAGE_HEIGHT * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
+			final int tileWidth      = MapImagesManager.TILE_IMAGE_WIDTH  * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
+			final int tileHeight     = MapImagesManager.TILE_IMAGE_HEIGHT * chartsParams.zoom / ChartsTab.MAX_ZOOM; // At max zoom tiles are shown in real size
 			final int mapPixelWidth  = replay.replayHeader.mapWidth  * tileWidth;
 			final int mapPixelHeight = replay.replayHeader.mapHeight * tileHeight;
 			
@@ -609,8 +657,9 @@ public class ChartsComponent extends JPanel {
 				chartVScrollBar.setValue( y * ( chartVScrollBar.getMaximum() - chartVScrollBar.getVisibleAmount() ) / ( mapPixelHeight - chartsParams.componentHeight ) );
 		}
 		else {
-			if ( chartsParams.componentWidth > 0 ) // to avoid ArithmeticException 
-				chartScrollBar.setValue( x * ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ) / ( chartsParams.componentWidth * chartsParams.zoom - chartsParams.componentWidth ) );
+			final int divider = ( chartsParams.componentWidth * chartsParams.zoom - chartsParams.componentWidth );
+			if ( divider > 0 ) // to avoid ArithmeticException 
+				chartScrollBar.setValue( x * ( chartScrollBar.getMaximum() - chartScrollBar.getVisibleAmount() ) / divider );
 		}
 	}
 	
@@ -1096,7 +1145,7 @@ public class ChartsComponent extends JPanel {
 		
 		graphics.setFont( CHART_MAIN_FONT );
 		graphics.setColor( CHART_AXIS_COLOR );
-		graphics.drawString( overall ? "Overall APM" : "APM", 1, 10 );
+		graphics.drawString( overall ? "Overall APM" : "APM", chartsParams.dx + 1, 10 );
 		
 		// First count the actions
 		final int[] effectiveActionsCounts = eapm ? new int[ chartsParams.playersCount ] : null;
@@ -1192,22 +1241,14 @@ public class ChartsComponent extends JPanel {
 			
 			drawAxisAndTimeLabels( graphics, i );
 			
-			// Draw APM axis labels and assist lines
-			if ( !chartsParams.allPlayersOnOneChart || i == 0 ) { // We draw labels once if all players are on one chart
+			// Draw assist lines
+			if ( !chartsParams.allPlayersOnOneChart || i == 0 ) { // We draw assist lines once if all players are on one chart
 				graphics.setFont( CHART_AXIS_LABEL_FONT );
-				// if no actions, let's define axis labels from zero to ASSIST_LINES_COUNT
-				final int maxApm = maxActionss[ i ] > 0 ? maxActionss[ i ] * ( chartPoints - 1 ) * 60 / Math.max( ReplayHeader.convertFramesToSeconds( chartsParams.frames ), 1 ) : ASSIST_LINES_COUNT;
-				for ( int j = 0; j <= ASSIST_LINES_COUNT; j++ ) {
-					final int y   = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
-					final int apm = maxApm * j / ASSIST_LINES_COUNT;
-					graphics.setColor( CHART_BACKGROUND_COLOR );
-					graphics.fillRect( 1, y - 4, 20, 9 );
-					graphics.setColor( CHART_AXIS_LABEL_COLOR );
-					graphics.drawString( ( apm < 100 ? ( apm < 10 ? "  " : " " ) : "" ) + apm, 1, y + 4 );
-					if ( j > 0 ) {
-						graphics.setColor( CHART_ASSIST_LINES_COLOR );
-						graphics.drawLine( chartsParams.x1 + 1, y, chartsParams.x1 + chartsParams.maxXInChart, y );
-					}
+				// If no actions, let's define axis labels from zero to ASSIST_LINES_COUNT
+				for ( int j = 1; j <= ASSIST_LINES_COUNT; j++ ) {
+					final int y = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
+					graphics.setColor( CHART_ASSIST_LINES_COLOR );
+					graphics.drawLine( chartsParams.x1 + 1, y, chartsParams.x1 + chartsParams.maxXInChart, y );
 				}
 			}
 			
@@ -1251,7 +1292,23 @@ public class ChartsComponent extends JPanel {
 				else
 					eapmString += "0%";
 			}
+			
 			drawPlayerDescription( graphics, chartsParams, i, inGameColor, eapmString );
+			
+			// Draw APM axis labels
+			if ( !chartsParams.allPlayersOnOneChart || i == 0 ) { // We draw labels once if all players are on one chart
+				graphics.setFont( CHART_AXIS_LABEL_FONT );
+				// If no actions, let's define axis labels from zero to ASSIST_LINES_COUNT
+				final int maxApm = maxActionss[ i ] > 0 ? maxActionss[ i ] * ( chartPoints - 1 ) * 60 / Math.max( ReplayHeader.convertFramesToSeconds( chartsParams.frames ), 1 ) : ASSIST_LINES_COUNT;
+				for ( int j = 0; j <= ASSIST_LINES_COUNT; j++ ) {
+					final int y   = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
+					final int apm = maxApm * j / ASSIST_LINES_COUNT;
+					graphics.setColor( CHART_BACKGROUND_COLOR );
+					graphics.fillRect( chartsParams.dx + 1, y - 4, 20, 9 );
+					graphics.setColor( CHART_AXIS_LABEL_COLOR );
+					graphics.drawString( ( apm < 100 ? ( apm < 10 ? "  " : " " ) : "" ) + apm, chartsParams.dx + 1, y + 4 );
+				}
+			}
 		}
 	}
 	
@@ -1434,7 +1491,7 @@ public class ChartsComponent extends JPanel {
 		
 		graphics.setFont( CHART_MAIN_FONT );
 		graphics.setColor( CHART_AXIS_COLOR );
-		graphics.drawString( "Pairs/sec", 1, 10 );
+		graphics.drawString( "Pairs/sec", chartsParams.dx + 1, 10 );
 		
 		// First identify Action Sequences
 		final List< int[] >[] actionSequenceLists = new List[ chartsParams.playersCount ]; // An action sequence has 4 parameters: its first frame; its last frame; pairs count, and whether it is hotkey sequence (0) or not (1) 
@@ -1514,27 +1571,19 @@ public class ChartsComponent extends JPanel {
 			
 			drawAxisAndTimeLabels( graphics, i );
 			
-			// Draw Pairs/sec axis labels and assist lines
-			if ( !chartsParams.allPlayersOnOneChart || i == 0 ) { // We draw labels once if all players are on one chart
+			// Draw assist lines
+			if ( !chartsParams.allPlayersOnOneChart || i == 0 ) { // We draw assist lines once if all players are on one chart
 				graphics.setFont( CHART_AXIS_LABEL_FONT );
-				// if no action sequences, let's define axis labels from zero to ASSIST_LINES_COUNT
-				final float maxValue = maxValues[ i ] > 0 ? maxValues[ i ] : ASSIST_LINES_COUNT;
-				for ( int j = 0; j <= ASSIST_LINES_COUNT; j++ ) {
-					final int   y     = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
-					graphics.setColor( CHART_BACKGROUND_COLOR );
-					graphics.fillRect( 1, y - 4, 20, 9 );
-					final float value = maxValue * j / ASSIST_LINES_COUNT;
-					graphics.setColor( CHART_AXIS_LABEL_COLOR );
-					graphics.drawString( new Formatter( Locale.ENGLISH ).format( "%.1f", value ).toString(), 1, y + 3 );
-					if ( j > 0 ) {
-						graphics.setColor( CHART_ASSIST_LINES_COLOR );
-						graphics.drawLine( chartsParams.x1 + 1, y, chartsParams.x1 + chartsParams.maxXInChart, y );
-					}
+				for ( int j = 1; j <= ASSIST_LINES_COUNT; j++ ) {
+					final int y = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
+					graphics.setColor( CHART_ASSIST_LINES_COLOR );
+					graphics.drawLine( chartsParams.x1 + 1, y, chartsParams.x1 + chartsParams.maxXInChart, y );
 				}
 			}
 			
 			// Now draw the bars of the action sequences
-			final float maxValue = maxValues[ i ] > 0 ? maxValues[ i ] : 1;
+			// If no action sequences, let's define axis labels from zero to ASSIST_LINES_COUNT
+			final float maxValue = maxValues[ i ] > 0 ? maxValues[ i ] : ASSIST_LINES_COUNT;
 			for ( final int[] actionSequence : actionSequenceLists[ i ] ) {
 				final int x1               = chartsParams.getXForIteration( actionSequence[ 0 ] );
 				final int x2               = chartsParams.getXForIteration( actionSequence[ 1 ] );
@@ -1545,6 +1594,20 @@ public class ChartsComponent extends JPanel {
 			}
 			
 			drawPlayerDescription( graphics, chartsParams, i, inGameColor, new Formatter( Locale.ENGLISH ).format( "Avg %.1f pairs/sec", summaDuration[ i ] > 0 ? summaPairs[ i ] * 1000f / ( summaDuration[ i ] * 42f ) : 0f ).toString() );
+			
+			// Draw Pairs/sec axis labels
+			if ( !chartsParams.allPlayersOnOneChart || i == 0 ) { // We draw labels once if all players are on one chart
+				graphics.setFont( CHART_AXIS_LABEL_FONT );
+				for ( int j = 0; j <= ASSIST_LINES_COUNT; j++ ) {
+					final int   y     = y1 + chartsParams.maxYInChart - ( chartsParams.maxYInChart * j / ASSIST_LINES_COUNT );
+					final float value = maxValue * j / ASSIST_LINES_COUNT;
+					graphics.setColor( CHART_BACKGROUND_COLOR );
+					graphics.fillRect( chartsParams.dx + 1, y - 4, 20, 9 );
+					graphics.setColor( CHART_AXIS_LABEL_COLOR );
+					graphics.drawString( new Formatter( Locale.ENGLISH ).format( "%.1f", value ).toString(), chartsParams.dx + 1, y + 3 );
+				}
+			}
+			
 		}
 	}
 	
