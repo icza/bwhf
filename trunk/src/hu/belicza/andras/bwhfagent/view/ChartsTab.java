@@ -17,7 +17,6 @@ import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwt.awt.event.ComponentAdapter;
 import swingwt.awt.event.ComponentEvent;
-import swingwtx.swing.BorderFactory;
 import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
@@ -130,8 +129,6 @@ public class ChartsTab extends Tab {
 	 * Builds the GUI of the tab.
 	 */
 	private void buildGUI() {
-		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
-		
 		final Box buttonsPanel = Box.createHorizontalBox();
 		// We need to issue a validate() if the state of a maximized window changes (SwingWT bug). 
 		buttonsPanel.addComponentListener( new ComponentAdapter() {
@@ -140,6 +137,7 @@ public class ChartsTab extends Tab {
 				SwingUtilities.invokeLater( new Runnable() {
 					public void run() {
 						buttonsPanel.getParent().validate();
+						chartsComponent.repaint();
 					}
 				} );
 			}
@@ -253,8 +251,9 @@ public class ChartsTab extends Tab {
 		
 		contentBox.add( buttonsPanel );
 		
+		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
+		
 		final JPanel chartsCommonControlPanel = Utils.createWrapperPanel();
-		chartsCommonControlPanel.setBorder( BorderFactory.createTitledBorder( "General chart settings:" ) );
 		chartsCommonControlPanel.add( new JLabel( "Chart:" ) );
 		chartTypeComboBox.addChangeListener( new ChangeListener() {
 			public void stateChanged( final ChangeEvent event ) {
