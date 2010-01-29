@@ -11,6 +11,7 @@
  * Now charts are finally drawn *double buffered*, which means no more flickering!
  * Added a new setting on the Player checker tab: *Ignore the following names*. Names enumerated here will be completely ignored (no hacker or record check). By default this contains 3 trivial names: _"Open, Closed, Computer"_. But the thing is in non-English Starcraft these words are different. So non-English Starcraft users can easily adjust this to their words. For example in Spanish change this to: _"Abierta, Cerrado, Ordenador"_.
  * Added new tips.
+ * Some other minor bugfix.
 
 ----
 ===3.00 2010-01-14===
