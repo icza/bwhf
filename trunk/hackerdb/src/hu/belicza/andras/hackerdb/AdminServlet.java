@@ -688,13 +688,13 @@ public class AdminServlet extends BaseServlet {
 			}
 			resultSet.close();
 			
-			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT ip) FROM download_log WHERE version+interval '30 days'>now()" );
+			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT ip) FROM download_log WHERE version+INTERVAL '720:0'>now()" );
 			if ( resultSet.next() ) {
 				outputWriter.println( "<tr style='background:#c0ffc0'><th align=left>Active IPs (have downloads in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
-			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM download_log WHERE version + interval '24 hours'>now()" );
+			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM download_log WHERE version + INTERVAL '24:0'>now()" );
 			if ( resultSet.next() ) {
 				outputWriter.println( "<tr style='background:#c0ffc0'><th align=left>Hacker list downloads in the last 24 hours:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
@@ -718,7 +718,7 @@ public class AdminServlet extends BaseServlet {
 			}
 			resultSet.close();
 			
-			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT key.id) FROM key JOIN report on key.id=report.key WHERE key.revocated=FALSE AND report.version+interval '30 days'>now()" );
+			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT key.id) FROM key JOIN report on key.id=report.key WHERE key.revocated=FALSE AND report.version+INTERVAL '720:0'>now()" );
 			if ( resultSet.next() ) {
 				outputWriter.println( "<tr style='background:#ffffc0'><th align=left>Active keys (have reports in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
