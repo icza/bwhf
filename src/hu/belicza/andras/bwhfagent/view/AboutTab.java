@@ -71,7 +71,7 @@ public class AboutTab extends Tab {
 						// This is needed, else the scroll pane does not get resized (SwingWT bug also).
 						editorPane.setHeight( 10 );
 						editorPane.getParent().validate();
-						contentBox.validate();
+						buttonsPanel.getParent().validate();
 					}
 				} );
 			}
