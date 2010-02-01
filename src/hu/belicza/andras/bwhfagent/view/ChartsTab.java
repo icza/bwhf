@@ -15,6 +15,7 @@ import java.io.FileFilter;
 import java.util.Arrays;
 import java.util.Comparator;
 
+import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -233,6 +234,7 @@ public class ChartsTab extends Tab {
 		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
 		
 		final JPanel chartsCommonControlPanel = Utils.createWrapperPanel();
+		chartsCommonControlPanel.setBorder( BorderFactory.createLineBorder( Color.GRAY ) );
 		chartsCommonControlPanel.add( new JLabel( "Chart:" ) );
 		chartTypeComboBox.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
