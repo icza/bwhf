@@ -16,8 +16,10 @@ import java.net.URLEncoder;
 import java.security.MessageDigest;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
+import java.util.Map.Entry;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
@@ -421,10 +423,10 @@ public class Utils {
 	 * @param mapName        map name
 	 * @param replayMd5      MD5 checksum of the replay
 	 * @param replaySaveTime save time of the replay
-	 * @param playerNameSet  set of player names that were found hacking
+	 * @param playerNameUsedHackSetMap player names mapped to the set of their used hacks
 	 * @return null if report succeeded; an error message otherwise
 	 */
-	public static String sendHackerReport( final String key, final int gateway, final int gameEngine, final String mapName, final String replayMd5, final long replaySaveTime, final Set< String > playerNameSet ) {
+	public static String sendHackerReport( final String key, final int gateway, final int gameEngine, final String mapName, final String replayMd5, final long replaySaveTime, final Map< String, Set< Integer > > playerNameUsedHackSetMap ) {
 		BufferedReader input = null;
 		try {
 			final StringBuilder reportURLBuilder = new StringBuilder( Consts.BWHF_HACKER_DATA_BASE_SERVER_URL );
@@ -438,8 +440,17 @@ public class Utils {
 							.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_AGENT_VERSION    ).append( '=' ).append( URLEncoder.encode( MainFrame.getInstance().applicationVersion, "UTF-8" ) );
 			
 			int i = 0;
-			for ( final String playerName : playerNameSet )
-				reportURLBuilder.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_PLAYER ).append( i++ ).append( '=' ).append( URLEncoder.encode( playerName, "UTF-8" ) );
+			for ( final Entry< String, Set< Integer > > playerEntry : playerNameUsedHackSetMap.entrySet() ) {
+				reportURLBuilder.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_PLAYER ).append( i ).append( '=' ).append( URLEncoder.encode( playerEntry.getKey(), "UTF-8" ) );
+				final StringBuilder usedHacksBuilder = new StringBuilder();
+				for ( final Integer hackType : playerEntry.getValue() ) {
+					if ( usedHacksBuilder.length() > 0 )
+						usedHacksBuilder.append( ',' );
+					usedHacksBuilder.append( hackType );
+				}
+				reportURLBuilder.append( '&' ).append( ServerApiConsts.REQUEST_PARAMETER_NAME_USED_HACKS ).append( i ).append( '=' ).append( URLEncoder.encode( usedHacksBuilder.toString(), "UTF-8" ) );
+				i++;
+			}
 			
 			input = new BufferedReader( new InputStreamReader( new URL( reportURLBuilder.toString() ).openStream() ) );
 			final String message = input.readLine();

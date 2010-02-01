@@ -29,6 +29,8 @@ public class ServerApiConsts {
 	public static final String REQUEST_PARAMETER_NAME_REPLAY_SAVE_TIME = "rst";
 	/** Hacker id request parameter.                   */
 	public static final String REQUEST_PARAMETER_NAME_HACKER_ID        = "hid";
+	/** Used hacks by the player request parameter.    */
+	public static final String REQUEST_PARAMETER_NAME_USED_HACKS        = "uhp";
 	
 	/** List hackers operation value.            */
 	public static final String OPERATION_LIST           = "lst";

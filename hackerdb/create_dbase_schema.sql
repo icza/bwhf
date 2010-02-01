@@ -126,6 +126,7 @@ CREATE TABLE report
   save_time timestamp without time zone,
   revocated boolean NOT NULL DEFAULT false,
   changed_by integer,
+  used_hacks character varying,
   CONSTRAINT report_pkey PRIMARY KEY (id),
   CONSTRAINT report_hacker_fkey FOREIGN KEY (hacker)
       REFERENCES hacker (id) MATCH SIMPLE
