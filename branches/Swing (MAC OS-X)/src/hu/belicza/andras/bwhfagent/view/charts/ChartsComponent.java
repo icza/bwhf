@@ -218,6 +218,8 @@ public class ChartsComponent extends JPanel {
 	private final StringBuilder         actionsListTextBuilder   = new StringBuilder();
 	/** Text area to show the players' actions.                                  */
 	private final JTextArea             actionsListTextArea      = new JTextArea();
+	/** Label before the filter text field.                                      */
+	private final JLabel                filterActionsLabel       = new JLabel( "Filter actions:" );
 	
 	/** To jump to a specific iteration.                                         */
 	private final JTextField            jumpToIterationTextField = new JTextField( 1 );
@@ -388,7 +390,8 @@ public class ChartsComponent extends JPanel {
 			}
 		} );
 		actionListOptionsPanel.add( searchTextField );
-		actionListOptionsPanel.add( new JLabel( "Filter actions:" ) );
+		filterActionsLabel.setOpaque( true ); // Needed for the background to take effect
+		actionListOptionsPanel.add( filterActionsLabel );
 		filterTextField.addKeyListener( new KeyAdapter() {
 			@Override
 			public void keyPressed( final KeyEvent event ) {
@@ -723,6 +726,9 @@ public class ChartsComponent extends JPanel {
 			setZoom( (Integer) chartsTab.zoomComboBox.getSelectedItem() );
 		}
 		
+		// Chart and action list might be differently synced in case of different chart type (like map view and not map view), so we resync now.
+		syncMarkerFromActionListToChart();
+		
 		// We store values on the options panel before we remove the components, they might lost their values in SwingWT
 		assignUsedProperties();
 		// removeAll() does not work properly in SwingWT, we remove components manually!
@@ -971,6 +977,8 @@ public class ChartsComponent extends JPanel {
 	 */
 	public void loadPlayerActionsIntoList() {
 		final String[][] filterGroups = createFilterGroups();
+		
+		filterActionsLabel.setBackground( filterGroups == null ? filterActionsLabel.getParent().getBackground() : Color.GREEN );
 		
 		actionList.clear();
 		actionsListTextBuilder.setLength( 0 );
