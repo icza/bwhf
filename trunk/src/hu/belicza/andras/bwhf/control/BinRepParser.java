@@ -238,10 +238,13 @@ public class BinRepParser {
 						final short newWidth  = mapDataBuffer.getShort();
 						final short newHeight = mapDataBuffer.getShort();
 						// Sometimes newWidth and newHeight is 0, we don't want to overwrite the size with wrong values!
-						if ( newWidth > replayHeader.mapWidth )
-							replayHeader.mapWidth = newWidth;
-						if ( newHeight > replayHeader.mapHeight )
-							replayHeader.mapHeight= newHeight;
+						// And sometimes it contains some insane values, we just ignore them
+						if ( newWidth <= 256 && newHeight <= 256 ) {
+							if ( newWidth > replayHeader.mapWidth )
+								replayHeader.mapWidth = newWidth;
+							if ( newHeight > replayHeader.mapHeight )
+								replayHeader.mapHeight= newHeight;
+						}
 						if ( !parseMapTileData )
 							break; // We only needed the dimension section
 					}
