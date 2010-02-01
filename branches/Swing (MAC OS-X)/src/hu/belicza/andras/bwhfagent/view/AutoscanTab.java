@@ -15,8 +15,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.swing.BorderFactory;
@@ -323,12 +325,19 @@ public class AutoscanTab extends LoggedTab {
 											if ( gatewayComboBox.getSelectedIndex() == 0 )
 												logMessage( "Error! Hacker report was not sent due to no gateway is selected!" );
 											else {
-												logMessage( "Sending hacker report..." );
-												final Set< String > playerNameSet = new HashSet< String >( 8 );
-												for ( final HackDescription hackDescription : hackDescriptionList )
-													playerNameSet.add( hackDescription.playerName );
+												if ( skipLatterActionsOfHackersCheckBox.isSelected() ) // We need full hack list for reporting
+													hackDescriptionList = ReplayScanner.scanReplayForHacks( replay, false );
 												
-												final String message = Utils.sendHackerReport( authorizationKey, gatewayComboBox.getSelectedIndex() - 1, replay.replayHeader.gameEngine & 0xff, replay.replayHeader.mapName, Utils.calculateFileMd5( lastReplayFile ), replay.replayHeader.saveTime.getTime(), playerNameSet );
+												logMessage( "Sending hacker report..." );
+												final Map< String, Set< Integer > > playerNameUsedHackSetMap = new HashMap< String, Set< Integer > >();
+												for ( final HackDescription hackDescription : hackDescriptionList ) {
+													Set< Integer > usedHackSet = playerNameUsedHackSetMap.get( hackDescription.playerName );
+													if ( usedHackSet == null )
+														playerNameUsedHackSetMap.put( hackDescription.playerName, usedHackSet = new HashSet< Integer >() );
+													usedHackSet.add( hackDescription.hackType );
+												}
+												
+												final String message = Utils.sendHackerReport( authorizationKey, gatewayComboBox.getSelectedIndex() - 1, replay.replayHeader.gameEngine & 0xff, replay.replayHeader.mapName, Utils.calculateFileMd5( lastReplayFile ), replay.replayHeader.saveTime.getTime(), playerNameUsedHackSetMap );
 												if ( message == null )
 													logMessage( "Sending hacker report succeeded." );
 												else
