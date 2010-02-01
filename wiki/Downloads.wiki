@@ -4,9 +4,9 @@
 
 BWHF Agent can be used on windows and linux and on MAC OS-X.
 
-||Download latest BWHF Agent for windows:||[http://bwhf.googlecode.com/files/BWHFAgent%203.00%20windows.zip http://lh3.ggpht.com/_jDMClHrENz8/ShFo6OThnSI/AAAAAAAAN1E/4LcVEUVjDwA/s800/windows_icon.png.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%203.00%20windows.zip BWHF Agent 3.00 for windows] 3.4 MB||
-||Download latest BWHF Agent for MAC OS-X:||[http://bwhf.googlecode.com/files/BWHFAgent%203.00%20os-x.zip http://lh3.ggpht.com/_jDMClHrENz8/St7hzwdFUnI/AAAAAAAAO-M/XWOj9zJnk5o/s800/osx.gif.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%203.00%20os-x.zip BWHF Agent 3.00 for OS-X] 1.2 MB||
-||Download latest BWHF Agent for linux:||[http://bwhf.googlecode.com/files/BWHFAgent%203.00%20linux.zip http://lh5.ggpht.com/_jDMClHrENz8/ShFo6MbPePI/AAAAAAAAN1I/wdIE3RXg3zY/s800/linux_icon.png.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%203.00%20linux.zip BWHF Agent 3.00 for linux] 3.5 MB||
+||Download latest BWHF Agent for windows:||[http://bwhf.googlecode.com/files/BWHFAgent%203.20%20windows.zip http://lh3.ggpht.com/_jDMClHrENz8/ShFo6OThnSI/AAAAAAAAN1E/4LcVEUVjDwA/s800/windows_icon.png.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%203.20%20windows.zip BWHF Agent 3.20 for windows] 3.4 MB||
+||Download latest BWHF Agent for MAC OS-X:||[http://bwhf.googlecode.com/files/BWHFAgent%203.20%20os-x.zip http://lh3.ggpht.com/_jDMClHrENz8/St7hzwdFUnI/AAAAAAAAO-M/XWOj9zJnk5o/s800/osx.gif.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%203.20%20os-x.zip BWHF Agent 3.20 for OS-X] 1.2 MB||
+||Download latest BWHF Agent for linux:||[http://bwhf.googlecode.com/files/BWHFAgent%203.20%20linux.zip http://lh5.ggpht.com/_jDMClHrENz8/ShFo6MbPePI/AAAAAAAAN1I/wdIE3RXg3zY/s800/linux_icon.png.jpg] [http://bwhf.googlecode.com/files/BWHFAgent%203.20%20linux.zip BWHF Agent 3.20 for linux] 3.5 MB||
 
 Basically all windows are supported where you can install the 32-bit version Java 6.0 or higher (Windows XP / Vista / 7 / Server).
 
