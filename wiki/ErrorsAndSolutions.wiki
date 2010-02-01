@@ -1,4 +1,5 @@
 #summary Possible errors and their solutions regarding to BWHF Agent.
+#labels Featured
 
 =BWHF Agent errors and solutions=
 
