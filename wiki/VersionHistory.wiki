@@ -14,7 +14,7 @@
  * Added a new setting on the Player checker tab: *Ignore the following names*. Names enumerated here will be completely ignored (no hacker check, no record check). By default this contains 3 trivial names: _"Open, Closed, Computer"_. But the thing is in non-English Starcraft these words are different. So non-English Starcraft users can easily adjust these to their words. For example in Spanish change this to: _"Abierta, Cerrado, Ordenador"_.
  * Filter label has green background to draw attention if action filter is activated.
  * Added new tips.
- * Other minor bugfixes.
+ * Other minor improvements and bugfixes.
 
 ----
 ===3.00 2010-01-14===
