@@ -206,6 +206,8 @@ public class ChartsComponent extends Canvas {
 	private final JCheckBox showPlayerNamesOnMapCheckBox         = new JCheckBox( "Show player names on map", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_PLAYER_NAMES_ON_MAP ) ) );
 	/** Show player names on map checkbox.                  */
 	private final JCheckBox showBuildingImagesCheckBox           = new JCheckBox( "Show building images", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_BUILDING_IMAGES ) ) );
+	/** Hide overlapped buildings checkbox.                 */
+	private final JCheckBox hideOverlappedBuildingsCheckBox      = new JCheckBox( "Hide overlapped buildings", Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_OVERLAPPED_BUILDINGS ) ) );
 	
 	/** Scroll bar to scroll the zoomed charts.                                  */
 	private final JScrollBar            chartScrollBar           = new JScrollBar( JScrollBar.HORIZONTAL );
@@ -447,6 +449,7 @@ public class ChartsComponent extends Canvas {
 		maxFramesDelayInSequenceComboBox.addChangeListener( repainterChangeListener );
 		showPlayerNamesOnMapCheckBox.addChangeListener( repainterChangeListener );
 		showBuildingImagesCheckBox.addChangeListener( repainterChangeListener );
+		hideOverlappedBuildingsCheckBox.addChangeListener( repainterChangeListener );
 	}
 	
 	/**
@@ -774,6 +777,7 @@ public class ChartsComponent extends Canvas {
 			case MAP_VIEW :
 				chartOptionsPanel.add( showPlayerNamesOnMapCheckBox );
 				chartOptionsPanel.add( showBuildingImagesCheckBox );
+				chartOptionsPanel.add( hideOverlappedBuildingsCheckBox );
 				break;
 		}
 		
@@ -789,6 +793,7 @@ public class ChartsComponent extends Canvas {
 		maxFramesDelayInSequenceComboBox.setSelectedIndex( Integer.parseInt( Utils.settingsProperties.getProperty( Consts.PROPERTY_MAX_FRAME_DELAY_IN_SEQUENCES ) ) );
 		showPlayerNamesOnMapCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_PLAYER_NAMES_ON_MAP ) ) );
 		showBuildingImagesCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_SHOW_BUILDING_IMAGES ) ) );
+		hideOverlappedBuildingsCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_OVERLAPPED_BUILDINGS ) ) );
 		
 		contentPanel.validate();
 		repaint();
@@ -1691,8 +1696,42 @@ public class ChartsComponent extends Canvas {
 			if ( replayMapViewImage != null )
 				graphics.drawImage( replayMapViewImage, 0, 0, null );
 			
-			final boolean showPlayerNames    = showPlayerNamesOnMapCheckBox.isSelected();
-			final boolean showBuildingImages = showBuildingImagesCheckBox  .isSelected();
+			final boolean showPlayerNames         = showPlayerNamesOnMapCheckBox   .isSelected();
+			final boolean showBuildingImages      = showBuildingImagesCheckBox     .isSelected();
+			final boolean hideOverlappedBuildings = hideOverlappedBuildingsCheckBox.isSelected();
+			
+			final List< int[] > buildingList = hideOverlappedBuildings ? new ArrayList< int[] >() : null; // Building rectangles (in pixel coordinates) and the action index
+			if ( hideOverlappedBuildings && selectedActionIndex >= 0 ) {
+				// Show buildings up to this time
+				final int maxActionIndex = Math.min( selectedActionIndex, actionList.size() );
+				for ( int i = 0; i < maxActionIndex; i++ ) {
+					final Object[] actionObjects = actionList.get( i );
+					final Action   action        = (Action) actionObjects[ 0 ];
+					if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
+						final int[]  targetPoint = getActionTargetPoint( action, zoom );
+						if ( targetPoint != null ) {
+							final int x1 = targetPoint[ 0 ];
+							final int y1 = targetPoint[ 1 ];
+							
+							final Size size = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
+							final int x2 = x1 + size.width  * zoom - 1;
+							final int y2 = y1 + size.height * zoom - 1;
+							
+							for ( int j = 0; j < buildingList.size(); j++ ) {
+								final int[] buildLoc = buildingList.get( j );
+								if ( buildLoc[ 2 ] < x1 || buildLoc[ 0 ] > x2 || buildLoc[ 3 ] < y1 || buildLoc[ 1 ] > y2 )
+									continue;
+								else {
+									buildingList.remove( j );
+									j--;
+								}
+							}
+							
+							buildingList.add( new int[] { x1, y1, x2, y2, i } );
+						}
+					}
+				}
+			}
 			
 			// Show start locations
 			for ( int i = 0; i < chartsParams.playersCount; i++ ) {
@@ -1707,10 +1746,24 @@ public class ChartsComponent extends Canvas {
 				final int   race           = replay.replayHeader.playerRaces[ playerIndex ] & 0xff;
 				final short mainBuildingId = race >= 0 && race < RACE_MAIN_BUILDINGS.length ? RACE_MAIN_BUILDINGS[ race ] : Action.BUILDING_NAME_INDEX_NEXUS;
 				final Size  size           = Action.BUILDING_ID_SIZE_MAP.get( mainBuildingId );
+				startLocCycle:
 				for ( final int[] loc : mapData.startLocationList )
 					if ( loc[ 2 ] == playerIndex ) {
 						final int x = ( loc[ 0 ] - size.width  * MapImagesManager.TILE_IMAGE_WIDTH  / 2 ) * zoom / MapImagesManager.TILE_IMAGE_WIDTH;
 						final int y = ( loc[ 1 ] - size.height * MapImagesManager.TILE_IMAGE_HEIGHT / 2 ) * zoom / MapImagesManager.TILE_IMAGE_HEIGHT;
+						
+						if ( buildingList != null ) {
+							final int x2 = x + size.width  * zoom - 1;
+							final int y2 = y + size.height * zoom - 1;
+							for ( int j = 0; j < buildingList.size(); j++ ) {
+								final int[] buildLoc = buildingList.get( j );
+								if ( buildLoc[ 2 ] < x || buildLoc[ 0 ] > x2 || buildLoc[ 3 ] < y || buildLoc[ 1 ] > y2 )
+									continue;
+								else
+									continue startLocCycle;
+							}
+						}
+						
 						// We always paint rectangle, because even if we have to draw images, we would have to draw a rectangle. DrawRect is extremely slow in SwingWT, fillRect is much faster :S
 						graphics.fillRect( x, y, size.width * zoom+1, size.height * zoom+1 );
 						if ( showBuildingImages ) {
@@ -1731,14 +1784,29 @@ public class ChartsComponent extends Canvas {
 			if ( selectedActionIndex >= 0 ) {
 				// Show buildings up to this time
 				final int maxActionIndex = Math.min( selectedActionIndex, actionList.size() );
+				actionCycle:
 				for ( int i = 0; i < maxActionIndex; i++ ) {
 					final Object[] actionObjects = actionList.get( i );
-					final Action action = (Action) actionObjects[ 0 ];
+					final Action   action        = (Action) actionObjects[ 0 ];
 					if ( action.actionNameIndex == Action.ACTION_NAME_INDEX_BUILD ) {
-						final StringTokenizer paramsTokenizer = new StringTokenizer( action.parameters.substring( action.parameters.indexOf( '(' ) + 1, action.parameters.indexOf( ')' ) ), "," );
-						if ( paramsTokenizer.countTokens() == 2 ) {
-							final int x = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
-							final int y = Integer.parseInt( paramsTokenizer.nextToken() ) * zoom;
+						final int[]  targetPoint = getActionTargetPoint( action, zoom );
+						if ( targetPoint != null ) {
+							final int x = targetPoint[ 0 ];
+							final int y = targetPoint[ 1 ];
+							
+							final Size size = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
+							
+							if ( buildingList != null ) {
+								final int x2 = x + size.width  * zoom - 1;
+								final int y2 = y + size.height * zoom - 1;
+								for ( int j = 0; j < buildingList.size(); j++ ) {
+									final int[] buildLoc = buildingList.get( j );
+									if ( buildLoc[ 4 ] == i || ( buildLoc[ 2 ] < x || buildLoc[ 0 ] > x2 || buildLoc[ 3 ] < y || buildLoc[ 1 ] > y2 ) )
+										continue;
+									else
+										continue actionCycle;
+								}
+							}
 							
 							final int playerIndex = replay.replayHeader.getPlayerIndexByName( (String) actionObjects[ 1 ] );
 							
@@ -1751,8 +1819,7 @@ public class ChartsComponent extends Canvas {
 							}
 							graphics.setColor( playerColor );
 							
-							final Size size = Action.BUILDING_ID_SIZE_MAP.get( action.parameterBuildingNameIndex );
-							// We always paint rectangle, because even if we have to draw images, we would have to draw a rectangle. DrawRect is extremely slow in SwingWT, fillRect is much faster :S
+							// We always paint rectangle, because even if we have to draw images, we would have to draw a border rectangle. DrawRect is extremely slow in SwingWT, fillRect is much faster :S
 							graphics.fillRect( x, y, size.width * zoom+1, size.height * zoom+1 );
 							if ( showBuildingImages ) {
 								final int race = replay.replayHeader.playerRaces[ playerIndex ] & 0xff;
@@ -1767,8 +1834,8 @@ public class ChartsComponent extends Canvas {
 				// And the current action's target point
 				try { // To avoid the hassle with string -> int parsing
 					if ( selectedActionIndex < actionList.size() ) {
-						final Action action = (Action) actionList.get( selectedActionIndex )[ 0 ];
-						final int[] targetPoint = getActionTargetPoint( action, zoom );
+						final Action action      = (Action) actionList.get( selectedActionIndex )[ 0 ];
+						final int[]  targetPoint = getActionTargetPoint( action, zoom );
 						if ( targetPoint != null ) {
 							final int x = targetPoint[ 0 ];
 							final int y = targetPoint[ 1 ];
@@ -1933,6 +2000,7 @@ public class ChartsComponent extends Canvas {
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_MAX_FRAME_DELAY_IN_SEQUENCES  , Integer.toString( maxFramesDelayInSequenceComboBox.getSelectedIndex() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_PLAYER_NAMES_ON_MAP      , Boolean.toString( showPlayerNamesOnMapCheckBox.isSelected() ) );
 		Utils.settingsProperties.setProperty( Consts.PROPERTY_SHOW_BUILDING_IMAGES          , Boolean.toString( showBuildingImagesCheckBox.isSelected() ) );
+		Utils.settingsProperties.setProperty( Consts.PROPERTY_HIDE_OVERLAPPED_BUILDINGS     , Boolean.toString( hideOverlappedBuildingsCheckBox.isSelected() ) );
 	}
 	
 }
