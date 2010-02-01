@@ -16,6 +16,8 @@ import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 
 /**
  * About tab.
@@ -97,13 +99,13 @@ public class AboutTab extends Tab {
 		
 		editorPane = new JEditorPane( "text/html", aboutHtml );
 		editorPane.setEditable( false );
-		/*editorPane.addHyperlinkListener( new HyperlinkListener() {
+		editorPane.addHyperlinkListener( new HyperlinkListener() {
 			public void hyperlinkUpdate( final HyperlinkEvent event ) {
 				if ( event.getEventType() == HyperlinkEvent.EventType.ACTIVATED )
 					if ( event.getURL() != null )
 						Utils.showURLInBrowser( event.getURL().toString() );
 			}
-		} );*/
+		} );
 		
 		final JScrollPane wrapperScrollPane = new JScrollPane( editorPane );
 		contentBox.add( wrapperScrollPane );
