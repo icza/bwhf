@@ -68,11 +68,15 @@ public class AboutTab extends Tab {
 			public void componentResized( final ComponentEvent ce ) {
 				SwingUtilities.invokeLater( new Runnable() {
 					public void run() {
+						// This is needed, else the scroll pane does not get resized (SwingWT bug also).
+						editorPane.setHeight( 10 );
+						editorPane.getParent().validate();
 						contentBox.validate();
 					}
 				} );
 			}
 		} );
+		buttonsPanel.setMaximumSize( Utils.getMaxDimension() );
 		JButton button = new JButton( "Visit home page", IconResourceManager.ICON_WORLD_GO );
 		button.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
@@ -127,7 +131,7 @@ public class AboutTab extends Tab {
 			
 			// Why do we need this?
 			// Not setting preferred size of the editorPane results in really wide window size after pack,
-			// because the about html contains long lines which are not broke by default.
+			// because the about html contains long lines which are not broken by default.
 			// Setting preferred size of the editorPane results in no scrollbars around it, so its
 			// full content wouldn't be visible.
 			// Solution: the component added to the content box should be sized and scrolled.

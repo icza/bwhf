@@ -163,7 +163,7 @@ public class ChartsComponent extends Canvas {
 	/** Panel containing options of the selected chart type.          */
 	private final JPanel            chartOptionsPanel = Utils.createWrapperPanel();
 	/** Game details label.                                           */
-	private final JLabel            gameDetailsLabel  = new JLabel( "&lt;Game info&gt;", JLabel.CENTER );
+	public  final JLabel            gameDetailsLabel  = new JLabel( "&lt;Game info&gt;", JLabel.CENTER );
 	/** Panel containing checkboxes of players.                       */
 	private final JPanel            playersPanel      = Utils.createWrapperPanel();
 	/** Replay whose charts to be visualized.                         */
@@ -218,7 +218,9 @@ public class ChartsComponent extends Canvas {
 	/** This is where we first construct actionsListTextArea's content.          */
 	private final StringBuilder         actionsListTextBuilder   = new StringBuilder();
 	/** Text area to show the players' actions.                                  */
-	private final JTextArea             actionsListTextArea      = new JTextArea();
+	public  final JTextArea             actionsListTextArea      = new JTextArea();
+	/** Label before the filter text field.                                      */
+	private final JLabel                filterActionsLabel       = new JLabel( "Filter actions:" );
 	
 	/** To jump to a specific iteration.                                         */
 	private final JTextField            jumpToIterationTextField = new JTextField( 1 );
@@ -389,7 +391,7 @@ public class ChartsComponent extends Canvas {
 			}
 		} );
 		actionListOptionsPanel.add( searchTextField );
-		actionListOptionsPanel.add( new JLabel( "Filter actions:" ) );
+		actionListOptionsPanel.add( filterActionsLabel );
 		filterTextField.addKeyListener( new KeyAdapter() {
 			@Override
 			public void keyPressed( final KeyEvent event ) {
@@ -728,6 +730,9 @@ public class ChartsComponent extends Canvas {
 			setZoom( (Integer) chartsTab.zoomComboBox.getSelectedItem() );
 		}
 		
+		// Chart and action list might be differently synced in case of different chart type (like map view and not map view), so we resync now.
+		syncMarkerFromActionListToChart();
+		
 		// We store values on the options panel before we remove the components, they might lost their values in SwingWT
 		assignUsedProperties();
 		// removeAll() does not work properly in SwingWT, we remove components manually!
@@ -974,6 +979,8 @@ public class ChartsComponent extends Canvas {
 	 */
 	public void loadPlayerActionsIntoList() {
 		final String[][] filterGroups = createFilterGroups();
+		
+		filterActionsLabel.setBackground( filterGroups == null ? filterActionsLabel.getParent().getBackground() : Color.GREEN );
 		
 		actionList.clear();
 		actionsListTextBuilder.setLength( 0 );
