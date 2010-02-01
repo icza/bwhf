@@ -17,6 +17,7 @@ import swingwt.awt.event.ActionEvent;
 import swingwt.awt.event.ActionListener;
 import swingwt.awt.event.ComponentAdapter;
 import swingwt.awt.event.ComponentEvent;
+import swingwtx.swing.BorderFactory;
 import swingwtx.swing.Box;
 import swingwtx.swing.JButton;
 import swingwtx.swing.JCheckBox;
@@ -136,6 +137,9 @@ public class ChartsTab extends Tab {
 			public void componentResized( final ComponentEvent ce ) {
 				SwingUtilities.invokeLater( new Runnable() {
 					public void run() {
+						// The label might disappear, this will refresh it.
+						chartsComponent.gameDetailsLabel.setText( chartsComponent.gameDetailsLabel.getText() );
+						chartsComponent.actionsListTextArea.getParent().validate();
 						buttonsPanel.getParent().validate();
 						chartsComponent.repaint();
 					}
@@ -254,6 +258,7 @@ public class ChartsTab extends Tab {
 		contentBox.add( Utils.wrapInPanel( loadedReplayLabel ) );
 		
 		final JPanel chartsCommonControlPanel = Utils.createWrapperPanel();
+		chartsCommonControlPanel.setBorder( BorderFactory.createLineBorder( Color.BLACK ) );
 		chartsCommonControlPanel.add( new JLabel( "Chart:" ) );
 		chartTypeComboBox.addChangeListener( new ChangeListener() {
 			public void stateChanged( final ChangeEvent event ) {
