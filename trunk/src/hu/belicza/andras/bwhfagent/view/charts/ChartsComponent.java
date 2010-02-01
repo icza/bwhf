@@ -733,9 +733,6 @@ public class ChartsComponent extends Canvas {
 			setZoom( (Integer) chartsTab.zoomComboBox.getSelectedItem() );
 		}
 		
-		// Chart and action list might be differently synced in case of different chart type (like map view and not map view), so we resync now.
-		syncMarkerFromActionListToChart();
-		
 		// We store values on the options panel before we remove the components, they might lost their values in SwingWT
 		assignUsedProperties();
 		// removeAll() does not work properly in SwingWT, we remove components manually!
@@ -796,7 +793,8 @@ public class ChartsComponent extends Canvas {
 		hideOverlappedBuildingsCheckBox.setSelected( Boolean.parseBoolean( Utils.settingsProperties.getProperty( Consts.PROPERTY_HIDE_OVERLAPPED_BUILDINGS ) ) );
 		
 		contentPanel.validate();
-		repaint();
+		// Chart and action list might be differently synced in case of different chart type (like map view and not map view), so we resync now.
+		syncMarkerFromActionListToChart(); // This also calls repaint(), so we don't have to do that here
 	}
 	
 	/**
