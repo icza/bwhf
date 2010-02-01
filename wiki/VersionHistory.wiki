@@ -12,6 +12,7 @@
  * Now charts are finally drawn *double buffered*, which means no more flickering!
  * When charts are scrolled, vertical axis labels remain visible (they are drawn to fixed positions, they don't scroll with the charts).
  * Added a new setting on the Player checker tab: *Ignore the following names*. Names enumerated here will be completely ignored (no hacker check, no record check). By default this contains 3 trivial names: _"Open, Closed, Computer"_. But the thing is in non-English Starcraft these words are different. So non-English Starcraft users can easily adjust these to their words. For example in Spanish change this to: _"Abierta, Cerrado, Ordenador"_.
+ * "Filter actions:" label has green background to draw attention if action filter is activated.
  * Added new tips.
  * Other minor bugfixes.
 
