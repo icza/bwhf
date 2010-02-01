@@ -31,6 +31,7 @@ import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_PLAYER;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_REPLAY_MD5;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_REPLAY_SAVE_TIME;
+import static hu.belicza.andras.hackerdb.ServerApiConsts.REQUEST_PARAMETER_NAME_USED_HACKS;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_FIRST_REPORTED;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_GATEWAY;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.SORT_BY_VALUE_HACKING_PERIOD;
@@ -41,7 +42,6 @@ import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_FIRST;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_LAST;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_NEXT;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_PREVIOUS;
-
 import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.IOException;
@@ -198,14 +198,17 @@ public class HackerDbServlet extends BaseServlet {
 				if ( agentVersion == null )
 					throw new BadRequestException();
 				
-				final List< String > playerNameList = new ArrayList< String >( MAX_PLAYERS_IN_REPORT );
+				final List< String[] > playerDetailList = new ArrayList< String[] >( MAX_PLAYERS_IN_REPORT );
 				String playerName;
-				for ( int i = 0; i <= MAX_PLAYERS_IN_REPORT && ( playerName = request.getParameter( REQUEST_PARAMETER_NAME_PLAYER + i ) ) != null; i++ )
-					playerNameList.add( playerName.toLowerCase() ); // We handle player names all lowercased!
-				if ( playerNameList.isEmpty() )
+				for ( int i = 0; i <= MAX_PLAYERS_IN_REPORT && ( playerName = request.getParameter( REQUEST_PARAMETER_NAME_PLAYER + i ) ) != null; i++ ) {
+					playerName = playerName.toLowerCase(); // We handle player names all lowercased!
+					final String usedHacks = request.getParameter( REQUEST_PARAMETER_NAME_USED_HACKS + i ); // It's optional, was introduced in version 3.10
+					playerDetailList.add( new String[] { playerName, usedHacks } );
+				}
+				if ( playerDetailList.isEmpty() )
 					throw new BadRequestException();
 				
-				sendBackPlainMessage( handleReport( key, gatewayIndex, gameEngine, mapName, replayMd5, replaySaveTime, agentVersion, playerNameList.toArray( new String[ playerNameList.size() ] ), request.getRemoteAddr() ), response );
+				sendBackPlainMessage( handleReport( key, gatewayIndex, gameEngine, mapName, replayMd5, replaySaveTime, agentVersion, playerDetailList.toArray( new String[ playerDetailList.size() ][] ), request.getRemoteAddr() ), response );
 				
 			} else if ( operation.equals( OPERATION_STATISTICS ) ) {
 				
@@ -973,11 +976,11 @@ public class HackerDbServlet extends BaseServlet {
 	 * @param replayMd5      MD5 checksum of the replay
 	 * @param replaySaveTime save time of the replay
 	 * @param agentVersion   BWHF agent version
-	 * @param playerNames    names of players being reported; only non-null values contain information
+	 * @param playerDetails  array of player details which are string arrays with 2 elements: player name and used hacks (this one is optional)
 	 * @param ip             ip of the reporter's computer
 	 * @return an error message if report fails; an empty string otherwise
 	 */
-	private String handleReport( final String key, final int gateway, final int gameEngine, final String mapName, final String replayMd5, final Long replaySaveTime, final String agentVersion, final String[] playerNames, final String ip ) {
+	private String handleReport( final String key, final int gateway, final int gameEngine, final String mapName, final String replayMd5, final Long replaySaveTime, final String agentVersion, final String[][] playerDetails, final String ip ) {
 		Connection        connection = null;
 		PreparedStatement statement  = null;
 		ResultSet         resultSet  = null;
@@ -1018,13 +1021,13 @@ public class HackerDbServlet extends BaseServlet {
 				// The rest has to be in a transaction
 				connection.setAutoCommit( false );
 				
-				final Integer[] hackerIds = new Integer[ playerNames.length ];
+				final Integer[] hackerIds = new Integer[ playerDetails.length ];
 				
 				// Search existing hackers with the given names on the same gateways
 				statement = connection.prepareStatement( "SELECT id FROM hacker WHERE gateway=? AND name=?" );
-				for ( int i = 0; i < playerNames.length && playerNames[ i ] != null; i++ ) {
-					statement.setInt   ( 1, gateway          );
-					statement.setString( 2, playerNames[ i ] );
+				for ( int i = 0; i < playerDetails.length; i++ ) {
+					statement.setInt   ( 1, gateway                 );
+					statement.setString( 2, playerDetails[ i ][ 0 ] );
 					
 					resultSet = statement.executeQuery();
 					if ( resultSet.next() ) {
@@ -1034,11 +1037,11 @@ public class HackerDbServlet extends BaseServlet {
 					else {
 						// New hacker, add it first
 						statement2 = connection.prepareStatement( "INSERT INTO hacker (name,gateway) VALUES (?,?)" );
-						statement2.setString( 1, playerNames[ i ] );
+						statement2.setString( 1, playerDetails[ i ][ 0 ] );
 						statement2.setInt   ( 2, gateway          );
 						if ( statement2.executeUpdate() > 0 ) {
 							statement3 = connection.prepareStatement( "SELECT id FROM hacker WHERE name=? AND gateway=?" );
-							statement3.setString( 1, playerNames[ i ] );
+							statement3.setString( 1, playerDetails[ i ][ 0 ] );
 							statement3.setInt   ( 2, gateway          );
 							resultSet3 = statement3.executeQuery();
 							if ( resultSet3.next() )
@@ -1059,7 +1062,7 @@ public class HackerDbServlet extends BaseServlet {
 				statement.close();
 				
 				// Lastly insert the report records
-				statement = connection.prepareStatement( "INSERT INTO report (hacker,game_engine,map_name,agent_version,key,ip,replay_md5,save_time) VALUES (?,?,?,?,?,?,?,?)" );
+				statement = connection.prepareStatement( "INSERT INTO report (hacker,game_engine,map_name,agent_version,key,ip,replay_md5,save_time,used_hacks) VALUES (?,?,?,?,?,?,?,?,?)" );
 				statement.setInt   ( 2, gameEngine   );
 				statement.setString( 3, mapName      );
 				statement.setString( 4, agentVersion );
@@ -1073,11 +1076,17 @@ public class HackerDbServlet extends BaseServlet {
 					statement.setNull( 8, Types.TIMESTAMP );
 				else
 					statement.setTimestamp( 8, new Timestamp( replaySaveTime ) );
+				
 				for ( int i = 0; i < hackerIds.length && hackerIds[ i ] != null; i++ ) {
 					statement.setInt( 1, hackerIds[ i ] );
+					if ( playerDetails[ i ][ 1 ] == null )
+						statement.setNull( 9, Types.VARCHAR );
+					else
+						statement.setString( 9, playerDetails[ i ][ 1 ] );
 					if ( statement.executeUpdate() <= 0 )
 						throw new SQLException( "Could not insert report." );
 				}
+				
 				statement.close();
 				
 				connection.commit();
@@ -1094,7 +1103,8 @@ public class HackerDbServlet extends BaseServlet {
 			try {
 				if ( !connection.getAutoCommit() )
 					connection.setAutoCommit( true );
-			} catch ( final SQLException se ) {
+			}
+			catch ( final SQLException se ) {
 			}
 			if ( resultSet3 != null ) try { resultSet3.close(); } catch ( final SQLException se ) {}
 			if ( statement3 != null ) try { statement3.close(); } catch ( final SQLException se ) {}
