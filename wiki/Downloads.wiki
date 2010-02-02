@@ -15,7 +15,7 @@ Basically all windows are supported where you can install the 32-bit version Jav
 ===How to upgrade from an older release?===
  # Rename your old `BWHFAgent` folder to `BWHFAgent.old` for example.
  # Download and extract the new BWHFAgent zip file.
- # Copy your settings and custom files from the old one (`settings.properties`, replay lists, saved HTML reports, log files; all of these are optional).
+ # Copy your `settings.properties` file from the `BWHFAgent.old` to the new `BWHFAgent` folder (optionally you can also copy the replay lists, saved HTML reports, log files from the old BWHFAgent folder to the new one).
  # You can now delete the old BWHFAgent (`BWHFAgent.old` folder).
 You're done. If you start the Agent now, you will have all your previous settings.
 
