@@ -81,10 +81,16 @@ public class Action implements Comparable< Action > {
 	public static final byte ACTION_NAME_INDEX_MERGE_DARK_ARCHON = (byte) 0x5a;
 	public static final byte ACTION_NAME_INDEX_LIFT              = (byte) 0x2f;
 	
+	public static final byte SUBACTION_NAME_INDEX_UNKNOWN     = (byte) 0xff;
+	public static final byte SUBACTION_NAME_INDEX_UNLOAD      = (byte) 0x70;
+	public static final byte SUBACTION_NAME_INDEX_LAUNCH_NUKE = (byte) 0x7e;
+	public static final byte SUBACTION_NAME_INDEX_RECALL      = (byte) 0x8f;
+	
 	/** Set of actions that have an exact point target. */
 	public static final Set< Byte > ACTION_NAME_INDICES_WITH_POINT_TARGET_SET = new HashSet< Byte >(
 			Arrays.asList( ACTION_NAME_INDEX_ATTACK_MOVE, ACTION_NAME_INDEX_GATHER, ACTION_NAME_INDEX_SET_RALLY, ACTION_NAME_INDEX_MOVE,
-					(byte) 0x15 /* All subactions. */ ) );
+					SUBACTION_NAME_INDEX_LAUNCH_NUKE, SUBACTION_NAME_INDEX_RECALL, (byte) 0x15 /* All subactions. */ )
+	);
 	
 	/** Action IDs we're interested in when parsing exported text by BWChart.<br>
 	 *  Parsing from exported BWChart text is no longer a goal. This might be inaccurate. */
@@ -152,12 +158,6 @@ public class Action implements Comparable< Action > {
 		ACTION_ID_NAME_MAP.put( ACTION_NAME_INDEX_ATTACK_MOVE, "Attack Move" );
 		ACTION_ID_NAME_MAP.put( ACTION_NAME_INDEX_GATHER, "Gather" );
 	}
-	
-	
-	public static final byte SUBACTION_NAME_INDEX_UNKNOWN     = (byte) 0xff;
-	public static final byte SUBACTION_NAME_INDEX_UNLOAD      = (byte) 0x70;
-	public static final byte SUBACTION_NAME_INDEX_LAUNCH_NUKE = (byte) 0x7e;
-	public static final byte SUBACTION_NAME_INDEX_RECALL      = (byte) 0x8f;
 	
 	/** Subactions of action 0x15 */
 	public static final Map< Byte, String > SUBACTION_ID_NAME_MAP = new HashMap< Byte, String >();
