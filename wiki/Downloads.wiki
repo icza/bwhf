@@ -13,10 +13,10 @@ Basically all windows are supported where you can install the 32-bit version Jav
 *Remember that if you were using a previous version and you download a new verison, you have to reenter your key and set again all your settings OR alternatively you can copy your old `settings.properties` file to keep all the old settings (along with the key).*
 
 ===How to upgrade from an old release?===
- # Rename your old BWHFAgent folder to BWHFAgent.old for example.
+ # Rename your old `BWHFAgent` folder to `BWHFAgent.old` for example.
  # Download and extract the new BWHFAgent zip file.
- # _Optional:_ Copy your settings and custom files from the old one (settings.properties, replay lists, saved HTML reports).
- # You can now delete the old BWHFAgent (BWHFAgent.old folder).
+ # _Optional:_ Copy your settings and custom files from the old one (`settings.properties`, replay lists, saved HTML reports).
+ # You can now delete the old BWHFAgent (`BWHFAgent.old` folder).
 You're done. If you start the Agent now, you will have all your previous settings.
 
 ===BWHF Agent requires Java http://lh5.ggpht.com/_jDMClHrENz8/ShFo6deSQUI/AAAAAAAAN1M/fXeoqQNXNxc/s800/java16x16.png.jpg===
