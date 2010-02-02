@@ -17,6 +17,7 @@ xcopy /Q webapp-root\WEB-INF\*.* %WAR_DIR%\WEB-INF\
 xcopy /Q webapp-root\WEB-INF\lib\*.* %WAR_DIR%\WEB-INF\lib\
 xcopy /Q webapp-root\WEB-INF\classes\hu\belicza\andras\hackerdb\*.* %WAR_DIR%\WEB-INF\classes\hu\belicza\andras\hackerdb\
 xcopy /Q ..\bin\hu\belicza\andras\bwhf\model\ReplayHeader.class %WAR_DIR%\WEB-INF\classes\hu\belicza\andras\bwhf\model\
+xcopy /Q ..\bin\hu\belicza\andras\bwhf\model\HackDescription.class %WAR_DIR%\WEB-INF\classes\hu\belicza\andras\bwhf\model\
 
 
 :quit

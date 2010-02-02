@@ -431,7 +431,7 @@ public class AdminServlet extends BaseServlet {
 					+ ( hackerName != null ? " value='" + encodeHtmlString( hackerName ) + "'" : "" ) + ">&nbsp;&nbsp;|&nbsp;&nbsp;Limit:<input type=text name='" + REQUEST_PARAM_LASTREPS_LIMIT + "'" 
 					+ " value='" + lastRepsLimit + "' size=1>&nbsp;&nbsp;|&nbsp;&nbsp;<input type=submit value='Apply'></p>" );
 			
-			String query = "SELECT report.id, reporter.name, key.id, hacker.id, hacker.name, hacker.gateway, game_engine, report.version, substr(report.agent_version,1,5), game.id, report.revocated, key.revocated, hacker.guarded"
+			String query = "SELECT report.id, reporter.name, key.id, hacker.id, hacker.name, hacker.gateway, game_engine, report.version, substr(report.agent_version,1,5), game.id, report.revocated, key.revocated, hacker.guarded, reporter.id"
 					+ ( fullAdmin ? ", key.value, report.ip, changer.name" : "" ) + " FROM report JOIN key on report.key=key.id JOIN person as reporter on key.person=reporter.id JOIN hacker on report.hacker=hacker.id LEFT OUTER JOIN game on report.replay_md5=game.replay_md5"
 					+ ( fullAdmin ? " LEFT OUTER JOIN person as changer on report.changed_by=changer.id" : "" );
 			if ( keyId != null )
@@ -452,7 +452,7 @@ public class AdminServlet extends BaseServlet {
 			outputWriter.println( "<input type=hidden name='" + REQUEST_PARAM_NEW_GATEWAY       + "'>" );
 			
 			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2>" );
-			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME + "><th>#" + ( fullAdmin ? "<th>IP" : "" ) + "<th>Report<th>Reporter<th>Key<th>Hacker<th>Hacker name<th>Gateway<th>Engine<th>Date<th>Agver<th>Game id<th>Revocated?<th>Guarded" + ( fullAdmin ? "<th>Changed by" : "" ) );
+			outputWriter.println( "<tr class=" + TABLE_HEADER_STYLE_NAME + "><th>#" + ( fullAdmin ? "<th>IP" : "" ) + "<th>Report<th>Reporter<th>Reporter name<th>Key<th>Hacker<th>Hacker name<th>Gateway<th>Engine<th>Date<th>Agver<th>Game id<th>Revocated?<th>Guarded" + ( fullAdmin ? "<th>Changed by" : "" ) );
 			resultSet = statement.executeQuery();
 			int rowCounter = 0;
 			while ( resultSet.next() ) {
@@ -463,11 +463,12 @@ public class AdminServlet extends BaseServlet {
 				final boolean guarded   = resultSet.getBoolean( 13 );
 				
 				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) + "><td align=right>" + (++rowCounter)
-						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 15 ) + "' target='_blank'>" + resultSet.getString( 15 ) + "&uarr;</a>" : "" )
+						+ ( fullAdmin ? "<td>" + "<a href='http://www.geoiptool.com/en/?IP=" + resultSet.getString( 16 ) + "' target='_blank'>" + resultSet.getString( 16 ) + "&uarr;</a>" : "" )
 						+ "<td align=right>" + reportId
+						+ "<td align=right>" + resultSet.getInt( 14 ) 
 						+ "<td>" + encodeHtmlString( resultSet.getString( 2 ) ) 
-						+ "<td align=right>" + ( resultSet.getBoolean( 12 ) ? "(revocated) " : "" ) + "<a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_KEY_ID + "')[0].value='" + resultSet.getInt( 3 ) + "';document.forms['lastReportsFormId'].submit();\">" + resultSet.getInt( 3 ) + "</a>" + ( fullAdmin ? ' ' + getHackerRecordsByKeyLink( resultSet.getString( 14 ), "", "keyreportsform" ) : "" ) 
-						+ "<td align=right>" + hackerId
+						+ "<td align=right>" + ( resultSet.getBoolean( 12 ) ? "(revocated) " : "" ) + "<a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_KEY_ID + "')[0].value='" + resultSet.getInt( 3 ) + "';document.forms['lastReportsFormId'].submit();\">" + resultSet.getInt( 3 ) + "</a>" + ( fullAdmin ? ' ' + getHackerRecordsByKeyLink( resultSet.getString( 15 ), "", "keyreportsform" ) : "" ) 
+						+ "<td align=right>" + HackerDbServlet.getHackerRecordsByIdLink( hackerId, hackerId + "&uarr;", true )
 						+ "<td><a href=\"javascript:document.getElementsByName('" + REQUEST_PARAM_HACKER_NAME + "')[0].value='" + encodeHtmlString( '"' + resultSet.getString( 5 ) + '"' ) + "';document.forms['lastReportsFormId'].submit();\">" + encodeHtmlString( resultSet.getString( 5 ) ) + "</a> " 
 							+ HackerDbServlet.getHackerRecordsByNameLink( '"' + resultSet.getString( 5 ) + '"', "&uarr;", true ) + ( guarded ? " (guarded)" : "" )
 						+ "<td>" + getGatewayComboHtml( gateway, reportId )
@@ -479,7 +480,7 @@ public class AdminServlet extends BaseServlet {
 				outputWriter.println( revocated ? "<input type=submit value='Reinstate' onclick='javascript:this.form." + REQUEST_PARAM_REINSTATE_ID + ".value=\"" + reportId + "\";'>" : "<input type=submit value='Revocate' onclick='javascript:this.form." + REQUEST_PARAM_REVOCATE_ID + ".value=\"" + reportId + "\";'>" );
 				outputWriter.println( "<td align=center>" + ( guarded ? "<input type=submit value='Unguard' onclick='javascript:this.form." + REQUEST_PARAM_UNGUARD_ID + ".value=\"" + hackerId + "\";'>" : "<input type=submit value='Guard' onclick='javascript:this.form." + REQUEST_PARAM_GUARD_ID + ".value=\"" + hackerId + "\";'>" ) );
 				if ( fullAdmin )
-					outputWriter.println( "<td>" + ( resultSet.getString( 16 ) == null ? "&nbsp;" : encodeHtmlString( resultSet.getString( 16 ) ) ) );
+					outputWriter.println( "<td>" + ( resultSet.getString( 17 ) == null ? "&nbsp;" : encodeHtmlString( resultSet.getString( 17 ) ) ) );
 			}
 			resultSet.close();
 			statement.close();
