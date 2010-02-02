@@ -42,6 +42,7 @@ import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_FIRST;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_LAST;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_NEXT;
 import static hu.belicza.andras.hackerdb.ServerApiConsts.STEP_DIRECTION_PREVIOUS;
+import hu.belicza.andras.bwhf.model.HackDescription;
 import hu.belicza.andras.bwhf.model.ReplayHeader;
 
 import java.io.IOException;
@@ -65,6 +66,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -892,14 +894,14 @@ public class HackerDbServlet extends BaseServlet {
 			renderHeader( outputWriter, "Reports of hacker " + hackerNameHtml );
 			
 			outputWriter.println( "<table border=1 cellspacing=0 cellpadding=2><tr class='" + TABLE_HEADER_STYLE_NAME + " " + NON_SORTING_COLUMN_STYLE_NAME + "'>" );
-			outputWriter.println( "<th>&nbsp;#&nbsp;<th>Engine<th>Map<th>Reported at<th>Played at<th>Game details" ); 
+			outputWriter.println( "<th>&nbsp;#&nbsp;<th>Engine<th>Map<th>Reported at<th>Played at<th>Game details<th>Used hacks" ); 
 			
-			resultSet = statement.executeQuery( "SELECT r.game_engine, r.map_name, r.version, r.save_time, game.id FROM report r JOIN key on key.id=r.key JOIN hacker h on r.hacker=h.id LEFT OUTER JOIN game on r.replay_md5=game.replay_md5 WHERE h.id=" + hackerId
+			resultSet = statement.executeQuery( "SELECT r.game_engine, r.map_name, r.version, r.save_time, game.id, r.used_hacks FROM report r JOIN key on key.id=r.key JOIN hacker h on r.hacker=h.id LEFT OUTER JOIN game on r.replay_md5=game.replay_md5 WHERE h.id=" + hackerId
 					+ " AND r.revocated=FALSE AND h.guarded=FALSE AND key.revocated=FALSE ORDER BY version DESC" );
 			
 			int counter = 0;
 			while ( resultSet.next() ) {
-				outputWriter.println( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) 
+				outputWriter.print( "<tr class=" + ( gateway < GATEWAY_STYLE_NAMES.length ? GATEWAY_STYLE_NAMES[ gateway ] : UNKNOWN_GATEWAY_STYLE_NAME ) 
 						+ "><td align=right>" + DECIMAL_FORMAT.format( ++counter )
 						+ "<td align=center>" + ReplayHeader.GAME_ENGINE_SHORT_NAMES[ resultSet.getInt( 1 ) ]
 						+ "<td>" + encodeHtmlString( resultSet.getString( 2 ) )
@@ -907,6 +909,22 @@ public class HackerDbServlet extends BaseServlet {
 						+ "<td align=center>" + ( resultSet.getTimestamp( 4 ) == null ? "N/A" : FULL_DATE_FORMAT.format( resultSet.getTimestamp( 4 ) ) )
 						+ "<td align=center>" + ( resultSet.getObject( 5 ) == null ? "N/A" : PlayersNetworkServlet.getGameDetailsHtmlLink( resultSet.getInt( 5 ), "details" ) )
 				);
+				final String usedHacks = resultSet.getString( 6 );
+				if ( usedHacks == null ) {
+					outputWriter.print( "<td align=center>N/A" );
+				}
+				else {
+					outputWriter.print( "<td>" );
+					final StringTokenizer usedHacksTokenizer = new StringTokenizer( usedHacks, "," );
+					int uhc = 0;
+					while ( usedHacksTokenizer.hasMoreTokens() )
+						try {
+							outputWriter.print( ( uhc > 0 ? ", " : "" ) + HackDescription.HACK_TYPE_NAMES[ Integer.parseInt( usedHacksTokenizer.nextToken() ) ].trim() );
+							uhc++;
+						}
+						catch ( final NumberFormatException nfe ) {}
+				}
+				outputWriter.println();
 			}
 			
 			outputWriter.println( "</table>" );
@@ -1126,13 +1144,27 @@ public class HackerDbServlet extends BaseServlet {
 	protected static String getHackerRecordsByNameLink( final String hackerName, final String text, final boolean newWindow ) {
 		try {
 			return "<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_LIST
-				 + '&' + FILTER_NAME_NAME + '=' + URLEncoder.encode( hackerName, "UTF-8" )
-				 + "'" + ( newWindow ? " target='_blank'>" : ">" ) + text + "</a>";
+				 + '&' + FILTER_NAME_NAME + '=' + URLEncoder.encode( hackerName, "UTF-8" ) + "'"
+				 + ( newWindow ? " target='_blank'>" : ">" ) + text + "</a>";
 		} catch ( final UnsupportedEncodingException uee ) {
 			// This should never happen
 			uee.printStackTrace();
 			throw new RuntimeException( uee );
 		}
+	}
+	
+	/**
+	 * Generates and returns an HTML link to the hacker reports of a hacker specified by his/her id.<br>
+	 * An HTML anchor tag will be returned whose text is the value of <code>text</code>.
+	 * @param hackerId  id of the hacker whose hacker reports to be listed
+	 * @param text      text to appear in the link (will not be encoded!)
+	 * @param newWindow tells if link has to be opened in a new window
+	 * @return an HTML link to the records of a hacker search by name
+	 */
+	protected static String getHackerRecordsByIdLink( final int hackerId, final String text, final boolean newWindow ) {
+		return "<a href='hackers?" + REQUEST_PARAMETER_NAME_OPERATION + '=' + OPERATION_HACKER_DETAILS
+			 + '&' + REQUEST_PARAMETER_NAME_HACKER_ID + "=" + hackerId + "'"
+			 + ( newWindow ? " target='_blank'>" : ">" ) + text + "</a>";
 	}
 	
 	private static void renderHeader( final PrintWriter outputWriter, final String pageTitle ) {
