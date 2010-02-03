@@ -32,7 +32,7 @@ Check out the [VersionHistory version history] page for a detailed list of new f
 
 ===For developers:===
 
-Check out the BWHF Agent developer documentation:
+Check out the BWHF Agent developer documentation (it covers the BWHF system only up to version 2.21, changes and new principles after that are not included):
 ||A 50-page developer documentation of BWHF Agent in English:||[http://bwhf.googlecode.com/files/Starcraft%20Hacking%20Recognition.pdf http://lh6.ggpht.com/_jDMClHrENz8/ShFqXEs8FEI/AAAAAAAAN2E/4Gbx8JDIVDM/s800/pdf_icon.png.jpg] [http://bwhf.googlecode.com/files/Starcraft%20Hacking%20Recognition.pdf Starcraft Hacking Recognition.pdf] 779 KB||
 
 ===Looking for older releases?===
