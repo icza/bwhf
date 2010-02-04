@@ -116,6 +116,14 @@ public class ReplayHeader {
 	}
 	
 	/**
+	 * Converts the specified amount of frames given in long to seconds.
+	 * @return the specified amount of frames in seconds
+	 */
+	public static long convertLongFramesToSeconds( final long frames ) {
+		return frames * 42l / 1000l;
+	}
+	
+	/**
 	 * Returns the game duration in seconds.
 	 * @return the game duration in seconds
 	 */
@@ -142,6 +150,37 @@ public class ReplayHeader {
 		
 		seconds %= 3600;
 		final int minutes = seconds / 60;
+		if ( ( longFormat || hours > 0 ) && minutes < 10 )
+			formatBuilder.append( 0 );
+		formatBuilder.append( minutes ).append( ':' );
+		
+		seconds %= 60;
+		if ( seconds < 10 )
+			formatBuilder.append( 0 );
+		formatBuilder.append( seconds );
+		
+		return formatBuilder;
+	}
+	
+	/**
+	 * Converts the specified amount of frames given in long to a human friendly time format.
+	 * @param frames amount of frames to be formatted
+	 * @param formatBuilder builder to be used to append the output to
+	 * @param longFormat tells if the required format is "hh:mm:ss" (no matter how short the game is)
+	 * @return the format builder used to append the result
+	 */
+	public static StringBuilder formatLongFrames( final long frames, final StringBuilder formatBuilder, final boolean longFormat ) {
+		long seconds = convertLongFramesToSeconds( frames );
+		
+		final long hours = seconds / 3600;
+		if ( longFormat || hours > 0 ) {
+			if ( longFormat && hours < 10 )
+				formatBuilder.append( 0 );
+			formatBuilder.append( hours ).append( ':' );
+		}
+		
+		seconds %= 3600;
+		final long minutes = seconds / 60;
 		if ( ( longFormat || hours > 0 ) && minutes < 10 )
 			formatBuilder.append( 0 );
 		formatBuilder.append( minutes ).append( ':' );
