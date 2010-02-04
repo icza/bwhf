@@ -685,7 +685,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					final Date lastGameDate  = resultSet.getDate( 5 );
 					outputWriter.print( "<td>" + ( firstGameDate == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( firstGameDate ) ) );
 					outputWriter.print( "<td>" + ( lastGameDate  == null ? UNKOWN_HTML_STRING : SIMPLE_DATE_FORMAT.format( lastGameDate  ) ) );
-					outputWriter.print( "<td align=center>" + ReplayHeader.formatFrames( resultSet.getInt( 6 ), new StringBuilder(), true ) );
+					outputWriter.print( "<td align=center>" + ReplayHeader.formatLongFrames( resultSet.getLong( 6 ), new StringBuilder(), true ) );
 				}
 				if ( queryParam == null )
 					statement.close();
@@ -1013,16 +1013,16 @@ public class PlayersNetworkServlet extends BaseServlet {
 					outputWriter.print( "<tr><th align=left>Presence:<td>" + ( firstGameDate == null ? UNKOWN_HTML_STRING : formatDays( days ) ) );
 					if ( hasAka ) outputWriter.print( "<td>" + ( firstGameDate2 == null ? UNKOWN_HTML_STRING : formatDays( days2 ) ) );
 					
-					outputWriter.print( "<tr><th align=left>Total time in games:<td>" + ReplayHeader.formatFrames( resultSet.getInt( 4 ), new StringBuilder(), true ) );
-					if ( hasAka ) outputWriter.print( "<td>" + ReplayHeader.formatFrames( resultSet2.getInt( 4 ), new StringBuilder(), true ) );
+					outputWriter.print( "<tr><th align=left>Total time in games:<td>" + ReplayHeader.formatLongFrames( resultSet.getLong( 4 ), new StringBuilder(), true ) );
+					if ( hasAka ) outputWriter.print( "<td>" + ReplayHeader.formatLongFrames( resultSet2.getLong( 4 ), new StringBuilder(), true ) );
 					outputWriter.print( "<tr><th align=left>Average games per day:<td>" + ( firstGameDate == null ? UNKOWN_HTML_STRING : new Formatter( Locale.ENGLISH ).format( "%.2f", ( resultSet.getInt( 1 ) / (float) days ) ) ) );
 					if ( hasAka ) outputWriter.print( "<td>" + ( firstGameDate2 == null ? UNKOWN_HTML_STRING : new Formatter( Locale.ENGLISH ).format( "%.2f", ( resultSet2.getInt( 1 ) / (float) days2 ) ) ) );
-					outputWriter.print( "<tr><th align=left>Average game length:<td>" + ( resultSet.getInt( 8 ) > 0 ? ReplayHeader.formatFrames( resultSet.getInt( 9 ) /  resultSet.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
-					if ( hasAka ) outputWriter.print( "<td>" + ( resultSet2.getInt( 8 ) > 0 ? ReplayHeader.formatFrames( resultSet2.getInt( 9 ) /  resultSet2.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
-					averageApm = (int) (resultSet.getInt( 10 ) > 0 ? ( resultSet.getInt( 11 ) * 60l /  ReplayHeader.convertFramesToSeconds( resultSet.getInt( 10 ) ) ) : 0l );
+					outputWriter.print( "<tr><th align=left>Average game length:<td>" + ( resultSet.getInt( 8 ) > 0 ? ReplayHeader.formatLongFrames( resultSet.getLong( 9 ) / resultSet.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
+					if ( hasAka ) outputWriter.print( "<td>" + ( resultSet2.getInt( 8 ) > 0 ? ReplayHeader.formatLongFrames( resultSet2.getLong( 9 ) / resultSet2.getInt( 8 ), new StringBuilder(), true ) + " *" : UNKOWN_HTML_STRING ) );
+					averageApm = (int) (resultSet.getLong( 10 ) > 0 ? ( resultSet.getInt( 11 ) * 60l /  ReplayHeader.convertLongFramesToSeconds( resultSet.getLong( 10 ) ) ) : 0l );
 					outputWriter.print( "<tr><th align=left>Average APM:<td>" + ( averageApm > 0 ? averageApm + " **" : UNKOWN_HTML_STRING ) );
 					if ( hasAka ) {
-						averageApm2 = (int) (resultSet2.getInt( 10 ) > 0 ? ( resultSet2.getInt( 11 ) * 60l /  ReplayHeader.convertFramesToSeconds( resultSet2.getInt( 10 ) ) ) : 0l );
+						averageApm2 = (int) (resultSet2.getLong( 10 ) > 0 ? ( resultSet2.getInt( 11 ) * 60l /  ReplayHeader.convertLongFramesToSeconds( resultSet2.getLong( 10 ) ) ) : 0l );
 						outputWriter.print( "<td>" + ( averageApm2 > 0 ? averageApm2 + " **" : UNKOWN_HTML_STRING ) );
 					}
 					outputWriter.print( "<tr><th align=left>Race distribution:<td>Zerg: " + (int) ( resultSet.getInt( 5 ) * 100.0f / gamesCount + 0.5f ) + "%, Terran: " + (int) ( resultSet.getInt( 6 ) * 100.0f / gamesCount + 0.5f ) + "%, Protoss: " + (int) ( resultSet.getInt( 7 ) * 100.0f / gamesCount + 0.5f ) + "%" );

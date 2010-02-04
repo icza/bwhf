@@ -270,7 +270,7 @@ CREATE TABLE player
   games_count integer DEFAULT 0,
   first_game timestamp without time zone,
   last_game timestamp without time zone,
-  total_frames integer DEFAULT 0,
+  total_frames bigint DEFAULT 0,
   "version" timestamp without time zone DEFAULT now(),
   is_computer boolean NOT NULL DEFAULT false,
   CONSTRAINT player_pkey PRIMARY KEY (id),
