@@ -276,6 +276,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 			connection = dataSource.getConnection();
 			
 			synchronized ( PlayersNetworkServlet.class ) {
+				// No parallel processing is allowed, because currently we assume the max game id is what we inserted when connecting players to the game
+				
 				// This query has to be in the sync block too, else there might be duplicates (there were in the past)
 				statement = connection.prepareStatement( "SELECT id FROM game WHERE replay_md5=?" );
 				statement.setString( 1, replayMd5 );
@@ -291,9 +293,9 @@ public class PlayersNetworkServlet extends BaseServlet {
 				connection.setAutoCommit( false );
 				
 				// First create the players
+				statement = connection.prepareStatement( "SELECT id FROM player WHERE name=?" );
 				for ( final String playerName : playerNameList ) {
 					// Check if player already exists
-					statement = connection.prepareStatement( "SELECT id FROM player WHERE name=?" );
 					statement.setString( 1, playerName );
 					resultSet = statement.executeQuery();
 					if ( !resultSet.next() ) {
@@ -305,8 +307,8 @@ public class PlayersNetworkServlet extends BaseServlet {
 						statement2.close();
 					}
 					resultSet.close();
-					statement.close();
 				}
+				statement.close();
 				
 				// Players exist now. Let's insert the game.
 				statement = connection.prepareStatement( "INSERT INTO game (engine,frames,save_time,name,map_width,map_height,speed,type,sub_type,creator_name,map_name,replay_md5,agent_version,gateway,ip) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)" );
@@ -337,7 +339,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 				statement.close();
 				
 				// Insert the connections between the game and players
-				statement = connection.prepareStatement( "INSERT INTO game_player (game,player,race,actions_count,color) VALUES ((select max(id) from game),(select id from player where name=?),?,?,?)" );
+				statement = connection.prepareStatement( "INSERT INTO game_player (game,player,race,actions_count,color) VALUES ((select max(id) from game),(select id from player where name=?),?,?,?)" ); // We assume the last game is the one we inserted so no parallel processing allowed
 				for ( int i = 0; i < playerNameList.size(); i++ ) {
 					colCounter = 1;
 					statement.setString( colCounter++, playerNameList   .get( i ) );
@@ -357,13 +359,14 @@ public class PlayersNetworkServlet extends BaseServlet {
 				for ( final String playerName : playerNameList ) {
 					colCounter = 1;
 					if ( saveTime != null ) {
-						statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
-						statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
-						statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
-						statement.setTimestamp( colCounter++, new Timestamp( saveTime ) );
+						final Timestamp timestamp = new Timestamp( saveTime );
+						statement.setTimestamp( colCounter++, timestamp );
+						statement.setTimestamp( colCounter++, timestamp );
+						statement.setTimestamp( colCounter++, timestamp );
+						statement.setTimestamp( colCounter++, timestamp );
 					}
-					statement.setInt      ( colCounter++, frames                    );
-					statement.setString   ( colCounter++, playerName                );
+					statement.setInt   ( colCounter++, frames     );
+					statement.setString( colCounter++, playerName );
 					
 					if ( statement.executeUpdate() == 0 )
 						throw new Exception( "Could not update player: " + playerName + "!" );
