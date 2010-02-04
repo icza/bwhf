@@ -683,19 +683,19 @@ public class AdminServlet extends BaseServlet {
 			}
 			resultSet.close();
 			
-			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM (SELECT ip FROM download_log WHERE version>='2009-04-20' GROUP BY ip HAVING COUNT(*)>=10) as foo" );
+			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM (SELECT ip FROM download_log GROUP BY ip HAVING COUNT(*)>=10) as foo" );
 			if ( resultSet.next() ) {
 				outputWriter.println( "<tr style='background:#c0ffc0'><th align=left>Different IPs with at least 10 downloads:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
-			resultSet = statement.executeQuery( "SELECT COUNT(DISTINCT ip) FROM download_log WHERE version+INTERVAL '720:0'>now()" );
+			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM (SELECT ip FROM download_log WHERE version+INTERVAL '720:0'>now() GROUP BY ip) as foo" );
 			if ( resultSet.next() ) {
 				outputWriter.println( "<tr style='background:#c0ffc0'><th align=left>Active IPs (have downloads in the last 30 days):<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
 			resultSet.close();
 			
-			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM download_log WHERE version + INTERVAL '24:0'>now()" );
+			resultSet = statement.executeQuery( "SELECT COUNT(*) FROM download_log WHERE version+INTERVAL '24:0'>now()" );
 			if ( resultSet.next() ) {
 				outputWriter.println( "<tr style='background:#c0ffc0'><th align=left>Hacker list downloads in the last 24 hours:<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 1 ) ) );
 			}
