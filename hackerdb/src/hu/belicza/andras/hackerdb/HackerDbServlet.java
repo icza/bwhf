@@ -204,7 +204,7 @@ public class HackerDbServlet extends BaseServlet {
 				String playerName;
 				for ( int i = 0; i <= MAX_PLAYERS_IN_REPORT && ( playerName = request.getParameter( REQUEST_PARAMETER_NAME_PLAYER + i ) ) != null; i++ ) {
 					playerName = playerName.toLowerCase(); // We handle player names all lowercased!
-					final String usedHacks = request.getParameter( REQUEST_PARAMETER_NAME_USED_HACKS + i ); // It's optional, was introduced in version 3.10
+					final String usedHacks = request.getParameter( REQUEST_PARAMETER_NAME_USED_HACKS + i ); // It's optional, was introduced in version 3.20
 					playerDetailList.add( new String[] { playerName, usedHacks } );
 				}
 				if ( playerDetailList.isEmpty() )
