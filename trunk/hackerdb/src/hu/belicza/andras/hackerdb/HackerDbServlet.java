@@ -816,11 +816,11 @@ public class HackerDbServlet extends BaseServlet {
 			// We might deny the download based on the authorization key...
 			
 			statement = connection.createStatement();
-			resultSet = statement.executeQuery( "SELECT DISTINCT gateway, name from hacker JOIN report on report.hacker=hacker.id JOIN key on report.key=key.id WHERE hacker.guarded=FALSE AND key.revocated=FALSE AND report.revocated=FALSE" );
+			resultSet = statement.executeQuery( "SELECT DISTINCT hacker.id, gateway, name from hacker JOIN report on report.hacker=hacker.id JOIN key on report.key=key.id WHERE hacker.guarded=FALSE AND key.revocated=FALSE AND report.revocated=FALSE" );
 			outputWriter = response.getWriter();
 			
 			while ( resultSet.next() )
-				outputWriter.println( resultSet.getInt( 1 ) + "," + resultSet.getString( 2 ) );
+				outputWriter.println( resultSet.getInt( 2 ) + "," + resultSet.getString( 3 ) );
 			
 			outputWriter.flush();
 			
@@ -1175,6 +1175,7 @@ public class HackerDbServlet extends BaseServlet {
 		
 		outputWriter.println( getCurrentTimeCode() );
 		outputWriter.println( "<h2>BWHF Hacker Database</h2>" );
+		outputWriter.println( "<div class='note'>The World's largest StarCrfat Broodwar hacker, game and player database</div>" );
 		
 		outputWriter.println( HACKER_LIST_MENU_HTML );
 		outputWriter.println( GOOGLE_AD_HTML_HEADER );
