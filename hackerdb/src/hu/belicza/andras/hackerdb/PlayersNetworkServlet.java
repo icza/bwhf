@@ -1730,6 +1730,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 		outputWriter.println( "</head><body><center>" );
 		outputWriter.println( getCurrentTimeCode() );
 		outputWriter.println( "<h2>BWHF Players' Network</h2>" );
+		outputWriter.println( "<div class='note'>The World's largest StarCrfat Broodwar hacker, game and player database</div>" );
 		outputWriter.println( MENU_HTML );
 		outputWriter.println( GOOGLE_AD_HTML_HEADER );
 	}
