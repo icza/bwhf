@@ -1175,7 +1175,7 @@ public class HackerDbServlet extends BaseServlet {
 		
 		outputWriter.println( getCurrentTimeCode() );
 		outputWriter.println( "<h2>BWHF Hacker Database</h2>" );
-		outputWriter.println( "<div class='note'>The World's largest StarCrfat Broodwar hacker, game and player database</div>" );
+		outputWriter.println( "<div class='note'>The World's largest StarCraft Brood War hacker, game and player database</div>" );
 		
 		outputWriter.println( HACKER_LIST_MENU_HTML );
 		outputWriter.println( GOOGLE_AD_HTML_HEADER );
