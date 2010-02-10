@@ -1,0 +1,19 @@
+#summary Description of the BWHFAgent bot and its commands
+
+=BWHFAgent Bot on battle.net=
+
+I run a bot called *BWHFAgent* on the 4 public battle.net servers. The channel in which the bot stays might change, but mostly the bot stays in the following channels:
+||*Gatway*||*Channel*||
+||USEast||)v(||
+||USWest||marlboro||
+||Europe||Brood war BGH||
+||Asia||sex||
+
+Other bots having similar names or claiming they are BWHF bots are not under my control and I take no responsibility for them. I only run and maintain the *BWHFAgent* bot.
+
+==Commands==
+
+The bot accepts commands starting with a dot ('.'). Commands can be given either in the channel where the bot stays, or commands can be whispered to the bot from anywhere (from any channel, from game lobby or even from games). The bot whispers back the result/response of the command.
+
+Currently the following commands are valid for everyone:
+ * *.scan username*<br>This command checks if _username_ is a hacker. If the user is a hacker on the gateway, it will whisper back _"username is a hacker!"_. If the user is a hacker on another gateway, it will whisper back _"username is a hacker on another gatway."_. If the user is not a hacker on any gateways, it will whisper back _"username is not a hacker."_.
