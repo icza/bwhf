@@ -550,15 +550,17 @@ public class AdminServlet extends BaseServlet {
 		try {
 			outputWriter = response.getWriter();
 			renderHeader( request, outputWriter );
-			outputWriter.println( "<h3>" + Page.NEW_KEY.displayName + "</h3>" );
+			final boolean fullAdmin = (Boolean) request.getSession( false ).getAttribute( ATTRIBUTE_FULL_ADMIN );
 			
-			final Integer numberOfKeys  = getIntegerParamValue   ( request, REQUEST_PARAM_NUMBER_OF_KEYS );
+			outputWriter.println( "<h3>" + Page.NEW_KEY.displayName + ( fullAdmin ? "" : " <i>(limited access)</i>" ) + "</h3>" );
+			
+			final Integer numberOfKeys  = fullAdmin ? getIntegerParamValue( request, REQUEST_PARAM_NUMBER_OF_KEYS ) : new Integer( 1 );
 			final String  personName    = getNullStringParamValue( request, REQUEST_PARAM_PERSON_NAME    );
 			final String  personEmail   = getNullStringParamValue( request, REQUEST_PARAM_PERSON_EMAIL   );
 			final String  personComment = getNullStringParamValue( request, REQUEST_PARAM_PERSON_COMMENT );
 			
 			StringBuilder emailMessageBuilder = null;
-			if ( numberOfKeys != null || personName != null || personEmail != null || personComment != null ) {
+			if ( personName != null || personEmail != null || personComment != null ) {
 				if ( numberOfKeys == null || personName == null || personEmail == null || personComment == null ) {
 					renderMessage( "All fields are required!", true, outputWriter );
 				}
@@ -621,7 +623,8 @@ public class AdminServlet extends BaseServlet {
 			
 			outputWriter.println( "<form action='admin?" + REQUEST_PARAM_PAGE_NAME + '=' + Page.NEW_KEY.name() + "' method=POST>" );
 			outputWriter.println( "<table border=0>" );
-			outputWriter.println( "<tr><td align=right>Number of keys*:<td><input type=text name='" + REQUEST_PARAM_NUMBER_OF_KEYS + "' value='1'>" );
+			if ( fullAdmin )
+				outputWriter.println( "<tr><td align=right>Number of keys*:<td><input type=text name='" + REQUEST_PARAM_NUMBER_OF_KEYS + "' value='1'>" );
 			outputWriter.println( "<tr><td align=right>Name of the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_NAME + "'><td><div class='note'>(Person's real name)</div>" );
 			outputWriter.println( "<tr><td align=right>E-mail of the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_EMAIL + "'>" );
 			outputWriter.println( "<tr><td align=right>Comment to the person*:<td><input type=text name='" + REQUEST_PARAM_PERSON_COMMENT + "'><td><div class='note'>(Battle.net accounts with gateways)</div>" );
