@@ -3,13 +3,12 @@
 =BWHF Agent on MAC OS-X=
 http://lh4.ggpht.com/_jDMClHrENz8/S3zqHPSjpXI/AAAAAAAASqU/aIpg24n-j4w/s800/BWHFonMAC.jpg
 
-This guide was written by teamliquid.net member Slugbreath. This is the [http://www.teamliquid.net/forum/viewmessage.php?topic_id=112589 source].
+This guide was written by teamliquid.net member [http://www.teamliquid.net/forum/profile.php?user=Slugbreath Slugbreath]. This is the [http://www.teamliquid.net/forum/viewmessage.php?topic_id=112589 source].
 
 ===Step 1 – Checking your version of Java===
 Open up the Terminal.
-{{{
-The Terminal can be found in the Utilites folder that in turn is located under Applications.
-}}}
+
+<table><tr><td>The Terminal can be found in the Utilites folder that in turn is located under Applications.</table>
 
 Don’t worry, you won’t have to do a lot of scary stuff in the Terminal and if I was able to figure out what to do, you’ll be able to do this too!
 
@@ -23,3 +22,44 @@ If your version of Java is 1.6 or higher skip step 2.
 
 ===Step 2 – Setting up Java 1.6===
 If you haven’t got Java version 1.6 or higher, you will have to go and download it from [http://support.apple.com/downloads/Java_for_Mac_OS_X_10_5_Update_1 Apple’s homepage].
+
+Once that is downloaded and installed, go to your Java Preferences that, just like the Terminal, is located under Utilites.
+
+Once you have started the Java Preferences you will be greated by two sets of check-boxes with different versions of Java listed. In the lower of the two, Java programs, tick Java SE 6 and drag it to the top of the list (or untick all of the other options).
+
+Once that it done, go back to the Terminal and once again type:
+
+`java -version`
+
+You should now have the required version of Java installed.
+
+===Step 3 – Download BWHFAgent===
+Download the latest version of BWHFAgent for Mac from [http://code.google.com/p/bwhf/wiki/Downloads?tm=2 this link] and unzip it. While it doesn’t matter where you place the BWHFAgent folder, I would suggest that you place it somewhere that’s easy to access.
+
+===Step 4 – Navigate to the BWHFAgent folder===
+Now go back to the Terminal and navigate to the BWHFAgent folder. If you don't know how to do that, read in the box below.
+<table><tr><td>
+We will be using two (or three) commands here. The first is
+
+`ls`
+
+This command (short for list) lists all of the files in the directory you are browsing with the Terminal.
+
+The second command we will use is
+
+`cd`
+
+which is short for change directory. The way it works is by typing
+
+`cd foldername`
+
+you will navigate to that folder (as long as the folder is located in the folder you are currently in). If the folder name contains a space use put the folder name, with spaces and all, between two “ and you’ll be find.
+
+To go up a level, just type
+
+`cd ..`
+
+Use these commands to navigate to the folder where you placed BWHFAgent.
+
+For example, if you have the BWHFAgent folder in the Starcraft Folder, that in turn is installed under Applications, the following lines will take you there:
+</td></table>
