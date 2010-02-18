@@ -1,0 +1,25 @@
+#summary Step-by-step instructions on how-to setup and run BWHF Agent on MAC
+
+=BWHF Agent on MAC OS-X=
+http://lh4.ggpht.com/_jDMClHrENz8/S3zqHPSjpXI/AAAAAAAASqU/aIpg24n-j4w/s800/BWHFonMAC.jpg
+
+This guide was written by teamliquid.net member Slugbreath. This is the [http://www.teamliquid.net/forum/viewmessage.php?topic_id=112589 source].
+
+===Step 1 – Checking your version of Java===
+Open up the Terminal.
+{{{
+The Terminal can be found in the Utilites folder that in turn is located under Applications.
+}}}
+
+Don’t worry, you won’t have to do a lot of scary stuff in the Terminal and if I was able to figure out what to do, you’ll be able to do this too!
+
+Once in the Terminal, write the following:
+
+`java -version`
+
+Now, you should get a few lines of text back but the only thing we are interested in here is the version of Java that is running.
+
+If your version of Java is 1.6 or higher skip step 2.
+
+===Step 2 – Setting up Java 1.6===
+If you haven’t got Java version 1.6 or higher, you will have to go and download it from [http://support.apple.com/downloads/Java_for_Mac_OS_X_10_5_Update_1 Apple’s homepage].
