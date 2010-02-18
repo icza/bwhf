@@ -3,7 +3,7 @@
 =BWHF Agent on MAC OS-X=
 http://lh4.ggpht.com/_jDMClHrENz8/S3zqHPSjpXI/AAAAAAAASqU/aIpg24n-j4w/s800/BWHFonMAC.jpg
 
-This guide was written by teamliquid.net member [http://www.teamliquid.net/forum/profile.php?user=Slugbreath Slugbreath]. I basically copied/quoted his thread. This is the [http://www.teamliquid.net/forum/viewmessage.php?topic_id=112589 original source].
+This guide was written by teamliquid.net member [http://www.teamliquid.net/forum/profile.php?user=Slugbreath Slugbreath]. I basically copied/quoted his thread with minor modifications. This is the [http://www.teamliquid.net/forum/viewmessage.php?topic_id=112589 original source].
 
 ===Step 1 – Checking your version of Java===
 Open up the Terminal.
