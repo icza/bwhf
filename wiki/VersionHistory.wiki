@@ -4,9 +4,7 @@
 
 <wiki:toc max_depth="3" />
 
-<wiki:comment>
-----
-===Changes and new features in the upcoming release===
+<wiki:comment>===Changes and new features in the upcoming release===
 </wiki:comment>
 
 ----
