@@ -5,8 +5,14 @@
 <wiki:toc max_depth="3" />
 
 <wiki:comment>
+----
 ===Changes and new features in the upcoming release===
 </wiki:comment>
+
+----
+===Changes and new features in the upcoming release===
+ * Added detection of auto subunit re-queue hack.
+ * Target points of recall and launch nuke acttions were not marked in the map view chart. Now they are.
 
 ----
 ===3.20 2010-02-01===
