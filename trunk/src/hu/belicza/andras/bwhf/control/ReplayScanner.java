@@ -17,7 +17,7 @@ import java.util.List;
 public class ReplayScanner {
 	
 	/** Version of the scan engine. */
-	public static final String ENGINE_VERSION = "1.46";
+	public static final String ENGINE_VERSION = "1.47";
 	
 	/**
 	 * Scans the replay actions for hacks.
@@ -276,7 +276,7 @@ public class ReplayScanner {
 				actionsCountForGeneralMulticommandHack = 0;
 			}
 			
-			// Auto unit re-queue hack:
+			// Auto unit re-queue hack and auto subunit re-queue hack:
 			// All at iteration I1 (and just these at I1): Select X, Train, Select Y
 			// All at iteration I2 (and just these at I2): Select Z, Train, Select Y
 			// I1 != I2
@@ -285,19 +285,19 @@ public class ReplayScanner {
 						&& playerActions[ actionIndex + 3 ].actionNameIndex == Action.ACTION_NAME_INDEX_SELECT && playerActions[ actionIndex + 5 ].actionNameIndex == Action.ACTION_NAME_INDEX_SELECT
 						&& action.iteration == playerActions[ actionIndex + 1 ].iteration && action.iteration == playerActions[ actionIndex + 2 ].iteration
 						&& playerActions[ actionIndex + 3 ].iteration == playerActions[ actionIndex + 4 ].iteration && playerActions[ actionIndex + 3 ].iteration == playerActions[ actionIndex + 5 ].iteration 
-						&& playerActions[ actionIndex + 1 ].actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN && playerActions[ actionIndex + 4 ].actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN
+						&& ( playerActions[ actionIndex + 1 ].actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN && playerActions[ actionIndex + 4 ].actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN || playerActions[ actionIndex + 1 ].actionNameIndex == Action.ACTION_NAME_INDEX_BUILD_SUBUNIT && playerActions[ actionIndex + 4 ].actionNameIndex == Action.ACTION_NAME_INDEX_BUILD_SUBUNIT )
 						&& playerActions[ actionIndex + 2 ].parameters != null && playerActions[ actionIndex + 5 ].parameters != null
 						&& playerActions[ actionIndex + 2 ].parameters.equals( playerActions[ actionIndex + 5 ].parameters )
 						&& action.parameters != null && playerActions[ actionIndex + 3 ].parameters != null ) {
 					if ( ++autoUnitRequeueCount == 1 ) {
 						// It can happen 1 out of 5k games, so just mark it first, but don't alert						
-						lastAutoUnitRequeueOccurance = new HackDescription( player.playerName, HackDescription.HACK_TYPE_AUT0_UNIT_REQUEUE, action.iteration );
+						lastAutoUnitRequeueOccurance = new HackDescription( player.playerName, playerActions[ actionIndex + 1 ].actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN ? HackDescription.HACK_TYPE_AUT0_UNIT_REQUEUE : HackDescription.HACK_TYPE_AUT0_SUBUNIT_REQUEUE, action.iteration );
 					}
 					else {
 						// If this is not the first, it can't be coincidence!
 						if ( autoUnitRequeueCount == 2 )
 							hackDescriptionList.add( lastAutoUnitRequeueOccurance );
-						hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_AUT0_UNIT_REQUEUE, action.iteration ) );
+						hackDescriptionList.add( new HackDescription( player.playerName, playerActions[ actionIndex + 1 ].actionNameIndex == Action.ACTION_NAME_INDEX_TRAIN ?HackDescription.HACK_TYPE_AUT0_UNIT_REQUEUE : HackDescription.HACK_TYPE_AUT0_SUBUNIT_REQUEUE, action.iteration ) );
 					}
 				}
 			
