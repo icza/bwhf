@@ -1047,10 +1047,15 @@ public class PlayersNetworkServlet extends BaseServlet {
 					resultSet2  = statement2.executeQuery( "SELECT gateway, COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ") GROUP BY gateway ORDER BY gateway" );
 				
 				outputWriter.print( "<tr><th align=left>Gateway distribution:<td>" );
-				outputWriter.print( generateGatewayDistributionImageHtml( resultSet ) );
+				String html;
+				outputWriter.print( html = generateGatewayDistributionImageHtml( resultSet ) );
+				if ( !UNKOWN_HTML_STRING.equals( html ) )
+					outputWriter.print( "<span class='note'>(Roll over to see details in tooltip.)</span>" );
 				if ( akaIdList != null ) {
 					outputWriter.print( "<td>" );
-					outputWriter.print( generateGatewayDistributionImageHtml( resultSet2 ) );
+					outputWriter.print( html = generateGatewayDistributionImageHtml( resultSet2 ) );
+					if ( !UNKOWN_HTML_STRING.equals( html ) )
+					outputWriter.print( "<span class='note'>(Roll over to see details in tooltip.)</span>" );
 				}
 				
 				if ( hasAka )
@@ -1059,6 +1064,34 @@ public class PlayersNetworkServlet extends BaseServlet {
 				
 				outputWriter.flush();
 				
+				// Game type distribution
+				resultSet  = statement.executeQuery( "SELECT type, COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player=" + entityId + " GROUP BY type ORDER BY COUNT(*) DESC" );
+				if ( akaIdList != null )
+					resultSet2  = statement2.executeQuery( "SELECT type, COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ") GROUP BY type ORDER BY COUNT(*) DESC" );
+				
+				outputWriter.println( "<tr><th align=left>Game type distribution:<td valign=top><table border=0 width=100%>" );
+				int rowCounter = 1;
+				while ( resultSet.next() ) {
+					outputWriter.println( "<tr" + ( (rowCounter & 0x01) == 1 ? " style='background:#cacaca'" : "" ) + "><td align=right>" + rowCounter + "<td>" + getGameTypeName( resultSet.getShort( 1 ), true ) );
+					outputWriter.println( "<td align=right>" + DECIMAL_FORMAT.format( resultSet.getInt( 2 ) ) + "<td align=right>" + (int) ( resultSet.getInt( 2 ) * 100.0f / gamesCount + 0.5f ) + "%" );
+					rowCounter++;
+				}
+				outputWriter.println( "</table>" );
+				if ( hasAka ) {
+					outputWriter.println( "<td valign=top><table border=0 width=100%>" );
+					rowCounter = 1;
+					while ( resultSet2.next() ) {
+						outputWriter.println( "<tr" + ( (rowCounter & 0x01) == 1 ? " style='background:#cacaca'" : "" ) + "><td align=right>" + rowCounter + "<td>" + getGameTypeName( resultSet2.getShort( 1 ), true ) );
+						outputWriter.println( "<td align=right>" + DECIMAL_FORMAT.format( resultSet2.getInt( 2 ) ) + "<td align=right>" + (int) ( resultSet2.getInt( 2 ) * 100.0f / gamesCount2 + 0.5f ) + "%" );
+						rowCounter++;
+					}
+					outputWriter.println( "</table>" );
+				}
+				
+				if ( hasAka )
+					resultSet2.close();
+				resultSet.close();
+				
 				// Top maps section
 				final int TOP_COUNT = 15;
 				resultSet  = statement.executeQuery( "SELECT map_name, COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player=" + entityId + " GROUP BY map_name ORDER BY COUNT(*) DESC LIMIT " + TOP_COUNT );
@@ -1066,7 +1099,7 @@ public class PlayersNetworkServlet extends BaseServlet {
 					resultSet2  = statement2.executeQuery( "SELECT map_name, COUNT(*) FROM game_player JOIN game on game.id=game_player.game WHERE player IN (" + akaIdList + ") GROUP BY map_name ORDER BY COUNT(*) DESC LIMIT " + TOP_COUNT );
 				
 				outputWriter.println( "<tr><th align=left>Top " + TOP_COUNT + " maps:<td valign=top><table border=0 width=100%>" );
-				int rowCounter = 1;
+				rowCounter = 1;
 				while ( resultSet.next() ) {
 					outputWriter.println( "<tr" + ( (rowCounter & 0x01) == 1 ? " style='background:#cacaca'" : "" ) + "><td align=right>" + rowCounter + "<td>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), resultSet.getString( 1 ), null, null, false ) );
 					outputWriter.println( "<td align=right>" + getGameListWithMapHtmlLink( resultSet.getString( 1 ), DECIMAL_FORMAT.format( resultSet.getInt( 2 ) ), entityId, null, false ) + "<td align=right>" + (int) ( resultSet.getInt( 2 ) * 100.0f / gamesCount + 0.5f ) + "%" );
