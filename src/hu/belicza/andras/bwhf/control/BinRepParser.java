@@ -218,13 +218,13 @@ public class BinRepParser {
 								mapDataBuffer.getShort(); // valid elements flag
 								final byte owner = mapDataBuffer.get();
 								
-								if ( type == 176 || type == 177 || type == 178 ) { // Minerals
+								if ( type == Action.UNIT_NAME_MINERAL_FIELD_1 || type == Action.UNIT_NAME_MINERAL_FIELD_2 || type == Action.UNIT_NAME_MINERAL_FIELD_3 ) {
 									mapData.mineralFieldList.add( new short[] { x, y } );
 								}
-								else if ( type == 188 ) { // Vespene geyser
+								else if ( type == Action.UNIT_NAME_VESPENE_GEYSER ) {
 									mapData.geyserList.add( new short[] { x, y } );
 								}
-								else if ( type == 214 ) { // Start location
+								else if ( type == Action.UNIT_NAME_START_LOCATION ) {
 									mapData.startLocationList.add( new int[] { x, y, owner } );
 								}
 								
