@@ -12,6 +12,7 @@
  * Added detection of *auto subunit re-queue hack*.
  * Target points of recall and launch nuke actions were not marked in the map view chart. Now they are.
  * Corrected/completed unit enumeration.
+ * Fixed a bug in build anywhere hack detection.
 
 ----
 ===3.20 2010-02-01===
