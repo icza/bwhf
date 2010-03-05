@@ -310,13 +310,17 @@ public class Action implements Comparable< Action > {
 	public static final short BUILDING_NAME_INDEX_CONTROL_TOWER       = (short) 0x73;
 	public static final short BUILDING_NAME_INDEX_NEXUS               = (short) 0x9A;
 	public static final short BUILDING_NAME_INDEX_COMMAND_CENTER      = (short) 0x6A;
+	public static final short BUILDING_NAME_INDEX_REFINERY            = (short) 0x6E;
 	public static final short BUILDING_NAME_INDEX_HATCHERY            = (short) 0x83;
 	public static final short BUILDING_NAME_INDEX_BUNKER              = (short) 0x7D;
 	public static final short BUILDING_NAME_INDEX_PHOTON_CANNON       = (short) 0xA2;
 	public static final short BUILDING_NAME_INDEX_SUNKEN_COLONY       = (short) 0x92;
+	public static final short BUILDING_NAME_INDEX_EXTRACTOR           = (short) 0x95;
+	public static final short BUILDING_NAME_INDEX_ASSIMILATOR         = (short) 0x9D;
 	public static final short BUILDING_NAME_INDEX_NYDUS_CANAL         = (short) 0x86;
 	public static final short BUILDING_NAME_INDEX_FIRST_ZERG_BUILDING = (short) 0x83;
 	public static final short BUILDING_NAME_INDEX_LAST_ZERG_BUILDING  = (short) 0x95;
+	
 	
 	/** Map of unit IDs and their names. */
 	public static final Map< Short, String > UNIT_ID_NAME_MAP = new HashMap< Short, String >();
