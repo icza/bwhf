@@ -17,7 +17,7 @@ import java.util.List;
 public class ReplayScanner {
 	
 	/** Version of the scan engine. */
-	public static final String ENGINE_VERSION = "1.47";
+	public static final String ENGINE_VERSION = "1.48";
 	
 	/**
 	 * Scans the replay actions for hacks.
@@ -171,7 +171,9 @@ public class ReplayScanner {
 						final int x = Integer.parseInt( action.parameters.substring( action.parameters.indexOf( '(' ) + 1, commaIndex ) );
 						final int y = Integer.parseInt( action.parameters.substring( commaIndex + 1, action.parameters.indexOf( ')', commaIndex ) ) );
 						// In the range of x all coordinate is buildable, but in the range of y the bottom line is reserved
-						if ( x > replayHeader.mapWidth - buildingSize.width || y > replayHeader.mapHeight - buildingSize.height - 1 )
+						// Only exception for the bottom line is if there is a geyser
+						if ( x > replayHeader.mapWidth - buildingSize.width
+								|| ( y > replayHeader.mapHeight - buildingSize.height - 1 && action.parameterBuildingNameIndex != Action.BUILDING_NAME_INDEX_ASSIMILATOR && action.parameterBuildingNameIndex != Action.BUILDING_NAME_INDEX_EXTRACTOR && action.parameterBuildingNameIndex != Action.BUILDING_NAME_INDEX_REFINERY ) )
 							hackDescriptionList.add( new HackDescription( player.playerName, HackDescription.HACK_TYPE_BUILD_ANYWHERE, action.iteration ) );
 					}
 					catch ( final Exception e ) {
