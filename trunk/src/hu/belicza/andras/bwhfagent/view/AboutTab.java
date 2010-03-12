@@ -91,11 +91,17 @@ public class AboutTab extends Tab {
 			}
 		} );
 		buttonsPanel.add( button );
-		buttonsPanel.add( button );
 		button = new JButton( "Visit Players' Network", IconResourceManager.ICON_WORLD_GO );
 		button.addActionListener( new ActionListener() {
 			public void actionPerformed( final ActionEvent event ) {
 				Utils.showURLInBrowser( Consts.PLAYERS_NETWORK_PAGE_URL );
+			}
+		} );
+		buttonsPanel.add( button );
+		button = new JButton( "Visit Sc2gears home page", IconResourceManager.ICON_WORLD_GO );
+		button.addActionListener( new ActionListener() {
+			public void actionPerformed( final ActionEvent event ) {
+				Utils.showURLInBrowser( Consts.SC2GEARS_HOME_PAGE_URL );
 			}
 		} );
 		buttonsPanel.add( button );

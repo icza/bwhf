@@ -84,7 +84,8 @@ public class MainFrame extends JFrame {
 		"Leaving all fields empty on the Replay search tab will add all selected replays or all replays in a folder.",
 		"If you're using a non-English version of Starcraft, you can modify the ignored names on the Player checker tab for your language.",
 		"Most buttons have hotkeys. If they're hidden, press ALT to see the hotkeys in Win 7 and Vista.",
-		"You can hide certain buildings on the Map view chart if you filter the action list."
+		"You can hide certain buildings on the Map view chart if you filter the action list.",
+		"Are you playing StarCraft 2? Then check out the Sc2gears project."
 	};
 	
 	/** Stores the reference of the main frame. */
