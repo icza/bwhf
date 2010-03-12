@@ -29,6 +29,9 @@ public class Consts {
 	/** Players' Network page url string.                                      */
 	public static final String PLAYERS_NETWORK_PAGE_URL                = "http://bwhf.net/hackerdb/players";
 	
+	/** Sc2gears home page string.                                             */
+	public static final String SC2GEARS_HOME_PAGE_URL                  = "http://sites.google.com/site/sc2gears";
+	
 	/** URL of the BWHF hacker data base server.                               */
 	public static final String BWHF_HACKER_DATA_BASE_SERVER_URL        = "http://bwhf.net/hackerdb/hackers";
 	/** URL of the Players' Network processor server.                          */
