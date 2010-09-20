@@ -5,7 +5,7 @@
     <reloadable>true</reloadable>
     <redirectLogger>false</redirectLogger>
     <updateXml>true</updateXml>
-    <warLocation></warLocation>
+    <warLocation>w:\hackerdb.war</warLocation>
     <extraInfo></extraInfo>
     <webPath>/hackerdb</webPath>
 </tomcatProjectProperties>
