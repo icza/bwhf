@@ -40,6 +40,7 @@ CREATE TABLE "key"
   person integer NOT NULL,
   "comment" character varying,
   "version" timestamp without time zone DEFAULT now(),
+  premium boolean NOT NULL DEFAULT false,
   CONSTRAINT key_pkey PRIMARY KEY (id),
   CONSTRAINT key_person_fkey FOREIGN KEY (person)
       REFERENCES person (id) MATCH SIMPLE
@@ -182,6 +183,7 @@ CREATE TABLE download_log
   success boolean,
   exec_time_ms integer,
   "version" timestamp without time zone DEFAULT now(),
+  denied boolean,
   CONSTRAINT download_log_pkey PRIMARY KEY (id)
 )
 WITH (
