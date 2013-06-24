@@ -1,10 +1,10 @@
 #summary Describes the Players' Network
 
-=Players' Network=
+=Players' Network™=
 
 <wiki:toc max_depth="2" />
 
-Players' Network builds a network of Starcraft Broodwar players based on replays.
+Players' Network™ builds a network of Starcraft Broodwar players based on replays.
 It has a web interface:
 
 [http://bwhf.net/hackerdb/players]
