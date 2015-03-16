@@ -24,7 +24,7 @@
 <a href='http://mac.softpedia.com/progClean/BWHF-Agent-Clean-69288.html'><img src='http://mac.softpedia.com/base_img/softpedia_free_award_f.gif' /></a></td>
 <td valign='top'>
 <table><tr><td><a href='https://github.com/icza/bwhf/blob/wiki/Screenshots.md'><img src='http://lh4.ggpht.com/_jDMClHrENz8/S2bPsErVD_I/AAAAAAAASfw/06DrxnZUnjA/s400/map_view_chart.png.jpg' /></a></td></tr>
-<tr><td align='center'><a href='../wikiScreenshots.md'>More screenshots...</a></td></tr>
+<tr><td align='center'><a href='../wiki/Screenshots.md'>More screenshots...</a></td></tr>
 </table>
 </td></tr>
 </table></li></ul>
