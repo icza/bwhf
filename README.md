@@ -60,21 +60,21 @@ For those who possess a valid authorization key **can report hackers automatical
 |Main features of BWHF Agent:|[Main features](../wiki/Features.md)|
 |:---------------------------|:---------------------------|
 |Frequently Asked Questions:|[FAQs](../wiki/FAQs.md)|
-|You can read more about authorization keys and how to get one:|[Authorization keys](AuthorizationKeys.md)|
-|You can read how the replay search works in BWHF Agent:|[Replay search in BWHF Agent](ReplaySearchInBWHFAgent.md)|
+|You can read more about authorization keys and how to get one:|[Authorization keys](../wiki/AuthorizationKeys.md)|
+|You can read how the replay search works in BWHF Agent:|[Replay search in BWHF Agent](../wiki/ReplaySearchInBWHFAgent.md)|
 |You can list, search, filter, sort existing hackers online on this web page:|[BWHF Hacker database™](http://bwhf.net/hackerdb/hackers)|
-|You can read how this page works and how to use it:|[Online hacker database help](OnlineHackerDatabase.md)|
+|You can read how this page works and how to use it:|[Online hacker database help](../wiki/OnlineHackerDatabase.md)|
 |You can view the Players' Network™ here:|[Players' Network™](http://bwhf.net/hackerdb/players)|
-|You can get help about the Players' Network here:|[Players' Network help](PlayersNetwork.md)|
-|Version history and upcoming new additions/changes/features:|[Version history](VersionHistory.md)|
-|You read about how the player matcher works:|[Player matcher in BWHF Agent](PlayerMatcherInBWHFAgent.md)|
-|Read about the APM/EAPM calculation in BWHF Agent:|[EapmRules](EapmRules.md)|
-|Problems starting or using BWHF Agent? Check out this page:|[Errors and solutions](ErrorsAndSolutions.md)|
+|You can get help about the Players' Network here:|[Players' Network help](../wiki/PlayersNetwork.md)|
+|Version history and upcoming new additions/changes/features:|[Version history](../wiki/VersionHistory.md)|
+|You read about how the player matcher works:|[Player matcher in BWHF Agent](../wiki/PlayerMatcherInBWHFAgent.md)|
+|Read about the APM/EAPM calculation in BWHF Agent:|[EapmRules](../wiki/EapmRules.md)|
+|Problems starting or using BWHF Agent? Check out this page:|[Errors and solutions](../wiki/ErrorsAndSolutions.md)|
 |Developer doc of BWHF Agent in English: my Thesis about Starcraft Hacking Recognition|[![](http://lh6.ggpht.com/_jDMClHrENz8/ShFqXEs8FEI/AAAAAAAAN2E/4Gbx8JDIVDM/s800/pdf_icon.png.jpg)](http://bwhf.googlecode.com/files/Starcraft%20Hacking%20Recognition.pdf) [Starcraft Hacking Recognition.pdf](http://bwhf.googlecode.com/files/Starcraft%20Hacking%20Recognition.pdf)|
 |To sign up for an authorization key, fill out the application form:|[Application form to get a Key](http://spreadsheets.google.com/viewform?hl=en&formkey=clNkSndGTTJFWU1uNi01QTZxTFlNaVE6MA..)|
-|<font color='red'><b>NEW!</b></font> Read about the BWHFAgent bot:|[BWHFAgentBot](BWHFAgentBot.md)|
-|How to prevent getting hacked?|[Howto avoid hackers?](HowtoAvoidHackers.md)|
-|BWHF turned 1!|[First birthday statistics](FirstBirthday.md)|
+|<font color='red'><b>NEW!</b></font> Read about the BWHFAgent bot:|[BWHFAgentBot](../wiki/BWHFAgentBot.md)|
+|How to prevent getting hacked?|[Howto avoid hackers?](../wiki/HowtoAvoidHackers.md)|
+|BWHF turned 1!|[First birthday statistics](../wiki/FirstBirthday.md)|
 
 ### Installation ###
 Just download the newest version of BWHF Agent. It is available for windows, linux and MAC OS-X. After downloading the zip file, extract it to anywhere you like (it does not need to be inside the Starcraft folder). On linux and OS-X you have to set executable permission on the starter script.
