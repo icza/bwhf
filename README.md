@@ -24,12 +24,12 @@
 <a href='http://mac.softpedia.com/progClean/BWHF-Agent-Clean-69288.html'><img src='http://mac.softpedia.com/base_img/softpedia_free_award_f.gif' /></a></td>
 <td valign='top'>
 <table><tr><td><a href='https://github.com/icza/bwhf/blob/wiki/Screenshots.md'><img src='http://lh4.ggpht.com/_jDMClHrENz8/S2bPsErVD_I/AAAAAAAASfw/06DrxnZUnjA/s400/map_view_chart.png.jpg' /></a></td></tr>
-<tr><td align='center'><a href='Screenshots.md'>More screenshots...</a></td></tr>
+<tr><td align='center'><a href='../wikiScreenshots.md'>More screenshots...</a></td></tr>
 </table>
 </td></tr>
 </table></li></ul>
 
-|<font color='red'><b>Are you a StarCraft 2 player? Check out <a href='http://sites.google.com/site/sc2gears/'>Sc2gears</a>!</b></font>|
+|<font color='red'><b>Are you a StarCraft 2 player? Check out <a href='https://sites.google.com/site/sc2gears/'>Sc2gears</a>!</b></font>|
 |:-------------------------------------------------------------------------------------------------------------------------------------|
 
 Step-by-step instructions on how to setup BWHF Agent and Chaoslauncher: HowtoSetupVideos
@@ -57,9 +57,9 @@ Now you can add any old replays (or folder of replays recursively) to the Player
 
 For those who possess a valid authorization key **can report hackers automatically** to a central hacker database.
 
-|Main features of BWHF Agent:|[Main features](Features.md)|
+|Main features of BWHF Agent:|[Main features](../wiki/Features.md)|
 |:---------------------------|:---------------------------|
-|Frequently Asked Questions:|[FAQs](FAQs.md)|
+|Frequently Asked Questions:|[FAQs](../wiki/FAQs.md)|
 |You can read more about authorization keys and how to get one:|[Authorization keys](AuthorizationKeys.md)|
 |You can read how the replay search works in BWHF Agent:|[Replay search in BWHF Agent](ReplaySearchInBWHFAgent.md)|
 |You can list, search, filter, sort existing hackers online on this web page:|[BWHF Hacker database™](http://bwhf.net/hackerdb/hackers)|
