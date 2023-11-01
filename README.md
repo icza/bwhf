@@ -70,7 +70,7 @@ For those who possess a valid authorization key **can report hackers automatical
 |You read about how the player matcher works:|[Player matcher in BWHF Agent](../wiki/PlayerMatcherInBWHFAgent.md)|
 |Read about the APM/EAPM calculation in BWHF Agent:|[EapmRules](../wiki/EapmRules.md)|
 |Problems starting or using BWHF Agent? Check out this page:|[Errors and solutions](../wiki/ErrorsAndSolutions.md)|
-|Developer doc of BWHF Agent in English: my Thesis about Starcraft Hacking Recognition|[![](http://lh6.ggpht.com/_jDMClHrENz8/ShFqXEs8FEI/AAAAAAAAN2E/4Gbx8JDIVDM/s800/pdf_icon.png.jpg)](http://bwhf.googlecode.com/files/Starcraft%20Hacking%20Recognition.pdf) [Starcraft Hacking Recognition.pdf](http://bwhf.googlecode.com/files/Starcraft%20Hacking%20Recognition.pdf)|
+|Developer doc of BWHF Agent in English: my Thesis about Starcraft Hacking Recognition|[![](http://lh6.ggpht.com/_jDMClHrENz8/ShFqXEs8FEI/AAAAAAAAN2E/4Gbx8JDIVDM/s800/pdf_icon.png.jpg)](http://bwhf.googlecode.com/files/Starcraft%20Hacking%20Recognition.pdf) [Starcraft Hacking Recognition.pdf](https://github.com/icza/bwhf/blob/master/publication/Starcraft%20Hacking%20Recognition.pdf)|
 |To sign up for an authorization key, fill out the application form:|[Application form to get a Key](http://spreadsheets.google.com/viewform?hl=en&formkey=clNkSndGTTJFWU1uNi01QTZxTFlNaVE6MA..)|
 |<font color='red'><b>NEW!</b></font> Read about the BWHFAgent bot:|[BWHFAgentBot](../wiki/BWHFAgentBot.md)|
 |How to prevent getting hacked?|[Howto avoid hackers?](../wiki/HowtoAvoidHackers.md)|
